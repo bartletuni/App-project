@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { uploadToDrive } from "@/lib/drive";
+import { uploadToR2 } from "@/lib/r2";
 import { addDays } from "date-fns";
 
 export async function POST(req: NextRequest) {
@@ -60,20 +60,20 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    // Convert file to Buffer and Upload to Drive
+    // Convert file to Buffer and Upload to R2
     const buffer = Buffer.from(await file.arrayBuffer());
     let fileId: string | undefined;
 
     try {
-        const fileIdRes = await uploadToDrive(file.name, file.type || "application/sla", buffer);
+        const fileIdRes = await uploadToR2(file.name, file.type || "application/sla", buffer);
         fileId = fileIdRes || undefined;
     } catch (e) {
         console.error(e);
-        return NextResponse.json({ error: "Error uploading to Google Drive. Ensure the Admin has setup credentials properly." }, { status: 500 });
+        return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
     }
 
     if (!fileId) {
-         return NextResponse.json({ error: "Error uploading to Google Drive" }, { status: 500 });
+         return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
     }
 
     // Create Part Request

@@ -1,0 +1,44 @@
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || "";
+const accessKeyId = process.env.R2_ACCESS_KEY_ID || "";
+const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || "";
+const bucketName = process.env.R2_BUCKET_NAME || "";
+
+if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+  console.warn("Missing Cloudflare R2 credentials in environment variables.");
+}
+
+export const s3Client = new S3Client({
+  region: "auto",
+  endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+});
+
+export async function uploadToR2(fileName: string, mimeType: string, fileBuffer: Buffer) {
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+    throw new Error("Missing Cloudflare R2 credentials in environment variables.");
+  }
+
+  const objectKey = `${Date.now()}-${fileName.replace(/\s+/g, "_")}`;
+
+  try {
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: objectKey,
+        Body: fileBuffer,
+        ContentType: mimeType,
+      })
+    );
+
+    return objectKey;
+  } catch (error: any) {
+    console.error("Error uploading to Cloudflare R2:", error.message || error);
+    throw new Error("Failed to upload file to Cloudflare R2");
+  }
+}
