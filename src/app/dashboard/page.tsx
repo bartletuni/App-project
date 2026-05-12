@@ -70,35 +70,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      {/* Top Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white p-1.5 rounded-lg shadow-sm">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-gray-900">TakomoCo</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <button onClick={() => router.push('/contact')} className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                Support
-              </button>
-              <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500 hidden sm:block">{session?.user?.email}</span>
-                <button 
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-10">
