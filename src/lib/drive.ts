@@ -1,0 +1,46 @@
+import { google } from "googleapis";
+import { Readable } from "stream";
+
+// Validate env vars
+const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL || "";
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n") || "";
+const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || "";
+
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: GOOGLE_CLIENT_EMAIL,
+    private_key: GOOGLE_PRIVATE_KEY,
+  },
+  scopes: ["https://www.googleapis.com/auth/drive.file"],
+});
+
+const drive = google.drive({ version: "v3", auth });
+
+export async function uploadToDrive(fileName: string, mimeType: string, fileBuffer: Buffer) {
+  if (!GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_DRIVE_FOLDER_ID) {
+    throw new Error("Missing Google Drive API credentials or folder ID in environment variables.");
+  }
+
+  const stream = new Readable();
+  stream.push(fileBuffer);
+  stream.push(null);
+
+  try {
+    const response = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        parents: [GOOGLE_DRIVE_FOLDER_ID],
+      },
+      media: {
+        mimeType,
+        body: stream,
+      },
+      fields: "id",
+    });
+
+    return response.data.id;
+  } catch (error) {
+    console.error("Error uploading to Google Drive:", error);
+    throw new Error("Failed to upload file to Google Drive");
+  }
+}
