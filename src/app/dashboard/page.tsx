@@ -151,8 +151,11 @@ export default function DashboardPage() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
                               req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                              req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                              req.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border border-green-200' :
+                              req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                               req.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' :
-                              'bg-green-50 text-green-700 border border-green-200'
+                              'bg-gray-50 text-gray-700 border border-gray-200'
                             }`}>
                               {req.status}
                             </span>
