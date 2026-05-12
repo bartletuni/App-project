@@ -18,8 +18,7 @@ const drive = google.drive({ version: "v3", auth });
 
 export async function uploadToDrive(fileName: string, mimeType: string, fileBuffer: Buffer) {
   if (!GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_DRIVE_FOLDER_ID) {
-    console.warn("Missing Google Drive API credentials. Bypassing upload and returning a dummy ID for local testing.");
-    return "dummy_file_id_for_testing_12345";
+    throw new Error("Missing Google Drive API credentials or folder ID in environment variables.");
   }
 
   const stream = new Readable();
@@ -43,14 +42,6 @@ export async function uploadToDrive(fileName: string, mimeType: string, fileBuff
     return response.data.id;
   } catch (error: any) {
     console.error("Error uploading to Google Drive:", error.message || error);
-    
-    // Google Cloud now restricts free-tier Service Accounts to 0 bytes of storage quota.
-    // If we hit this, we will gracefully return a dummy ID so the app continues to function locally.
-    if (error?.code === 403 || error?.message?.includes("storage quota")) {
-      console.warn("Google Drive Storage Quota exceeded for Service Account. Returning a dummy ID for testing.");
-      return "dummy_file_id_quota_exceeded_123";
-    }
-
     throw new Error("Failed to upload file to Google Drive");
   }
 }
