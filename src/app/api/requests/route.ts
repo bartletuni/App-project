@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!file.name.toLowerCase().endsWith(".stl")) {
-        return NextResponse.json({ error: "Only .STL files are allowed" }, { status: 400 });
+      return NextResponse.json({ error: "Only .STL files are allowed" }, { status: 400 });
     }
 
     if (!dateNeededStr) {
@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
     const minDate = addDays(new Date(), 5);
 
     // reset time part for comparison
-    dateNeeded.setHours(0,0,0,0);
-    minDate.setHours(0,0,0,0);
+    dateNeeded.setHours(0, 0, 0, 0);
+    minDate.setHours(0, 0, 0, 0);
 
     if (dateNeeded < minDate) {
       return NextResponse.json({ error: "Lead time must be at least 5 days" }, { status: 400 });
@@ -55,16 +55,16 @@ export async function POST(req: NextRequest) {
     // Handle Phone Number
     const userId = (session.user as any).id;
     let phoneNumberRecord = await prisma.phoneNumber.findFirst({
-        where: { userId: userId, number: phoneNumberString }
+      where: { userId: userId, number: phoneNumberString }
     });
 
     if (!phoneNumberRecord) {
-        phoneNumberRecord = await prisma.phoneNumber.create({
-            data: {
-                userId,
-                number: phoneNumberString
-            }
-        });
+      phoneNumberRecord = await prisma.phoneNumber.create({
+        data: {
+          userId,
+          number: phoneNumberString
+        }
+      });
     }
 
     // Convert file to Buffer and Upload to R2
@@ -72,15 +72,15 @@ export async function POST(req: NextRequest) {
     let fileId: string | undefined;
 
     try {
-        const fileIdRes = await uploadToR2(file.name, file.type || "application/sla", buffer);
-        fileId = fileIdRes || undefined;
+      const fileIdRes = await uploadToR2(file.name, file.type || "application/sla", buffer);
+      fileId = fileIdRes || undefined;
     } catch (e) {
-        console.error(e);
-        return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
+      console.error(e);
+      return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
     }
 
     if (!fileId) {
-         return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
+      return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
     }
 
     // Create Part Request
@@ -104,40 +104,40 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const userId = (session.user as any).id;
-        const isAdmin = (session.user as any).isAdmin;
-
-        let requests;
-
-        if (isAdmin) {
-             // Admin can see all requests
-             requests = await prisma.partRequest.findMany({
-                include: {
-                    user: true,
-                    phoneNumber: true,
-                },
-                orderBy: { createdAt: 'desc'}
-            });
-        } else {
-             // Ensure normal users can ONLY see their own requests
-             requests = await prisma.partRequest.findMany({
-                where: { userId },
-                include: {
-                    phoneNumber: true,
-                },
-                orderBy: { createdAt: 'desc'}
-            });
-        }
-
-        return NextResponse.json(requests);
-
-    } catch (error) {
-         return NextResponse.json({ error: "Failed to fetch requests" }, { status: 500 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = (session.user as any).id;
+    const isAdmin = (session.user as any).isAdmin;
+
+    let requests;
+
+    if (isAdmin) {
+      // Admin can see all requests
+      requests = await prisma.partRequest.findMany({
+        include: {
+          user: true,
+          phoneNumber: true,
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+    } else {
+      // Ensure normal users can ONLY see their own requests
+      requests = await prisma.partRequest.findMany({
+        where: { userId },
+        include: {
+          phoneNumber: true,
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+    }
+
+    return NextResponse.json(requests);
+
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch requests" }, { status: 500 });
+  }
 }
