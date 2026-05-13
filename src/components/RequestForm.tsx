@@ -101,8 +101,9 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">.STL File (Required)</label>
+          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL File (Required)</label>
           <input
+            id="fileUpload"
             type="file"
             accept=".stl"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
@@ -112,8 +113,9 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date Needed (Min 5 days lead time)</label>
+          <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">Date Needed (Min 5 days lead time)</label>
           <input
+            id="dateNeeded"
             type="date"
             min={minDate}
             value={dateNeeded}
@@ -124,10 +126,11 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number (Required)</label>
+          <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number (Required)</label>
           {isAddingPhone || pastPhones.length === 0 ? (
             <div className="flex gap-2">
                 <input
+                    id="phoneNumber"
                     type="tel"
                     value={newPhoneNumber}
                     onChange={(e) => setNewPhoneNumber(e.target.value)}
@@ -144,6 +147,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
           ) : (
              <div className="flex gap-2 items-center">
                  <select
+                    id="phoneNumber"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
@@ -161,8 +165,9 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Notes</label>
+          <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">Notes</label>
           <textarea
+            id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
