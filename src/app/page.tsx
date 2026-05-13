@@ -9,6 +9,9 @@ export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,18 +21,47 @@ export default function Home() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+      if (isLogin) {
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
 
-      if (result?.error) {
-        // Our backend auto-registers if the user doesn't exist,
-        // so an error usually means wrong password.
-        setError("Invalid email or password.");
+        if (result?.error) {
+          setError("Invalid email or password.");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
-        router.push("/dashboard");
+        // Handle registration
+        const registerRes = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password, shippingAddress, billingAddress, phone }),
+        });
+
+        if (!registerRes.ok) {
+          const data = await registerRes.json();
+          setError(data.error || "Failed to create account.");
+          setLoading(false);
+          return;
+        }
+
+        // Auto sign-in after registration
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
+
+        if (result?.error) {
+          setError("Account created, but failed to automatically sign in.");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -128,6 +160,53 @@ export default function Home() {
                 placeholder="••••••••"
               />
             </div>
+
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingAddress">
+                    Shipping Address
+                  </label>
+                  <input
+                    id="shippingAddress"
+                    type="text"
+                    required={!isLogin}
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                    placeholder="123 Main St, City, ST 12345"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingAddress">
+                    Billing Address
+                  </label>
+                  <input
+                    id="billingAddress"
+                    type="text"
+                    required={!isLogin}
+                    value={billingAddress}
+                    onChange={(e) => setBillingAddress(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                    placeholder="Same as shipping"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
+                    Phone Number
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    required={!isLogin}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                    placeholder="(555) 555-5555"
+                  />
+                </div>
+              </>
+            )}
 
             <button
               type="submit"

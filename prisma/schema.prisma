@@ -7,12 +7,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  isAdmin         Boolean  @default(false)
+  shippingAddress String?
+  billingAddress  String?
+  phone           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   phoneNumbers PhoneNumber[]
   requests     PartRequest[]
@@ -40,6 +43,7 @@ model PartRequest {
   notes         String?
   dateNeeded    DateTime
   status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
+  invoiceNumber String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
