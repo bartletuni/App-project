@@ -12,10 +12,10 @@ if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
 
 export const s3Client = new S3Client({
   region: "auto",
-  endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+  endpoint: `https://${accountId.trim()}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId,
-    secretAccessKey,
+    accessKeyId: accessKeyId.trim(),
+    secretAccessKey: secretAccessKey.trim(),
   },
 });
 
