@@ -85,6 +85,9 @@ export default function AdminDashboardPage() {
                <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
             </div>
             <div className="flex items-center gap-6">
+               <Link href="/admin/reports" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
+                 Generate Reports
+               </Link>
                <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Back to User Dashboard
                </Link>
@@ -145,7 +148,7 @@ export default function AdminDashboardPage() {
                          <select
                             value={req.status}
                             onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                            className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer border ${
+                            className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer border ${
                               req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
                               req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
                               req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :

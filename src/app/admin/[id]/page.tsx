@@ -11,6 +11,8 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
   const router = useRouter();
   const [req, setReq] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [invoiceInput, setInvoiceInput] = useState("");
+  const [savingInvoice, setSavingInvoice] = useState(false);
 
   const fetchRequest = useCallback(() => {
     fetch(`/api/requests/${params.id}`)
@@ -20,6 +22,7 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
       })
       .then((data) => {
          setReq(data);
+         setInvoiceInput(data.invoiceNumber || "");
          setLoading(false);
       })
       .catch((err) => {
@@ -70,6 +73,28 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSaveInvoice = async () => {
+    setSavingInvoice(true);
+    try {
+      const res = await fetch(`/api/requests/${params.id}/invoice`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceNumber: invoiceInput }),
+      });
+      if (res.ok) {
+        fetchRequest();
+        alert("Invoice number saved successfully");
+      } else {
+        alert("Failed to save invoice number");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving invoice number");
+    } finally {
+      setSavingInvoice(false);
     }
   };
 
@@ -166,6 +191,25 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
                           <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100">{req.notes}</dd>
                       </div>
                     )}
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-gray-500">Invoice Number</dt>
+                        <dd className="mt-1 flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={invoiceInput}
+                              onChange={(e) => setInvoiceInput(e.target.value)}
+                              placeholder="Enter Invoice #"
+                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
+                            />
+                            <button
+                              onClick={handleSaveInvoice}
+                              disabled={savingInvoice || invoiceInput === req.invoiceNumber || (!invoiceInput && !req.invoiceNumber)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {savingInvoice ? "Saving..." : "Save Invoice"}
+                            </button>
+                        </dd>
+                    </div>
                 </dl>
             </div>
 

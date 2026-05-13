@@ -21,23 +21,16 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-            // Auto register for simplicity, or we can reject. Let's register.
-            const hashedPassword = await bcrypt.hash(credentials.password, 10);
-            user = await prisma.user.create({
-              data: {
-                email: credentials.email,
-                password: hashedPassword,
-              },
-            });
-        } else {
-            const isValidPassword = await bcrypt.compare(
-                credentials.password,
-                user.password
-            );
+            return null; // Don't auto-register anymore
+        }
 
-            if (!isValidPassword) {
-                return null;
-            }
+        const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            user.password
+        );
+
+        if (!isValidPassword) {
+            return null;
         }
 
         return {
