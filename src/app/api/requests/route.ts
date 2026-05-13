@@ -25,6 +25,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "STL file is required" }, { status: 400 });
     }
 
+    if (typeof file === "string" || !file.name) {
+      return NextResponse.json({ error: "Invalid STL file uploaded" }, { status: 400 });
+    }
+
     if (!file.name.toLowerCase().endsWith(".stl")) {
         return NextResponse.json({ error: "Only .STL files are allowed" }, { status: 400 });
     }
