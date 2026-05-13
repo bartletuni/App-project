@@ -185,6 +185,7 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
                             <option value="NEEDS REVIEW">NEEDS REVIEW</option>
                             <option value="COMPLETED">COMPLETED</option>
                             <option value="CANCELLED">CANCELLED</option>
+                            <option value="INVOICE SENT">INVOICE SENT</option>
                        </select>
                    </div>
                    {req.status !== 'CANCELLED' && (
