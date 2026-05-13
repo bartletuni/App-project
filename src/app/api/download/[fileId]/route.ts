@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { s3Client } from "@/lib/r2";
+import { prisma } from "@/lib/prisma";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -19,6 +20,18 @@ export async function GET(
 
     if (!fileId) {
       return NextResponse.json({ error: "File ID is required" }, { status: 400 });
+    }
+
+    const partRequest = await prisma.partRequest.findFirst({
+      where: { fileId },
+    });
+
+    if (!partRequest) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    if (partRequest.userId !== (session.user as any).id && !(session.user as any).isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const bucketName = process.env.R2_BUCKET_NAME || "";
