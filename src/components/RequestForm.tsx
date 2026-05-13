@@ -8,6 +8,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [isAddingPhone, setIsAddingPhone] = useState(false);
@@ -52,6 +53,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("quantity", quantity);
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
@@ -69,6 +71,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
       setFile(null);
       setNotes("");
+      setQuantity("1");
       setDateNeeded("");
       setNewPhoneNumber("");
       setIsAddingPhone(false);
@@ -108,6 +111,19 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
             accept=".stl"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">Quantity</label>
+          <input
+            id="quantity"
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
             required
           />
         </div>

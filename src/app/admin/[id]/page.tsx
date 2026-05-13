@@ -135,6 +135,10 @@ export default function AdminRequestViewPage({ params }: { params: { id: string 
                         <dd className="mt-1 text-sm text-gray-900 font-semibold">{req.phoneNumber?.number}</dd>
                     </div>
                     <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Quantity</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{req.quantity}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
                         <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(req.dateNeeded), "MMM d, yyyy")}</dd>
                     </div>

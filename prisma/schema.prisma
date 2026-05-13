@@ -36,6 +36,7 @@ model PartRequest {
   phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id])
   fileId        String      // Google Drive file ID
   fileName      String      // Original uploaded file name
+  quantity      Int         @default(1)
   notes         String?
   dateNeeded    DateTime
   status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED

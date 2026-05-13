@@ -117,6 +117,7 @@ export default function AdminDashboardPage() {
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -132,6 +133,9 @@ export default function AdminDashboardPage() {
                       <td className="px-6 py-4">
                         <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
                         {req.notes && <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={req.notes}><span className="font-semibold text-gray-700">Notes:</span> {req.notes}</div>}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
