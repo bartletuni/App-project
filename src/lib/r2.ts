@@ -38,7 +38,11 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
 
     return objectKey;
   } catch (error: any) {
-    console.error("Error uploading to Cloudflare R2:", error.message || error);
-    throw new Error("Failed to upload file to Cloudflare R2");
+    console.error("=== R2 UPLOAD ERROR ===");
+    console.error("Message:", error.message);
+    console.error("Name:", error.name);
+    console.error("Code:", error.$metadata?.httpStatusCode);
+    console.error("Full Error:", error);
+    throw new Error(`Failed to upload to R2: ${error.message || error.name}`);
   }
 }
