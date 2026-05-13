@@ -93,9 +93,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(partRequest, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Failed to create request:", error);
-    return NextResponse.json({ error: "Failed to create request", details: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create request" }, { status: 500 });
   }
 }
 

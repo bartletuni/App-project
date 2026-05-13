@@ -7,37 +7,39 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  password     String
-  isAdmin      Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  requests     PartRequest[]
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   phoneNumbers PhoneNumber[]
+  requests     PartRequest[]
 }
 
 model PhoneNumber {
-  id        String        @id @default(cuid())
+  id        String   @id @default(cuid())
   number    String
   userId    String
-  createdAt DateTime      @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
   requests  PartRequest[]
-  user      User          @relation(fields: [userId], references: [id])
 }
 
 model PartRequest {
   id            String      @id @default(cuid())
   userId        String
+  user          User        @relation(fields: [userId], references: [id])
   phoneNumberId String
-  fileId        String
-  fileName      String
+  phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id])
+  fileId        String      // Google Drive file ID
+  fileName      String      // Original uploaded file name
   quantity      Int         @default(1)
   notes         String?
   dateNeeded    DateTime
-  status        String      @default("PENDING")
+  status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id])
-  user          User        @relation(fields: [userId], references: [id])
 }
