@@ -14,9 +14,12 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    const quantityStr = formData.get("quantity") as string | null;
     const notes = formData.get("notes") as string | null;
     const dateNeededStr = formData.get("dateNeeded") as string | null;
     let phoneNumberString = formData.get("phoneNumber") as string | null;
+
+    const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
     if (!file) {
       return NextResponse.json({ error: "STL file is required" }, { status: 400 });
@@ -83,6 +86,7 @@ export async function POST(req: NextRequest) {
         phoneNumberId: phoneNumberRecord.id,
         fileId,
         fileName: file.name,
+        quantity,
         notes,
         dateNeeded,
       },
@@ -108,6 +112,7 @@ export async function GET(req: NextRequest) {
         let requests;
 
         if (isAdmin) {
+             // Admin can see all requests
              requests = await prisma.partRequest.findMany({
                 include: {
                     user: true,
@@ -116,6 +121,7 @@ export async function GET(req: NextRequest) {
                 orderBy: { createdAt: 'desc'}
             });
         } else {
+             // Ensure normal users can ONLY see their own requests
              requests = await prisma.partRequest.findMany({
                 where: { userId },
                 include: {

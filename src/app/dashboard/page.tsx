@@ -12,6 +12,8 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isAdmin = (session?.user as any)?.isAdmin;
+
   const fetchRequests = async () => {
     try {
       const res = await fetch("/api/requests");
@@ -79,12 +81,14 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column: Request Form */}
-          <div className="xl:col-span-1">
-             <RequestForm onFormSubmit={fetchRequests} />
-          </div>
+          {!isAdmin && (
+            <div className="xl:col-span-1">
+              <RequestForm onFormSubmit={fetchRequests} />
+            </div>
+          )}
 
           {/* Right Column: Past Requests */}
-          <div className="xl:col-span-2">
+          <div className={isAdmin ? "xl:col-span-3" : "xl:col-span-2"}>
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-200 bg-white">
                 <h2 className="text-xl font-bold text-gray-900">Recent Requests</h2>
@@ -104,7 +108,8 @@ export default function DashboardPage() {
                     <thead className="bg-gray-50/50">
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">File Name</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Needed</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date Needed</th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
                         <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -115,6 +120,9 @@ export default function DashboardPage() {
                         <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {req.fileName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {req.quantity}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {format(new Date(req.dateNeeded), "MMM d, yyyy")}
