@@ -57,6 +57,12 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
       return;
     }
 
+    if (file.size > 20 * 1024 * 1024) {
+      setError("File size exceeds the 20MB limit.");
+      setLoading(false);
+      return;
+    }
+
     const finalPhone = (isAddingPhone || pastPhones.length === 0) ? newPhoneNumber : phoneNumber;
     if (!finalPhone) {
         setError("Please provide a phone number.");
@@ -119,7 +125,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL File (Required)</label>
+          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL File (Required, Max File Size 20MB)</label>
           <input
             id="fileUpload"
             type="file"

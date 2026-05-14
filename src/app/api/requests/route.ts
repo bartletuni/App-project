@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Only .STL files are allowed" }, { status: 400 });
     }
 
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size exceeds the 20MB limit" }, { status: 400 });
+    }
+
     if (!dateNeededStr) {
       return NextResponse.json({ error: "Date needed is required" }, { status: 400 });
     }
