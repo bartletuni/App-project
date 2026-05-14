@@ -12,6 +12,12 @@ function AdminDashboardContent() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Filter state
+  const [filterUser, setFilterUser] = useState("");
+  const [filterInvoice, setFilterInvoice] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterDate, setFilterDate] = useState("");
+
   // Modal state
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,10 +149,25 @@ function AdminDashboardContent() {
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedRequest(null);
     setInvoiceInput("");
   };
+
+  const filteredRequests = requests.filter((req) => {
+    const matchesUser = 
+      !filterUser || 
+      req.user.name.toLowerCase().includes(filterUser.toLowerCase()) || 
+      req.user.email.toLowerCase().includes(filterUser.toLowerCase());
+    
+    const matchesInvoice = 
+      !filterInvoice || 
+      (req.invoiceNumber && req.invoiceNumber.toLowerCase().includes(filterInvoice.toLowerCase()));
+    
+    const matchesStatus = filterStatus === "ALL" || req.status === filterStatus;
+    
+    const matchesDate = !filterDate || format(new Date(req.createdAt), "yyyy-MM-dd") === filterDate;
+
+    return matchesUser && matchesInvoice && matchesStatus && matchesDate;
+  });
 
   if (status === "loading" || loading) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
@@ -184,19 +205,91 @@ function AdminDashboardContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="flex justify-between items-end mb-8">
             <div>
-               <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">All System Requests</h1>
+                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">All System Requests</h1>
                <p className="text-gray-500 mt-1">Manage, update, and review all user submissions.</p>
             </div>
         </div>
 
+        {/* Filters */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filter by User</label>
+                <input
+                    type="text"
+                    value={filterUser}
+                    onChange={(e) => setFilterUser(e.target.value)}
+                    placeholder="Name or Email"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Invoice Number</label>
+                <input
+                    type="text"
+                    value={filterInvoice}
+                    onChange={(e) => setFilterInvoice(e.target.value)}
+                    placeholder="Search Invoice #"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
+                <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                    <option value="ALL">All Statuses</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="CANCELLED">CANCELLED</option>
+                    <option value="INVOICE SENT">INVOICE SENT</option>
+                </select>
+            </div>
+            <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Submission Date</label>
+                <div className="flex gap-2">
+                    <input
+                        type="date"
+                        value={filterDate}
+                        onChange={(e) => setFilterDate(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {filterDate && (
+                        <button 
+                            onClick={() => setFilterDate("")}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                        >
+                            Clear
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          {requests.length === 0 ? (
+          {filteredRequests.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                   <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">No requests found</h3>
-                <p className="text-gray-500">There are currently no part requests in the system.</p>
+                <h3 className="text-lg font-bold text-gray-900">No requests match filters</h3>
+                <p className="text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+                {(filterUser || filterInvoice || filterStatus !== "ALL" || filterDate) && (
+                    <button 
+                        onClick={() => {
+                            setFilterUser("");
+                            setFilterInvoice("");
+                            setFilterStatus("ALL");
+                            setFilterDate("");
+                        }}
+                        className="mt-4 text-indigo-600 font-bold hover:underline"
+                    >
+                        Reset all filters
+                    </button>
+                )}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -212,7 +305,7 @@ function AdminDashboardContent() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {requests.map((req) => (
+                  {filteredRequests.map((req) => (
                     <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="text-sm font-bold text-gray-900">{req.user.name}</div>
