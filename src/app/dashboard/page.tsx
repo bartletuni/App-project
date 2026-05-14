@@ -75,7 +75,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Overview</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome, {session?.user?.name || (session?.user as any)?.email}</h1>
           <p className="text-gray-500 mt-2 text-lg">Manage your custom part requests and track their status.</p>
         </div>
 
@@ -111,6 +111,7 @@ export default function DashboardPage() {
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date Needed</th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
                         <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
@@ -138,6 +139,9 @@ export default function DashboardPage() {
                             }`}>
                               {req.status}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                             {req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                              {format(new Date(req.createdAt), "MMM d, h:mm a")}
