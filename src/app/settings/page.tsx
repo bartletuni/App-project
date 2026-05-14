@@ -1,18 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Lock, User, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   
+  const [name, setName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState(false);
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      setName(session.user.name);
+    }
+  }, [session]);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileError("");
+    setProfileSuccess(false);
+    setProfileLoading(true);
+
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setProfileError(data.error || "Failed to update profile.");
+      } else {
+        setProfileSuccess(true);
+        // Update the session to reflect the new name
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            name: name,
+          },
+        });
+      }
+    } catch (err) {
+      setProfileError("An unexpected error occurred. Please try again.");
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,17 +115,66 @@ export default function SettingsPage() {
               <User className="w-5 h-5 text-indigo-600" />
               <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                <div className="text-sm font-medium text-gray-500">Email Address</div>
-                <div className="sm:col-span-2 text-gray-900 font-medium bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-                  {session?.user?.email || "Loading..."}
+            <form onSubmit={handleProfileUpdate} className="p-6 space-y-6">
+              {profileError && (
+                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <p className="font-medium text-sm">{profileError}</p>
+                </div>
+              )}
+              
+              {profileSuccess && (
+                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100">
+                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <p className="font-medium text-sm">Profile updated successfully.</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Company / Personal Name</label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                    placeholder="Your Name / Company Name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                  <div className="text-sm font-medium text-gray-500">Email Address</div>
+                  <div className="sm:col-span-2 text-gray-400 font-medium bg-gray-50/50 px-4 py-2 rounded-lg border border-gray-100 italic">
+                    {session?.user?.email || "Loading..."}
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-500 mt-4">
-                Your email is used for login and notifications. It cannot be changed at this time.
-              </p>
-            </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <p className="text-xs text-gray-500 max-w-[60%]">
+                  Your email is used for login and notifications and cannot be changed.
+                </p>
+                <button
+                  type="submit"
+                  disabled={profileLoading}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  {profileLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Name"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
 
           {/* Password Change Section */}
