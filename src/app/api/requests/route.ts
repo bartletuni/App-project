@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
+import { Resend } from "resend";
+import { NewRequestEmailHTML } from "@/lib/email-templates";
  
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +101,31 @@ export async function POST(req: NextRequest) {
         dateNeeded,
       },
     });
+
+    // Send Email Notification
+    try {
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey);
+        await resend.emails.send({
+          from: 'TakomoCo <onboarding@resend.dev>',
+          to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
+          subject: `New Request: ${file.name}`,
+          html: NewRequestEmailHTML({
+            customerName: session.user?.name || "Customer",
+            customerEmail: session.user?.email || "N/A",
+            fileName: file.name,
+            quantity,
+            material: material || "Not specified",
+            dateNeeded: format(dateNeeded, "PPP"),
+            notes: notes || undefined,
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error("Failed to send email notification:", emailError);
+      // We don't return an error here because the request was successfully created in the DB
+    }
 
     return NextResponse.json(partRequest, { status: 201 });
   } catch (error) {
