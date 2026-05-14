@@ -113,11 +113,27 @@ export async function GET(req: NextRequest) {
     const userId = (session.user as any).id;
     const isAdmin = (session.user as any).isAdmin;
 
+    const startDateParam = req.nextUrl.searchParams.get("startDate");
+    const endDateParam = req.nextUrl.searchParams.get("endDate");
+
+    let dateFilter: any = {};
+    if (startDateParam && endDateParam) {
+      dateFilter = {
+        createdAt: {
+          gte: new Date(`${startDateParam}T00:00:00.000Z`),
+          lte: new Date(`${endDateParam}T23:59:59.999Z`),
+        }
+      };
+    }
+
     let requests;
 
     if (isAdmin) {
       // Admin can see all requests
       requests = await prisma.partRequest.findMany({
+        where: {
+          ...dateFilter,
+        },
         include: {
           user: true,
           phoneNumber: true,
@@ -127,7 +143,10 @@ export async function GET(req: NextRequest) {
     } else {
       // Ensure normal users can ONLY see their own requests
       requests = await prisma.partRequest.findMany({
-        where: { userId },
+        where: {
+          userId,
+          ...dateFilter,
+        },
         include: {
           phoneNumber: true,
         },
