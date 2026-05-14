@@ -119,7 +119,12 @@ export async function GET(req: NextRequest) {
       // Admin can see all requests
       requests = await prisma.partRequest.findMany({
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+            }
+          },
           phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
@@ -129,6 +134,12 @@ export async function GET(req: NextRequest) {
       requests = await prisma.partRequest.findMany({
         where: { userId },
         include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            }
+          },
           phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
