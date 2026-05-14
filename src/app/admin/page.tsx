@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
 
@@ -30,6 +30,8 @@ export default function AdminDashboardPage() {
       .catch(() => setLoading(false));
   };
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/api/auth/signin");
@@ -41,6 +43,18 @@ export default function AdminDashboardPage() {
       fetchRequests();
     }
   }, [status, router, session]);
+
+  useEffect(() => {
+    if (requests.length > 0) {
+      const requestId = searchParams.get("id");
+      if (requestId) {
+        const req = requests.find((r) => r.id === requestId);
+        if (req) {
+          openModal(req);
+        }
+      }
+    }
+  }, [requests, searchParams]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -206,7 +220,16 @@ export default function AdminDashboardPage() {
                         <div className="text-sm font-medium text-gray-400">{req.phoneNumber.number}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                        <div className="flex items-center gap-2">
+                           <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                           <button 
+                             onClick={() => openModal(req)}
+                             className="text-indigo-600 hover:text-indigo-800 p-1 hover:bg-indigo-50 rounded transition-colors"
+                             title="View Details"
+                           >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                           </button>
+                        </div>
                         {req.notes && <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={req.notes}><span className="font-semibold text-gray-700">Notes:</span> {req.notes}</div>}
                       </td>
                       <td className="px-6 py-4">
