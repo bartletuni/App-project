@@ -66,12 +66,13 @@ export default function GenerateReportsPage() {
       doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
       doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
 
-      const tableColumn = ["Date Submitted", "User Email", "Phone", "File Name", "Quantity", "Status", "Invoice #", "Date Needed"];
+      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Quantity", "Status", "Invoice #", "Date Needed"];
       const tableRows: any[] = [];
 
       filteredRequests.forEach((req: any) => {
         const rowData = [
           format(new Date(req.createdAt), "MM/dd/yyyy"),
+          req.user?.name || "N/A",
           req.user?.email || "N/A",
           req.phoneNumber?.number || "N/A",
           req.fileName,

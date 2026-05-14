@@ -149,14 +149,20 @@ function AdminDashboardContent() {
   };
 
   const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedRequest(null);
     setInvoiceInput("");
   };
 
   const filteredRequests = requests.filter((req) => {
+    const userName = req.user?.name || "";
+    const userEmail = req.user?.email || "";
+    const searchTerm = filterUser.toLowerCase();
+
     const matchesUser = 
       !filterUser || 
-      req.user.name.toLowerCase().includes(filterUser.toLowerCase()) || 
-      req.user.email.toLowerCase().includes(filterUser.toLowerCase());
+      userName.toLowerCase().includes(searchTerm) || 
+      userEmail.toLowerCase().includes(searchTerm);
     
     const matchesInvoice = 
       !filterInvoice || 
@@ -308,9 +314,10 @@ function AdminDashboardContent() {
                   {filteredRequests.map((req) => (
                     <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900">{req.user.name}</div>
-                        <div className="text-sm font-medium text-gray-500">{req.user.email}</div>
-                        <div className="text-sm font-medium text-gray-400">{req.phoneNumber.number}</div>
+                        <div className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">Customer</div>
+                        <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
+                        <div className="text-xs font-medium text-gray-500">{req.user?.email || "N/A"}</div>
+                        <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
