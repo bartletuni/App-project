@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
@@ -398,5 +398,13 @@ export default function AdminDashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
+      <AdminDashboardContent />
+    </Suspense>
   );
 }
