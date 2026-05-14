@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
@@ -40,7 +41,7 @@ export default function Home() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, password, shippingAddress, billingAddress, phone }),
+          body: JSON.stringify({ name, email, password, shippingAddress, billingAddress, phone }),
         });
 
         if (!registerRes.ok) {
@@ -131,6 +132,22 @@ export default function Home() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
+                  Company / Personal Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 text-gray-900 px-4 py-3"
+                  placeholder="ACME Corp / Jane Doe"
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
                 Email Address

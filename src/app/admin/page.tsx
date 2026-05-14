@@ -12,6 +12,12 @@ export default function AdminDashboardPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Modal state
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [invoiceInput, setInvoiceInput] = useState("");
+  const [savingInvoice, setSavingInvoice] = useState(false);
+
   const fetchRequests = () => {
     fetch("/api/requests")
       .then((res) => res.json())
@@ -45,6 +51,9 @@ export default function AdminDashboardPage() {
       });
       if (res.ok) {
         fetchRequests();
+        if (selectedRequest && selectedRequest.id === id) {
+            setSelectedRequest({ ...selectedRequest, status: newStatus });
+        }
       } else {
         alert("Failed to update status");
       }
@@ -60,6 +69,9 @@ export default function AdminDashboardPage() {
       const res = await fetch(`/api/requests/${id}/cancel`, { method: "POST" });
       if (res.ok) {
         fetchRequests();
+        if (selectedRequest && selectedRequest.id === id) {
+            setSelectedRequest({ ...selectedRequest, status: "CANCELLED" });
+        }
       } else {
         const data = await res.json();
         alert(data.error || "Failed to cancel request");
@@ -67,6 +79,59 @@ export default function AdminDashboardPage() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to completely delete this request? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/requests/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete request");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting request");
+    }
+  };
+
+  const handleSaveInvoice = async (id: string) => {
+    setSavingInvoice(true);
+    try {
+      const res = await fetch(`/api/requests/${id}/invoice`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceNumber: invoiceInput }),
+      });
+      if (res.ok) {
+        fetchRequests();
+        if (selectedRequest && selectedRequest.id === id) {
+            setSelectedRequest({ ...selectedRequest, invoiceNumber: invoiceInput === "" ? null : invoiceInput });
+        }
+        alert("Invoice number saved successfully");
+      } else {
+        alert("Failed to save invoice number");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving invoice number");
+    } finally {
+      setSavingInvoice(false);
+    }
+  };
+
+  const openModal = (req: any) => {
+    setSelectedRequest(req);
+    setInvoiceInput(req.invoiceNumber || "");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedRequest(null);
+    setInvoiceInput("");
   };
 
   if (status === "loading" || loading) {
@@ -85,11 +150,17 @@ export default function AdminDashboardPage() {
                <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
             </div>
             <div className="flex items-center gap-6">
-               <Link href="/admin/reports" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
+               <Link href="/admin" className="text-sm font-bold text-indigo-600 transition-colors">
+                 Requests
+               </Link>
+               <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Users
+               </Link>
+               <Link href="/admin/reports" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
                  Generate Reports
                </Link>
                <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Back to User Dashboard
+                 Back to Dashboard
                </Link>
             </div>
           </div>
@@ -130,8 +201,9 @@ export default function AdminDashboardPage() {
                   {requests.map((req) => (
                     <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900">{req.user.email}</div>
-                        <div className="text-sm font-medium text-gray-500">{req.phoneNumber.number}</div>
+                        <div className="text-sm font-bold text-gray-900">{req.user.name}</div>
+                        <div className="text-sm font-medium text-gray-500">{req.user.email}</div>
+                        <div className="text-sm font-medium text-gray-400">{req.phoneNumber.number}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
@@ -166,30 +238,19 @@ export default function AdminDashboardPage() {
                          </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
-                          <a
-                              href={`/api/download/${req.fileId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
-                          >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                              File
-                          </a>
-                          <Link
-                              href={`/admin/${req.id}`}
+                          <button
+                              onClick={() => openModal(req)}
                               className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
                           >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                              View Details
-                          </Link>
-                          {req.status !== 'CANCELLED' && (
-                              <button
-                                onClick={() => handleCancel(req.id)}
-                                className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
-                              >
-                                Cancel
-                              </button>
-                          )}
+                              View Order
+                          </button>
+                          <button
+                            onClick={() => handleDelete(req.id)}
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                          >
+                            Delete
+                          </button>
                       </td>
                     </tr>
                   ))}
@@ -199,6 +260,120 @@ export default function AdminDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+                <h3 className="text-xl leading-6 font-bold text-gray-900">
+                  Ticket Details
+                </h3>
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div className="px-6 py-6 sm:p-8">
+                <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Name (Company/Personal)</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.name}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">User Email</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.email}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.phoneNumber?.number}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Quantity</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.quantity}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Submitted On</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
+                    </div>
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-gray-500">File</dt>
+                        <dd className="mt-2 text-sm text-gray-900">
+                           <a
+                              href={`/api/download/${selectedRequest.fileId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors font-semibold"
+                           >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                              Download {selectedRequest.fileName}
+                           </a>
+                        </dd>
+                    </div>
+                    {selectedRequest.notes && (
+                      <div className="sm:col-span-2">
+                          <dt className="text-sm font-medium text-gray-500">Notes</dt>
+                          <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100">{selectedRequest.notes}</dd>
+                      </div>
+                    )}
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-gray-500">Invoice Number</dt>
+                        <dd className="mt-1 flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={invoiceInput}
+                              onChange={(e) => setInvoiceInput(e.target.value)}
+                              placeholder="Enter Invoice #"
+                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
+                            />
+                            <button
+                              onClick={() => handleSaveInvoice(selectedRequest.id)}
+                              disabled={savingInvoice || invoiceInput === selectedRequest.invoiceNumber || (!invoiceInput && !selectedRequest.invoiceNumber)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {savingInvoice ? "Saving..." : "Save Invoice"}
+                            </button>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div className="px-6 py-5 border-t border-gray-200 bg-gray-50">
+               <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Admin Actions</h4>
+               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                   <div className="flex items-center gap-3">
+                       <label htmlFor="status-select" className="text-sm font-medium text-gray-700">Update Status:</label>
+                       <select
+                            id="status-select"
+                            value={selectedRequest.status}
+                            onChange={(e) => handleStatusChange(selectedRequest.id, e.target.value)}
+                            className="text-sm font-bold rounded-lg px-3 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer text-black"
+                         >
+                            <option value="PENDING">PENDING</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                            <option value="INVOICE SENT">INVOICE SENT</option>
+                       </select>
+                   </div>
+                   {selectedRequest.status !== 'CANCELLED' && (
+                       <button
+                         onClick={() => handleCancel(selectedRequest.id)}
+                         className="text-red-700 bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
+                       >
+                         Cancel Request
+                       </button>
+                   )}
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
