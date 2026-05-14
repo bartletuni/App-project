@@ -135,7 +135,12 @@ export async function GET(req: NextRequest) {
           ...dateFilter,
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+            }
+          },
           phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
@@ -148,6 +153,12 @@ export async function GET(req: NextRequest) {
           ...dateFilter,
         },
         include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            }
+          },
           phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }

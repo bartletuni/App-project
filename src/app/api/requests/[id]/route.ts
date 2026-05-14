@@ -17,7 +17,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         const request = await prisma.partRequest.findUnique({
             where: { id },
             include: {
-                user: true,
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                    }
+                },
                 phoneNumber: true,
             }
         });
