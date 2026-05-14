@@ -11,8 +11,19 @@ export default function Home() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
-  const [billingAddress, setBillingAddress] = useState("");
+  const [shippingStreet, setShippingStreet] = useState("");
+  const [shippingApt, setShippingApt] = useState("");
+  const [shippingCity, setShippingCity] = useState("");
+  const [shippingState, setShippingState] = useState("");
+  const [shippingZip, setShippingZip] = useState("");
+  
+  const [billingStreet, setBillingStreet] = useState("");
+  const [billingApt, setBillingApt] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingState, setBillingState] = useState("");
+  const [billingZip, setBillingZip] = useState("");
+  
+  const [sameAsShipping, setSameAsShipping] = useState(true);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,12 +59,24 @@ export default function Home() {
         }
       } else {
         // Handle registration
+        const finalShippingAddress = `${shippingStreet}${shippingApt ? `, ${shippingApt}` : ""}, ${shippingCity}, ${shippingState} ${shippingZip}`;
+        const finalBillingAddress = sameAsShipping 
+          ? finalShippingAddress 
+          : `${billingStreet}${billingApt ? `, ${billingApt}` : ""}, ${billingCity}, ${billingState} ${billingZip}`;
+
         const registerRes = await fetch("/api/auth/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name, email, password, shippingAddress, billingAddress, phone }),
+          body: JSON.stringify({ 
+            name, 
+            email, 
+            password, 
+            shippingAddress: finalShippingAddress, 
+            billingAddress: finalBillingAddress, 
+            phone 
+          }),
         });
 
         if (!registerRes.ok) {
@@ -204,33 +227,172 @@ export default function Home() {
 
             {!isLogin && (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingAddress">
-                    Shipping Address
-                  </label>
-                  <input
-                    id="shippingAddress"
-                    type="text"
-                    required={!isLogin}
-                    value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                    placeholder="123 Main St, City, ST 12345"
-                  />
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingStreet">
+                        Street Address
+                      </label>
+                      <input
+                        id="shippingStreet"
+                        type="text"
+                        required={!isLogin}
+                        value={shippingStreet}
+                        onChange={(e) => setShippingStreet(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        placeholder="123 Main St"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingApt">
+                        Apartment, suite, etc. (optional)
+                      </label>
+                      <input
+                        id="shippingApt"
+                        type="text"
+                        value={shippingApt}
+                        onChange={(e) => setShippingApt(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        placeholder="Apt 4B"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingCity">
+                          City
+                        </label>
+                        <input
+                          id="shippingCity"
+                          type="text"
+                          required={!isLogin}
+                          value={shippingCity}
+                          onChange={(e) => setShippingCity(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          placeholder="City"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingState">
+                          State / Province
+                        </label>
+                        <input
+                          id="shippingState"
+                          type="text"
+                          required={!isLogin}
+                          value={shippingState}
+                          onChange={(e) => setShippingState(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          placeholder="ST"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingZip">
+                        ZIP / Postal Code
+                      </label>
+                      <input
+                        id="shippingZip"
+                        type="text"
+                        required={!isLogin}
+                        value={shippingZip}
+                        onChange={(e) => setShippingZip(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        placeholder="12345"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingAddress">
-                    Billing Address
-                  </label>
-                  <input
-                    id="billingAddress"
-                    type="text"
-                    required={!isLogin}
-                    value={billingAddress}
-                    onChange={(e) => setBillingAddress(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                    placeholder="Same as shipping"
-                  />
+
+                <div className="pt-6 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-900">Billing Information</h3>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sameAsShipping}
+                        onChange={(e) => setSameAsShipping(e.target.checked)}
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                      <span className="text-sm font-medium text-gray-600">Same as shipping</span>
+                    </label>
+                  </div>
+                  
+                  {!sameAsShipping && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingStreet">
+                          Street Address
+                        </label>
+                        <input
+                          id="billingStreet"
+                          type="text"
+                          required={!isLogin && !sameAsShipping}
+                          value={billingStreet}
+                          onChange={(e) => setBillingStreet(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          placeholder="123 Main St"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingApt">
+                          Apartment, suite, etc. (optional)
+                        </label>
+                        <input
+                          id="billingApt"
+                          type="text"
+                          value={billingApt}
+                          onChange={(e) => setBillingApt(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          placeholder="Apt 4B"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingCity">
+                            City
+                          </label>
+                          <input
+                            id="billingCity"
+                            type="text"
+                            required={!isLogin && !sameAsShipping}
+                            value={billingCity}
+                            onChange={(e) => setBillingCity(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                            placeholder="City"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingState">
+                            State / Province
+                          </label>
+                          <input
+                            id="billingState"
+                            type="text"
+                            required={!isLogin && !sameAsShipping}
+                            value={billingState}
+                            onChange={(e) => setBillingState(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                            placeholder="ST"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingZip">
+                          ZIP / Postal Code
+                        </label>
+                        <input
+                          id="billingZip"
+                          type="text"
+                          required={!isLogin && !sameAsShipping}
+                          value={billingZip}
+                          onChange={(e) => setBillingZip(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          placeholder="12345"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
