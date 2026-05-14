@@ -40,19 +40,10 @@ export default function GenerateReportsPage() {
     setLoading(true);
 
     try {
-      // Fetch all requests - we will filter on the frontend for simplicity given the current API design
-      const res = await fetch("/api/requests");
+      // Fetch requests already filtered by date range on the backend
+      const res = await fetch(`/api/requests?startDate=${startDate}&endDate=${endDate}`);
       if (!res.ok) throw new Error("Failed to fetch requests");
-      const allRequests = await res.json();
-
-      // Correct for timezone offset when parsing YYYY-MM-DD strings
-      const start = new Date(`${startDate}T00:00:00`);
-      const end = new Date(`${endDate}T23:59:59.999`);
-
-      const filteredRequests = allRequests.filter((req: any) => {
-        const reqDate = new Date(req.createdAt);
-        return reqDate >= start && reqDate <= end;
-      });
+      const filteredRequests = await res.json();
 
       if (filteredRequests.length === 0) {
         alert("No requests found within the selected date range.");
@@ -61,13 +52,18 @@ export default function GenerateReportsPage() {
       }
 
       // Generate PDF
+      // Correct for timezone offset when parsing YYYY-MM-DD strings for formatting
+      const startObj = new Date(`${startDate}T00:00:00`);
+      const endObj = new Date(`${endDate}T23:59:59.999`);
+
+      // Generate PDF
       const doc = new jsPDF("landscape");
 
       doc.setFontSize(18);
       doc.text("TakomoCo Request History Report", 14, 22);
 
       doc.setFontSize(11);
-      doc.text(`Date Range: ${format(start, "MMM d, yyyy")} - ${format(end, "MMM d, yyyy")}`, 14, 30);
+      doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
       doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
 
       const tableColumn = ["Date Submitted", "User Email", "Phone", "File Name", "Quantity", "Status", "Invoice #", "Date Needed"];
@@ -96,7 +92,7 @@ export default function GenerateReportsPage() {
         styles: { fontSize: 9 }
       });
 
-      doc.save(`TakomoCo_Report_${format(start, "yyyyMMdd")}_${format(end, "yyyyMMdd")}.pdf`);
+      doc.save(`TakomoCo_Report_${format(startObj, "yyyyMMdd")}_${format(endObj, "yyyyMMdd")}.pdf`);
 
     } catch (err) {
       console.error(err);
