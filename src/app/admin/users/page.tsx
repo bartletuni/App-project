@@ -11,6 +11,8 @@ export default function AdminUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchUsers = () => {
     fetch("/api/admin/users")
@@ -50,6 +52,16 @@ export default function AdminUsersPage() {
       console.error(err);
       alert("Error deleting user");
     }
+  };
+
+  const openModal = (user: any) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
   };
 
   if (status === "loading" || loading) {
@@ -131,7 +143,13 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                          {format(new Date(user.createdAt), "MMM d, yyyy")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
+                          <button
+                            onClick={() => openModal(user)}
+                            className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                          >
+                            Display Information
+                          </button>
                           {!user.isAdmin && (
                               <button
                                 onClick={() => handleDelete(user.id)}
@@ -149,6 +167,70 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
+
+      {/* User Info Modal */}
+      {isModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+                <h3 className="text-xl leading-6 font-bold text-gray-900">
+                  User Account Information
+                </h3>
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-500">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div className="px-6 py-6 sm:p-8">
+                <dl className="grid grid-cols-1 gap-x-4 gap-y-6">
+                    <div>
+                        <dt className="text-sm font-medium text-gray-500">Full Name</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedUser.name}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-medium text-gray-500">Email Address</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedUser.email}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedUser.phone || "N/A"}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-medium text-gray-500">Shipping Address</dt>
+                        <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">{selectedUser.shippingAddress || "N/A"}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-medium text-gray-500">Billing Address</dt>
+                        <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">{selectedUser.billingAddress || "N/A"}</dd>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt className="text-sm font-medium text-gray-500">Role</dt>
+                            <dd className="mt-1">
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${selectedUser.isAdmin ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
+                                    {selectedUser.isAdmin ? 'Admin' : 'User'}
+                                </span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-sm font-medium text-gray-500">Joined On</dt>
+                            <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedUser.createdAt), "MMM d, yyyy")}</dd>
+                        </div>
+                    </div>
+                </dl>
+            </div>
+
+            <div className="px-6 py-5 border-t border-gray-200 bg-gray-50 text-right">
+                <button
+                  onClick={closeModal}
+                  className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors"
+                >
+                  Close
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

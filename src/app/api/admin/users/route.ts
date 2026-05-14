@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
             take: 1
           },
           isAdmin: true,
+          shippingAddress: true,
+          billingAddress: true,
           createdAt: true,
       }
     });
