@@ -306,6 +306,7 @@ function AdminDashboardContent() {
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -320,16 +321,7 @@ function AdminDashboardContent() {
                         <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                           <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
-                           <button 
-                             onClick={() => openModal(req)}
-                             className="text-indigo-600 hover:text-indigo-800 p-1 hover:bg-indigo-50 rounded transition-colors"
-                             title="View Details"
-                           >
-                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                           </button>
-                        </div>
+                        <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
                         {req.notes && <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={req.notes}><span className="font-semibold text-gray-700">Notes:</span> {req.notes}</div>}
                       </td>
                       <td className="px-6 py-4">
@@ -338,6 +330,15 @@ function AdminDashboardContent() {
                       <td className="px-6 py-4">
                         <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
                         <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {req.invoiceNumber ? (
+                          <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
+                            #{req.invoiceNumber}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">Pending</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                          <select
