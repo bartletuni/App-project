@@ -7,6 +7,8 @@ import { format, addDays } from "date-fns";
 export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
+  const [material, setMaterial] = useState("");
+  const [availableMaterials, setAvailableMaterials] = useState<{ id: string; name: string }[]>([]);
   const [dateNeeded, setDateNeeded] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -28,6 +30,17 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
              setPhoneNumber(data[0].number);
           } else {
              setIsAddingPhone(true);
+          }
+        }
+      });
+
+    fetch("/api/materials")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAvailableMaterials(data);
+          if (data.length > 0) {
+            setMaterial(data[0].name);
           }
         }
       });
@@ -54,6 +67,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
     const formData = new FormData();
     formData.append("file", file);
     formData.append("quantity", quantity);
+    formData.append("material", material);
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
@@ -71,6 +85,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
       setFile(null);
       setNotes("");
+      if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
       setQuantity("1");
       setDateNeeded("");
       setNewPhoneNumber("");
@@ -179,9 +194,28 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
              </div>
           )}
         </div>
+        
+        <div>
+          <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">Material</label>
+          <select
+            id="material"
+            value={material}
+            onChange={(e) => setMaterial(e.target.value)}
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
+            required
+          >
+            {availableMaterials.length === 0 ? (
+                <option value="">No materials available</option>
+            ) : (
+                availableMaterials.map((m) => (
+                    <option key={m.id} value={m.name}>{m.name}</option>
+                ))
+            )}
+          </select>
+        </div>
 
         <div>
-          <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">Notes</label>
+          <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">Notes (Color, etc.)</label>
           <textarea
             id="notes"
             value={notes}

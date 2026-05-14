@@ -32,6 +32,12 @@ model PhoneNumber {
   requests  PartRequest[]
 }
 
+model Material {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
 model PartRequest {
   id            String      @id @default(cuid())
   userId        String
@@ -41,6 +47,7 @@ model PartRequest {
   fileId        String      // Google Drive file ID
   fileName      String      // Original uploaded file name
   quantity      Int         @default(1)
+  material      String?
   notes         String?
   dateNeeded    DateTime
   status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED

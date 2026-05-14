@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null;
     const quantityStr = formData.get("quantity") as string | null;
     const notes = formData.get("notes") as string | null;
+    const material = formData.get("material") as string | null;
     const dateNeededStr = formData.get("dateNeeded") as string | null;
     let phoneNumberString = formData.get("phoneNumber") as string | null;
 
@@ -93,6 +94,7 @@ export async function POST(req: NextRequest) {
         fileId,
         fileName: file.name,
         quantity,
+        material,
         notes,
         dateNeeded,
       },

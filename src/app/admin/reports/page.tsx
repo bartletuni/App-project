@@ -66,7 +66,7 @@ export default function GenerateReportsPage() {
       doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
       doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
 
-      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Quantity", "Status", "Invoice #", "Date Needed"];
+      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Material", "Quantity", "Status", "Invoice #", "Date Needed"];
       const tableRows: any[] = [];
 
       filteredRequests.forEach((req: any) => {
@@ -76,6 +76,7 @@ export default function GenerateReportsPage() {
           req.user?.email || "N/A",
           req.phoneNumber?.number || "N/A",
           req.fileName,
+          req.material || "N/A",
           req.quantity.toString(),
           req.status,
           req.invoiceNumber || "N/A",
@@ -119,8 +120,20 @@ export default function GenerateReportsPage() {
                <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
             </div>
             <div className="flex items-center gap-6">
-               <Link href="/admin" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-                 &larr; Back to Admin Dashboard
+               <Link href="/admin" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Requests
+               </Link>
+               <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Users
+               </Link>
+               <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Materials
+               </Link>
+               <Link href="/admin/reports" className="text-sm font-bold text-indigo-600 transition-colors">
+                 Reports
+               </Link>
+               <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Back to Dashboard
                </Link>
             </div>
           </div>

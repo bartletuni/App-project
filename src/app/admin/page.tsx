@@ -197,6 +197,9 @@ function AdminDashboardContent() {
                <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Users
                </Link>
+               <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Materials
+               </Link>
                <Link href="/admin/reports" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
                  Generate Reports
                </Link>
@@ -322,7 +325,10 @@ function AdminDashboardContent() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
-                        {req.notes && <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={req.notes}><span className="font-semibold text-gray-700">Notes:</span> {req.notes}</div>}
+                        <div className="flex gap-2 mt-1">
+                            {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
+                            {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
@@ -415,6 +421,10 @@ function AdminDashboardContent() {
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Quantity</dt>
                         <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.quantity}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">Material</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.material || "N/A"}</dd>
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
