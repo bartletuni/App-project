@@ -21,6 +21,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                     select: {
                         id: true,
                         email: true,
+                        name: true,
                     }
                 },
                 phoneNumber: true,

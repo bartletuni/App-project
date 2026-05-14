@@ -141,6 +141,7 @@ export async function GET(req: NextRequest) {
             select: {
               id: true,
               email: true,
+              name: true,
             }
           },
           phoneNumber: true,
@@ -159,6 +160,7 @@ export async function GET(req: NextRequest) {
             select: {
               id: true,
               email: true,
+              name: true,
             }
           },
           phoneNumber: true,
