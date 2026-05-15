@@ -27,15 +27,15 @@ export async function POST(req: NextRequest) {
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
     if (!file) {
-      return NextResponse.json({ error: "STL file is required" }, { status: 400 });
+      return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
     }
 
     if (typeof file === "string" || !file.name) {
-      return NextResponse.json({ error: "Invalid STL file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid file uploaded" }, { status: 400 });
     }
 
-    if (!file.name.toLowerCase().endsWith(".stl")) {
-      return NextResponse.json({ error: "Only .STL files are allowed" }, { status: 400 });
+    if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
+      return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
     }
 
     if (file.size > 20 * 1024 * 1024) {
@@ -81,7 +81,13 @@ export async function POST(req: NextRequest) {
     let fileId: string | undefined;
 
     try {
-      const fileIdRes = await uploadToR2(file.name, file.type || "application/sla", buffer);
+      let mimeType = file.type || "application/sla";
+      if (file.name.toLowerCase().endsWith(".zip")) {
+        mimeType = "application/zip";
+      } else if (file.name.toLowerCase().endsWith(".stl") && !file.type) {
+        mimeType = "application/sla"; // fallback for stl if no type
+      }
+      const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
       fileId = fileIdRes || undefined;
     } catch (e) {
       console.error(e);
