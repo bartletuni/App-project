@@ -301,92 +301,164 @@ function AdminDashboardContent() {
                 )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+            <>
+              {/* Mobile Card View (shown only on small screens) */}
+              <div className="block lg:hidden">
+                <div className="divide-y divide-gray-100">
                   {filteredRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">Customer</div>
-                        <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
-                        <div className="text-xs font-medium text-gray-500">{req.user?.email || "N/A"}</div>
-                        <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
-                        <div className="flex gap-2 mt-1">
-                            {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
-                            {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                    <div key={req.id} className="p-4 space-y-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">Customer</div>
+                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs text-gray-500">{req.user?.email || "N/A"}</div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
-                        <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {req.invoiceNumber ? (
-                          <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
-                            #{req.invoiceNumber}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">Pending</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                         <select
-                            value={req.status}
-                            onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                            className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer border ${
-                              req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                              req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                              req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
-                              req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
-                              req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
-                              'bg-gray-50 text-gray-800 border-gray-200'
-                            }`}
-                         >
-                            <option value="PENDING">PENDING</option>
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                            <option value="COMPLETED">COMPLETED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                            <option value="INVOICE SENT">INVOICE SENT</option>
-                         </select>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
+                        <select
+                          value={req.status}
+                          onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 border ${
+                            req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                            req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                            req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
+                            req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                            req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                            'bg-gray-50 text-gray-800 border-gray-200'
+                          }`}
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="ACTIVE">ACTIVE</option>
+                          <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                          <option value="CANCELLED">CANCELLED</option>
+                          <option value="INVOICE SENT">INVOICE SENT</option>
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">File</div>
+                          <div className="text-sm font-semibold text-gray-900 truncate" title={req.fileName}>{req.fileName}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Invoice</div>
+                          <div className="text-sm font-bold text-indigo-700">
+                            {req.invoiceNumber ? `#${req.invoiceNumber}` : <span className="text-gray-300 font-normal italic text-xs">Pending</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center pt-2">
+                        <div className="text-xs text-gray-500">
+                          <span className="font-semibold text-gray-900">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
+                        </div>
+                        <div className="flex gap-2">
                           <button
-                              onClick={() => openModal(req)}
-                              className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            onClick={() => openModal(req)}
+                            className="text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold"
                           >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                              View Order
+                            View
                           </button>
                           <button
                             onClick={() => handleDelete(req.id)}
-                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            className="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold"
                           >
                             Delete
                           </button>
-                      </td>
-                    </tr>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              </div>
+
+              {/* Desktop Table View (hidden on mobile) */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {filteredRequests.map((req) => (
+                      <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">Customer</div>
+                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs font-medium text-gray-500">{req.user?.email || "N/A"}</div>
+                          <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                          <div className="flex gap-2 mt-1">
+                              {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
+                              {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
+                          <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {req.invoiceNumber ? (
+                            <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
+                              #{req.invoiceNumber}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">Pending</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                              value={req.status}
+                              onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer border ${
+                                req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                                req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                                req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
+                                req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                                req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                                'bg-gray-50 text-gray-800 border-gray-200'
+                              }`}
+                          >
+                              <option value="PENDING">PENDING</option>
+                              <option value="ACTIVE">ACTIVE</option>
+                              <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+                              <option value="COMPLETED">COMPLETED</option>
+                              <option value="CANCELLED">CANCELLED</option>
+                              <option value="INVOICE SENT">INVOICE SENT</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
+                            <button
+                                onClick={() => openModal(req)}
+                                className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                View Order
+                            </button>
+                            <button
+                              onClick={() => handleDelete(req.id)}
+                              className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            >
+                              Delete
+                            </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

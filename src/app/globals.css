@@ -16,8 +16,13 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: #f9fafb; /* bg-gray-50 */
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: #f9fafb;
 }
 
 input, select, textarea {

@@ -108,33 +108,15 @@ export default function DashboardPage() {
                   <p className="text-gray-500 mt-1">You haven't submitted any part requests yet.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50/50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">File Name</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date Needed</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
-                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-100">
+                <>
+                  {/* Mobile Card View */}
+                  <div className="block sm:hidden">
+                    <div className="divide-y divide-gray-100">
                       {requests.map((req) => (
-                        <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {req.fileName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {req.quantity}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {format(new Date(req.dateNeeded), "MMM d, yyyy")}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                        <div key={req.id} className="p-4 space-y-3 hover:bg-gray-50 transition-colors">
+                          <div className="flex justify-between items-start">
+                            <div className="text-sm font-bold text-gray-900 truncate pr-2">{req.fileName}</div>
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                               req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
                               req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                               req.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border border-green-200' :
@@ -144,40 +126,105 @@ export default function DashboardPage() {
                             }`}>
                               {req.status}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                             {req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                             {format(new Date(req.createdAt), "MMM d, h:mm a")}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
-                            {isAdmin && (
-                              <Link
-                                href={`/admin?id=${req.id}`}
-                                className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                View Order
-                              </Link>
-                            )}
-                            {req.status === "PENDING" && isCancelable(req.createdAt) && (
-                              <button
-                                onClick={() => handleCancel(req.id)}
-                                className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors font-semibold"
-                              >
-                                Cancel
-                              </button>
-                            )}
-                            {req.status === "PENDING" && !isCancelable(req.createdAt) && (
-                              <span className="text-gray-400 text-xs cursor-not-allowed bg-gray-50 border border-gray-100 px-2 py-1 rounded" title="Cancellation period expired">Locked</span>
-                            )}
-                          </td>
-                        </tr>
+                          </div>
+                          
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <div>Qty: <span className="font-semibold text-gray-900">{req.quantity}</span></div>
+                            <div>Invoice: <span className="font-semibold text-indigo-600">{req.invoiceNumber || "Pending"}</span></div>
+                          </div>
+
+                          <div className="flex justify-between items-center pt-1">
+                            <div className="text-[10px] text-gray-400">
+                              Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}
+                            </div>
+                            <div className="flex gap-2">
+                              {req.status === "PENDING" && isCancelable(req.createdAt) && (
+                                <button
+                                  onClick={() => handleCancel(req.id)}
+                                  className="text-red-600 bg-red-50 px-3 py-1 rounded text-[10px] font-bold"
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50/50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">File Name</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date Needed</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
+                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {requests.map((req) => (
+                          <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {req.fileName}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {req.quantity}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {format(new Date(req.dateNeeded), "MMM d, yyyy")}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                                req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                                req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                req.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border border-green-200' :
+                                req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                                req.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' :
+                                'bg-gray-50 text-gray-700 border border-gray-200'
+                              }`}>
+                                {req.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                              {req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {format(new Date(req.createdAt), "MMM d, h:mm a")}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
+                              {isAdmin && (
+                                <Link
+                                  href={`/admin?id=${req.id}`}
+                                  className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                  View Order
+                                </Link>
+                              )}
+                              {req.status === "PENDING" && isCancelable(req.createdAt) && (
+                                <button
+                                  onClick={() => handleCancel(req.id)}
+                                  className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors font-semibold"
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                              {req.status === "PENDING" && !isCancelable(req.createdAt) && (
+                                <span className="text-gray-400 text-xs cursor-not-allowed bg-gray-50 border border-gray-100 px-2 py-1 rounded" title="Cancellation period expired">Locked</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>
