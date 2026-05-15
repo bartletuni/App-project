@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
@@ -154,26 +154,28 @@ function AdminDashboardContent() {
     setInvoiceInput("");
   };
 
-  const filteredRequests = requests.filter((req) => {
-    const userName = req.user?.name || "";
-    const userEmail = req.user?.email || "";
-    const searchTerm = filterUser.toLowerCase();
+  const filteredRequests = useMemo(() => {
+    return requests.filter((req) => {
+      const userName = req.user?.name || "";
+      const userEmail = req.user?.email || "";
+      const searchTerm = filterUser.toLowerCase();
 
-    const matchesUser = 
-      !filterUser || 
-      userName.toLowerCase().includes(searchTerm) || 
-      userEmail.toLowerCase().includes(searchTerm);
-    
-    const matchesInvoice = 
-      !filterInvoice || 
-      (req.invoiceNumber && req.invoiceNumber.toLowerCase().includes(filterInvoice.toLowerCase()));
-    
-    const matchesStatus = filterStatus === "ALL" || req.status === filterStatus;
-    
-    const matchesDate = !filterDate || format(new Date(req.createdAt), "yyyy-MM-dd") === filterDate;
+      const matchesUser =
+        !filterUser ||
+        userName.toLowerCase().includes(searchTerm) ||
+        userEmail.toLowerCase().includes(searchTerm);
 
-    return matchesUser && matchesInvoice && matchesStatus && matchesDate;
-  });
+      const matchesInvoice =
+        !filterInvoice ||
+        (req.invoiceNumber && req.invoiceNumber.toLowerCase().includes(filterInvoice.toLowerCase()));
+
+      const matchesStatus = filterStatus === "ALL" || req.status === filterStatus;
+
+      const matchesDate = !filterDate || format(new Date(req.createdAt), "yyyy-MM-dd") === filterDate;
+
+      return matchesUser && matchesInvoice && matchesStatus && matchesDate;
+    });
+  }, [requests, filterUser, filterInvoice, filterStatus, filterDate]);
 
   if (status === "loading" || loading) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;

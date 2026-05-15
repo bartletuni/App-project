@@ -183,20 +183,11 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Ensure normal users can ONLY see their own requests
+      // Normal users do not need the user or phoneNumber relations
       requests = await prisma.partRequest.findMany({
         where: {
           userId,
           ...dateFilter,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            }
-          },
-          phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
       });
