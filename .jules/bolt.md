@@ -5,3 +5,7 @@
 ## 2024-05-14 - Admin Request Reports Filtering Performance Bottleneck (Timezone Edge Case)
 **Learning:** Initially filtering by pushing `new Date(YYYY-MM-DD)` to Prisma was shifting the local time string into an exact UTC timestamp for Prisma (`YYYY-MM-DDT00:00:00.000Z`). For a tool querying by logical day, this shifted boundary meant requests submitted around midnight in the local timezone might fall into the adjacent day incorrectly.
 **Action:** When migrating client-side date logic to the backend, ensure the parsing explicitly accounts for or matches the expected timezone offset behavior.
+
+## 2026-05-15 - Unnecessary Database Relations & Missing Client-side Memoization
+**Learning:** In `src/app/api/requests/route.ts`, the GET endpoint was blindly performing SQL joins (via Prisma's `include`) for `user` and `phoneNumber` for *all* requests, even though non-admin users only view their own requests and don't display relation data on the dashboard. This wastes database cycles and increases network payload size. Additionally, in `src/app/admin/page.tsx`, the expensive `requests.filter()` operation was running on every single render cycle, regardless of whether the filter states or requests had actually changed.
+**Action:** Always verify if joined/included relations are actually consumed by the requesting client. If not, omit them to save resources. When filtering or transforming large arrays in React components, wrap the logic in `useMemo` to prevent unnecessary recalculations.
