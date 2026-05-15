@@ -52,7 +52,7 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
     setError("");
 
     if (!file) {
-      setError("Please select an STL file.");
+      setError("Please select an STL or ZIP file.");
       setLoading(false);
       return;
     }
@@ -125,11 +125,11 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL File (Required, Max File Size 20MB)</label>
+          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL or .ZIP File (Required, Max File Size 20MB)</label>
           <input
             id="fileUpload"
             type="file"
-            accept=".stl"
+            accept=".stl,.zip"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
