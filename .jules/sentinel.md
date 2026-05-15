@@ -6,3 +6,7 @@
 **Vulnerability:** The API endpoints `/api/requests` and `/api/requests/[id]` fetched part request information and explicitly loaded the associated user with `include: { user: true }`. Because Prisma returns all fields by default, this effectively exposed sensitive user data—namely hashed passwords and potentially other billing details—in API responses to both standard users and administrators.
 **Learning:** Using `include: { relation: true }` in Prisma is dangerous when the related entity contains sensitive information (like user credentials). Prisma does not have automatic "hidden" fields.
 **Prevention:** Always explicitly define which fields are safe to return when fetching relations. Use nested `select` statements inside the include block (e.g., `user: { select: { id: true, email: true } }`) to explicitly whitelist fields and prevent data leakage.
+## 2025-05-15 - [MEDIUM] Added Missing Input Validation to User Registration
+**Vulnerability:** The `/api/auth/register` endpoint accepted any string as an email and any length string as a password, allowing users to be created with malformed emails and weak passwords.
+**Learning:** The password strength requirement (minimum 6 characters) was enforced during password changes (`/api/user/change-password`), but not during initial user creation, creating an inconsistent security posture.
+**Prevention:** Always implement strong, consistent input validation (e.g., regex for emails, minimum length for passwords) at all entry points that accept user data, especially authentication and registration routes.
