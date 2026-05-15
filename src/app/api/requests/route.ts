@@ -26,6 +26,11 @@ export async function POST(req: NextRequest) {
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
+    // Security: Validate quantity to prevent negative numbers or NaN (integer overflow/underflow protection)
+    if (isNaN(quantity) || quantity < 1) {
+      return NextResponse.json({ error: "Quantity must be at least 1" }, { status: 400 });
+    }
+
     if (!file) {
       return NextResponse.json({ error: "STL file is required" }, { status: 400 });
     }
