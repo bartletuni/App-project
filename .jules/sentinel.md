@@ -10,3 +10,7 @@
 **Vulnerability:** The `/api/auth/register` endpoint accepted any string as an email and any length string as a password, allowing users to be created with malformed emails and weak passwords.
 **Learning:** The password strength requirement (minimum 6 characters) was enforced during password changes (`/api/user/change-password`), but not during initial user creation, creating an inconsistent security posture.
 **Prevention:** Always implement strong, consistent input validation (e.g., regex for emails, minimum length for passwords) at all entry points that accept user data, especially authentication and registration routes.
+## 2025-05-16 - [HIGH] Prevented HTML Injection / Stored XSS in Email Templates
+**Vulnerability:** The `NewRequestEmailHTML` template in `src/lib/email-templates.ts` interpolated user-provided fields (like `customerName`, `notes`, `fileName`) directly into the HTML string without escaping them. This allowed an attacker to inject arbitrary HTML or potentially malicious links into notification emails sent to administrators or other users.
+**Learning:** Even internal notification emails are an attack vector if they reflect unsanitized user input. Many email clients render HTML, making them susceptible to phishing or UI redressing attacks via injected markup.
+**Prevention:** Always use an HTML escaping function (replacing `&`, `<`, `>`, `"`, `'`) when interpolating dynamic user data into raw HTML templates, regardless of whether it's for a webpage or an email.
