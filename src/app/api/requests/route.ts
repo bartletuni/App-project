@@ -189,20 +189,11 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Ensure normal users can ONLY see their own requests
+      // ⚡ Bolt: Removed unnecessary relation joins (user, phoneNumber) for non-admin users to reduce DB cycles and payload size
       requests = await prisma.partRequest.findMany({
         where: {
           userId,
           ...dateFilter,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            }
-          },
-          phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
       });
