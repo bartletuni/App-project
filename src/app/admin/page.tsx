@@ -590,7 +590,7 @@ function AdminDashboardContent() {
                         </dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">Tracking Number</dt>
+                        <dt className="text-sm font-medium text-gray-500">USPS Tracking Number</dt>
                         <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"

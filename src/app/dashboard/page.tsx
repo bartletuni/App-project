@@ -137,7 +137,7 @@ export default function DashboardPage() {
                             {req.trackingNumber && (
                               <div className="flex justify-between">
                                 <div></div>
-                                <div>Tracking: <span className="font-semibold text-teal-600">{req.trackingNumber}</span></div>
+                                <div>USPS Tracking: <span className="font-semibold text-teal-600">{req.trackingNumber}</span></div>
                               </div>
                             )}
                           </div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                               <div>{req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}</div>
                               {req.trackingNumber && (
                                 <div className="text-xs text-teal-600 mt-1">
-                                  Track: {req.trackingNumber}
+                                  USPS Tracking: {req.trackingNumber}
                                 </div>
                               )}
                             </td>
