@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
-import { InvoiceSentEmailHTML } from "@/lib/email-templates";
+import { InvoiceSentEmailHTML, StatusUpdateEmailHTML } from "@/lib/email-templates";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { status } = body;
 
     // Validate valid statuses
-    const validStatuses = ["PENDING", "ACTIVE", "COMPLETED", "NEEDS REVIEW", "CANCELLED", "INVOICE SENT"];
+    const validStatuses = ["PENDING", "ACTIVE", "COMPLETED", "NEEDS REVIEW", "CANCELLED", "INVOICE SENT", "SHIPPED"];
     if (!status || !validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status provided" }, { status: 400 });
     }
@@ -60,6 +60,32 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
       } catch (emailError) {
         console.error("Failed to send invoice email notification:", emailError);
+      }
+    } else if ((status === "SHIPPED" && partRequest.status !== "SHIPPED") || (status === "COMPLETED" && partRequest.status !== "COMPLETED")) {
+      try {
+        const resendApiKey = process.env.RESEND_API_KEY;
+        if (resendApiKey) {
+          const resend = new Resend(resendApiKey);
+          let message = "";
+          if (status === "SHIPPED") {
+            message = "Your requested part has been shipped!";
+          } else if (status === "COMPLETED") {
+            message = "Your requested part has been completed and is ready!";
+          }
+          await resend.emails.send({
+            from: 'TakomoCo <onboarding@resend.dev>',
+            to: partRequest.user.email,
+            subject: `Order ${status}: ${updatedRequest.fileName}`,
+            html: StatusUpdateEmailHTML({
+              customerName: partRequest.user.name || "Customer",
+              fileName: updatedRequest.fileName,
+              status: status,
+              message: message,
+            }),
+          });
+        }
+      } catch (emailError) {
+        console.error(`Failed to send ${status} email notification:`, emailError);
       }
     }
 

@@ -122,6 +122,7 @@ export default function DashboardPage() {
                               req.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border border-green-200' :
                               req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                               req.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' :
+                              req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
                               'bg-gray-50 text-gray-700 border border-gray-200'
                             }`}>
                               {req.status}
@@ -186,6 +187,7 @@ export default function DashboardPage() {
                                 req.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border border-green-200' :
                                 req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                                 req.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' :
+                                req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
                                 'bg-gray-50 text-gray-700 border border-gray-200'
                               }`}>
                                 {req.status}

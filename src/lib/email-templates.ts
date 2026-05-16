@@ -141,3 +141,53 @@ export const InvoiceSentEmailHTML = (data: {
 </body>
 </html>
 `;
+
+export const StatusUpdateEmailHTML = (data: {
+  customerName: string;
+  fileName: string;
+  status: string;
+  message: string;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
+    .content { padding: 20px; }
+    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
+    .field { margin-bottom: 15px; }
+    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
+    .value { font-size: 16px; color: #1a202c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Status Update: ${escapeHtml(data.status)}</h1>
+    </div>
+    <div class="content">
+      <p>Hello ${escapeHtml(data.customerName)},</p>
+      <p>${escapeHtml(data.message)}</p>
+      
+      <div class="field">
+        <div class="label">File Name</div>
+        <div class="value">${escapeHtml(data.fileName)}</div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+          View Dashboard
+        </a>
+      </div>
+    </div>
+    <div class="footer">
+      This is an automated notification from your TakomoCo application.
+    </div>
+  </div>
+</body>
+</html>
+`;
+

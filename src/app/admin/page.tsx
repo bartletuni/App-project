@@ -63,6 +63,11 @@ function AdminDashboardContent() {
   }, [requests, searchParams]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
+    if (newStatus === "COMPLETED") {
+      if (!confirm("Are you sure you want to mark this request as COMPLETED? An email notification will be sent to the customer.")) {
+        return;
+      }
+    }
     try {
       const res = await fetch(`/api/requests/${id}/status`, {
         method: "PATCH",
@@ -255,6 +260,7 @@ function AdminDashboardContent() {
                     <option value="COMPLETED">COMPLETED</option>
                     <option value="CANCELLED">CANCELLED</option>
                     <option value="INVOICE SENT">INVOICE SENT</option>
+                    <option value="SHIPPED">SHIPPED</option>
                 </select>
             </div>
             <div>
@@ -322,6 +328,7 @@ function AdminDashboardContent() {
                             req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
                             req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
                             req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                            req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
                             'bg-gray-50 text-gray-800 border-gray-200'
                           }`}
                         >
@@ -331,6 +338,7 @@ function AdminDashboardContent() {
                           <option value="COMPLETED">COMPLETED</option>
                           <option value="CANCELLED">CANCELLED</option>
                           <option value="INVOICE SENT">INVOICE SENT</option>
+                          <option value="SHIPPED">SHIPPED</option>
                         </select>
                       </div>
 
@@ -427,6 +435,7 @@ function AdminDashboardContent() {
                                 req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
                                 req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
                                 req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                                req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
                                 'bg-gray-50 text-gray-800 border-gray-200'
                               }`}
                           >
@@ -436,6 +445,7 @@ function AdminDashboardContent() {
                               <option value="COMPLETED">COMPLETED</option>
                               <option value="CANCELLED">CANCELLED</option>
                               <option value="INVOICE SENT">INVOICE SENT</option>
+                              <option value="SHIPPED">SHIPPED</option>
                           </select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
@@ -570,6 +580,7 @@ function AdminDashboardContent() {
                             <option value="COMPLETED">COMPLETED</option>
                             <option value="CANCELLED">CANCELLED</option>
                             <option value="INVOICE SENT">INVOICE SENT</option>
+                            <option value="SHIPPED">SHIPPED</option>
                        </select>
                    </div>
                    {selectedRequest.status !== 'CANCELLED' && (
