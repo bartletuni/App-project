@@ -9,3 +9,7 @@
 ## 2024-05-15 - [Accessible Icon-Only Buttons]
 **Learning:** Icon-only modal close buttons without `aria-label` or focus styles are inaccessible to screen readers and difficult to navigate for keyboard users.
 **Action:** Always add an explicit `aria-label`, a `title` tooltip, and a `focus-visible:ring-2` focus indicator state with a subtle hover background to icon-only buttons to ensure they are fully accessible and discoverable.
+
+## 2024-05-16 - Accessible Icon-Only Action Buttons
+**Learning:** Icon-only action buttons (like Edit, Delete, Save, Cancel) in data tables are completely invisible to screen readers without an `aria-label`, even if they have a `title` tooltip.
+**Action:** Always provide explicit `aria-label` attributes for icon-only action buttons to ensure screen reader users can understand their function without relying on visual cues or hover-only tooltips.

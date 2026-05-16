@@ -208,6 +208,7 @@ export default function AdminMaterialsPage() {
                         onClick={() => handleUpdate(m.id)}
                         className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"
                         title="Save changes"
+                        aria-label="Save changes"
                       >
                         <Check className="w-5 h-5" />
                       </button>
@@ -218,6 +219,7 @@ export default function AdminMaterialsPage() {
                         }}
                         className="text-gray-400 hover:bg-gray-100 p-2 rounded-lg transition-colors"
                         title="Cancel editing"
+                        aria-label="Cancel editing"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -236,6 +238,7 @@ export default function AdminMaterialsPage() {
                           }}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                           title="Edit name"
+                          aria-label="Edit name"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -243,6 +246,7 @@ export default function AdminMaterialsPage() {
                           onClick={() => handleDelete(m.id)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                           title="Delete material"
+                          aria-label="Delete material"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
