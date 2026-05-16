@@ -1,3 +1,12 @@
+const escapeHtml = (unsafe: string) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 export const NewRequestEmailHTML = (data: {
   customerName: string;
   customerEmail: string;
@@ -33,17 +42,17 @@ export const NewRequestEmailHTML = (data: {
       
       <div class="field">
         <div class="label">Customer</div>
-        <div class="value">${data.customerName} (${data.customerEmail})</div>
+        <div class="value">${escapeHtml(data.customerName)} (${escapeHtml(data.customerEmail)})</div>
       </div>
 
       <div class="field">
         <div class="label">File Name</div>
-        <div class="value">${data.fileName}</div>
+        <div class="value">${escapeHtml(data.fileName)}</div>
       </div>
 
       <div class="field">
         <div class="label">Material</div>
-        <div class="value">${data.material}</div>
+        <div class="value">${escapeHtml(data.material)}</div>
       </div>
 
       <div class="field">
@@ -53,13 +62,13 @@ export const NewRequestEmailHTML = (data: {
 
       <div class="field">
         <div class="label">Date Needed</div>
-        <div class="value">${data.dateNeeded}</div>
+        <div class="value">${escapeHtml(data.dateNeeded)}</div>
       </div>
 
       ${data.notes ? `
       <div class="notes-box">
         <div class="label">Notes</div>
-        <div class="value">${data.notes}</div>
+        <div class="value">${escapeHtml(data.notes)}</div>
       </div>
       ` : ''}
 
