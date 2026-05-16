@@ -23,6 +23,8 @@ function AdminDashboardContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [invoiceInput, setInvoiceInput] = useState("");
   const [savingInvoice, setSavingInvoice] = useState(false);
+  const [trackingInput, setTrackingInput] = useState("");
+  const [savingTracking, setSavingTracking] = useState(false);
 
   const fetchRequests = () => {
     fetch("/api/requests")
@@ -147,9 +149,35 @@ function AdminDashboardContent() {
     }
   };
 
+  const handleSaveTracking = async (id: string) => {
+    setSavingTracking(true);
+    try {
+      const res = await fetch(`/api/requests/${id}/tracking`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingNumber: trackingInput }),
+      });
+      if (res.ok) {
+        fetchRequests();
+        if (selectedRequest && selectedRequest.id === id) {
+            setSelectedRequest({ ...selectedRequest, trackingNumber: trackingInput === "" ? null : trackingInput });
+        }
+        alert("Tracking number saved successfully");
+      } else {
+        alert("Failed to save tracking number");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving tracking number");
+    } finally {
+      setSavingTracking(false);
+    }
+  };
+
   const openModal = (req: any) => {
     setSelectedRequest(req);
     setInvoiceInput(req.invoiceNumber || "");
+    setTrackingInput(req.trackingNumber || "");
     setIsModalOpen(true);
   };
 
@@ -157,6 +185,7 @@ function AdminDashboardContent() {
     setIsModalOpen(false);
     setSelectedRequest(null);
     setInvoiceInput("");
+    setTrackingInput("");
   };
 
   const filteredRequests = requests.filter((req) => {
@@ -557,6 +586,25 @@ function AdminDashboardContent() {
                               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingInvoice ? "Saving..." : "Save Invoice"}
+                            </button>
+                        </dd>
+                    </div>
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-gray-500">Tracking Number</dt>
+                        <dd className="mt-1 flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={trackingInput}
+                              onChange={(e) => setTrackingInput(e.target.value)}
+                              placeholder="Enter Tracking #"
+                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
+                            />
+                            <button
+                              onClick={() => handleSaveTracking(selectedRequest.id)}
+                              disabled={savingTracking || trackingInput === selectedRequest.trackingNumber || (!trackingInput && !selectedRequest.trackingNumber)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {savingTracking ? "Saving..." : "Save Tracking"}
                             </button>
                         </dd>
                     </div>

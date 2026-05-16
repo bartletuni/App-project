@@ -129,9 +129,17 @@ export default function DashboardPage() {
                             </span>
                           </div>
                           
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <div>Qty: <span className="font-semibold text-gray-900">{req.quantity}</span></div>
-                            <div>Invoice: <span className="font-semibold text-indigo-600">{req.invoiceNumber || "Pending"}</span></div>
+                          <div className="flex flex-col gap-1 text-xs text-gray-500">
+                            <div className="flex justify-between">
+                              <div>Qty: <span className="font-semibold text-gray-900">{req.quantity}</span></div>
+                              <div>Invoice: <span className="font-semibold text-indigo-600">{req.invoiceNumber || "Pending"}</span></div>
+                            </div>
+                            {req.trackingNumber && (
+                              <div className="flex justify-between">
+                                <div></div>
+                                <div>Tracking: <span className="font-semibold text-teal-600">{req.trackingNumber}</span></div>
+                              </div>
+                            )}
                           </div>
 
                           <div className="flex justify-between items-center pt-1">
@@ -194,7 +202,12 @@ export default function DashboardPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                              {req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}
+                              <div>{req.invoiceNumber ? req.invoiceNumber : <span className="text-gray-400 font-normal">Pending</span>}</div>
+                              {req.trackingNumber && (
+                                <div className="text-xs text-teal-600 mt-1">
+                                  Track: {req.trackingNumber}
+                                </div>
+                              )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {format(new Date(req.createdAt), "MMM d, h:mm a")}

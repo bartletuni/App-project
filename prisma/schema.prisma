@@ -52,6 +52,7 @@ model PartRequest {
   dateNeeded    DateTime
   status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
   invoiceNumber String?
+  trackingNumber String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
