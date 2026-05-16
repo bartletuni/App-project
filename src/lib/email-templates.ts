@@ -147,6 +147,7 @@ export const StatusUpdateEmailHTML = (data: {
   fileName: string;
   status: string;
   message: string;
+  trackingNumber?: string | null;
 }) => `
 <!DOCTYPE html>
 <html>
@@ -176,6 +177,13 @@ export const StatusUpdateEmailHTML = (data: {
         <div class="label">File Name</div>
         <div class="value">${escapeHtml(data.fileName)}</div>
       </div>
+
+      ${data.trackingNumber ? `
+      <div class="field">
+        <div class="label">Tracking Number</div>
+        <div class="value">${escapeHtml(data.trackingNumber)}</div>
+      </div>
+      ` : ''}
 
       <div style="margin-top: 30px;">
         <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">

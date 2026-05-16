@@ -81,6 +81,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
               fileName: updatedRequest.fileName,
               status: status,
               message: message,
+              trackingNumber: updatedRequest.trackingNumber,
             }),
           });
         }
