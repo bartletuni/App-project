@@ -1,0 +1,10 @@
+
+> takomoco-app@0.1.0 start /app
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 426ms
+Missing Cloudflare R2 credentials in environment variables.
