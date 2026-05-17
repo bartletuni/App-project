@@ -206,8 +206,9 @@ export default function AdminMaterialsPage() {
                       />
                       <button
                         onClick={() => handleUpdate(m.id)}
-                        className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                        className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                         title="Save changes"
+                        aria-label="Save changes"
                       >
                         <Check className="w-5 h-5" />
                       </button>
@@ -216,8 +217,9 @@ export default function AdminMaterialsPage() {
                           setEditingId(null);
                           setEditingName("");
                         }}
-                        className="text-gray-400 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                        className="text-gray-400 hover:bg-gray-100 p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                         title="Cancel editing"
+                        aria-label="Cancel editing"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -228,21 +230,23 @@ export default function AdminMaterialsPage() {
                         <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
                         <span className="text-gray-900 font-semibold">{m.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         <button
                           onClick={() => {
                             setEditingId(m.id);
                             setEditingName(m.name);
                           }}
-                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                          title="Edit name"
+                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                          title="Edit material"
+                          aria-label="Edit material"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(m.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                           title="Delete material"
+                          aria-label="Delete material"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
