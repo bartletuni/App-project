@@ -8,7 +8,13 @@ export async function GET() {
     const materials = await prisma.material.findMany({
       orderBy: { name: "asc" },
     });
-    return NextResponse.json(materials);
+    return NextResponse.json(materials, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch materials" }, { status: 500 });
   }

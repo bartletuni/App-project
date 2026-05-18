@@ -9,7 +9,7 @@ export default function MaterialsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/materials")
+    fetch("/api/materials?t=" + new Date().getTime(), { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
