@@ -11,11 +11,6 @@ export async function GET(
   { params }: { params: { fileId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { fileId } = params;
 
     if (!fileId) {
@@ -26,12 +21,21 @@ export async function GET(
       where: { fileId },
     });
 
-    if (!partRequest) {
-      return NextResponse.json({ error: "Request not found" }, { status: 404 });
-    }
-
-    if (partRequest.userId !== (session.user as any).id && !(session.user as any).isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (partRequest) {
+      const session = await getServerSession(authOptions);
+      if (!session || !session.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      if (partRequest.userId !== (session.user as any).id && !(session.user as any).isAdmin) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else {
+      const material = await prisma.material.findFirst({
+        where: { imageId: fileId },
+      });
+      if (!material) {
+        return NextResponse.json({ error: "File not found" }, { status: 404 });
+      }
     }
 
     const bucketName = process.env.R2_BUCKET_NAME || "";
