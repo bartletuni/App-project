@@ -17,6 +17,8 @@ export default function AdminMaterialsPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingDesc, setEditingDesc] = useState("");
+  const [editingImage, setEditingImage] = useState<File | null>(null);
 
   const fetchMaterials = () => {
     fetch("/api/admin/materials")
@@ -75,16 +77,22 @@ export default function AdminMaterialsPage() {
   const handleUpdate = async (id: string) => {
     if (!editingName.trim()) return;
 
+    const formData = new FormData();
+    formData.append("name", editingName);
+    if (editingDesc) formData.append("description", editingDesc);
+    if (editingImage) formData.append("image", editingImage);
+
     try {
       const res = await fetch(`/api/admin/materials/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editingName }),
+        body: formData,
       });
 
       if (res.ok) {
         setEditingId(null);
         setEditingName("");
+        setEditingDesc("");
+        setEditingImage(null);
         fetchMaterials();
       } else {
         alert("Failed to update material");
@@ -229,48 +237,79 @@ export default function AdminMaterialsPage() {
           ) : (
             <ul className="divide-y divide-gray-100">
               {materials.map((m) => (
-                <li key={m.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between group">
+                <li key={m.id} className="p-4 hover:bg-gray-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between group gap-4">
                   {editingId === m.id ? (
-                    <div className="flex-1 flex gap-3 mr-4">
+                    <div className="flex-1 flex flex-col gap-3 w-full">
                       <input
                         type="text"
                         autoFocus
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
-                        className="flex-1 border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                        placeholder="Material Name"
+                        className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                       />
-                      <button
-                        onClick={() => handleUpdate(m.id)}
-                        className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                        title="Save changes"
-                      >
-                        <Check className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditingName("");
-                        }}
-                        className="text-gray-400 hover:bg-gray-100 p-2 rounded-lg transition-colors"
-                        title="Cancel editing"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
+                      <textarea
+                        value={editingDesc}
+                        onChange={(e) => setEditingDesc(e.target.value)}
+                        placeholder="Description (Optional)"
+                        className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                        rows={2}
+                      />
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setEditingImage(e.target.files?.[0] || null)}
+                          className="block w-full sm:w-auto text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdate(m.id)}
+                            className="text-green-600 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
+                          >
+                            <Check className="w-4 h-4" /> Save
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingId(null);
+                              setEditingName("");
+                              setEditingDesc("");
+                              setEditingImage(null);
+                            }}
+                            className="text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
+                          >
+                            <X className="w-4 h-4" /> Cancel
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
-                        <span className="text-gray-900 font-semibold">{m.name}</span>
+                      <div className="flex items-center gap-4 flex-1">
+                        {m.imageId ? (
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                            <img src={`/api/download/${m.imageId}`} alt={m.name} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-50 to-gray-100 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
+                            <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-900 font-bold block">{m.name}</span>
+                          {m.description && <span className="text-gray-500 text-sm line-clamp-1">{m.description}</span>}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => {
                             setEditingId(m.id);
                             setEditingName(m.name);
+                            setEditingDesc(m.description || "");
+                            setEditingImage(null);
                           }}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                          title="Edit name"
+                          title="Edit material"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
