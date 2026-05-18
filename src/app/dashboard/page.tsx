@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push("/login");
     } else if (status === "authenticated") {
       if (isAdmin) {
         router.push("/admin");

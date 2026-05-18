@@ -1,452 +1,209 @@
-"use client";
+import Link from "next/link";
+import { ArrowRight, Layers, Scan, Zap, Shield, CheckCircle2 } from "lucide-react";
 
-import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-
-export default function Home() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [shippingStreet, setShippingStreet] = useState("");
-  const [shippingApt, setShippingApt] = useState("");
-  const [shippingCity, setShippingCity] = useState("");
-  const [shippingState, setShippingState] = useState("");
-  const [shippingZip, setShippingZip] = useState("");
-  
-  const [billingStreet, setBillingStreet] = useState("");
-  const [billingApt, setBillingApt] = useState("");
-  const [billingCity, setBillingCity] = useState("");
-  const [billingState, setBillingState] = useState("");
-  const [billingZip, setBillingZip] = useState("");
-  
-  const [sameAsShipping, setSameAsShipping] = useState(true);
-  const [phone, setPhone] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      const isAdmin = (session?.user as any)?.isAdmin;
-      if (isAdmin) {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
-    }
-  }, [status, session, router]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      if (isLogin) {
-        const result = await signIn("credentials", {
-          redirect: false,
-          email,
-          password,
-        });
-
-        if (result?.error) {
-          setError("Invalid email or password.");
-        } else {
-          router.push("/dashboard");
-        }
-      } else {
-        // Handle registration
-        const finalShippingAddress = `${shippingStreet}${shippingApt ? `, ${shippingApt}` : ""}, ${shippingCity}, ${shippingState} ${shippingZip}`;
-        const finalBillingAddress = sameAsShipping 
-          ? finalShippingAddress 
-          : `${billingStreet}${billingApt ? `, ${billingApt}` : ""}, ${billingCity}, ${billingState} ${billingZip}`;
-
-        const registerRes = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            name, 
-            email, 
-            password, 
-            shippingAddress: finalShippingAddress, 
-            billingAddress: finalBillingAddress, 
-            phone 
-          }),
-        });
-
-        if (!registerRes.ok) {
-          const data = await registerRes.json();
-          setError(data.error || "Failed to create account.");
-          setLoading(false);
-          return;
-        }
-
-        // Auto sign-in after registration
-        const result = await signIn("credentials", {
-          redirect: false,
-          email,
-          password,
-        });
-
-        if (result?.error) {
-          setError("Account created, but failed to automatically sign in.");
-        } else {
-          router.push("/dashboard");
-        }
-      }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
-        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p className="text-gray-500 font-medium">Checking authentication...</p>
-      </div>
-    );
-  }
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen flex items-stretch bg-gray-50">
-      {/* Left Column - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden">
-        {/* Decorative background shapes */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-overlay blur-3xl"></div>
-        </div>
-
-        <div className="relative z-10 max-w-lg mx-auto">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-            TakomoCo <br />
-            <span className="text-blue-300">Request Management</span>
-          </h1>
-          <p className="text-lg text-indigo-100 mb-8 leading-relaxed">
-            Streamline your additive manufacturing workflows. Upload your custom part specifications, track progress in real-time, and get your parts delivered faster than ever.
-          </p>
-
-          <div className="grid grid-cols-2 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-              <div className="text-3xl font-bold mb-1">⚡️</div>
-              <h3 className="font-semibold text-lg mb-1">Lightning Fast</h3>
-              <p className="text-sm text-indigo-200">Rapid turnaround times for all prototyping.</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-              <div className="text-3xl font-bold mb-1">🎯</div>
-              <h3 className="font-semibold text-lg mb-1">High Precision</h3>
-              <p className="text-sm text-indigo-200">State of the art 3D printing accuracy.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Column - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white shadow-2xl z-10">
-        <div className="w-full max-w-md">
-          {/* Mobile Header (Hidden on Desktop) */}
-          <div className="lg:hidden mb-10 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">TakomoCo</h1>
-            <p className="text-gray-500">Request Management Portal</p>
-          </div>
-
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {isLogin ? "Welcome Back" : "Create an Account"}
-            </h2>
-            <p className="text-gray-500">
-              {isLogin
-                ? "Enter your details to access your dashboard."
-                : "Sign up to start requesting custom parts."}
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md text-sm animate-pulse">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
-                  Company / Personal Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 text-gray-900 px-4 py-3"
-                  placeholder="ACME Corp / Jane Doe"
-                />
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-lg flex items-center justify-center font-bold shadow-sm">
+                T
               </div>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                placeholder="you@company.com"
-              />
+              <span className="font-bold text-xl text-gray-900 tracking-tight">TakomoCo</span>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                placeholder="••••••••"
-              />
+            <div className="flex items-center gap-6">
+              <Link href="/materials" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
+                Materials
+              </Link>
+              <Link 
+                href="/login" 
+                className="text-sm font-bold bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg"
+              >
+                Sign In
+              </Link>
             </div>
-
-            {!isLogin && (
-              <>
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingStreet">
-                        Street Address
-                      </label>
-                      <input
-                        id="shippingStreet"
-                        type="text"
-                        required={!isLogin}
-                        value={shippingStreet}
-                        onChange={(e) => setShippingStreet(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="123 Main St"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingApt">
-                        Apartment, suite, etc. (optional)
-                      </label>
-                      <input
-                        id="shippingApt"
-                        type="text"
-                        value={shippingApt}
-                        onChange={(e) => setShippingApt(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="Apt 4B"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingCity">
-                          City
-                        </label>
-                        <input
-                          id="shippingCity"
-                          type="text"
-                          required={!isLogin}
-                          value={shippingCity}
-                          onChange={(e) => setShippingCity(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="City"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingState">
-                          State / Province
-                        </label>
-                        <input
-                          id="shippingState"
-                          type="text"
-                          required={!isLogin}
-                          value={shippingState}
-                          onChange={(e) => setShippingState(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="ST"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingZip">
-                        ZIP / Postal Code
-                      </label>
-                      <input
-                        id="shippingZip"
-                        type="text"
-                        required={!isLogin}
-                        value={shippingZip}
-                        onChange={(e) => setShippingZip(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="12345"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">Billing Information</h3>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sameAsShipping}
-                        onChange={(e) => setSameAsShipping(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm font-medium text-gray-600">Same as shipping</span>
-                    </label>
-                  </div>
-                  
-                  {!sameAsShipping && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingStreet">
-                          Street Address
-                        </label>
-                        <input
-                          id="billingStreet"
-                          type="text"
-                          required={!isLogin && !sameAsShipping}
-                          value={billingStreet}
-                          onChange={(e) => setBillingStreet(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="123 Main St"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingApt">
-                          Apartment, suite, etc. (optional)
-                        </label>
-                        <input
-                          id="billingApt"
-                          type="text"
-                          value={billingApt}
-                          onChange={(e) => setBillingApt(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="Apt 4B"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingCity">
-                            City
-                          </label>
-                          <input
-                            id="billingCity"
-                            type="text"
-                            required={!isLogin && !sameAsShipping}
-                            value={billingCity}
-                            onChange={(e) => setBillingCity(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                            placeholder="City"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingState">
-                            State / Province
-                          </label>
-                          <input
-                            id="billingState"
-                            type="text"
-                            required={!isLogin && !sameAsShipping}
-                            value={billingState}
-                            onChange={(e) => setBillingState(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                            placeholder="ST"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingZip">
-                          ZIP / Postal Code
-                        </label>
-                        <input
-                          id="billingZip"
-                          type="text"
-                          required={!isLogin && !sameAsShipping}
-                          value={billingZip}
-                          onChange={(e) => setBillingZip(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="12345"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
-                    Phone Number
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    required={!isLogin}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                    placeholder="(555) 555-5555"
-                  />
-                </div>
-              </>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </span>
-              ) : isLogin ? (
-                "Sign In"
-              ) : (
-                "Create Account"
-              )}
-            </button>
-          </form>
-
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError("");
-              }}
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-            >
-              {isLogin
-                ? "Don't have an account? Create one now."
-                : "Already have an account? Sign in here."}
-            </button>
           </div>
         </div>
-      </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+          <div className="absolute top-48 -left-24 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-48 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
+            Digital Design <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+              Physical Reality
+            </span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto mb-10 leading-relaxed">
+            TakomoCo is a specialized additive manufacturing and rapid prototyping studio. We offer high-precision 3D printing and 3D scanning services for engineering and reproduction applications.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link 
+              href="/login" 
+              className="inline-flex justify-center items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
+            >
+              Start Your Project
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link 
+              href="/materials" 
+              className="inline-flex justify-center items-center bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+            >
+              View Material Library
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Competencies */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-2">Capabilities</h2>
+            <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900">Core Competencies</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-indigo-100 hover:shadow-lg transition-all group">
+              <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Layers className="w-7 h-7" />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900 mb-3">Additive Manufacturing</h4>
+              <p className="text-gray-600 leading-relaxed">Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade materials.</p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-blue-100 hover:shadow-lg transition-all group">
+              <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Scan className="w-7 h-7" />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900 mb-3">3D Scanning & Reverse Eng.</h4>
+              <p className="text-gray-600 leading-relaxed">High-fidelity scanning for intricate part reproduction, exact 1:1 copies, and robust digital archiving.</p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-purple-100 hover:shadow-lg transition-all group">
+              <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Zap className="w-7 h-7" />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900 mb-3">Rapid Prototyping</h4>
+              <p className="text-gray-600 leading-relaxed">Iterative design support to dramatically accelerate your product development cycles.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technical Specs & Differentiators */}
+      <section className="py-20 bg-gray-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            
+            {/* Technical Specifications */}
+            <div>
+              <h3 className="text-3xl font-extrabold mb-8 text-white">Technical Specifications</h3>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 bg-white/10 p-2 rounded-lg text-indigo-300">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-white">Maximum Build Volume</h4>
+                    <p className="text-gray-400 mt-1">220mm x 220mm x 220mm space for dense, robust components.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 bg-white/10 p-2 rounded-lg text-blue-300">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-white">Advanced Thermal Capacity</h4>
+                    <p className="text-gray-400 mt-1">Optimized for specialized materials requiring up to 280°C extrusion temperature.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 bg-white/10 p-2 rounded-lg text-purple-300">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-white">Scanning Precision</h4>
+                    <p className="text-gray-400 mt-1">Capable of capturing highly intricate geometries for near-exact reproductions.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Differentiators */}
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-sm">
+              <h3 className="text-2xl font-extrabold mb-8 text-white flex items-center gap-3">
+                <Shield className="w-7 h-7 text-indigo-400" />
+                Why Choose TakomoCo?
+              </h3>
+              <ul className="space-y-8">
+                <li>
+                  <h4 className="text-lg font-bold text-indigo-300 mb-2">Material Mastery</h4>
+                  <p className="text-gray-400 leading-relaxed">Highly specialized in handling complex, abrasive, and carbon-fiber-reinforced composites.</p>
+                </li>
+                <li>
+                  <h4 className="text-lg font-bold text-blue-300 mb-2">End-to-End Workflow</h4>
+                  <p className="text-gray-400 leading-relaxed">From scanning a broken legacy part to engineering and delivering a fiber-reinforced replacement seamlessly.</p>
+                </li>
+                <li>
+                  <h4 className="text-lg font-bold text-purple-300 mb-2">Agile Response</h4>
+                  <p className="text-gray-400 leading-relaxed">Our small-scale focus allows for rapid pivots, personal attention, and dedicated engineering support.</p>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Footer / CTA */}
+      <footer className="bg-white py-16 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Ready to start building?</h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Contact us today or log in to submit a request. We specialize in high-strength, chemically and impact resistant composites.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
+            <Link 
+              href="/login" 
+              className="bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-colors shadow-md"
+            >
+              Submit a Request
+            </Link>
+            <a 
+              href="mailto:takomocompany@gmail.com"
+              className="bg-gray-100 text-gray-900 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-200 transition-colors"
+            >
+              takomocompany@gmail.com
+            </a>
+          </div>
+
+          <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+            <div className="flex items-center gap-2 mb-4 md:mb-0">
+              <div className="w-6 h-6 bg-indigo-600 text-white rounded flex items-center justify-center font-bold text-xs">
+                T
+              </div>
+              <span className="font-semibold text-gray-900">TakomoCo</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center">
+              <span>📞 385-695-4178</span>
+              <span>Primary NAICS: 333248, 541330, 541420</span>
+              <span>© {new Date().getFullYear()} TakomoCo. All rights reserved.</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

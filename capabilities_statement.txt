@@ -1,0 +1,26 @@
+TakomoCo - Capability Statement
+TakomoCo is a specialized additive manufacturing and rapid prototyping studio. We focus on bridging the gap between digital design and physical reality, offering high-precision 3D printing and 3D scanning services for engineering and reproduction applications.
+Core Competencies
+Additive Manufacturing: Expert FDM/FFF printing with a focus on engineering-grade materials.
+3D Scanning & Reverse Engineering: High-fidelity scanning for part reproduction and digital archiving.
+Rapid Prototyping: Iterative design support to accelerate product development cycles.
+•	Technical Material Expertise: Specializing in high-strength, chemically resistant, high temperature resistant, and impact resistant composites.
+Technical Specifications
+Maximum Build Volume: 220mm x 220mm x 220mm
+Thermal Capacity: Optimized for materials requiring up to 280 deg C extrusion temperature.
+•	Scanning Precision: Capable of capturing intricate geometries for near-exact 1:1 reproductions.
+Material Specializations
+We work with a wide array of high-performance thermoplastics, including but not limited to:
+•	PPA-CF (Polyphthalamide Carbon Fiber)
+•	Polycarbonate (PC)
+•	PA6-CF/PA12-CF (Nylon - Carbon Fiber)
+•	PETG, ASA, ABS, TPU, PLA, and specialized blends.
+Differentiators
+Material Mastery: Specialized in handling abrasive, carbon-fiber-reinforced materials.
+End-to-End Workflow: From scanning a broken legacy part to delivering a fiber-reinforced replacement.
+•	Agile Response: Small-scale focus allows for rapid pivots and personalized engineering support.
+Company Information
+TakomoCo
+Phone: 385-695-4178
+Email: takomocompany@gmail.com
+Primary NAICS: 333248, 541330, 541420

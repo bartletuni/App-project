@@ -42,7 +42,7 @@ function AdminDashboardContent() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/api/auth/signin");
+      router.push("/login");
     } else if (status === "authenticated") {
       if (!(session?.user as any)?.isAdmin) {
           router.push("/dashboard");

@@ -33,9 +33,11 @@ model PhoneNumber {
 }
 
 model Material {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  imageId     String?
+  createdAt   DateTime @default(now())
 }
 
 model PartRequest {

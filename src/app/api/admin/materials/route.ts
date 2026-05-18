@@ -14,6 +14,8 @@ export async function GET() {
   }
 }
 
+import { uploadToR2 } from "@/lib/r2";
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
@@ -22,13 +24,40 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { name } = await req.json();
+    const formData = await req.formData();
+    const name = formData.get("name") as string | null;
+    const description = formData.get("description") as string | null;
+    const file = formData.get("image") as File | null;
+
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    let imageId: string | undefined;
+
+    if (file && typeof file !== "string" && file.name) {
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: "Image size exceeds the 5MB limit" }, { status: 400 });
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const mimeType = file.type || "application/octet-stream";
+      
+      try {
+        const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
+        imageId = fileIdRes || undefined;
+      } catch (e) {
+        console.error(e);
+        return NextResponse.json({ error: "Error uploading image. Ensure credentials are setup." }, { status: 500 });
+      }
+    }
+
     const material = await prisma.material.create({
-      data: { name },
+      data: { 
+        name,
+        description: description || null,
+        imageId: imageId || null,
+      },
     });
 
     return NextResponse.json(material);

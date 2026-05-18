@@ -12,6 +12,8 @@ export default function AdminMaterialsPage() {
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMaterialName, setNewMaterialName] = useState("");
+  const [newMaterialDesc, setNewMaterialDesc] = useState("");
+  const [newMaterialImage, setNewMaterialImage] = useState<File | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -44,15 +46,21 @@ export default function AdminMaterialsPage() {
     e.preventDefault();
     if (!newMaterialName.trim()) return;
 
+    const formData = new FormData();
+    formData.append("name", newMaterialName);
+    if (newMaterialDesc) formData.append("description", newMaterialDesc);
+    if (newMaterialImage) formData.append("image", newMaterialImage);
+
     try {
       const res = await fetch("/api/admin/materials", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newMaterialName }),
+        body: formData,
       });
 
       if (res.ok) {
         setNewMaterialName("");
+        setNewMaterialDesc("");
+        setNewMaterialImage(null);
         setIsAdding(false);
         fetchMaterials();
       } else {
@@ -155,31 +163,58 @@ export default function AdminMaterialsPage() {
         {isAdding && (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
             <h2 className="text-lg font-bold text-gray-900 mb-4">New Material</h2>
-            <form onSubmit={handleAdd} className="flex gap-4">
-              <input
-                type="text"
-                autoFocus
-                value={newMaterialName}
-                onChange={(e) => setNewMaterialName(e.target.value)}
-                placeholder="e.g. Carbon Fiber PLA"
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold transition-colors"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewMaterialName("");
-                }}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-2 rounded-lg font-bold transition-colors"
-              >
-                Cancel
-              </button>
+            <form onSubmit={handleAdd} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Material Name</label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={newMaterialName}
+                  onChange={(e) => setNewMaterialName(e.target.value)}
+                  placeholder="e.g. Carbon Fiber PLA"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Description (Optional)</label>
+                <textarea
+                  value={newMaterialDesc}
+                  onChange={(e) => setNewMaterialDesc(e.target.value)}
+                  placeholder="Short description of the material's properties..."
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Image (Optional, Max 5MB)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewMaterialImage(e.target.files?.[0] || null)}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold transition-colors"
+                >
+                  Save Material
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewMaterialName("");
+                    setNewMaterialDesc("");
+                    setNewMaterialImage(null);
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-2 rounded-lg font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
         )}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
 
-export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
+function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [material, setMaterial] = useState("");
@@ -17,6 +17,9 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  const searchParams = useSearchParams();
+  const initialMaterial = searchParams.get("material");
 
   const minDate = format(addDays(new Date(), 5), "yyyy-MM-dd");
 
@@ -40,11 +43,15 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
         if (Array.isArray(data)) {
           setAvailableMaterials(data);
           if (data.length > 0) {
-            setMaterial(data[0].name);
+            if (initialMaterial && data.some(m => m.name === initialMaterial)) {
+              setMaterial(initialMaterial);
+            } else {
+              setMaterial(data[0].name);
+            }
           }
         }
       });
-  }, []);
+  }, [initialMaterial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,5 +256,13 @@ export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void
         </button>
       </form>
     </div>
+  );
+}
+
+export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
+  return (
+    <Suspense fallback={<div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 animate-pulse h-96"></div>}>
+      <RequestFormContent onFormSubmit={onFormSubmit} />
+    </Suspense>
   );
 }
