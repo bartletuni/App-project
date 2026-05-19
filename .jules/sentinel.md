@@ -14,3 +14,10 @@
 **Vulnerability:** The email template generation function in `src/lib/email-templates.ts` (`NewRequestEmailHTML`) was manually constructing HTML strings and directly interpolating user input (names, file names, notes) without any escaping or sanitization. This allowed an attacker to inject arbitrary HTML, CSS, or scripts into the emails sent to administrators.
 **Learning:** This vulnerability existed because the application relied on manual string concatenation for HTML generation instead of a proper templating engine (like Handlebars or React Email) that automatically escapes variables by default.
 **Prevention:** When manually constructing HTML strings that include user input, always sanitize or escape the input using a dedicated escaping function (e.g., replacing `<`, `>`, `&`, `"`, `'` with their HTML entities) before interpolation. Alternatively, use modern templating libraries that provide automatic escaping to prevent injection flaws.
+
+## 2024-05-19 - File Upload Path Traversal & MIME Type Spoofing
+**Vulnerability:** File uploads to Cloudflare R2 blindly trusted user-provided `file.name` and `file.type` via FormData. An attacker could exploit `file.name` for Path Traversal (overwriting unexpected S3 keys or breaking paths) and could spoof `file.type` to cause Content-Type mismatches resulting in Stored XSS when files are downloaded or viewed in a browser.
+**Learning:** Never trust client-provided file metadata in FormData. Even if Next.js parses it securely into a File object, the `name` and `type` properties are directly controlled by the client.
+**Prevention:**
+1. Always sanitize file names before using them in storage keys (e.g., using `path.basename` and replacing invalid characters with `_`).
+2. Always infer the `mimeType` securely from the validated file extension on the backend, rather than reading `file.type`.
