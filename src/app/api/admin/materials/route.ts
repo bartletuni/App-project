@@ -41,7 +41,13 @@ export async function POST(req: Request) {
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
-      const mimeType = file.type || "application/octet-stream";
+
+      let mimeType = "application/octet-stream";
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (ext === 'png') mimeType = "image/png";
+      else if (ext === 'jpg' || ext === 'jpeg') mimeType = "image/jpeg";
+      else if (ext === 'gif') mimeType = "image/gif";
+      else if (ext === 'webp') mimeType = "image/webp";
       
       try {
         const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
