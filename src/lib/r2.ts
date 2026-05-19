@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import path from "path";
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || "";
 const accessKeyId = process.env.R2_ACCESS_KEY_ID || "";
@@ -24,7 +25,9 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
     throw new Error("Missing Cloudflare R2 credentials in environment variables.");
   }
 
-  const objectKey = `${Date.now()}-${fileName.replace(/\s+/g, "_")}`;
+  // Sanitize filename: extract basename and replace invalid characters to prevent path traversal
+  const safeBaseName = path.basename(fileName).replace(/[^a-zA-Z0-9.-]/g, "_");
+  const objectKey = `${Date.now()}-${safeBaseName}`;
 
   try {
     await s3Client.send(
