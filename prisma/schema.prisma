@@ -30,6 +30,8 @@ model PhoneNumber {
   createdAt DateTime @default(now())
 
   requests  PartRequest[]
+
+  @@index([userId, number])
 }
 
 model Material {
@@ -57,4 +59,8 @@ model PartRequest {
   trackingNumber String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([phoneNumberId])
+  @@index([createdAt])
 }
