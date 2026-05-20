@@ -25,17 +25,17 @@ export default function Navbar() {
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/dashboard" aria-label="Dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none rounded-md px-1.5 py-1">
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden md:inline">Dashboard</span>
             </Link>
             
-            <Link href="/contact" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/contact" aria-label="Support" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none rounded-md px-1.5 py-1">
               <LifeBuoy className="w-4 h-4" />
               <span className="hidden md:inline">Support</span>
             </Link>
 
-            <Link href="/settings" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/settings" aria-label="Settings" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none rounded-md px-1.5 py-1">
               <Settings className="w-4 h-4" />
               <span className="hidden md:inline">Settings</span>
             </Link>
