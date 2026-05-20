@@ -9,3 +9,7 @@
 ## 2024-05-15 - [Accessible Icon-Only Buttons]
 **Learning:** Icon-only modal close buttons without `aria-label` or focus styles are inaccessible to screen readers and difficult to navigate for keyboard users.
 **Action:** Always add an explicit `aria-label`, a `title` tooltip, and a `focus-visible:ring-2` focus indicator state with a subtle hover background to icon-only buttons to ensure they are fully accessible and discoverable.
+
+## 2024-05-20 - [Accessible Responsive Navigation Links]
+**Learning:** Responsively hiding link text (e.g., "Dashboard", "Support") using Tailwind's `hidden` classes (like `hidden md:inline`) while leaving only an icon visible causes the link to become an unlabelled icon for screen reader users on mobile devices. Furthermore, these links often lack visible focus indicators for keyboard navigation.
+**Action:** Always add explicit `aria-label` attributes to navigation links containing icons when text is hidden responsively. Ensure robust keyboard accessibility by applying focus styles such as `focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none rounded-md px-1.5 py-1` to these elements.
