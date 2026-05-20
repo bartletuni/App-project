@@ -13,11 +13,13 @@ export default function AdminMaterialsPage() {
   const [loading, setLoading] = useState(true);
   const [newMaterialName, setNewMaterialName] = useState("");
   const [newMaterialDesc, setNewMaterialDesc] = useState("");
+  const [newMaterialColor, setNewMaterialColor] = useState("#ffffff");
   const [newMaterialImage, setNewMaterialImage] = useState<File | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingDesc, setEditingDesc] = useState("");
+  const [editingColor, setEditingColor] = useState("#ffffff");
   const [editingImage, setEditingImage] = useState<File | null>(null);
 
   const fetchMaterials = () => {
@@ -51,6 +53,7 @@ export default function AdminMaterialsPage() {
     const formData = new FormData();
     formData.append("name", newMaterialName);
     if (newMaterialDesc) formData.append("description", newMaterialDesc);
+    formData.append("color", newMaterialColor);
     if (newMaterialImage) formData.append("image", newMaterialImage);
 
     try {
@@ -62,6 +65,7 @@ export default function AdminMaterialsPage() {
       if (res.ok) {
         setNewMaterialName("");
         setNewMaterialDesc("");
+        setNewMaterialColor("#ffffff");
         setNewMaterialImage(null);
         setIsAdding(false);
         fetchMaterials();
@@ -80,6 +84,7 @@ export default function AdminMaterialsPage() {
     const formData = new FormData();
     formData.append("name", editingName);
     if (editingDesc) formData.append("description", editingDesc);
+    formData.append("color", editingColor);
     if (editingImage) formData.append("image", editingImage);
 
     try {
@@ -92,6 +97,7 @@ export default function AdminMaterialsPage() {
         setEditingId(null);
         setEditingName("");
         setEditingDesc("");
+        setEditingColor("#ffffff");
         setEditingImage(null);
         fetchMaterials();
       } else {
@@ -195,6 +201,15 @@ export default function AdminMaterialsPage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Color</label>
+                <input
+                  type="color"
+                  value={newMaterialColor}
+                  onChange={(e) => setNewMaterialColor(e.target.value)}
+                  className="h-10 w-20 cursor-pointer rounded border border-gray-300 p-1"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Image (Optional, Max 5MB)</label>
                 <input
                   type="file"
@@ -216,6 +231,7 @@ export default function AdminMaterialsPage() {
                     setIsAdding(false);
                     setNewMaterialName("");
                     setNewMaterialDesc("");
+                    setNewMaterialColor("#ffffff");
                     setNewMaterialImage(null);
                   }}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-2 rounded-lg font-bold transition-colors"
@@ -255,6 +271,15 @@ export default function AdminMaterialsPage() {
                         className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
                         rows={2}
                       />
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-gray-700">Color</label>
+                        <input
+                          type="color"
+                          value={editingColor}
+                          onChange={(e) => setEditingColor(e.target.value)}
+                          className="h-8 w-16 cursor-pointer rounded border border-gray-300 p-0.5"
+                        />
+                      </div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <input
                           type="file"
@@ -274,6 +299,7 @@ export default function AdminMaterialsPage() {
                               setEditingId(null);
                               setEditingName("");
                               setEditingDesc("");
+                              setEditingColor("#ffffff");
                               setEditingImage(null);
                             }}
                             className="text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
@@ -291,8 +317,8 @@ export default function AdminMaterialsPage() {
                             <img src={`/api/download/${m.imageId}`} alt={m.name} className="w-full h-full object-cover" />
                           </div>
                         ) : (
-                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-50 to-gray-100 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
-                            <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
+                          <div className="w-12 h-12 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm" style={{ backgroundColor: m.color || '#f3f4f6' }}>
+                             <div className="w-3 h-3 rounded-full opacity-50 bg-black mix-blend-overlay"></div>
                           </div>
                         )}
                         <div>
@@ -306,6 +332,7 @@ export default function AdminMaterialsPage() {
                             setEditingId(m.id);
                             setEditingName(m.name);
                             setEditingDesc(m.description || "");
+                            setEditingColor(m.color || "#ffffff");
                             setEditingImage(null);
                           }}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
