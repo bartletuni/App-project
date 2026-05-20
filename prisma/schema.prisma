@@ -37,6 +37,7 @@ model Material {
   name        String   @unique
   description String?
   imageId     String?
+  color       String?
   createdAt   DateTime @default(now())
 }
 

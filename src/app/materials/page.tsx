@@ -82,7 +82,10 @@ export default function MaterialsPage() {
                     />
                   </div>
                 ) : (
-                  <div className="h-16 w-full bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-100"></div>
+                  <div
+                    className="h-16 w-full border-b border-gray-100"
+                    style={{ backgroundColor: m.color || '#f9fafb' }}
+                  ></div>
                 )}
                 
                 <div className="p-8 flex-1 flex flex-col">

@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const name = formData.get("name") as string | null;
     const description = formData.get("description") as string | null;
+    const color = formData.get("color") as string | null;
     const file = formData.get("image") as File | null;
 
     if (!name) {
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
       data: { 
         name,
         description: description || null,
+        color: color || null,
         imageId: imageId || null,
       },
     });

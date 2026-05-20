@@ -18,6 +18,7 @@ export async function PATCH(
     const formData = await req.formData();
     const name = formData.get("name") as string | null;
     const description = formData.get("description") as string | null;
+    const color = formData.get("color") as string | null;
     const file = formData.get("image") as File | null;
 
     if (!name) {
@@ -46,6 +47,7 @@ export async function PATCH(
     const updateData: any = { 
       name,
       description: description || null,
+      color: color || null,
     };
 
     if (imageId) {
