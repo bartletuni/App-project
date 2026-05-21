@@ -20,6 +20,8 @@ model User {
 
   phoneNumbers PhoneNumber[]
   requests     PartRequest[]
+
+  @@index([createdAt])
 }
 
 model PhoneNumber {
@@ -29,7 +31,10 @@ model PhoneNumber {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
-  requests  PartRequest[]
+  requests PartRequest[]
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model Material {
@@ -41,20 +46,24 @@ model Material {
 }
 
 model PartRequest {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  phoneNumberId String
-  phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id])
-  fileId        String      // Google Drive file ID
-  fileName      String      // Original uploaded file name
-  quantity      Int         @default(1)
-  material      String?
-  notes         String?
-  dateNeeded    DateTime
-  status        String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
-  invoiceNumber String?
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  phoneNumberId  String
+  phoneNumber    PhoneNumber @relation(fields: [phoneNumberId], references: [id])
+  fileId         String // Google Drive file ID
+  fileName       String // Original uploaded file name
+  quantity       Int         @default(1)
+  material       String?
+  notes          String?
+  dateNeeded     DateTime
+  status         String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
+  invoiceNumber  String?
   trackingNumber String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([phoneNumberId])
+  @@index([createdAt])
 }
