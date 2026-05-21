@@ -40,11 +40,23 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Image size exceeds the 5MB limit" }, { status: 400 });
       }
 
+      // Sanitize file name to prevent Path Traversal
+      const sanitizedFileName = file.name.replace(/^.*[\\\/]/, '').replace(/[^a-zA-Z0-9.-]/g, '_');
+
       const buffer = Buffer.from(await file.arrayBuffer());
-      const mimeType = file.type || "application/octet-stream";
+
+      // Securely infer MIME type to prevent Content-Type spoofing / Stored XSS
+      let mimeType = "application/octet-stream";
+      if (sanitizedFileName.toLowerCase().endsWith(".png")) {
+        mimeType = "image/png";
+      } else if (sanitizedFileName.toLowerCase().endsWith(".jpg") || sanitizedFileName.toLowerCase().endsWith(".jpeg")) {
+        mimeType = "image/jpeg";
+      } else if (sanitizedFileName.toLowerCase().endsWith(".webp")) {
+        mimeType = "image/webp";
+      }
       
       try {
-        const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
+        const fileIdRes = await uploadToR2(sanitizedFileName, mimeType, buffer);
         imageId = fileIdRes || undefined;
       } catch (e) {
         console.error(e);

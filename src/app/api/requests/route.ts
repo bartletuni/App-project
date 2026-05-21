@@ -76,18 +76,23 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Sanitize file name to prevent Path Traversal
+    const sanitizedFileName = file.name.replace(/^.*[\\\/]/, '').replace(/[^a-zA-Z0-9.-]/g, '_');
+
     // Convert file to Buffer and Upload to R2
     const buffer = Buffer.from(await file.arrayBuffer());
     let fileId: string | undefined;
 
     try {
-      let mimeType = file.type || "application/sla";
-      if (file.name.toLowerCase().endsWith(".zip")) {
+      // Securely infer MIME type to prevent Content-Type spoofing / Stored XSS
+      let mimeType = "application/octet-stream";
+      if (sanitizedFileName.toLowerCase().endsWith(".zip")) {
         mimeType = "application/zip";
-      } else if (file.name.toLowerCase().endsWith(".stl") && !file.type) {
-        mimeType = "application/sla"; // fallback for stl if no type
+      } else if (sanitizedFileName.toLowerCase().endsWith(".stl")) {
+        mimeType = "application/sla";
       }
-      const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
+
+      const fileIdRes = await uploadToR2(sanitizedFileName, mimeType, buffer);
       fileId = fileIdRes || undefined;
     } catch (e) {
       console.error(e);
@@ -104,7 +109,7 @@ export async function POST(req: NextRequest) {
         userId,
         phoneNumberId: phoneNumberRecord.id,
         fileId,
-        fileName: file.name,
+        fileName: sanitizedFileName,
         quantity,
         material,
         notes,
@@ -120,11 +125,11 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: 'TakomoCo <onboarding@resend.dev>',
           to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-          subject: `New Request: ${file.name}`,
+          subject: `New Request: ${sanitizedFileName}`,
           html: NewRequestEmailHTML({
             customerName: session.user?.name || "Customer",
             customerEmail: session.user?.email || "N/A",
-            fileName: file.name,
+            fileName: sanitizedFileName,
             quantity,
             material: material || "Not specified",
             dateNeeded: format(dateNeeded, "PPP"),
