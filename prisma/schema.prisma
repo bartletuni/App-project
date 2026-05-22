@@ -20,6 +20,9 @@ model User {
 
   phoneNumbers PhoneNumber[]
   requests     PartRequest[]
+
+  // ⚡ Bolt: Index createdAt for faster sorting in queries (e.g., admin users list)
+  @@index([createdAt])
 }
 
 model PhoneNumber {
@@ -30,6 +33,9 @@ model PhoneNumber {
   createdAt DateTime @default(now())
 
   requests  PartRequest[]
+
+  // ⚡ Bolt: Index foreign key to prevent full table scans during relation lookups
+  @@index([userId])
 }
 
 model Material {
@@ -57,4 +63,10 @@ model PartRequest {
   trackingNumber String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  // ⚡ Bolt: Index foreign keys to prevent full table scans during relation lookups
+  @@index([userId])
+  @@index([phoneNumberId])
+  // ⚡ Bolt: Index createdAt for faster sorting in queries (e.g., fetching user requests)
+  @@index([createdAt])
 }
