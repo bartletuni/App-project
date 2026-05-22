@@ -32,7 +32,19 @@ export async function PATCH(
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
-      const mimeType = file.type || "application/octet-stream";
+
+      // Prevent Content-Type Spoofing by inferring strictly from extension
+      let mimeType = "application/octet-stream";
+      const fileNameLower = file.name.toLowerCase();
+      if (fileNameLower.endsWith(".png")) {
+        mimeType = "image/png";
+      } else if (fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg")) {
+        mimeType = "image/jpeg";
+      } else if (fileNameLower.endsWith(".webp")) {
+        mimeType = "image/webp";
+      } else if (fileNameLower.endsWith(".gif")) {
+        mimeType = "image/gif";
+      }
       
       try {
         const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
