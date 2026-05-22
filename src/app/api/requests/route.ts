@@ -81,12 +81,14 @@ export async function POST(req: NextRequest) {
     let fileId: string | undefined;
 
     try {
-      let mimeType = file.type || "application/sla";
+      // Prevent Content-Type Spoofing by inferring strictly from extension
+      let mimeType = "application/octet-stream";
       if (file.name.toLowerCase().endsWith(".zip")) {
         mimeType = "application/zip";
-      } else if (file.name.toLowerCase().endsWith(".stl") && !file.type) {
-        mimeType = "application/sla"; // fallback for stl if no type
+      } else if (file.name.toLowerCase().endsWith(".stl")) {
+        mimeType = "application/sla";
       }
+
       const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
       fileId = fileIdRes || undefined;
     } catch (e) {
