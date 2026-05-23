@@ -9,3 +9,7 @@
 ## 2024-05-15 - [Accessible Icon-Only Buttons]
 **Learning:** Icon-only modal close buttons without `aria-label` or focus styles are inaccessible to screen readers and difficult to navigate for keyboard users.
 **Action:** Always add an explicit `aria-label`, a `title` tooltip, and a `focus-visible:ring-2` focus indicator state with a subtle hover background to icon-only buttons to ensure they are fully accessible and discoverable.
+
+## 2024-05-16 - [Keyboard Navigable Hidden Containers]
+**Learning:** Container actions that become visible on hover (e.g., using `opacity-0 group-hover:opacity-100` in Tailwind CSS) remain invisible to keyboard users who tab to them because they lack a focus state trigger for the container.
+**Action:** When implementing keyboard focus for visually hidden element containers, always include `focus-within:opacity-100` on the parent container so its elements become visible when a user navigates to them via keyboard. Additionally, ensure the contained actions have visible focus indicators (`focus-visible:ring-*`).
