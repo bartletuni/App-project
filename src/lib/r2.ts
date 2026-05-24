@@ -24,7 +24,32 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
     throw new Error("Missing Cloudflare R2 credentials in environment variables.");
   }
 
-  const objectKey = `${Date.now()}-${fileName.replace(/\s+/g, "_")}`;
+  // Sanitize filename: replace non-alphanumeric, dot, dash, underscore with underscore
+  let safeFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  if (!safeFileName || safeFileName === "" || safeFileName.replace(/_/g, "") === "") {
+    safeFileName = "unnamed_file";
+  }
+
+  // Infer safe MIME type from extension instead of trusting user input
+  const parts = safeFileName.split('.');
+  const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : "";
+  let safeMimeType = "application/octet-stream";
+
+  if (ext === "zip") {
+    safeMimeType = "application/zip";
+  } else if (ext === "stl") {
+    safeMimeType = "application/sla";
+  } else if (ext === "png") {
+    safeMimeType = "image/png";
+  } else if (ext === "jpg" || ext === "jpeg") {
+    safeMimeType = "image/jpeg";
+  } else if (ext === "webp") {
+    safeMimeType = "image/webp";
+  } else if (ext === "gif") {
+    safeMimeType = "image/gif";
+  }
+
+  const objectKey = `${Date.now()}-${safeFileName}`;
 
   try {
     await s3Client.send(
@@ -32,7 +57,7 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
         Bucket: bucketName,
         Key: objectKey,
         Body: fileBuffer,
-        ContentType: mimeType,
+        ContentType: safeMimeType,
       })
     );
 
