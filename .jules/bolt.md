@@ -5,3 +5,7 @@
 ## 2024-05-14 - Admin Request Reports Filtering Performance Bottleneck (Timezone Edge Case)
 **Learning:** Initially filtering by pushing `new Date(YYYY-MM-DD)` to Prisma was shifting the local time string into an exact UTC timestamp for Prisma (`YYYY-MM-DDT00:00:00.000Z`). For a tool querying by logical day, this shifted boundary meant requests submitted around midnight in the local timezone might fall into the adjacent day incorrectly.
 **Action:** When migrating client-side date logic to the backend, ensure the parsing explicitly accounts for or matches the expected timezone offset behavior.
+
+## 2026-05-24 - Unnecessary Relation Joins for Client Data
+**Learning:** The `/api/requests` endpoint was joining `user` and `phoneNumber` tables using Prisma's `include` statement for normal users. However, the frontend dashboard (`/dashboard`) was not consuming this nested relation data. This resulted in unnecessary database operations and larger network payload sizes (over-fetching).
+**Action:** Always verify exactly what data the frontend component consumes. Remove unnecessary `include` and `select` statements in API routes to optimize database query performance and reduce JSON payload size.

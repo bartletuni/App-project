@@ -189,20 +189,14 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Ensure normal users can ONLY see their own requests
+      // ⚡ Bolt Performance Optimization:
+      // Removed unnecessary `include` for `user` and `phoneNumber` relations.
+      // The user dashboard does not display this data, so skipping these joins
+      // saves database cycles and reduces the JSON payload size.
       requests = await prisma.partRequest.findMany({
         where: {
           userId,
           ...dateFilter,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            }
-          },
-          phoneNumber: true,
         },
         orderBy: { createdAt: 'desc' }
       });
