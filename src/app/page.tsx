@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Layers, Scan, Zap, Shield, CheckCircle2 } from "lucide-react";
 
 export default function LandingPage() {
@@ -9,9 +10,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-lg flex items-center justify-center font-bold shadow-sm">
-                T
-              </div>
+              <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
               <span className="font-bold text-xl text-gray-900 tracking-tight">TakomoCo</span>
             </div>
             <div className="flex items-center gap-6">
@@ -117,7 +116,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-white">Maximum Build Volume</h4>
-                    <p className="text-gray-400 mt-1">220mm x 220mm x 220mm space for dense, robust components.</p>
+                    <p className="text-gray-400 mt-1">256mm x 256mm x 256mm space for dense, robust components.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -126,7 +125,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-white">Advanced Thermal Capacity</h4>
-                    <p className="text-gray-400 mt-1">Optimized for specialized materials requiring up to 280°C extrusion temperature.</p>
+                    <p className="text-gray-400 mt-1">Optimized for specialized materials requiring up to 320°C extrusion temperature.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -191,9 +190,7 @@ export default function LandingPage() {
 
           <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 bg-indigo-600 text-white rounded flex items-center justify-center font-bold text-xs">
-                T
-              </div>
+              <Image src="/logo.png" alt="TakomoCo Logo" width={24} height={24} className="rounded" />
               <span className="font-semibold text-gray-900">TakomoCo</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center">
