@@ -89,6 +89,9 @@ export default function AdminUsersPage() {
                <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Materials
                </Link>
+               <Link href="/admin/add-request" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Add Request
+               </Link>
                <Link href="/admin/reports" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Reports
                </Link>
