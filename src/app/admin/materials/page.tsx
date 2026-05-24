@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Plus, Trash2, Edit2, Check, X, Package } from "lucide-react";
 
 export default function AdminMaterialsPage() {
@@ -130,9 +131,7 @@ export default function AdminMaterialsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-lg flex items-center justify-center font-bold shadow-sm">
-                T
-              </div>
+              <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
               <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
             </div>
             <div className="flex items-center gap-6">

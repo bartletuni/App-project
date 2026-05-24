@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Beaker, Zap } from "lucide-react";
 
 export default function MaterialsPage() {
@@ -38,9 +39,7 @@ export default function MaterialsPage() {
               Back to Home
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-lg flex items-center justify-center font-bold shadow-sm">
-                T
-              </div>
+              <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
               <span className="font-bold text-xl text-gray-900 tracking-tight">TakomoCo</span>
             </div>
             <Link 
