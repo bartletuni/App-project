@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     const material = formData.get("material") as string | null;
     const dateNeededStr = formData.get("dateNeeded") as string | null;
     let phoneNumberString = formData.get("phoneNumber") as string | null;
+    const requestedUserId = formData.get("userId") as string | null;
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
@@ -61,16 +62,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Lead time must be at least 5 days" }, { status: 400 });
     }
 
+    // Handle Target User
+    const isAdmin = (session.user as any).isAdmin;
+    let targetUserId = (session.user as any).id;
+    let targetUserEmail = session.user?.email || "N/A";
+    let targetUserName = session.user?.name || "Customer";
+
+    if (isAdmin && requestedUserId) {
+      const requestedUser = await prisma.user.findUnique({
+        where: { id: requestedUserId },
+        select: { id: true, email: true, name: true }
+      });
+      if (requestedUser) {
+        targetUserId = requestedUser.id;
+        targetUserEmail = requestedUser.email;
+        targetUserName = requestedUser.name || "Customer";
+      }
+    }
+
     // Handle Phone Number
-    const userId = (session.user as any).id;
     let phoneNumberRecord = await prisma.phoneNumber.findFirst({
-      where: { userId: userId, number: phoneNumberString }
+      where: { userId: targetUserId, number: phoneNumberString }
     });
 
     if (!phoneNumberRecord) {
       phoneNumberRecord = await prisma.phoneNumber.create({
         data: {
-          userId,
+          userId: targetUserId,
           number: phoneNumberString
         }
       });
@@ -101,7 +119,7 @@ export async function POST(req: NextRequest) {
     // Create Part Request
     const partRequest = await prisma.partRequest.create({
       data: {
-        userId,
+        userId: targetUserId,
         phoneNumberId: phoneNumberRecord.id,
         fileId,
         fileName: file.name,
@@ -122,8 +140,8 @@ export async function POST(req: NextRequest) {
           to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
           subject: `New Request: ${file.name}`,
           html: NewRequestEmailHTML({
-            customerName: session.user?.name || "Customer",
-            customerEmail: session.user?.email || "N/A",
+            customerName: targetUserName,
+            customerEmail: targetUserEmail,
             fileName: file.name,
             quantity,
             material: material || "Not specified",
