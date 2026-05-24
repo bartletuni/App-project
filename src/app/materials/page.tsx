@@ -31,11 +31,11 @@ export default function MaterialsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Materials library navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-semibold text-sm">
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               Back to Home
             </Link>
             <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export default function MaterialsPage() {
 
         {materials.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-16 text-center max-w-2xl mx-auto">
-            <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" aria-hidden="true" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No materials listed yet</h3>
             <p className="text-gray-500">Check back later as we update our comprehensive material library.</p>
           </div>
@@ -97,7 +97,7 @@ export default function MaterialsPage() {
                       href={`/dashboard?material=${encodeURIComponent(m.name)}`}
                       className="w-full inline-flex justify-center items-center gap-2 bg-gray-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all"
                     >
-                      <Zap className="w-4 h-4" />
+                      <Zap className="w-4 h-4" aria-hidden="true" />
                       Build With This Material
                     </Link>
                   </div>

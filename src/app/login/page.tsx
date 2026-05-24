@@ -109,11 +109,12 @@ export default function Home() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
-        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <p className="text-gray-500 font-medium">Checking authentication...</p>
+        <span className="sr-only">Loading, please wait</span>
       </div>
     );
   }
@@ -121,7 +122,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-stretch bg-gray-50">
       {/* Left Column - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden">
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden" aria-hidden="true">
         {/* Decorative background shapes */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
@@ -173,7 +174,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md text-sm animate-pulse">
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md text-sm" role="alert">
               {error}
             </div>
           )}
@@ -192,6 +193,7 @@ export default function Home() {
                   onChange={(e) => setName(e.target.value)}
                   className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 text-gray-900 px-4 py-3"
                   placeholder="ACME Corp / Jane Doe"
+                  autoComplete="name"
                 />
               </div>
             )}
@@ -207,6 +209,7 @@ export default function Home() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
                 placeholder="you@company.com"
+                autoComplete="email"
               />
             </div>
 
@@ -222,6 +225,7 @@ export default function Home() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
                 placeholder="••••••••"
+                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
@@ -242,6 +246,7 @@ export default function Home() {
                         onChange={(e) => setShippingStreet(e.target.value)}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
                         placeholder="123 Main St"
+                        autoComplete="shipping street-address"
                       />
                     </div>
                     <div>
@@ -406,6 +411,7 @@ export default function Home() {
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
                     placeholder="(555) 555-5555"
+                    autoComplete="tel"
                   />
                 </div>
               </>
@@ -418,7 +424,7 @@ export default function Home() {
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

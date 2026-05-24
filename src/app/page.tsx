@@ -6,7 +6,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100" aria-label="Landing page navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-3">
@@ -30,7 +30,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0" aria-hidden="true">
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
           <div className="absolute top-48 -left-24 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-48 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
@@ -52,7 +52,7 @@ export default function LandingPage() {
               className="inline-flex justify-center items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
             >
               Start Your Project
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5" aria-hidden="true" />
             </Link>
             <Link 
               href="/materials" 
@@ -75,7 +75,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-indigo-100 hover:shadow-lg transition-all group">
               <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Layers className="w-7 h-7" />
+                <Layers className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">Additive Manufacturing</h4>
               <p className="text-gray-600 leading-relaxed">Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade materials.</p>
@@ -83,7 +83,7 @@ export default function LandingPage() {
             
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-blue-100 hover:shadow-lg transition-all group">
               <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Scan className="w-7 h-7" />
+                <Scan className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">3D Scanning & Reverse Eng.</h4>
               <p className="text-gray-600 leading-relaxed">High-fidelity scanning for intricate part reproduction, exact 1:1 copies, and robust digital archiving.</p>
@@ -91,7 +91,7 @@ export default function LandingPage() {
             
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-purple-100 hover:shadow-lg transition-all group">
               <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Zap className="w-7 h-7" />
+                <Zap className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">Rapid Prototyping</h4>
               <p className="text-gray-600 leading-relaxed">Iterative design support to dramatically accelerate your product development cycles.</p>
@@ -112,7 +112,7 @@ export default function LandingPage() {
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="mt-1 bg-white/10 p-2 rounded-lg text-indigo-300">
-                    <CheckCircle2 className="w-6 h-6" />
+                    <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-white">Maximum Build Volume</h4>
@@ -121,7 +121,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="mt-1 bg-white/10 p-2 rounded-lg text-blue-300">
-                    <CheckCircle2 className="w-6 h-6" />
+                    <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-white">Advanced Thermal Capacity</h4>
@@ -130,7 +130,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="mt-1 bg-white/10 p-2 rounded-lg text-purple-300">
-                    <CheckCircle2 className="w-6 h-6" />
+                    <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-white">Scanning Precision</h4>
@@ -143,7 +143,7 @@ export default function LandingPage() {
             {/* Differentiators */}
             <div className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-sm">
               <h3 className="text-2xl font-extrabold mb-8 text-white flex items-center gap-3">
-                <Shield className="w-7 h-7 text-indigo-400" />
+                <Shield className="w-7 h-7 text-indigo-400" aria-hidden="true" />
                 Why Choose TakomoCo?
               </h3>
               <ul className="space-y-8">
@@ -167,7 +167,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer / CTA */}
-      <footer className="bg-white py-16 border-t border-gray-100">
+      <footer className="bg-white py-16 border-t border-gray-100" aria-label="Site footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Ready to start building?</h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">

@@ -112,20 +112,20 @@ export default function SettingsPage() {
           {/* Profile Section */}
           <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-600" />
+              <User className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
             </div>
             <form onSubmit={handleProfileUpdate} className="p-6 space-y-6">
               {profileError && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{profileError}</p>
                 </div>
               )}
               
               {profileSuccess && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100">
-                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
+                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">Profile updated successfully.</p>
                 </div>
               )}
@@ -163,7 +163,7 @@ export default function SettingsPage() {
                 >
                   {profileLoading ? (
                     <>
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -180,21 +180,21 @@ export default function SettingsPage() {
           {/* Password Change Section */}
           <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-indigo-600" />
+              <Lock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
             </div>
             
             <form onSubmit={handlePasswordChange} className="p-6 space-y-6">
               {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{error}</p>
                 </div>
               )}
               
               {success && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100">
-                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
+                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{success}</p>
                 </div>
               )}
@@ -209,6 +209,7 @@ export default function SettingsPage() {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                    autoComplete="current-password"
                   />
                 </div>
                 
@@ -224,6 +225,7 @@ export default function SettingsPage() {
                     required
                     minLength={6}
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                    autoComplete="new-password"
                   />
                 </div>
 
