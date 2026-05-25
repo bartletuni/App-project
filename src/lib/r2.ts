@@ -24,7 +24,8 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
     throw new Error("Missing Cloudflare R2 credentials in environment variables.");
   }
 
-  const objectKey = `${Date.now()}-${fileName.replace(/\s+/g, "_")}`;
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_") || "unnamed_file";
+  const objectKey = `${Date.now()}-${sanitizedFileName}`;
 
   try {
     await s3Client.send(
