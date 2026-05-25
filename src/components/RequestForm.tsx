@@ -58,13 +58,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     setLoading(true);
     setError("");
 
-    if (!file) {
+    if (!file && material !== "Custom") {
       setError("Please select an STL or ZIP file.");
       setLoading(false);
       return;
     }
 
-    if (file.size > 20 * 1024 * 1024) {
+    if (file && file.size > 20 * 1024 * 1024) {
       setError("File size exceeds the 20MB limit.");
       setLoading(false);
       return;
@@ -78,7 +78,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    if (file) formData.append("file", file);
     formData.append("quantity", quantity);
     formData.append("material", material);
     formData.append("notes", notes);
@@ -132,14 +132,16 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL or .ZIP File (Required, Max File Size 20MB)</label>
+          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            .STL or .ZIP File {material !== "Custom" ? "(Required, Max File Size 20MB)" : "(Optional, Max File Size 20MB)"}
+          </label>
           <input
             id="fileUpload"
             type="file"
             accept=".stl,.zip"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
+            required={material !== "Custom"}
           />
         </div>
 

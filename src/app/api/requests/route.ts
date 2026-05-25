@@ -26,19 +26,19 @@ export async function POST(req: NextRequest) {
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
-    if (!file) {
-      return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
+    if (!file && material !== "Custom") {
+      return NextResponse.json({ error: "STL or ZIP file is required unless material is Custom" }, { status: 400 });
     }
 
-    if (typeof file === "string" || !file.name) {
+    if (file && (typeof file === "string" || !file.name)) {
       return NextResponse.json({ error: "Invalid file uploaded" }, { status: 400 });
     }
 
-    if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
+    if (file && !file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
       return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
     }
 
-    if (file.size > 20 * 1024 * 1024) {
+    if (file && file.size > 20 * 1024 * 1024) {
       return NextResponse.json({ error: "File size exceeds the 20MB limit" }, { status: 400 });
     }
 
@@ -77,25 +77,29 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert file to Buffer and Upload to R2
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let fileId: string | undefined;
+    let fileId: string | undefined = undefined;
+    let fileName: string | undefined = undefined;
 
-    try {
-      let mimeType = file.type || "application/sla";
-      if (file.name.toLowerCase().endsWith(".zip")) {
-        mimeType = "application/zip";
-      } else if (file.name.toLowerCase().endsWith(".stl") && !file.type) {
-        mimeType = "application/sla"; // fallback for stl if no type
+    if (file) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      try {
+        let mimeType = file.type || "application/sla";
+        if (file.name.toLowerCase().endsWith(".zip")) {
+          mimeType = "application/zip";
+        } else if (file.name.toLowerCase().endsWith(".stl") && !file.type) {
+          mimeType = "application/sla"; // fallback for stl if no type
+        }
+        const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
+        fileId = fileIdRes || undefined;
+        fileName = file.name;
+      } catch (e) {
+        console.error(e);
+        return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
       }
-      const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
-      fileId = fileIdRes || undefined;
-    } catch (e) {
-      console.error(e);
-      return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
-    }
 
-    if (!fileId) {
-      return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
+      if (!fileId) {
+        return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
+      }
     }
 
     // Create Part Request
@@ -103,8 +107,8 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         phoneNumberId: phoneNumberRecord.id,
-        fileId,
-        fileName: file.name,
+        fileId: fileId || "",
+        fileName: fileName || "",
         quantity,
         material,
         notes,
@@ -120,11 +124,11 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: 'TakomoCo <onboarding@resend.dev>',
           to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-          subject: `New Request: ${file.name}`,
+          subject: `New Request${fileName ? ': ' + fileName : ''}`,
           html: NewRequestEmailHTML({
             customerName: session.user?.name || "Customer",
             customerEmail: session.user?.email || "N/A",
-            fileName: file.name,
+            fileName: fileName || "N/A",
             quantity,
             material: material || "Not specified",
             dateNeeded: format(dateNeeded, "PPP"),

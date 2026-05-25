@@ -75,7 +75,7 @@ export default function GenerateReportsPage() {
           req.user?.name || "N/A",
           req.user?.email || "N/A",
           req.phoneNumber?.number || "N/A",
-          req.fileName,
+          req.fileName || "Custom Request",
           req.material || "N/A",
           req.quantity.toString(),
           req.status,

@@ -46,8 +46,8 @@ model PartRequest {
   user          User        @relation(fields: [userId], references: [id])
   phoneNumberId String
   phoneNumber   PhoneNumber @relation(fields: [phoneNumberId], references: [id])
-  fileId        String      // Google Drive file ID
-  fileName      String      // Original uploaded file name
+  fileId        String?     // Google Drive file ID
+  fileName      String?     // Original uploaded file name
   quantity      Int         @default(1)
   material      String?
   notes         String?

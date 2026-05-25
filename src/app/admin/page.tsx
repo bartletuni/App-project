@@ -374,7 +374,7 @@ function AdminDashboardContent() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">File</div>
-                          <div className="text-sm font-semibold text-gray-900 truncate" title={req.fileName}>{req.fileName}</div>
+                          <div className="text-sm font-semibold text-gray-900 truncate" title={req.fileName || "Custom Request"}>{req.fileName || "Custom Request"}</div>
                         </div>
                         <div>
                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Invoice</div>
@@ -432,7 +432,7 @@ function AdminDashboardContent() {
                           <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                          <div className="text-sm font-bold text-gray-900">{req.fileName || "Custom Request"}</div>
                           <div className="flex gap-2 mt-1">
                               {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
                               {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
@@ -553,15 +553,19 @@ function AdminDashboardContent() {
                     <div className="sm:col-span-2">
                         <dt className="text-sm font-medium text-gray-500">File</dt>
                         <dd className="mt-2 text-sm text-gray-900">
-                           <a
-                              href={`/api/download/${selectedRequest.fileId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors font-semibold"
-                           >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                              Download {selectedRequest.fileName}
-                           </a>
+                           {selectedRequest.fileId ? (
+                             <a
+                                href={`/api/download/${selectedRequest.fileId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors font-semibold"
+                             >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                Download {selectedRequest.fileName}
+                             </a>
+                           ) : (
+                             <span className="text-gray-500 italic">No file attached</span>
+                           )}
                         </dd>
                     </div>
                     {selectedRequest.notes && (

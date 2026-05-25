@@ -115,7 +115,7 @@ export default function DashboardPage() {
                       {requests.map((req) => (
                         <div key={req.id} className="p-4 space-y-3 hover:bg-gray-50 transition-colors">
                           <div className="flex justify-between items-start">
-                            <div className="text-sm font-bold text-gray-900 truncate pr-2">{req.fileName}</div>
+                            <div className="text-sm font-bold text-gray-900 truncate pr-2">{req.fileName || "Custom Request"}</div>
                             <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                               req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
                               req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                         {requests.map((req) => (
                           <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {req.fileName}
+                              {req.fileName || "Custom Request"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {req.quantity}
