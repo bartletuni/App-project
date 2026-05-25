@@ -199,3 +199,145 @@ export const StatusUpdateEmailHTML = (data: {
 </html>
 `;
 
+export const NewUserAdminNotificationEmailHTML = (data: {
+  name: string;
+  email: string;
+  phone: string;
+  shippingAddress: string;
+  billingAddress: string;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
+    .content { padding: 20px; }
+    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
+    .field { margin-bottom: 15px; }
+    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
+    .value { font-size: 16px; color: #1a202c; }
+    .address-box { background-color: #f7fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>New User Registered</h1>
+    </div>
+    <div class="content">
+      <p>A new user account has been registered on the TakomoCo platform.</p>
+      
+      <div class="field">
+        <div class="label">Full Name</div>
+        <div class="value">${escapeHtml(data.name)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Email Address</div>
+        <div class="value">${escapeHtml(data.email)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Phone Number</div>
+        <div class="value">${escapeHtml(data.phone)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Shipping Address</div>
+        <div class="address-box">${escapeHtml(data.shippingAddress)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Billing Address</div>
+        <div class="address-box">${escapeHtml(data.billingAddress)}</div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <a href="${process.env.NEXTAUTH_URL}/admin/users" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+          Manage Users in Admin Console
+        </a>
+      </div>
+    </div>
+    <div class="footer">
+      This is an automated notification from your TakomoCo application.
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+export const WelcomeUserEmailHTML = (data: {
+  name: string;
+  email: string;
+  phone: string;
+  shippingAddress: string;
+  billingAddress: string;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
+    .content { padding: 20px; }
+    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
+    .field { margin-bottom: 15px; }
+    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
+    .value { font-size: 16px; color: #1a202c; }
+    .address-box { background-color: #f7fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome to TakomoCo!</h1>
+    </div>
+    <div class="content">
+      <p>Hello ${escapeHtml(data.name)},</p>
+      <p>Your account has been successfully created. Here is a summary of the registration information you provided:</p>
+      
+      <div class="field">
+        <div class="label">Full Name</div>
+        <div class="value">${escapeHtml(data.name)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Email Address</div>
+        <div class="value">${escapeHtml(data.email)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Phone Number</div>
+        <div class="value">${escapeHtml(data.phone)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Shipping Address</div>
+        <div class="address-box">${escapeHtml(data.shippingAddress)}</div>
+      </div>
+
+      <div class="field">
+        <div class="label">Billing Address</div>
+        <div class="address-box">${escapeHtml(data.billingAddress)}</div>
+      </div>
+
+      <p>You can now sign in to your dashboard to submit part requests, track your existing orders, and manage invoices.</p>
+
+      <div style="margin-top: 30px;">
+        <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+          Go to Dashboard
+        </a>
+      </div>
+    </div>
+    <div class="footer">
+      This is an automated notification from your TakomoCo application.
+    </div>
+  </div>
+</body>
+</html>
+`;

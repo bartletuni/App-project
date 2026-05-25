@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { Resend } from "resend";
+import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,6 +52,47 @@ export async function POST(req: NextRequest) {
         userId: user.id,
       },
     });
+
+    // Send Email Notification
+    try {
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey);
+
+        // 1. Send notification to Admin
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+          await resend.emails.send({
+            from: 'TakomoCo <onboarding@resend.dev>',
+            to: adminEmail,
+            subject: `New User Registered: ${user.name}`,
+            html: NewUserAdminNotificationEmailHTML({
+              name: user.name,
+              email: user.email,
+              phone: phone,
+              shippingAddress: user.shippingAddress || "N/A",
+              billingAddress: user.billingAddress || "N/A",
+            }),
+          });
+        }
+
+        // 2. Send welcome email to the user
+        await resend.emails.send({
+          from: 'TakomoCo <onboarding@resend.dev>',
+          to: user.email,
+          subject: 'Welcome to TakomoCo!',
+          html: WelcomeUserEmailHTML({
+            name: user.name,
+            email: user.email,
+            phone: phone,
+            shippingAddress: user.shippingAddress || "N/A",
+            billingAddress: user.billingAddress || "N/A",
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error("Failed to send registration email notifications:", emailError);
+    }
 
     return NextResponse.json({ success: true, user: { id: user.id, email: user.email } }, { status: 201 });
   } catch (error) {
