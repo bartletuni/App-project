@@ -5,3 +5,7 @@
 ## 2024-05-14 - Admin Request Reports Filtering Performance Bottleneck (Timezone Edge Case)
 **Learning:** Initially filtering by pushing `new Date(YYYY-MM-DD)` to Prisma was shifting the local time string into an exact UTC timestamp for Prisma (`YYYY-MM-DDT00:00:00.000Z`). For a tool querying by logical day, this shifted boundary meant requests submitted around midnight in the local timezone might fall into the adjacent day incorrectly.
 **Action:** When migrating client-side date logic to the backend, ensure the parsing explicitly accounts for or matches the expected timezone offset behavior.
+
+## 2024-05-15 - Missing Foreign Key Indexes in SQLite
+**Learning:** SQLite does not automatically index foreign keys or fields frequently used in sort operations (like `createdAt`). I discovered several queries (e.g., getting users, getting part requests, filtering by user) that perform full table scans or unoptimized sorts as the dataset grows.
+**Action:** Always explicitly add `@@index` annotations for foreign keys (e.g., `userId`) and commonly sorted fields (e.g., `createdAt`) in the Prisma schema when using SQLite as the provider.

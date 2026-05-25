@@ -20,6 +20,10 @@ model User {
 
   phoneNumbers PhoneNumber[]
   requests     PartRequest[]
+
+  // Performance Optimization (Bolt): Adding an index on `createdAt` significantly speeds up sorting operations,
+  // as users and reports are frequently requested in descending order of creation. This prevents full table scans.
+  @@index([createdAt])
 }
 
 model PhoneNumber {
@@ -30,6 +34,12 @@ model PhoneNumber {
   createdAt DateTime @default(now())
 
   requests  PartRequest[]
+
+  // Performance Optimization (Bolt): SQLite does not index foreign keys by default.
+  // Adding an index on `userId` improves the performance of relational queries linking numbers to users.
+  @@index([userId])
+  // Performance Optimization (Bolt): Adding an index to `createdAt` speeds up order-by queries.
+  @@index([createdAt])
 }
 
 model Material {
@@ -57,4 +67,11 @@ model PartRequest {
   trackingNumber String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  // Performance Optimization (Bolt): SQLite does not automatically index foreign keys.
+  // Indexing `userId` and `phoneNumberId` drastically improves relational query performance and filtering.
+  @@index([userId])
+  @@index([phoneNumberId])
+  // Performance Optimization (Bolt): Indexing `createdAt` improves sorting performance for lists and admin reports.
+  @@index([createdAt])
 }
