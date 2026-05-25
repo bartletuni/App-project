@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -450,6 +451,16 @@ export default function Home() {
                 ? "Don't have an account? Create one now."
                 : "Already have an account? Sign in here."}
             </button>
+          </div>
+
+          <div className="mt-6 text-center border-t border-gray-100 pt-6">
+            <Link
+              href="/materials"
+              className="text-sm text-gray-500 hover:text-indigo-600 font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></svg>
+              View Materials Library
+            </Link>
           </div>
         </div>
       </div>
