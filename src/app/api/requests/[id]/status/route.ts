@@ -28,7 +28,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     const partRequest = await prisma.partRequest.findUnique({
       where: { id },
-      include: { user: true }
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          }
+        }
+      }
     });
 
     if (!partRequest) {
