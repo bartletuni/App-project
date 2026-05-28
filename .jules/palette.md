@@ -9,3 +9,7 @@
 ## 2024-05-15 - [Accessible Icon-Only Buttons]
 **Learning:** Icon-only modal close buttons without `aria-label` or focus styles are inaccessible to screen readers and difficult to navigate for keyboard users.
 **Action:** Always add an explicit `aria-label`, a `title` tooltip, and a `focus-visible:ring-2` focus indicator state with a subtle hover background to icon-only buttons to ensure they are fully accessible and discoverable.
+
+## 2024-05-28 - [Accessible Hidden Actions]
+**Learning:** Actions visually hidden via CSS like `opacity-0 group-hover:opacity-100` are invisible to keyboard users who rely on the tab key to navigate, leading to inaccessible interfaces.
+**Action:** When hiding interactive containers on hover, ensure `focus-within:opacity-100` is included on the parent, and explicitly apply keyboard focus styles (`focus-visible:ring-2`) to the interactive elements themselves.
