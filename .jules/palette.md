@@ -12,3 +12,7 @@
 ## 2024-06-03 - Accessible Show/Hide Password Toggle
 **Learning:** Adding a show/hide password toggle significantly improves login/signup UX, but requires careful accessibility implementation. It must use a `button` with `type="button"` to avoid form submission, have a dynamic `aria-label` ("Show password" / "Hide password") based on state, and utilize padding on the input (`pr-12`) to prevent the password text from visually overlapping the absolutely positioned toggle icon.
 **Action:** When implementing password inputs, always include an accessible show/hide toggle utilizing Lucide icons (`Eye`/`EyeOff`) and dynamic `aria-label`s to reduce user friction during authentication.
+
+## 2026-05-31 - [Focus Management for Visually Hidden Element Containers]
+**Learning:** When using utility classes like `opacity-0 group-hover:opacity-100` to visually hide interactive elements until a container is hovered over, keyboard users are unable to see the focused elements unless the container also becomes visible on focus within.
+**Action:** Always ensure that when implementing hover-based visibility reveals for containers, you include `focus-within:opacity-100` on the parent, and explicitly defined focus styles (e.g. `focus-visible:ring-2`) on the interactive children to guarantee keyboard accessibility.
