@@ -305,7 +305,7 @@ export default function AdminMaterialsPage() {
                           {m.description && <span className="text-gray-500 text-sm line-clamp-1">{m.description}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                         <button
                           onClick={() => {
                             setEditingId(m.id);
@@ -313,7 +313,7 @@ export default function AdminMaterialsPage() {
                             setEditingDesc(m.description || "");
                             setEditingImage(null);
                           }}
-                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                           title="Edit material"
                           aria-label="Edit material"
                         >
@@ -321,7 +321,7 @@ export default function AdminMaterialsPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(m.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                           title="Delete material"
                           aria-label="Delete material"
                         >
