@@ -15,3 +15,6 @@
 ## 2024-06-04 - Accessible Visually Hidden Containers
 **Learning:** When using CSS to visually hide elements until they are hovered (e.g., `opacity-0 group-hover:opacity-100`), these elements remain in the tab sequence and receive focus, but are invisible, leading to a confusing experience for keyboard users.
 **Action:** Always include `focus-within:opacity-100` on the parent container alongside `group-hover:opacity-100` so that any interactive child elements become visible when receiving keyboard focus. Furthermore, explicitly ensure those interactive child elements have clear focus states (e.g., `focus-visible:ring-2`).
+## 2024-06-06 - Missing Password Visibility Toggles Cause Friction
+**Learning:** Password input fields without visibility toggles cause frustration and accessibility issues, particularly in settings pages where users must confirm complex new passwords.
+**Action:** Always include an accessible show/hide toggle (using an icon, dynamic `aria-label`, `type="button"`, and sufficient input padding like `pr-12` to prevent overlap) on all password fields.
