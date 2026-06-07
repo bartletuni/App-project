@@ -226,7 +226,9 @@ function AdminAddRequestContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="customer" className="block text-sm font-semibold text-gray-700 mb-1.5">Customer</label>
+              <label htmlFor="customer" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Select User <span className="text-red-500" aria-hidden="true">*</span>
+              </label>
               <select
                 id="customer"
                 value={selectedUserId}
@@ -245,7 +247,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">.STL or .ZIP File (Required, Max File Size 20MB)</label>
+              <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Max 20MB)</span>
+              </label>
               <input
                 id="fileUpload"
                 type="file"
@@ -257,7 +261,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">Quantity</label>
+              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Quantity <span className="text-red-500" aria-hidden="true">*</span>
+              </label>
               <input
                 id="quantity"
                 type="number"
@@ -270,7 +276,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">Date Needed (Min 5 days lead time)</label>
+              <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Min 5 days lead time)</span>
+              </label>
               <input
                 id="dateNeeded"
                 type="date"
@@ -283,7 +291,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number (Required)</label>
+              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Phone Number <span className="text-red-500" aria-hidden="true">*</span>
+              </label>
               {isAddingPhone || pastPhones.length === 0 ? (
                 <div className="flex gap-2">
                     <input
@@ -296,7 +306,7 @@ function AdminAddRequestContent() {
                         required
                     />
                     {pastPhones.length > 0 && (
-                        <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 rounded-lg transition-colors whitespace-nowrap">
+                        <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                             Cancel
                         </button>
                     )}
@@ -314,7 +324,7 @@ function AdminAddRequestContent() {
                             <option key={phone.id} value={phone.number}>{phone.number}</option>
                         ))}
                     </select>
-                    <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
+                    <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                         + Add New
                     </button>
                  </div>
@@ -322,7 +332,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">Material</label>
+              <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Material <span className="text-red-500" aria-hidden="true">*</span>
+              </label>
               <select
                 id="material"
                 value={material}
@@ -341,7 +353,9 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">Notes (Color, etc.)</label>
+              <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Notes <span className="text-gray-400 font-normal ml-1">(Color, etc.) - Optional</span>
+              </label>
               <textarea
                 id="notes"
                 value={notes}
