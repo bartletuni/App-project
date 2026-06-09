@@ -25,7 +25,16 @@ export async function POST(req: NextRequest) {
     let phoneNumberString = formData.get("phoneNumber") as string | null;
     const requestedUserId = formData.get("userId") as string | null;
 
+    // Security Enhancement: Validate quantity is within safe bounds
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
+    if (isNaN(quantity) || quantity < 1 || quantity > 10000) {
+      return NextResponse.json({ error: "Quantity must be a valid number between 1 and 10000" }, { status: 400 });
+    }
+
+    // Security Enhancement: Validate maximum length for notes to prevent abuse
+    if (notes && notes.length > 5000) {
+      return NextResponse.json({ error: "Notes cannot exceed 5000 characters" }, { status: 400 });
+    }
 
     if (!file) {
       return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
@@ -47,11 +56,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Date needed is required" }, { status: 400 });
     }
 
+    const dateNeeded = new Date(dateNeededStr);
+    if (isNaN(dateNeeded.getTime())) {
+      return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    }
+
     if (!phoneNumberString) {
       return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
     }
 
-    const dateNeeded = new Date(dateNeededStr);
+    if (phoneNumberString.length > 50) {
+        return NextResponse.json({ error: "Phone number is too long" }, { status: 400 });
+    }
+
     const minDate = addDays(new Date(), 5);
 
     // reset time part for comparison
