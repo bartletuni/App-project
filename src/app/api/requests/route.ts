@@ -27,6 +27,14 @@ export async function POST(req: NextRequest) {
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
+    if (isNaN(quantity) || quantity < 1 || quantity > 10000) {
+      return NextResponse.json({ error: "Invalid quantity provided" }, { status: 400 });
+    }
+
+    if (notes && notes.length > 2000) {
+       return NextResponse.json({ error: "Notes exceed maximum allowed length" }, { status: 400 });
+    }
+
     if (!file) {
       return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
     }
@@ -49,6 +57,10 @@ export async function POST(req: NextRequest) {
 
     if (!phoneNumberString) {
       return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
+    }
+
+    if (phoneNumberString.length > 50) {
+      return NextResponse.json({ error: "Phone number exceeds maximum length" }, { status: 400 });
     }
 
     const dateNeeded = new Date(dateNeededStr);
