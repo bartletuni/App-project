@@ -29,3 +29,7 @@
 **Vulnerability:** The application allowed negative values for the `quantity` field and unbounded string lengths for `notes` and `phoneNumber` fields, presenting both business logic flaws (e.g. requesting -10 parts) and Denial of Service (DoS) risks (e.g. sending GBs of text in a notes field).
 **Learning:** Prisma allows any integer for an `Int` field by default. Relying on frontend HTML constraints (e.g., `<input type="number" min="1">`) is insufficient as API endpoints can be directly hit. Additionally, unbounded text fields expose the database and server to exhaustion attacks.
 **Prevention:** Always validate numeric bounds explicitly at the application level before passing data to Prisma. Similarly, strictly enforce sensible maximum length limits on all user-provided strings at the API layer.
+## 2025-02-14 - Prevent Information Disclosure in Database Operations
+**Vulnerability:** Information Disclosure
+**Learning:** Returning raw database error messages (`error.message`) or error objects directly to the client in API routes can leak sensitive information such as database schemas, internal file paths, or exception details. This is particularly relevant when handling generic database exceptions or unexpected failures.
+**Prevention:** Always intercept database errors in API routes and return safe, sanitized, and generic error messages (e.g., "Failed to create resource", "Internal Server Error") to the client. Keep raw error logging strictly on the server side (e.g., `console.error`) to aid in debugging without exposing details externally.

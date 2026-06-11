@@ -76,6 +76,6 @@ export async function POST(req: Request) {
     if (error.code === 'P2002') {
         return NextResponse.json({ error: "Material already exists" }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create material: " + (error.message || "Unknown error") }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create material" }, { status: 500 });
   }
 }
