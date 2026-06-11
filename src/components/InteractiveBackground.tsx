@@ -117,17 +117,50 @@ export default function InteractiveBackground() {
           let p = particlesArray[i];
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
-          let minDistance = this.size + p.size + 3; // +3 padding to strongly discourage overlap
+          let minDistance = this.size + p.size + 15; // Increased padding to prevent overlap and maintain separation
 
           if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
-              // Strong repulsion to prevent overlapping
-              let separationX = (pdx / pDistance) * overlap * 0.5;
-              let separationY = (pdy / pDistance) * overlap * 0.5;
+              // Strong repulsion to resolve overlap and keep them separate
+              let separationX = (pdx / pDistance) * overlap * 0.85;
+              let separationY = (pdy / pDistance) * overlap * 0.85;
               this.x += separationX;
               this.y += separationY;
+
+              // Apply velocity bounce (elastic collision response) so they move away from each other
+              let rvx = this.speedX - p.speedX;
+              let rvy = this.speedY - p.speedY;
+              let nx = pdx / pDistance;
+              let ny = pdy / pDistance;
+              let velAlongNormal = rvx * nx + rvy * ny;
+
+              // Only bounce if they are moving towards each other
+              if (velAlongNormal < 0) {
+                const restitution = 0.8; // Bounciness coefficient
+                let impulse = -(1 + restitution) * velAlongNormal;
+                let impulseX = impulse * nx * 0.5;
+                let impulseY = impulse * ny * 0.5;
+                
+                this.speedX += impulseX;
+                this.speedY += impulseY;
+                p.speedX -= impulseX;
+                p.speedY -= impulseY;
+
+                // Clamp speeds to prevent runaway acceleration
+                const maxSpeed = 1.5;
+                let speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
+                if (speed > maxSpeed) {
+                  this.speedX = (this.speedX / speed) * maxSpeed;
+                  this.speedY = (this.speedY / speed) * maxSpeed;
+                }
+                let pSpeed = Math.sqrt(p.speedX * p.speedX + p.speedY * p.speedY);
+                if (pSpeed > maxSpeed) {
+                  p.speedX = (p.speedX / pSpeed) * maxSpeed;
+                  p.speedY = (p.speedY / pSpeed) * maxSpeed;
+                }
+              }
             }
           }
         }
