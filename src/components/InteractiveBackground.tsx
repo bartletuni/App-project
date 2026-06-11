@@ -79,6 +79,14 @@ export default function InteractiveBackground() {
         this.x += this.speedX;
         this.y += this.speedY;
 
+        // Slowly decay speeds back to normal if boosted by dispersion
+        const baseMaxSpeed = 0.35;
+        let speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
+        if (speed > baseMaxSpeed) {
+          this.speedX *= 0.95;
+          this.speedY *= 0.95;
+        }
+
         // Wrap around
         if (this.x < 0) this.x = canvas.width;
         if (this.x > canvas.width) this.x = 0;
@@ -117,19 +125,29 @@ export default function InteractiveBackground() {
           let p = particlesArray[i];
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
-          let minDistance = this.size + p.size + 7.5; // Reduced padding by 50% so they can congregate closer to one another
+          
+          // Check if either particle is near the mouse
+          let pdxMouse = mouseRef.current.x - p.x;
+          let pdyMouse = mouseRef.current.y - p.y;
+          let pDistanceMouse = Math.sqrt(pdxMouse * pdxMouse + pdyMouse * pdyMouse);
+          const isNearMouse = distance < 150 || pDistanceMouse < 150;
+
+          // Tight spacing when near mouse (7.5px padding), wider spacing when dispersing (20px padding)
+          let minDistance = this.size + p.size + (isNearMouse ? 7.5 : 20);
 
           if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
-              // Repulsion resolved overlap and keep them separate, increased by 2x
-              let separationX = (pdx / pDistance) * overlap * 1.275;
-              let separationY = (pdy / pDistance) * overlap * 1.275;
+              
+              // Gentle separation when near mouse to prevent jitter, strong push when dispersing
+              let separationScale = isNearMouse ? 0.35 : 0.9;
+              let separationX = (pdx / pDistance) * overlap * separationScale;
+              let separationY = (pdy / pDistance) * overlap * separationScale;
               this.x += separationX;
               this.y += separationY;
 
-              // Apply velocity bounce (elastic collision response) so they move away from each other
+              // Apply velocity bounce (elastic collision response)
               let rvx = this.speedX - p.speedX;
               let rvy = this.speedY - p.speedY;
               let nx = pdx / pDistance;
@@ -138,9 +156,10 @@ export default function InteractiveBackground() {
 
               // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
-                const restitution = 0.8; // Bounciness coefficient
-                // Impulse force doubled (increased by factor of 2)
-                let impulse = -(1 + restitution) * velAlongNormal * 1.5;
+                const restitution = 0.5; // Soft bounciness
+                // Gentle impulse near mouse, strong impulse when dispersing to push them apart
+                let impulseScale = isNearMouse ? 0.15 : 1.2;
+                let impulse = -(1 + restitution) * velAlongNormal * impulseScale;
                 let impulseX = impulse * nx * 0.5;
                 let impulseY = impulse * ny * 0.5;
                 
@@ -148,6 +167,15 @@ export default function InteractiveBackground() {
                 this.speedY += impulseY;
                 p.speedX -= impulseX;
                 p.speedY -= impulseY;
+
+                // If dispersing, give an extra outward velocity boost to scatter them quickly
+                if (!isNearMouse) {
+                  const scatterBoost = 0.25;
+                  this.speedX += nx * scatterBoost;
+                  this.speedY += ny * scatterBoost;
+                  p.speedX -= nx * scatterBoost;
+                  p.speedY -= ny * scatterBoost;
+                }
 
                 // Clamp speeds to prevent runaway acceleration
                 const maxSpeed = 1.5;
