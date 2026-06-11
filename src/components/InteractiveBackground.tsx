@@ -130,18 +130,23 @@ export default function InteractiveBackground() {
           let pdxMouse = mouseRef.current.x - p.x;
           let pdyMouse = mouseRef.current.y - p.y;
           let pDistanceMouse = Math.sqrt(pdxMouse * pdxMouse + pdyMouse * pdyMouse);
-          const isNearMouse = distance < 150 || pDistanceMouse < 150;
+          
+          // Smoothly interpolate mouse influence from 1.0 (fully near, <100px) to 0.0 (fully far, >250px)
+          let influenceThis = Math.max(0, Math.min(1, (250 - distance) / 150));
+          let influenceP = Math.max(0, Math.min(1, (250 - pDistanceMouse) / 150));
+          let influence = Math.max(influenceThis, influenceP);
 
-          // Tight spacing when near mouse (7.5px padding), wider spacing when dispersing (20px padding)
-          let minDistance = this.size + p.size + (isNearMouse ? 7.5 : 20);
+          // Smoothly transition spacing: 7.5px padding when near, 20px padding when far
+          let padding = 20 - (12.5 * influence);
+          let minDistance = this.size + p.size + padding;
 
           if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
               
-              // Gentle separation when near mouse to prevent jitter, moderate push when dispersing
-              let separationScale = isNearMouse ? 0.35 : 0.55;
+              // Smoothly transition separation force: gentle near mouse (0.35), moderate when dispersing (0.55)
+              let separationScale = 0.55 - (0.20 * influence);
               let separationX = (pdx / pDistance) * overlap * separationScale;
               let separationY = (pdy / pDistance) * overlap * separationScale;
               this.x += separationX;
@@ -157,8 +162,8 @@ export default function InteractiveBackground() {
               // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
                 const restitution = 0.5; // Soft bounciness
-                // Gentle impulse near mouse, moderate impulse when dispersing to push them apart
-                let impulseScale = isNearMouse ? 0.15 : 0.6;
+                // Smoothly transition bounce force: gentle near mouse (0.15), moderate when dispersing (0.6)
+                let impulseScale = 0.60 - (0.45 * influence);
                 let impulse = -(1 + restitution) * velAlongNormal * impulseScale;
                 let impulseX = impulse * nx * 0.5;
                 let impulseY = impulse * ny * 0.5;
@@ -168,9 +173,9 @@ export default function InteractiveBackground() {
                 p.speedX -= impulseX;
                 p.speedY -= impulseY;
 
-                // If dispersing, give a gentle outward velocity boost to scatter them smoothly
-                if (!isNearMouse) {
-                  const scatterBoost = 0.08;
+                // Smoothly transition outward velocity boost based on mouse distance
+                let scatterBoost = 0.08 * (1 - influence);
+                if (scatterBoost > 0) {
                   this.speedX += nx * scatterBoost;
                   this.speedY += ny * scatterBoost;
                   p.speedX -= nx * scatterBoost;
