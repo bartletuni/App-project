@@ -97,11 +97,11 @@ export default function InteractiveBackground() {
             let force = (maxDistance - distance) / maxDistance;
 
             // Reduced attraction for smoother organizing, scaled by distance to prevent jitter
-            let moveSpeed = force * this.density * 0.1;
+            let moveSpeed = force * this.density * 0.05;
 
             // Prevent overshooting and spazzing when exactly at the mouse
             if (moveSpeed > distance) {
-                moveSpeed = distance * 0.1;
+                moveSpeed = distance * 0.05;
             }
 
             let directionX = forceDirectionX * moveSpeed;
@@ -117,15 +117,15 @@ export default function InteractiveBackground() {
           let p = particlesArray[i];
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
-          let minDistance = this.size + p.size + 1; // +1 padding
+          let minDistance = this.size + p.size + 3; // +3 padding to strongly discourage overlap
 
           if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
-              // Repel smoothly
-              let separationX = (pdx / pDistance) * overlap * 0.1;
-              let separationY = (pdy / pDistance) * overlap * 0.1;
+              // Strong repulsion to prevent overlapping
+              let separationX = (pdx / pDistance) * overlap * 0.5;
+              let separationY = (pdy / pDistance) * overlap * 0.5;
               this.x += separationX;
               this.y += separationY;
             }
