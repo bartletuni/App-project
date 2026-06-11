@@ -115,6 +115,7 @@ export default function InteractiveBackground() {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
+        e.preventDefault();
         const touch = e.touches[0];
         setMousePosition({ x: touch.clientX, y: touch.clientY });
         mouseRef.current.x = touch.clientX;
@@ -133,7 +134,7 @@ export default function InteractiveBackground() {
     window.addEventListener("mousemove", updateMousePosition);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd);
     window.addEventListener("touchcancel", handleTouchEnd);
 
