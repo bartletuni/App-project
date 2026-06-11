@@ -20,8 +20,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Password strength validation (consistent with change-password route)
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters and include uppercase, lowercase, numbers, and special characters" },
+        { status: 400 }
+      );
     }
 
     const existingUser = await prisma.user.findUnique({
