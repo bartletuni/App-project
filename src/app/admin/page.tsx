@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader, Search, RefreshCw, X, Download, Shield, Eye, Trash2 } from "lucide-react";
 
 function AdminDashboardContent() {
   const { data: session, status } = useSession();
@@ -211,97 +210,79 @@ function AdminDashboardContent() {
     return matchesUser && matchesInvoice && matchesStatus && matchesDate;
   });
 
-  const getStatusBadge = (statusName: string) => {
-    const normalizedStatus = statusName.toUpperCase();
-    const presets: Record<string, string> = {
-      PENDING: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-      ACTIVE: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-      COMPLETED: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-      "NEEDS REVIEW": "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-      CANCELLED: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
-      SHIPPED: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
-    };
-    return presets[normalizedStatus] || "bg-slate-800 text-slate-400 border border-slate-700";
-  };
-
   if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-indigo-400 font-mono text-sm tracking-wider animate-pulse">
-        <Loader className="animate-spin h-8 w-8 mb-4" />
-        LOADING SYSTEM METRICS DATABASE...
-      </div>
-    );
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative z-10">
-      <nav className="backdrop-blur-md bg-slate-950/70 border-b border-slate-900 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-3">
-               <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm border border-white/10" />
-               <span className="font-bold text-xl text-white tracking-tight bg-gradient-to-r from-slate-100 to-slate-400 bg-clip-text text-transparent">Admin Console</span>
+            <div className="flex items-center gap-4">
+               <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
+               <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
             </div>
             <div className="flex items-center gap-6">
-               <Link href="/admin" className="text-sm font-bold text-indigo-400 transition-colors">
+               <Link href="/admin" className="text-sm font-bold text-indigo-600 transition-colors">
                  Requests
                </Link>
-               <Link href="/admin/users" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+               <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Users
                </Link>
-               <Link href="/admin/materials" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+               <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Materials
                </Link>
-               <Link href="/admin/add-request" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+               <Link href="/admin/add-request" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
                  Add Request
                </Link>
-               <Link href="/admin/reports" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                 Reports
+               <Link href="/admin/reports" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
+                 Generate Reports
                </Link>
-               <Link href="/dashboard" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
-                 Dashboard
+               <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                 Back to Dashboard
                </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
-        <div className="flex justify-between items-end mb-8 border-b border-slate-900 pb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div className="flex justify-between items-end mb-8">
             <div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight">System Telemetry Database</h1>
-              <p className="text-slate-400 mt-1 text-sm">Review, index, and process all user geometries and prints.</p>
+                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">All System Requests</h1>
+               <p className="text-gray-500 mt-1">Manage, update, and review all user submissions.</p>
             </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Filter by Client</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filter by User</label>
                 <input
                     type="text"
                     value={filterUser}
                     onChange={(e) => setFilterUser(e.target.value)}
                     placeholder="Name or Email"
-                    className="w-full border border-slate-850 rounded-xl px-4 py-2.5 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white placeholder-slate-600"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Invoice Number</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Invoice Number</label>
                 <input
                     type="text"
                     value={filterInvoice}
                     onChange={(e) => setFilterInvoice(e.target.value)}
                     placeholder="Search Invoice #"
-                    className="w-full border border-slate-850 rounded-xl px-4 py-2.5 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white placeholder-slate-600"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Print Status</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full border border-slate-850 rounded-xl px-4 py-2.5 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                     <option value="ALL">All Statuses</option>
                     <option value="PENDING">PENDING</option>
@@ -314,35 +295,34 @@ function AdminDashboardContent() {
                 </select>
             </div>
             <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Submission Date</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Submission Date</label>
                 <div className="flex gap-2">
                     <input
                         type="date"
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
-                        className="w-full border border-slate-850 rounded-xl px-4 py-2.5 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     {filterDate && (
                         <button 
                             onClick={() => setFilterDate("")}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition-colors font-mono uppercase"
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
                         >
-                            Reset
+                            Clear
                         </button>
                     )}
                 </div>
             </div>
         </div>
 
-        {/* System Table Grid */}
-        <div className="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {filteredRequests.length === 0 ? (
-            <div className="p-16 text-center flex flex-col items-center">
-                <div className="w-20 h-20 bg-slate-950/60 border border-slate-850 rounded-2xl flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-slate-750" />
+            <div className="p-12 text-center flex flex-col items-center">
+                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 </div>
-                <h3 className="text-base font-bold text-slate-300">No matching print records</h3>
-                <p className="text-slate-500 text-sm mt-1">Adjust filters or search parameters to locate telemetry records.</p>
+                <h3 className="text-lg font-bold text-gray-900">No requests match filters</h3>
+                <p className="text-gray-500">Try adjusting your filters to find what you're looking for.</p>
                 {(filterUser || filterInvoice || filterStatus !== "ALL" || filterDate) && (
                     <button 
                         onClick={() => {
@@ -351,127 +331,145 @@ function AdminDashboardContent() {
                             setFilterStatus("ALL");
                             setFilterDate("");
                         }}
-                        className="mt-4 text-indigo-400 font-bold hover:text-indigo-300 text-sm"
+                        className="mt-4 text-indigo-600 font-bold hover:underline"
                     >
-                        Reset Filters
+                        Reset all filters
                     </button>
                 )}
             </div>
           ) : (
             <>
               {/* Mobile Card View (shown only on small screens) */}
-              <div className="block lg:hidden divide-y divide-slate-800/45">
-                {filteredRequests.map((req) => (
-                  <div key={req.id} className="p-5 space-y-4 hover:bg-slate-900/10 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono mb-1">Customer</div>
-                        <div className="text-sm font-bold text-slate-200">{req.user?.name || "N/A"}</div>
-                        <div className="text-xs text-slate-400">{req.user?.email || "N/A"}</div>
+              <div className="block lg:hidden">
+                <div className="divide-y divide-gray-100">
+                  {filteredRequests.map((req) => (
+                    <div key={req.id} className="p-4 space-y-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">Customer</div>
+                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs text-gray-500">{req.user?.email || "N/A"}</div>
+                        </div>
+                        <select
+                          value={req.status}
+                          onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 border ${
+                            req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                            req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                            req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
+                            req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                            req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                            req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
+                            'bg-gray-50 text-gray-800 border-gray-200'
+                          }`}
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="ACTIVE">ACTIVE</option>
+                          <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                          <option value="CANCELLED">CANCELLED</option>
+                          <option value="INVOICE SENT">INVOICE SENT</option>
+                          <option value="SHIPPED">SHIPPED</option>
+                        </select>
                       </div>
-                      <select
-                        value={req.status}
-                        onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                        className={`text-[10px] font-bold rounded-full px-2.5 py-1 focus:outline-none focus:border-indigo-500 border bg-slate-950 text-white cursor-pointer ${getStatusBadge(req.status)}`}
-                      >
-                        <option value="PENDING">PENDING</option>
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                        <option value="COMPLETED">COMPLETED</option>
-                        <option value="CANCELLED">CANCELLED</option>
-                        <option value="INVOICE SENT">INVOICE SENT</option>
-                        <option value="SHIPPED">SHIPPED</option>
-                      </select>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-xs font-mono text-slate-400">
-                      <div>
-                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">File Name</div>
-                        <div className="text-sm font-semibold text-slate-200 truncate" title={req.fileName}>{req.fileName}</div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">File</div>
+                          <div className="text-sm font-semibold text-gray-900 truncate" title={req.fileName}>{req.fileName}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Invoice</div>
+                          <div className="text-sm font-bold text-indigo-700">
+                            {req.invoiceNumber ? `#${req.invoiceNumber}` : <span className="text-gray-300 font-normal italic text-xs">Pending</span>}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Invoice</div>
-                        <div className="text-sm font-bold text-indigo-400">
-                          {req.invoiceNumber ? `#${req.invoiceNumber}` : <span className="text-slate-600 font-normal italic text-xs">Unbilled</span>}
+
+                      <div className="flex justify-between items-center pt-2">
+                        <div className="text-xs text-gray-500">
+                          <span className="font-semibold text-gray-900">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openModal(req)}
+                            className="text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDelete(req.id)}
+                            className="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex justify-between items-center pt-3 border-t border-slate-800/40">
-                      <div className="text-xs text-slate-400 font-mono">
-                        <span className="font-semibold text-slate-500">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openModal(req)}
-                          className="text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg text-xs font-bold font-mono uppercase"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => handleDelete(req.id)}
-                          className="text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg text-xs font-bold font-mono uppercase"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               {/* Desktop Table View (hidden on mobile) */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-800/80">
-                  <caption className="sr-only">Admin requests database</caption>
-                  <thead className="bg-slate-900/10">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <caption className="sr-only">Admin requests table</caption>
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">User / Contact</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">File & Parameters</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Quantity</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Dates</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Financial Log</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Status</th>
-                      <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Operations</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/40">
+                  <tbody className="bg-white divide-y divide-gray-100">
                     {filteredRequests.map((req) => (
-                      <tr key={req.id} className="hover:bg-slate-900/10 transition-colors">
+                      <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono mb-1">Customer</div>
-                          <div className="text-sm font-bold text-slate-200">{req.user?.name || "N/A"}</div>
-                          <div className="text-xs font-mono text-slate-400 mt-0.5">{req.user?.email || "N/A"}</div>
-                          <div className="text-xs font-mono text-slate-550">{req.phoneNumber?.number || "N/A"}</div>
+                          <div className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">Customer</div>
+                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs font-medium text-gray-500">{req.user?.email || "N/A"}</div>
+                          <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-slate-200">{req.fileName}</div>
-                          <div className="flex gap-2 mt-1.5">
-                              {req.material && <span className="text-[9px] font-mono font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
-                              {req.notes && <div className="text-xs text-slate-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                          <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                          <div className="flex gap-2 mt-1">
+                              {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
+                              {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-slate-200 font-mono">{req.quantity}</div>
+                          <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
                         </td>
-                        <td className="px-6 py-4 font-mono">
-                          <div className="text-sm font-semibold text-slate-200">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">Sent: {format(new Date(req.createdAt), "MMM d")}</div>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
+                          <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
                         </td>
-                        <td className="px-6 py-4 font-mono">
+                        <td className="px-6 py-4">
                           {req.invoiceNumber ? (
-                            <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
+                            <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
                               #{req.invoiceNumber}
                             </span>
                           ) : (
-                            <span className="text-xs text-slate-600 italic">Unbilled</span>
+                            <span className="text-xs text-gray-400 italic">Pending</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <select
                               value={req.status}
                               onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer border bg-slate-950 text-white ${getStatusBadge(req.status)}`}
+                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer border ${
+                                req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                                req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                                req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
+                                req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                                req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
+                                req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
+                                'bg-gray-50 text-gray-800 border-gray-200'
+                              }`}
                           >
                               <option value="PENDING">PENDING</option>
                               <option value="ACTIVE">ACTIVE</option>
@@ -482,23 +480,20 @@ function AdminDashboardContent() {
                               <option value="SHIPPED">SHIPPED</option>
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="flex justify-end gap-3 items-center">
-                              <button
-                                  onClick={() => openModal(req)}
-                                  className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold uppercase text-xs font-mono"
-                              >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  Inspect
-                              </button>
-                              <button
-                                onClick={() => handleDelete(req.id)}
-                                className="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold uppercase text-xs font-mono"
-                              >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                  Delete
-                              </button>
-                            </div>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
+                            <button
+                                onClick={() => openModal(req)}
+                                className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                View Order
+                            </button>
+                            <button
+                              onClick={() => handleDelete(req.id)}
+                              className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            >
+                              Delete
+                            </button>
                         </td>
                       </tr>
                     ))}
@@ -510,126 +505,125 @@ function AdminDashboardContent() {
         </div>
       </div>
 
-      {/* Modal - Immersive Holographic HUD */}
+      {/* Modal */}
       {isModalOpen && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
-            <div className="px-6 py-5 border-b border-slate-800/80 bg-slate-950 flex justify-between items-center sticky top-0 z-10">
-                <h3 id="modal-title" className="text-lg leading-6 font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-indigo-400" />
-                  Telemetry Inspector
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+                <h3 id="modal-title" className="text-xl leading-6 font-bold text-gray-900">
+                  Ticket Details
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="text-slate-400 hover:text-white hover:bg-slate-850 p-1.5 rounded-xl transition-colors focus-visible:outline-none"
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   aria-label="Close ticket details"
                   title="Close ticket details"
                 >
-                    <X className="w-5 h-5" />
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
 
             <div className="px-6 py-6 sm:p-8">
-                <dl className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+                <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Client Name</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-semibold">{selectedRequest.user?.name}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Name (Company/Personal)</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.name}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Client Email</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-mono">{selectedRequest.user?.email}</dd>
+                        <dt className="text-sm font-medium text-gray-500">User Email</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.email}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Telemetry Phone</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-mono">{selectedRequest.phoneNumber?.number}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.phoneNumber?.number}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Batch Quantity</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-mono">{selectedRequest.quantity}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Quantity</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.quantity}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Core Material</dt>
-                        <dd className="mt-1 text-sm text-indigo-400 font-bold font-mono uppercase">{selectedRequest.material || "N/A"}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Material</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.material || "N/A"}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Delivery Deadline</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-mono">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Enqueued On</dt>
-                        <dd className="mt-1 text-sm text-slate-200 font-mono">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
+                        <dt className="text-sm font-medium text-gray-500">Submitted On</dt>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">3D CAD Model Telemetry</dt>
-                        <dd className="text-sm">
+                        <dt className="text-sm font-medium text-gray-500">File</dt>
+                        <dd className="mt-2 text-sm text-gray-900">
                            <a
                               href={`/api/download/${selectedRequest.fileId}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2.5 rounded-xl transition-colors font-bold text-xs uppercase tracking-wider font-mono shadow-sm"
+                              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors font-semibold"
                            >
-                              <Download className="w-4 h-4" />
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                               Download {selectedRequest.fileName}
                            </a>
                         </dd>
                     </div>
                     {selectedRequest.notes && (
                       <div className="sm:col-span-2">
-                          <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-1.5">Technical Notes</dt>
-                          <dd className="text-sm text-slate-300 bg-slate-950/60 p-4 rounded-xl border border-slate-850 font-mono leading-relaxed">{selectedRequest.notes}</dd>
+                          <dt className="text-sm font-medium text-gray-500">Notes</dt>
+                          <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100">{selectedRequest.notes}</dd>
                       </div>
                     )}
                     <div className="sm:col-span-2">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">Invoice Allocation</dt>
-                        <dd className="flex items-center gap-2">
+                        <dt className="text-sm font-medium text-gray-500">Invoice Number</dt>
+                        <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"
                               value={invoiceInput}
                               onChange={(e) => setInvoiceInput(e.target.value)}
                               placeholder="Enter Invoice #"
-                              className="border border-slate-800 rounded-xl px-3 py-2 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white font-mono w-48"
+                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
                             />
                             <button
                               onClick={() => handleSaveInvoice(selectedRequest.id)}
                               disabled={savingInvoice || invoiceInput === selectedRequest.invoiceNumber || (!invoiceInput && !selectedRequest.invoiceNumber)}
-                              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono h-[38px]"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {savingInvoice ? "Saving..." : "Apply Invoice"}
+                              {savingInvoice ? "Saving..." : "Save Invoice"}
                             </button>
                         </dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">USPS Tracking Allocation</dt>
-                        <dd className="flex items-center gap-2">
+                        <dt className="text-sm font-medium text-gray-500">USPS Tracking Number</dt>
+                        <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"
                               value={trackingInput}
                               onChange={(e) => setTrackingInput(e.target.value)}
                               placeholder="Enter Tracking #"
-                              className="border border-slate-800 rounded-xl px-3 py-2 text-sm bg-slate-950/60 focus:outline-none focus:border-indigo-500 text-white font-mono w-48"
+                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
                             />
                             <button
                               onClick={() => handleSaveTracking(selectedRequest.id)}
                               disabled={savingTracking || trackingInput === selectedRequest.trackingNumber || (!trackingInput && !selectedRequest.trackingNumber)}
-                              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono h-[38px]"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {savingTracking ? "Saving..." : "Apply Tracking"}
+                              {savingTracking ? "Saving..." : "Save Tracking"}
                             </button>
                         </dd>
                     </div>
                 </dl>
             </div>
 
-            <div className="px-6 py-5 border-t border-slate-800/80 bg-slate-950/60">
-               <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider font-mono">Operation Overrides</h4>
+            <div className="px-6 py-5 border-t border-gray-200 bg-gray-50">
+               <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Admin Actions</h4>
                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                    <div className="flex items-center gap-3">
-                       <label htmlFor="status-select" className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Change Status:</label>
+                       <label htmlFor="status-select" className="text-sm font-medium text-gray-700">Update Status:</label>
                        <select
                             id="status-select"
                             value={selectedRequest.status}
                             onChange={(e) => handleStatusChange(selectedRequest.id, e.target.value)}
-                            className="text-xs font-bold rounded-xl px-3 py-2.5 bg-slate-900 border border-slate-800 focus:outline-none focus:border-indigo-500 text-white font-mono cursor-pointer"
+                            className="text-sm font-bold rounded-lg px-3 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer text-black"
                          >
                             <option value="PENDING">PENDING</option>
                             <option value="ACTIVE">ACTIVE</option>
@@ -643,9 +637,9 @@ function AdminDashboardContent() {
                    {selectedRequest.status !== 'CANCELLED' && (
                        <button
                          onClick={() => handleCancel(selectedRequest.id)}
-                         className="text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-4 py-2 rounded-xl transition-colors font-bold uppercase text-xs font-mono shadow-sm"
+                         className="text-red-700 bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
                        >
-                         Override & Cancel Job
+                         Cancel Request
                        </button>
                    )}
                </div>
@@ -659,12 +653,7 @@ function AdminDashboardContent() {
 
 export default function AdminDashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-indigo-400 font-mono text-sm tracking-wider animate-pulse">
-        <Loader className="animate-spin h-8 w-8 mb-4" />
-        INITIALIZING SYSTEM INTERFACE...
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
       <AdminDashboardContent />
     </Suspense>
   );

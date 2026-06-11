@@ -10,16 +10,12 @@ if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
   console.warn("Missing Cloudflare R2 credentials in environment variables.");
 }
 
-const endpointUrl = accountId.trim() 
-  ? `https://${accountId.trim()}.r2.cloudflarestorage.com` 
-  : "https://r2.dummy-endpoint.com";
-
 export const s3Client = new S3Client({
   region: "auto",
-  endpoint: endpointUrl,
+  endpoint: `https://${accountId.trim()}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: accessKeyId.trim() || "dummy-key",
-    secretAccessKey: secretAccessKey.trim() || "dummy-secret",
+    accessKeyId: accessKeyId.trim(),
+    secretAccessKey: secretAccessKey.trim(),
   },
 });
 

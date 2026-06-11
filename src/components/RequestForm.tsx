@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
-import { Upload, FileCode, Check, AlertTriangle, AlertCircle, RefreshCw, Calendar, Phone, Layers, Info } from "lucide-react";
 
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [file, setFile] = useState<File | null>(null);
@@ -18,9 +17,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
 
@@ -56,51 +53,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       });
   }, [initialMaterial]);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const droppedFiles = e.dataTransfer.files;
-    if (droppedFiles && droppedFiles.length > 0) {
-      const selectedFile = droppedFiles[0];
-      const extension = selectedFile.name.split(".").pop()?.toLowerCase();
-      if (extension === "stl" || extension === "zip") {
-        setFile(selectedFile);
-        setError("");
-      } else {
-        setError("Only .STL or .ZIP formats are supported.");
-      }
-    }
-  };
-
-  const selectFileManually = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setError("");
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     if (!file) {
-      setError("Please select or drop an STL or ZIP file.");
+      setError("Please select an STL or ZIP file.");
       setLoading(false);
       return;
     }
@@ -153,32 +112,26 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   };
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl relative">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
-      <h2 className="text-xl font-bold mb-6 text-white border-b border-slate-800/80 pb-4 flex items-center gap-2">
-        <Layers className="w-5 h-5 text-indigo-400" />
-        New Order Console
-      </h2>
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+      <h2 className="text-xl font-bold mb-6 text-gray-900 border-b border-gray-100 pb-4">Create New Request</h2>
 
-      <div className="bg-amber-500/5 border border-amber-500/20 text-amber-300 p-4 mb-6 rounded-xl flex gap-3 items-start" role="alert">
-        <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 mb-6 rounded-xl flex gap-3 items-start" role="alert">
+        <svg className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
         <div>
-          <p className="font-semibold text-xs uppercase tracking-wider font-mono">Cancellation Protocol</p>
-          <p className="text-sm mt-1 text-slate-400">Orders can only be cancelled within <strong className="text-amber-400">30 minutes</strong> of placing the request.</p>
+          <p className="font-semibold text-sm">Cancellation Policy</p>
+          <p className="text-sm mt-1 text-amber-700">Orders can only be cancelled within <strong>30 minutes</strong> of placing the request.</p>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-sm flex gap-2.5 items-center" role="alert">
-          <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex gap-2 items-center" role="alert">
+          <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Holographic Build Plate Upload Zone */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">
             .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Max 20MB)</span>
           </label>
@@ -189,98 +142,25 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
-=======
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Holographic Build Plate (Model STL / ZIP)</label>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileInputChange} 
-            accept=".stl,.zip" 
-            className="hidden" 
->>>>>>> Stashed changes
           />
-          
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={selectFileManually}
-            className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all overflow-hidden flex flex-col items-center justify-center min-h-[160px] ${
-              isDragging 
-                ? "border-cyan-500 bg-cyan-500/5 scale-[0.99]" 
-                : file 
-                  ? "border-emerald-500/50 bg-emerald-500/5" 
-                  : "border-slate-800 hover:border-slate-700 bg-slate-950/40"
-            }`}
-          >
-            {/* Fine Grid Background inside Drag Box */}
-            <div className="absolute inset-0 build-plate-grid opacity-30 pointer-events-none" />
-
-            {/* Sweep Laser Scanning Animation on active file */}
-            {file && (
-              <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_10px_rgba(6,182,212,0.8)] animate-scan z-10" />
-            )}
-
-            {file ? (
-              <div className="relative z-20 space-y-2 animate-in fade-in zoom-in-95 duration-200">
-                <div className="mx-auto w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center">
-                  <Check className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-200 truncate max-w-[280px]">{file.name}</p>
-                  <p className="text-xs text-slate-500 font-mono mt-1">{(file.size / (1024 * 1024)).toFixed(2)} MB / READY TO SCAN</p>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg"
-                >
-                  Change File
-                </button>
-              </div>
-            ) : (
-              <div className="relative z-20 space-y-3 text-slate-400">
-                <div className="mx-auto w-10 h-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center">
-                  <Upload className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-300">Drag & drop your 3D file here</p>
-                  <p className="text-xs text-slate-500 mt-1">Supports .STL or .ZIP (Max 20MB)</p>
-                </div>
-                <button 
-                  type="button" 
-                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/30 px-3.5 py-2 rounded-lg bg-indigo-500/5 transition-all"
-                >
-                  Select File
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Quantity Field */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">
             Quantity <span className="text-red-500" aria-hidden="true">*</span>
           </label>
-=======
-          <label htmlFor="quantity" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Print Quantity</label>
->>>>>>> Stashed changes
           <input
             id="quantity"
             type="number"
             min="1"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white font-mono"
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
             required
           />
         </div>
 
-        {/* Date Field */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">
             Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Min 5 days lead time)</span>
           </label>
@@ -293,31 +173,12 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700"
             required
           />
-=======
-          <label htmlFor="dateNeeded" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date Needed (5 Days Lead Time)</label>
-          <div className="relative">
-            <input
-              id="dateNeeded"
-              type="date"
-              min={minDate}
-              value={dateNeeded}
-              onChange={(e) => setDateNeeded(e.target.value)}
-              className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white font-mono"
-              required
-            />
-          </div>
->>>>>>> Stashed changes
         </div>
 
-        {/* Phone Field */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">
             Phone Number <span className="text-red-500" aria-hidden="true">*</span>
           </label>
-=======
-          <label htmlFor="phoneNumber" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
->>>>>>> Stashed changes
           {isAddingPhone || pastPhones.length === 0 ? (
             <div className="flex gap-2">
                 <input
@@ -325,22 +186,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                     type="tel"
                     value={newPhoneNumber}
                     onChange={(e) => setNewPhoneNumber(e.target.value)}
-                    className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700"
                     placeholder="e.g., (123) 456-7890"
                     required
                 />
                 {pastPhones.length > 0 && (
-<<<<<<< Updated upstream
                     <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                         Cancel
-=======
-                    <button 
-                      type="button" 
-                      onClick={() => setIsAddingPhone(false)} 
-                      className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 rounded-xl transition-colors whitespace-nowrap"
-                    >
-                      Cancel
->>>>>>> Stashed changes
                     </button>
                 )}
             </div>
@@ -350,43 +202,29 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                     id="phoneNumber"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
                     required
                 >
                     {pastPhones.map((phone) => (
                         <option key={phone.id} value={phone.number}>{phone.number}</option>
                     ))}
                 </select>
-<<<<<<< Updated upstream
                 <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                     + Add New
-=======
-                <button 
-                  type="button" 
-                  onClick={() => setIsAddingPhone(true)} 
-                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 py-3 rounded-xl transition-colors whitespace-nowrap"
-                >
-                  + Add New
->>>>>>> Stashed changes
                 </button>
              </div>
           )}
         </div>
         
-        {/* Material Selection */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">
             Material <span className="text-red-500" aria-hidden="true">*</span>
           </label>
-=======
-          <label htmlFor="material" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Build Material</label>
->>>>>>> Stashed changes
           <select
             id="material"
             value={material}
             onChange={(e) => setMaterial(e.target.value)}
-            className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white"
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
             required
           >
             {availableMaterials.length === 0 ? (
@@ -399,37 +237,35 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           </select>
         </div>
 
-        {/* Notes Selection */}
         <div>
-<<<<<<< Updated upstream
           <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">
             Notes <span className="text-gray-400 font-normal ml-1">(Color, etc.) - Optional</span>
           </label>
-=======
-          <label htmlFor="notes" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Technical Instructions (Notes)</label>
->>>>>>> Stashed changes
           <textarea
             id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="block w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white resize-none"
-            placeholder="Color, layer height constraints, infill details, etc."
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 resize-none"
+            placeholder="Any special instructions?"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
         >
           {loading ? (
              <span className="flex items-center gap-2">
-               <RefreshCw className="w-4 h-4 animate-spin text-white" />
-               <span>Transmitting telemetry...</span>
+               <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+               <span>Submitting...</span>
                <span className="sr-only">Submitting your request, please wait</span>
              </span>
-          ) : "Submit Request to Print Queue"}
+          ) : "Submit Request"}
         </button>
       </form>
     </div>
@@ -438,7 +274,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
 export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   return (
-    <Suspense fallback={<div className="bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse h-[400px]"></div>}>
+    <Suspense fallback={<div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 animate-pulse h-96"></div>}>
       <RequestFormContent onFormSubmit={onFormSubmit} />
     </Suspense>
   );
