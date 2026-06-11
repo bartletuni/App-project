@@ -146,11 +146,14 @@ export async function POST(req: NextRequest) {
     try {
       const resendApiKey = process.env.RESEND_API_KEY;
       if (resendApiKey) {
+        // Sanitize file name to prevent Email Header Injection by removing newlines and carriage returns
+        const safeSubjectFileName = file.name.replace(/[\r\n]+/g, ' ').trim();
+
         const resend = new Resend(resendApiKey);
         await resend.emails.send({
           from: 'TakomoCo <onboarding@resend.dev>',
           to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-          subject: `New Request: ${file.name}`,
+          subject: `New Request: ${safeSubjectFileName}`,
           html: NewRequestEmailHTML({
             customerName: targetUserName,
             customerEmail: targetUserEmail,
