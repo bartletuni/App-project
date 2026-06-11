@@ -18,3 +18,7 @@
 ## 2024-06-05 - Accessible Form Requirements and Constraints
 **Learning:** Using placeholder text or inconsistent plain-text labels like "(Required)" can lead to a cluttered interface and may not be consistently read by screen readers. Conversely, failing to explicitly mark required fields or constraints (like max file sizes) causes validation frustration.
 **Action:** Always mark required fields with a standardized, visually distinct, but screen-reader-hidden asterisk (`<span className="text-red-500" aria-hidden="true">*</span>`). Constraints and optional indicators should be explicitly stated in the label text using lighter font weights (e.g., `<span className="text-gray-400 font-normal ml-1">(Optional)</span>`) to improve visual hierarchy and scannability while maintaining screen reader compatibility.
+
+## 2024-05-18 - Interactive Backgrounds / Use framer-motion / Convert to transparent layouts
+**Learning:** Hardcoded white backgrounds (`bg-white`) block global interactive background components from being visible.
+**Action:** When implementing global background effects, ensure page layouts and components use transparent or glassmorphic (`bg-white/60 backdrop-blur-xl`) styling to allow the effect to render properly without breaking contrast.

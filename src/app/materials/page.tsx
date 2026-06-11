@@ -4,6 +4,24 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Beaker, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 100 },
+  },
+};
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<any[]>([]);
@@ -23,15 +41,15 @@ export default function MaterialsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">
+      <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">
         Loading material library...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Materials library navigation">
+    <div className="min-h-screen bg-transparent font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Materials library navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-semibold text-sm">
@@ -63,17 +81,22 @@ export default function MaterialsPage() {
         </div>
 
         {materials.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-16 text-center max-w-2xl mx-auto">
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm border border-white/20 p-16 text-center max-w-2xl mx-auto">
             <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" aria-hidden="true" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No materials listed yet</h3>
             <p className="text-gray-500">Check back later as we update our comprehensive material library.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {materials.map((m) => (
-              <div key={m.id} className="bg-white rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden flex flex-col transition-all group hover:-translate-y-1">
+              <motion.div variants={itemVariants} key={m.id} className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm hover:shadow-xl border border-white/20 overflow-hidden flex flex-col transition-all group hover:-translate-y-1">
                 {m.imageId ? (
-                  <div className="h-48 w-full bg-gray-100 relative overflow-hidden border-b border-gray-100">
+                  <div className="h-48 w-full bg-gray-100/50 backdrop-blur-sm relative overflow-hidden border-b border-gray-200/50">
                     <img 
                       src={`/api/download/${m.imageId}`} 
                       alt={m.name} 
@@ -81,7 +104,7 @@ export default function MaterialsPage() {
                     />
                   </div>
                 ) : (
-                  <div className="h-16 w-full bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-100"></div>
+                  <div className="h-16 w-full bg-gradient-to-r from-gray-50/50 to-gray-100/50 backdrop-blur-sm border-b border-gray-200/50"></div>
                 )}
                 
                 <div className="p-8 flex-1 flex flex-col">
@@ -92,19 +115,19 @@ export default function MaterialsPage() {
                     <p className="text-gray-400 italic flex-1 text-sm">High performance engineering-grade material.</p>
                   )}
                   
-                  <div className="mt-8 pt-6 border-t border-gray-100">
+                  <div className="mt-8 pt-6 border-t border-gray-200/50">
                     <Link 
                       href={`/dashboard?material=${encodeURIComponent(m.name)}`}
-                      className="w-full inline-flex justify-center items-center gap-2 bg-gray-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all"
+                      className="w-full inline-flex justify-center items-center gap-2 bg-white/50 backdrop-blur-sm hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200/50 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all shadow-sm"
                     >
                       <Zap className="w-4 h-4" aria-hidden="true" />
                       Build With This Material
                     </Link>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </main>
     </div>

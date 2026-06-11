@@ -1,12 +1,32 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Layers, Scan, Zap, Shield, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 100 },
+  },
+};
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100" aria-label="Landing page navigation">
+      <nav className="fixed top-0 w-full bg-white/60 backdrop-blur-xl z-50 border-b border-gray-100/50" aria-label="Landing page navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-3">
@@ -30,23 +50,23 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0" aria-hidden="true">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-          <div className="absolute top-48 -left-24 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-48 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
+        {/* Removed static blobs since they are handled by InteractiveBackground */}
+        <motion.div
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
             Digital Design <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
               Physical Reality
             </span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto mb-10 leading-relaxed">
+          </motion.h1>
+          <motion.p variants={itemVariants} className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto mb-10 leading-relaxed">
             TakomoCo is a specialized additive manufacturing and rapid prototyping studio. We offer high-precision 3D printing and 3D scanning services for engineering and reproduction applications.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+          </motion.p>
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center gap-4">
             <Link 
               href="/login" 
               className="inline-flex justify-center items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
@@ -56,47 +76,59 @@ export default function LandingPage() {
             </Link>
             <Link 
               href="/materials" 
-              className="inline-flex justify-center items-center bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+              className="inline-flex justify-center items-center bg-white/60 backdrop-blur-md text-gray-900 border border-gray-200/50 px-8 py-4 rounded-full text-lg font-bold hover:bg-white/80 transition-all shadow-sm hover:shadow-md"
             >
               View Material Library
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Core Competencies */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-2">Capabilities</h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900">Core Competencies</h3>
-          </div>
+          <motion.div
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+          >
+            <motion.h2 variants={itemVariants} className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-2">Capabilities</motion.h2>
+            <motion.h3 variants={itemVariants} className="text-3xl md:text-4xl font-extrabold text-gray-900">Core Competencies</motion.h3>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-indigo-100 hover:shadow-lg transition-all group">
-              <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:border-indigo-200 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-indigo-100/80 backdrop-blur-sm text-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Layers className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">Additive Manufacturing</h4>
               <p className="text-gray-600 leading-relaxed">Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade materials.</p>
-            </div>
+            </motion.div>
             
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-blue-100 hover:shadow-lg transition-all group">
-              <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:border-blue-200 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-blue-100/80 backdrop-blur-sm text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Scan className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">3D Scanning & Reverse Eng.</h4>
               <p className="text-gray-600 leading-relaxed">High-fidelity scanning for intricate part reproduction, exact 1:1 copies, and robust digital archiving.</p>
-            </div>
+            </motion.div>
             
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-purple-100 hover:shadow-lg transition-all group">
-              <div className="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <motion.div variants={itemVariants} className="bg-white/60 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:border-purple-200 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-purple-100/80 backdrop-blur-sm text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Zap className="w-7 h-7" aria-hidden="true" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-3">Rapid Prototyping</h4>
               <p className="text-gray-600 leading-relaxed">Iterative design support to dramatically accelerate your product development cycles.</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -167,13 +199,19 @@ export default function LandingPage() {
       </section>
 
       {/* Footer / CTA */}
-      <footer className="bg-white py-16 border-t border-gray-100" aria-label="Site footer">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Ready to start building?</h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+      <footer className="bg-transparent py-16 border-t border-gray-200/50" aria-label="Site footer">
+        <motion.div
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={containerVariants}
+        >
+          <motion.h2 variants={itemVariants} className="text-3xl font-extrabold text-gray-900 mb-6">Ready to start building?</motion.h2>
+          <motion.p variants={itemVariants} className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Contact us today or log in to submit a request. We specialize in high-strength, chemically and impact resistant composites.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
+          </motion.p>
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
             <Link 
               href="/login" 
               className="bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-colors shadow-md"
@@ -182,13 +220,13 @@ export default function LandingPage() {
             </Link>
             <a 
               href="mailto:takomocompany@gmail.com"
-              className="bg-gray-100 text-gray-900 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-200 transition-colors"
+              className="bg-white/60 backdrop-blur-md text-gray-900 border border-gray-200/50 px-8 py-4 rounded-full text-lg font-bold hover:bg-white/80 transition-all shadow-sm hover:shadow-md"
             >
               takomocompany@gmail.com
             </a>
-          </div>
+          </motion.div>
 
-          <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+          <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
               <Image src="/logo.png" alt="TakomoCo Logo" width={24} height={24} className="rounded" />
               <span className="font-semibold text-gray-900">TakomoCo</span>
@@ -199,7 +237,7 @@ export default function LandingPage() {
               <span>© {new Date().getFullYear()} TakomoCo. All rights reserved.</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </footer>
     </div>
   );
