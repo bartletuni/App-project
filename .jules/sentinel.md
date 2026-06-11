@@ -29,3 +29,8 @@
 **Vulnerability:** The application allowed negative values for the `quantity` field and unbounded string lengths for `notes` and `phoneNumber` fields, presenting both business logic flaws (e.g. requesting -10 parts) and Denial of Service (DoS) risks (e.g. sending GBs of text in a notes field).
 **Learning:** Prisma allows any integer for an `Int` field by default. Relying on frontend HTML constraints (e.g., `<input type="number" min="1">`) is insufficient as API endpoints can be directly hit. Additionally, unbounded text fields expose the database and server to exhaustion attacks.
 **Prevention:** Always validate numeric bounds explicitly at the application level before passing data to Prisma. Similarly, strictly enforce sensible maximum length limits on all user-provided strings at the API layer.
+
+## 2024-06-11 - API Registration Rate Limiting
+**Vulnerability:** The `/api/auth/register` endpoint lacked rate limiting, allowing automated scripts to create thousands of accounts, leading to database exhaustion and potential email spam via Resend.
+**Learning:** Next.js API routes do not have built-in rate limiting and must be protected manually. In-memory maps can be used as a simple defense mechanism in the absence of a dedicated Redis cache.
+**Prevention:** Always wrap public-facing creation endpoints (like registration) with a rate-limiting utility, identifying clients by IP address or custom headers.

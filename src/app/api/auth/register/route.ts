@@ -3,9 +3,18 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.ip ?? req.headers.get("x-forwarded-for") ?? "unknown";
+    // Limit to 5 registrations per IP per 15 minutes
+    const { success } = rateLimit(ip, 5, 15 * 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const body = await req.json();
     const { name, email, password, shippingAddress, billingAddress, phone } = body;
 
