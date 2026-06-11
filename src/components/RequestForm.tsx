@@ -112,7 +112,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+    <div className="bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-sm border border-white/20">
       <h2 className="text-xl font-bold mb-6 text-gray-900 border-b border-gray-100 pb-4">Create New Request</h2>
 
       <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 mb-6 rounded-xl flex gap-3 items-start" role="alert">
@@ -274,7 +274,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
 export default function RequestForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   return (
-    <Suspense fallback={<div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 animate-pulse h-96"></div>}>
+    <Suspense fallback={<div className="bg-white/40 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-sm border border-white/10 animate-pulse h-96"></div>}>
       <RequestFormContent onFormSubmit={onFormSubmit} />
     </Suspense>
   );

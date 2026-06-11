@@ -66,12 +66,12 @@ export default function AdminUsersPage() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading users...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading users...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-transparent flex flex-col font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
@@ -110,16 +110,16 @@ export default function AdminUsersPage() {
             </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
           {users.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
                 <h3 className="text-lg font-bold text-gray-900">No users found</h3>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
+              <table className="min-w-full divide-y divide-gray-100/50">
                 <caption className="sr-only">Registered users</caption>
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50/50">
                   <tr>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
@@ -129,7 +129,7 @@ export default function AdminUsersPage() {
                     <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+                <tbody className="bg-transparent divide-y divide-gray-100/50">
                   {users.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
@@ -176,9 +176,9 @@ export default function AdminUsersPage() {
 
       {/* User Info Modal */}
       {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+          <div className="bg-white/90 backdrop-blur-xl border border-white/25 rounded-2xl shadow-xl overflow-hidden w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex justify-between items-center sticky top-0 z-10">
                 <h3 id="user-modal-title" className="text-xl leading-6 font-bold text-gray-900">
                   User Account Information
                 </h3>
@@ -231,7 +231,7 @@ export default function AdminUsersPage() {
                 </dl>
             </div>
 
-            <div className="px-6 py-5 border-t border-gray-200 bg-gray-50 text-right">
+            <div className="px-6 py-5 border-t border-gray-200/50 bg-white/40 text-right">
                 <button
                   onClick={closeModal}
                   className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors"

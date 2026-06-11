@@ -106,12 +106,12 @@ export default function GenerateReportsPage() {
   };
 
   if (status === "loading") {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-transparent flex flex-col font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
@@ -143,8 +143,8 @@ export default function GenerateReportsPage() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40">
                 <h3 className="text-xl leading-6 font-bold text-gray-900">
                   Generate Reports
                 </h3>

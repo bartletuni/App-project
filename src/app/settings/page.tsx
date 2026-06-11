@@ -105,7 +105,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-transparent py-10">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Account Settings</h1>
@@ -114,8 +114,8 @@ export default function SettingsPage() {
 
         <div className="space-y-6">
           {/* Profile Section */}
-          <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center gap-2">
+          <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
               <User className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
             </div>
@@ -182,8 +182,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Password Change Section */}
-          <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center gap-2">
+          <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
               <Lock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
             </div>

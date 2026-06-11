@@ -165,12 +165,12 @@ function AdminAddRequestContent() {
   };
 
   if (status === "loading") {
-      return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
+      return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-transparent flex flex-col font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
@@ -208,7 +208,7 @@ function AdminAddRequestContent() {
             <p className="text-gray-500 mt-1">Submit a new request on behalf of a customer.</p>
         </div>
 
-        <div className="max-w-2xl bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+        <div className="max-w-2xl bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-sm border border-white/20">
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex gap-2 items-center" role="alert">
@@ -390,7 +390,7 @@ function AdminAddRequestContent() {
 
 export default function AdminAddRequestPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
       <AdminAddRequestContent />
     </Suspense>
   );

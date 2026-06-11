@@ -211,12 +211,12 @@ function AdminDashboardContent() {
   });
 
   if (status === "loading" || loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-transparent flex flex-col font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
@@ -256,7 +256,7 @@ function AdminDashboardContent() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filter by User</label>
                 <input
@@ -315,7 +315,7 @@ function AdminDashboardContent() {
             </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
           {filteredRequests.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
@@ -412,9 +412,9 @@ function AdminDashboardContent() {
 
               {/* Desktop Table View (hidden on mobile) */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100">
+                <table className="min-w-full divide-y divide-gray-100/50">
                   <caption className="sr-only">Admin requests table</caption>
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gray-50/50">
                     <tr>
                       <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
                       <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
@@ -425,7 +425,7 @@ function AdminDashboardContent() {
                       <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-100">
+                  <tbody className="bg-transparent divide-y divide-gray-100/50">
                     {filteredRequests.map((req) => (
                       <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
@@ -507,9 +507,9 @@ function AdminDashboardContent() {
 
       {/* Modal */}
       {isModalOpen && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/25 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modal-title" className="text-xl leading-6 font-bold text-gray-900">
                   Ticket Details
                 </h3>
@@ -614,7 +614,7 @@ function AdminDashboardContent() {
                 </dl>
             </div>
 
-            <div className="px-6 py-5 border-t border-gray-200 bg-gray-50">
+            <div className="px-6 py-5 border-t border-gray-200/50 bg-white/40">
                <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Admin Actions</h4>
                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                    <div className="flex items-center gap-3">
@@ -653,7 +653,7 @@ function AdminDashboardContent() {
 
 export default function AdminDashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
       <AdminDashboardContent />
     </Suspense>
   );

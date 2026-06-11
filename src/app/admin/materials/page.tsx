@@ -122,12 +122,12 @@ export default function AdminMaterialsPage() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading materials...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading materials...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50" aria-label="Admin navigation">
+    <div className="min-h-screen bg-transparent flex flex-col font-sans">
+      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
@@ -174,7 +174,7 @@ export default function AdminMaterialsPage() {
         </div>
 
         {isAdding && (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-white/20 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
             <h2 className="text-lg font-bold text-gray-900 mb-4">New Material</h2>
             <form onSubmit={handleAdd} className="flex flex-col gap-4">
               <div>
@@ -232,7 +232,7 @@ export default function AdminMaterialsPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
           {materials.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
               <Package className="w-12 h-12 text-gray-300 mb-4" />
