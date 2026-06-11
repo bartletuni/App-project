@@ -117,15 +117,15 @@ export default function InteractiveBackground() {
           let p = particlesArray[i];
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
-          let minDistance = this.size + p.size + 15; // Increased padding to prevent overlap and maintain separation
+          let minDistance = this.size + p.size + 7.5; // Reduced padding by 50% so they can congregate closer to one another
 
           if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
-              // Repulsion resolved overlap and keep them separate, reduced by 25%
-              let separationX = (pdx / pDistance) * overlap * 0.6375;
-              let separationY = (pdy / pDistance) * overlap * 0.6375;
+              // Repulsion resolved overlap and keep them separate, increased by 2x
+              let separationX = (pdx / pDistance) * overlap * 1.275;
+              let separationY = (pdy / pDistance) * overlap * 1.275;
               this.x += separationX;
               this.y += separationY;
 
@@ -139,8 +139,8 @@ export default function InteractiveBackground() {
               // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
                 const restitution = 0.8; // Bounciness coefficient
-                // Impulse force reduced by 25%
-                let impulse = -(1 + restitution) * velAlongNormal * 0.75;
+                // Impulse force doubled (increased by factor of 2)
+                let impulse = -(1 + restitution) * velAlongNormal * 1.5;
                 let impulseX = impulse * nx * 0.5;
                 let impulseY = impulse * ny * 0.5;
                 
