@@ -94,13 +94,6 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      selectFileManually();
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -185,16 +178,26 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Holographic Build Plate Upload Zone */}
         <div>
-          <label htmlFor="fileUpload" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Holographic Build Plate (Model STL / ZIP) <span className="text-rose-500" aria-hidden="true">*</span>
+<<<<<<< Updated upstream
+          <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Max 20MB)</span>
           </label>
-          <input 
+          <input
             id="fileUpload"
+            type="file"
+            accept=".stl,.zip"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+=======
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Holographic Build Plate (Model STL / ZIP)</label>
+          <input 
             type="file" 
             ref={fileInputRef} 
             onChange={handleFileInputChange} 
             accept=".stl,.zip" 
             className="hidden" 
+>>>>>>> Stashed changes
           />
           
           <div
@@ -202,11 +205,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={selectFileManually}
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
-            role="button"
-            aria-label="Upload STL or ZIP file. Drag and drop file here, or click to select."
-            className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all overflow-hidden flex flex-col items-center justify-center min-h-[160px] outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
+            className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all overflow-hidden flex flex-col items-center justify-center min-h-[160px] ${
               isDragging 
                 ? "border-cyan-500 bg-cyan-500/5 scale-[0.99]" 
                 : file 
@@ -234,7 +233,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                 <button 
                   type="button" 
                   onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none"
+                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg"
                 >
                   Change File
                 </button>
@@ -250,7 +249,6 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                 </div>
                 <button 
                   type="button" 
-                  tabIndex={-1}
                   className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/30 px-3.5 py-2 rounded-lg bg-indigo-500/5 transition-all"
                 >
                   Select File
@@ -262,9 +260,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         {/* Quantity Field */}
         <div>
-          <label htmlFor="quantity" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Print Quantity <span className="text-rose-500" aria-hidden="true">*</span>
+<<<<<<< Updated upstream
+          <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Quantity <span className="text-red-500" aria-hidden="true">*</span>
           </label>
+=======
+          <label htmlFor="quantity" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Print Quantity</label>
+>>>>>>> Stashed changes
           <input
             id="quantity"
             type="number"
@@ -278,9 +280,21 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         {/* Date Field */}
         <div>
-          <label htmlFor="dateNeeded" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Date Needed <span className="text-rose-500" aria-hidden="true">*</span> <span className="text-slate-500 font-normal ml-1">(Min 5 days lead time)</span>
+<<<<<<< Updated upstream
+          <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Min 5 days lead time)</span>
           </label>
+          <input
+            id="dateNeeded"
+            type="date"
+            min={minDate}
+            value={dateNeeded}
+            onChange={(e) => setDateNeeded(e.target.value)}
+            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700"
+            required
+          />
+=======
+          <label htmlFor="dateNeeded" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date Needed (5 Days Lead Time)</label>
           <div className="relative">
             <input
               id="dateNeeded"
@@ -292,13 +306,18 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
               required
             />
           </div>
+>>>>>>> Stashed changes
         </div>
 
         {/* Phone Field */}
         <div>
-          <label htmlFor="phoneNumber" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Phone Number <span className="text-rose-500" aria-hidden="true">*</span>
+<<<<<<< Updated upstream
+          <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Phone Number <span className="text-red-500" aria-hidden="true">*</span>
           </label>
+=======
+          <label htmlFor="phoneNumber" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
+>>>>>>> Stashed changes
           {isAddingPhone || pastPhones.length === 0 ? (
             <div className="flex gap-2">
                 <input
@@ -311,12 +330,17 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                     required
                 />
                 {pastPhones.length > 0 && (
+<<<<<<< Updated upstream
+                    <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                        Cancel
+=======
                     <button 
                       type="button" 
                       onClick={() => setIsAddingPhone(false)} 
-                      className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 rounded-xl transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 rounded-xl transition-colors whitespace-nowrap"
                     >
                       Cancel
+>>>>>>> Stashed changes
                     </button>
                 )}
             </div>
@@ -333,12 +357,17 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                         <option key={phone.id} value={phone.number}>{phone.number}</option>
                     ))}
                 </select>
+<<<<<<< Updated upstream
+                <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                    + Add New
+=======
                 <button 
                   type="button" 
                   onClick={() => setIsAddingPhone(true)} 
-                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 py-3 rounded-xl transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 border border-slate-800 hover:border-slate-700 bg-slate-900/50 px-3.5 py-3 rounded-xl transition-colors whitespace-nowrap"
                 >
                   + Add New
+>>>>>>> Stashed changes
                 </button>
              </div>
           )}
@@ -346,9 +375,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         
         {/* Material Selection */}
         <div>
-          <label htmlFor="material" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Build Material <span className="text-rose-500" aria-hidden="true">*</span>
+<<<<<<< Updated upstream
+          <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Material <span className="text-red-500" aria-hidden="true">*</span>
           </label>
+=======
+          <label htmlFor="material" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Build Material</label>
+>>>>>>> Stashed changes
           <select
             id="material"
             value={material}
@@ -368,9 +401,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         {/* Notes Selection */}
         <div>
-          <label htmlFor="notes" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Technical Instructions (Notes) <span className="text-slate-500 font-normal ml-1">(Optional)</span>
+<<<<<<< Updated upstream
+          <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Notes <span className="text-gray-400 font-normal ml-1">(Color, etc.) - Optional</span>
           </label>
+=======
+          <label htmlFor="notes" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Technical Instructions (Notes)</label>
+>>>>>>> Stashed changes
           <textarea
             id="notes"
             value={notes}
