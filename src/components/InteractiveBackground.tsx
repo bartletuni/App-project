@@ -66,7 +66,8 @@ export default function InteractiveBackground() {
         this.y = Math.random() * canvas.height;
         this.baseX = this.x;
         this.baseY = this.y;
-        this.size = Math.random() * 3 + 1;
+        // 25% smaller on average
+        this.size = (Math.random() * 3 + 1) * 0.75;
         this.speedX = Math.random() * 0.5 - 0.25;
         this.speedY = Math.random() * 0.5 - 0.25;
         this.color = `rgba(139, 92, 246, ${Math.random() * 0.3 + 0.1})`; // Purple-ish
@@ -88,17 +89,47 @@ export default function InteractiveBackground() {
         let dx = mouseRef.current.x - this.x;
         let dy = mouseRef.current.y - this.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
-        let forceDirectionX = dx / distance;
-        let forceDirectionY = dy / distance;
         const maxDistance = 150;
-        let force = (maxDistance - distance) / maxDistance;
-        let directionX = forceDirectionX * force * this.density * 0.6;
-        let directionY = forceDirectionY * force * this.density * 0.6;
 
-        if (distance < maxDistance) {
-            // Track mouse slowly (attraction)
+        if (distance < maxDistance && distance > 0) {
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let force = (maxDistance - distance) / maxDistance;
+
+            // Reduced attraction for smoother organizing, scaled by distance to prevent jitter
+            let moveSpeed = force * this.density * 0.1;
+
+            // Prevent overshooting and spazzing when exactly at the mouse
+            if (moveSpeed > distance) {
+                moveSpeed = distance * 0.1;
+            }
+
+            let directionX = forceDirectionX * moveSpeed;
+            let directionY = forceDirectionY * moveSpeed;
+
             this.x += directionX;
             this.y += directionY;
+        }
+
+        // Particle collision/separation
+        for (let i = 0; i < particlesArray.length; i++) {
+          if (this === particlesArray[i]) continue;
+          let p = particlesArray[i];
+          let pdx = this.x - p.x;
+          let pdy = this.y - p.y;
+          let minDistance = this.size + p.size + 1; // +1 padding
+
+          if (Math.abs(pdx) < minDistance && Math.abs(pdy) < minDistance) {
+            let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
+            if (pDistance < minDistance && pDistance > 0) {
+              let overlap = minDistance - pDistance;
+              // Repel smoothly
+              let separationX = (pdx / pDistance) * overlap * 0.1;
+              let separationY = (pdy / pDistance) * overlap * 0.1;
+              this.x += separationX;
+              this.y += separationY;
+            }
+          }
         }
       }
 
@@ -114,7 +145,8 @@ export default function InteractiveBackground() {
 
     const init = () => {
       particlesArray = [];
-      const numberOfParticles = (canvas.width * canvas.height) / 9000;
+      // Doubled number of particles (halved the area per particle divisor from 9000 to 4500)
+      const numberOfParticles = (canvas.width * canvas.height) / 4500;
       for (let i = 0; i < numberOfParticles; i++) {
         particlesArray.push(new Particle());
       }
