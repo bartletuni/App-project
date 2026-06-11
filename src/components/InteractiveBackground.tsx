@@ -140,8 +140,8 @@ export default function InteractiveBackground() {
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
               
-              // Gentle separation when near mouse to prevent jitter, strong push when dispersing
-              let separationScale = isNearMouse ? 0.35 : 0.9;
+              // Gentle separation when near mouse to prevent jitter, moderate push when dispersing
+              let separationScale = isNearMouse ? 0.35 : 0.55;
               let separationX = (pdx / pDistance) * overlap * separationScale;
               let separationY = (pdy / pDistance) * overlap * separationScale;
               this.x += separationX;
@@ -157,8 +157,8 @@ export default function InteractiveBackground() {
               // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
                 const restitution = 0.5; // Soft bounciness
-                // Gentle impulse near mouse, strong impulse when dispersing to push them apart
-                let impulseScale = isNearMouse ? 0.15 : 1.2;
+                // Gentle impulse near mouse, moderate impulse when dispersing to push them apart
+                let impulseScale = isNearMouse ? 0.15 : 0.6;
                 let impulse = -(1 + restitution) * velAlongNormal * impulseScale;
                 let impulseX = impulse * nx * 0.5;
                 let impulseY = impulse * ny * 0.5;
@@ -168,17 +168,17 @@ export default function InteractiveBackground() {
                 p.speedX -= impulseX;
                 p.speedY -= impulseY;
 
-                // If dispersing, give an extra outward velocity boost to scatter them quickly
+                // If dispersing, give a gentle outward velocity boost to scatter them smoothly
                 if (!isNearMouse) {
-                  const scatterBoost = 0.25;
+                  const scatterBoost = 0.08;
                   this.speedX += nx * scatterBoost;
                   this.speedY += ny * scatterBoost;
                   p.speedX -= nx * scatterBoost;
                   p.speedY -= ny * scatterBoost;
                 }
 
-                // Clamp speeds to prevent runaway acceleration
-                const maxSpeed = 1.5;
+                // Clamp speeds to prevent runaway acceleration, moderate for smooth dispersion
+                const maxSpeed = 0.8;
                 let speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
                 if (speed > maxSpeed) {
                   this.speedX = (this.speedX / speed) * maxSpeed;
