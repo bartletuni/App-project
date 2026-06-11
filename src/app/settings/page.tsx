@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-<<<<<<< Updated upstream
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
-=======
-import { Lock, User, AlertCircle, CheckCircle2, Shield } from "lucide-react";
->>>>>>> Stashed changes
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
@@ -199,8 +195,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <div>
-<<<<<<< Updated upstream
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                  <label htmlFor="currentPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Current Password</label>
                   <div className="relative">
                     <input
                       id="currentPassword"
@@ -208,37 +203,24 @@ export default function SettingsPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-3 pr-12 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 focus-visible:ring-1 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
                       aria-label={showCurrentPassword ? "Hide password" : "Show password"}
                     >
-                      {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-=======
-                  <label htmlFor="currentPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Current Password</label>
-                  <input
-                    id="currentPassword"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
-                    autoComplete="current-password"
-                  />
->>>>>>> Stashed changes
                 </div>
                 
                 <div className="pt-2 border-t border-slate-900"></div>
 
                 <div>
-<<<<<<< Updated upstream
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                  <label htmlFor="newPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">New Password</label>
                   <div className="relative">
                     <input
                       id="newPassword"
@@ -247,22 +229,22 @@ export default function SettingsPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-3 pr-12 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 focus-visible:ring-1 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
                       aria-label={showNewPassword ? "Hide password" : "Show password"}
                     >
-                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                  <label htmlFor="confirmPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Confirm New Password</label>
                   <div className="relative">
                     <input
                       id="confirmPassword"
@@ -271,43 +253,17 @@ export default function SettingsPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-3 pr-12 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 focus-visible:ring-1 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-=======
-                  <label htmlFor="newPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">New Password</label>
-                  <input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
-                    autoComplete="new-password"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Confirm New Password</label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-white"
-                  />
->>>>>>> Stashed changes
                 </div>
               </div>
 
