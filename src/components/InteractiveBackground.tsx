@@ -7,13 +7,13 @@ export default function InteractiveBackground() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isClient, setIsClient] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true); // Default to true for desktop on load
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({
     x: 0,
     y: 0,
-    active: false,
+    active: true, // Default to true for desktop on load
     pulseX: 0,
     pulseY: 0,
     pulseRadius: 0,
@@ -28,17 +28,22 @@ export default function InteractiveBackground() {
     const mobileCheck = window.innerWidth < 768;
     setIsMobile(mobileCheck);
 
+    if (mobileCheck) {
+      // On mobile, deactivate interaction by default until user touches the screen
+      mouseRef.current.active = false;
+      setIsActive(false);
+    } else {
+      // On desktop, interaction is active by default
+      mouseRef.current.active = true;
+      setIsActive(true);
+    }
+
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       mouseRef.current.x = e.clientX;
       mouseRef.current.y = e.clientY;
       mouseRef.current.active = true;
       setIsActive(true);
-    };
-
-    const handleMouseLeave = () => {
-      mouseRef.current.active = false;
-      setIsActive(false);
     };
 
     const triggerShockwave = (x: number, y: number) => {
@@ -76,12 +81,12 @@ export default function InteractiveBackground() {
     };
 
     const handleTouchEnd = () => {
+      // Deactivate on mobile release to avoid stuck state
       mouseRef.current.active = false;
       setIsActive(false);
     };
 
     window.addEventListener("mousemove", updateMousePosition);
-    window.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
@@ -90,7 +95,6 @@ export default function InteractiveBackground() {
 
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
-      window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
@@ -104,10 +108,9 @@ export default function InteractiveBackground() {
     if (!isClient) return;
 
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      let tiltX = (e.gamma || 0) / 30; // normalized range, more sensitive response
+      let tiltX = (e.gamma || 0) / 30;
       let tiltY = (e.beta || 0) / 30;
 
-      // Clamp range to prevent runaway acceleration drift
       tiltX = Math.max(-1.5, Math.min(1.5, tiltX));
       tiltY = Math.max(-1.5, Math.min(1.5, tiltY));
 
@@ -132,13 +135,8 @@ export default function InteractiveBackground() {
     let animationFrameId: number;
 
     const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      
-      ctx.resetTransform();
-      ctx.scale(dpr, dpr);
-      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       init();
     };
 
@@ -156,15 +154,14 @@ export default function InteractiveBackground() {
       density: number;
 
       constructor() {
-        this.x = Math.random() * window.innerWidth;
-        this.y = Math.random() * window.innerHeight;
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
         this.baseX = this.x;
         this.baseY = this.y;
-        // 25% smaller on average
         this.size = (Math.random() * 3 + 1) * 0.75;
         this.speedX = Math.random() * 0.5 - 0.25;
         this.speedY = Math.random() * 0.5 - 0.25;
-        this.color = `rgba(139, 92, 246, ${Math.random() * 0.3 + 0.1})`; // Purple-ish
+        this.color = `rgba(139, 92, 246, ${Math.random() * 0.3 + 0.1})`;
         this.density = (Math.random() * 30) + 1;
       }
 
@@ -186,10 +183,10 @@ export default function InteractiveBackground() {
         }
 
         // Wrap around logically in CSS coordinates
-        if (this.x < 0) this.x = window.innerWidth;
-        if (this.x > window.innerWidth) this.x = 0;
-        if (this.y < 0) this.y = window.innerHeight;
-        if (this.y > window.innerHeight) this.y = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
 
         // Interaction with mouse/touch when active
         let distance = 0;
@@ -204,10 +201,8 @@ export default function InteractiveBackground() {
               let forceDirectionY = dy / distance;
               let force = (maxDistance - distance) / maxDistance;
 
-              // Reduced attraction for smoother organizing, scaled by distance to prevent jitter
               let moveSpeed = force * this.density * 0.05;
 
-              // Prevent overshooting and spazzing when exactly at the mouse
               if (moveSpeed > distance) {
                   moveSpeed = distance * 0.05;
               }
@@ -234,7 +229,6 @@ export default function InteractiveBackground() {
             let pushDirectionX = pdx / pDist;
             let pushDirectionY = pdy / pDist;
             
-            // Push outwards dynamically
             const pushForce = force * 6.0;
             this.speedX += pushDirectionX * pushForce;
             this.speedY += pushDirectionY * pushForce;
@@ -248,7 +242,6 @@ export default function InteractiveBackground() {
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
           
-          // Check if either particle is near the mouse
           let influence = 0;
           if (mouseRef.current.active) {
             let pdxMouse = mouseRef.current.x - p.x;
@@ -260,7 +253,6 @@ export default function InteractiveBackground() {
             influence = Math.max(influenceThis, influenceP);
           }
 
-          // Smoothly transition spacing: 7.5px padding when near, 20px padding when far
           let padding = 20 - (12.5 * influence);
           let minDistance = this.size + p.size + padding;
 
@@ -269,24 +261,20 @@ export default function InteractiveBackground() {
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
               
-              // Smoothly transition separation force: gentle near mouse (0.35), moderate when dispersing (0.55)
               let separationScale = 0.55 - (0.20 * influence);
               let separationX = (pdx / pDistance) * overlap * separationScale;
               let separationY = (pdy / pDistance) * overlap * separationScale;
               this.x += separationX;
               this.y += separationY;
 
-              // Apply velocity bounce (elastic collision response)
               let rvx = this.speedX - p.speedX;
               let rvy = this.speedY - p.speedY;
               let nx = pdx / pDistance;
               let ny = pdy / pDistance;
               let velAlongNormal = rvx * nx + rvy * ny;
 
-              // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
-                const restitution = 0.5; // Soft bounciness
-                // Smoothly transition bounce force: gentle near mouse (0.15), moderate when dispersing (0.6)
+                const restitution = 0.5;
                 let impulseScale = 0.60 - (0.45 * influence);
                 let impulse = -(1 + restitution) * velAlongNormal * impulseScale;
                 let impulseX = impulse * nx * 0.5;
@@ -297,7 +285,6 @@ export default function InteractiveBackground() {
                 p.speedX -= impulseX;
                 p.speedY -= impulseY;
 
-                // Smoothly transition outward velocity boost based on mouse distance
                 let scatterBoost = 0.08 * (1 - influence);
                 if (scatterBoost > 0) {
                   this.speedX += nx * scatterBoost;
@@ -306,7 +293,6 @@ export default function InteractiveBackground() {
                   p.speedY -= ny * scatterBoost;
                 }
 
-                // Clamp speeds to prevent runaway acceleration, moderate for smooth dispersion
                 const maxSpeed = 0.8;
                 let speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
                 if (speed > maxSpeed) {
@@ -338,16 +324,15 @@ export default function InteractiveBackground() {
       particlesArray = [];
       const mobileCheck = window.innerWidth < 768;
       const divisor = mobileCheck ? 4500 : 2250;
-      const numberOfParticles = (window.innerWidth * window.innerHeight) / divisor;
+      const numberOfParticles = (canvas.width * canvas.height) / divisor;
       for (let i = 0; i < numberOfParticles; i++) {
         particlesArray.push(new Particle());
       }
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Expand shockwave pulse
       if (mouseRef.current.pulseActive) {
         mouseRef.current.pulseRadius += 8;
         if (mouseRef.current.pulseRadius > 250) {
@@ -362,7 +347,6 @@ export default function InteractiveBackground() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Initialize dimensions and start animate
     resize();
     animate();
 
