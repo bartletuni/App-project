@@ -123,9 +123,9 @@ export default function InteractiveBackground() {
             let pDistance = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDistance < minDistance && pDistance > 0) {
               let overlap = minDistance - pDistance;
-              // Strong repulsion to resolve overlap and keep them separate
-              let separationX = (pdx / pDistance) * overlap * 0.85;
-              let separationY = (pdy / pDistance) * overlap * 0.85;
+              // Repulsion resolved overlap and keep them separate, reduced by 25%
+              let separationX = (pdx / pDistance) * overlap * 0.6375;
+              let separationY = (pdy / pDistance) * overlap * 0.6375;
               this.x += separationX;
               this.y += separationY;
 
@@ -139,7 +139,8 @@ export default function InteractiveBackground() {
               // Only bounce if they are moving towards each other
               if (velAlongNormal < 0) {
                 const restitution = 0.8; // Bounciness coefficient
-                let impulse = -(1 + restitution) * velAlongNormal;
+                // Impulse force reduced by 25%
+                let impulse = -(1 + restitution) * velAlongNormal * 0.75;
                 let impulseX = impulse * nx * 0.5;
                 let impulseY = impulse * ny * 0.5;
                 
@@ -178,8 +179,8 @@ export default function InteractiveBackground() {
 
     const init = () => {
       particlesArray = [];
-      // Doubled number of particles (halved the area per particle divisor from 9000 to 4500)
-      const numberOfParticles = (canvas.width * canvas.height) / 4500;
+      // Doubled number of particles again (halved the area per particle divisor from 4500 to 2250)
+      const numberOfParticles = (canvas.width * canvas.height) / 2250;
       for (let i = 0; i < numberOfParticles; i++) {
         particlesArray.push(new Particle());
       }
