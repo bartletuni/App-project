@@ -53,18 +53,39 @@ export default function InteractiveBackground() {
       mouseRef.current.pulseActive = true;
     };
 
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      let tiltX = (e.gamma || 0) / 30;
+      let tiltY = (e.beta || 0) / 30;
+
+      tiltX = Math.max(-1.5, Math.min(1.5, tiltX));
+      tiltY = Math.max(-1.5, Math.min(1.5, tiltY));
+
+      tiltRef.current = { x: tiltX, y: tiltY };
+    };
+
     const requestOrientationPermission = async () => {
       if (
         typeof DeviceOrientationEvent !== "undefined" &&
         typeof (DeviceOrientationEvent as any).requestPermission === "function"
       ) {
         try {
-          await (DeviceOrientationEvent as any).requestPermission();
+          const permissionState = await (DeviceOrientationEvent as any).requestPermission();
+          if (permissionState === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation);
+          }
         } catch (error) {
           console.error("Orientation permission error:", error);
         }
       }
     };
+
+    // Attach immediately for non-iOS 13+ devices
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof (DeviceOrientationEvent as any).requestPermission !== "function"
+    ) {
+      window.addEventListener("deviceorientation", handleOrientation);
+    }
 
     let permissionRequested = false;
     const handleFirstInteraction = () => {
@@ -123,28 +144,9 @@ export default function InteractiveBackground() {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("touchcancel", handleTouchEnd);
-    };
-  }, []);
-
-  // Gyroscope / Device Orientation event listener
-  useEffect(() => {
-    if (!isClient) return;
-
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      let tiltX = (e.gamma || 0) / 30;
-      let tiltY = (e.beta || 0) / 30;
-
-      tiltX = Math.max(-1.5, Math.min(1.5, tiltX));
-      tiltY = Math.max(-1.5, Math.min(1.5, tiltY));
-
-      tiltRef.current = { x: tiltX, y: tiltY };
-    };
-
-    window.addEventListener("deviceorientation", handleOrientation);
-    return () => {
       window.removeEventListener("deviceorientation", handleOrientation);
     };
-  }, [isClient]);
+  }, []);
 
   // Particle System
   useEffect(() => {
