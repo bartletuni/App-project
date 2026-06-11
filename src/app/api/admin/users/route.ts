@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Map to include the first phone number as a top-level property
-    const formattedUsers = users.map(user => ({
+    const formattedUsers = users.map((user: any) => ({
       ...user,
       phone: user.phoneNumbers.length > 0 ? user.phoneNumbers[0].number : null,
       phoneNumbers: undefined // remove the array
