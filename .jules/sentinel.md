@@ -29,3 +29,8 @@
 **Vulnerability:** The application allowed negative values for the `quantity` field and unbounded string lengths for `notes` and `phoneNumber` fields, presenting both business logic flaws (e.g. requesting -10 parts) and Denial of Service (DoS) risks (e.g. sending GBs of text in a notes field).
 **Learning:** Prisma allows any integer for an `Int` field by default. Relying on frontend HTML constraints (e.g., `<input type="number" min="1">`) is insufficient as API endpoints can be directly hit. Additionally, unbounded text fields expose the database and server to exhaustion attacks.
 **Prevention:** Always validate numeric bounds explicitly at the application level before passing data to Prisma. Similarly, strictly enforce sensible maximum length limits on all user-provided strings at the API layer.
+
+## 2026-06-11 - [MEDIUM] Added HTTP Security Headers
+**Vulnerability:** The Next.js application was not returning standard HTTP security headers such as `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, and `Permissions-Policy`. This left the application vulnerable to clickjacking, MIME-sniffing, and potentially overly permissive browser features.
+**Learning:** Next.js does not provide these security headers out of the box. They must be explicitly configured using the `headers()` function in `next.config.mjs` to be applied globally across all routes.
+**Prevention:** When bootstrapping a new Next.js project, always include a robust set of security headers in the initial configuration. For a Next.js App Router application, `next.config.mjs` is the correct place to define these global headers.
