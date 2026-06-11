@@ -53,11 +53,34 @@ export default function InteractiveBackground() {
       mouseRef.current.pulseActive = true;
     };
 
+    const requestOrientationPermission = async () => {
+      if (
+        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof (DeviceOrientationEvent as any).requestPermission === "function"
+      ) {
+        try {
+          await (DeviceOrientationEvent as any).requestPermission();
+        } catch (error) {
+          console.error("Orientation permission error:", error);
+        }
+      }
+    };
+
+    let permissionRequested = false;
+    const handleFirstInteraction = () => {
+      if (!permissionRequested) {
+        requestOrientationPermission();
+        permissionRequested = true;
+      }
+    };
+
     const handleMouseDown = (e: MouseEvent) => {
+      handleFirstInteraction();
       triggerShockwave(e.clientX, e.clientY);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      handleFirstInteraction();
       if (e.touches.length > 0) {
         const touch = e.touches[0];
         setMousePosition({ x: touch.clientX, y: touch.clientY });
@@ -135,9 +158,13 @@ export default function InteractiveBackground() {
     let animationFrameId: number;
 
     const resize = () => {
+      const widthChanged = canvas.width !== window.innerWidth;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      init();
+
+      if (widthChanged || particlesArray.length === 0) {
+        init();
+      }
     };
 
     window.addEventListener("resize", resize);
@@ -242,6 +269,9 @@ export default function InteractiveBackground() {
           let pdx = this.x - p.x;
           let pdy = this.y - p.y;
           
+          // AABB distance check FIRST before expensive Math.sqrt operations
+          if (Math.abs(pdx) > 40 || Math.abs(pdy) > 40) continue;
+
           let influence = 0;
           if (mouseRef.current.active) {
             let pdxMouse = mouseRef.current.x - p.x;
