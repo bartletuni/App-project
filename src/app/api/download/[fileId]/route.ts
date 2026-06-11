@@ -17,6 +17,11 @@ export async function GET(
       return NextResponse.json({ error: "File ID is required" }, { status: 400 });
     }
 
+    // Security Fix: Prevent S3 directory traversal / arbitrary file read
+    if (fileId.includes("/") || fileId.includes("\\") || fileId.includes("..")) {
+      return NextResponse.json({ error: "Invalid File ID" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findFirst({
       where: { fileId },
     });
