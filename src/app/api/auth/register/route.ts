@@ -63,13 +63,16 @@ export async function POST(req: NextRequest) {
       if (resendApiKey) {
         const resend = new Resend(resendApiKey);
 
+        // Sanitize to prevent Email Header (CRLF) Injection
+        const safeUserName = user.name ? user.name.replace(/[\r\n]/g, '') : "User";
+
         // 1. Send notification to Admin
         const adminEmail = process.env.ADMIN_EMAIL;
         if (adminEmail) {
           await resend.emails.send({
             from: 'TakomoCo <onboarding@resend.dev>',
             to: adminEmail,
-            subject: `New User Registered: ${user.name}`,
+            subject: `New User Registered: ${safeUserName}`,
             html: NewUserAdminNotificationEmailHTML({
               name: user.name,
               email: user.email,
