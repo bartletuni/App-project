@@ -1,0 +1,3 @@
+## 2025-05-18 - Hidden Action Buttons on Touch Devices
+**Learning:** Hiding essential action buttons (like edit and delete) using `opacity-0` with a `group-hover:opacity-100` reveal pattern completely breaks usability on touch devices (mobile/tablet) because they cannot trigger a hover state. As a result, users cannot see or interact with these controls.
+**Action:** When using hover-to-reveal patterns for secondary actions, always use responsive classes (e.g., `opacity-100 sm:opacity-0 sm:group-hover:opacity-100`) to ensure the controls remain persistently visible on touch devices, or adopt alternative patterns like "swipe to reveal" or an explicit "More options" (kebab) menu.
