@@ -24,19 +24,19 @@ export default function Navbar() {
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
               <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
               <span className="hidden md:inline">Dashboard</span>
               <span className="md:hidden sr-only">Dashboard</span>
             </Link>
             
-            <Link href="/contact" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/contact" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
               <LifeBuoy className="w-4 h-4" aria-hidden="true" />
               <span className="hidden md:inline">Support</span>
               <span className="md:hidden sr-only">Support</span>
             </Link>
 
-            <Link href="/settings" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <Link href="/settings" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1 rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
               <Settings className="w-4 h-4" aria-hidden="true" />
               <span className="hidden md:inline">Settings</span>
               <span className="md:hidden sr-only">Settings</span>
@@ -51,7 +51,7 @@ export default function Navbar() {
               </div>
               <button 
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg"
+                className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" aria-hidden="true" />
