@@ -17,6 +17,10 @@ export async function GET(
       return NextResponse.json({ error: "File ID is required" }, { status: 400 });
     }
 
+    if (fileId.includes('/') || fileId.includes('\\') || fileId.includes('..')) {
+      return NextResponse.json({ error: "Invalid file ID" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findFirst({
       where: { fileId },
     });
