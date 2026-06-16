@@ -106,7 +106,15 @@ export default function DashboardPage() {
                     <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   </div>
                   <h3 className="text-gray-900 font-medium text-lg">No requests found</h3>
-                  <p className="text-gray-500 mt-1">You haven't submitted any part requests yet.</p>
+                  <p className="text-gray-500 mt-1 mb-6">You haven't submitted any part requests yet.</p>
+                  {!isAdmin && (
+                    <button
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    >
+                      Start a Request
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>

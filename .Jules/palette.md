@@ -5,3 +5,7 @@
 ## 2026-06-14 - Focus Indicators on Navbar Links
 **Learning:** Navigation links inside a responsive layout might lose their implicit focus states when styled with Tailwind CSS, particularly if `outline-none` or similar resets are used. Keyboard users might tab through the Navbar without knowing where their focus is.
 **Action:** Add explicit `focus-visible:ring-2` or similar focus indicators to all interactive elements, especially primary navigation links and sign out buttons.
+
+## 2025-06-16 - Actionable Empty States
+**Learning:** Empty states that simply say "No data found" leave users stranded and increase cognitive load, as they have to manually figure out how to populate the list. Providing a clear Call-to-Action (CTA) within the empty state itself significantly improves user onboarding.
+**Action:** Always include a relevant helper text and a primary action button (e.g., "Add First Material" or "Start a Request") inside empty states to guide users directly to the next logical step. Ensure any decorative icons used in these states are marked with `aria-hidden="true"`.

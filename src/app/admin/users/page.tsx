@@ -113,7 +113,9 @@ export default function AdminUsersPage() {
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
           {users.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
+                <svg className="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 <h3 className="text-lg font-bold text-gray-900">No users found</h3>
+                <p className="text-gray-500 mt-1">There are currently no registered users in the system.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
