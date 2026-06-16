@@ -235,9 +235,15 @@ export default function AdminMaterialsPage() {
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
           {materials.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
-              <Package className="w-12 h-12 text-gray-300 mb-4" />
+              <Package className="w-12 h-12 text-gray-300 mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-gray-900">No materials defined</h3>
-              <p className="text-gray-500">Add materials to populate the dropdown for users.</p>
+              <p className="text-gray-500 mb-6">Add materials to populate the dropdown for users.</p>
+              <button
+                onClick={() => setIsAdding(true)}
+                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              >
+                + Add First Material
+              </button>
             </div>
           ) : (
             <ul className="divide-y divide-gray-100">
