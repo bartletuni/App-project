@@ -47,6 +47,11 @@ export default function MaterialsPage() {
     );
   }
 
+  const maxTensile = Math.max(...materials.map((m) => m.tensileStrength || 0), 0);
+  const maxStiffness = Math.max(...materials.map((m) => m.stiffness || 0), 0);
+  const maxHdt = Math.max(...materials.map((m) => m.hdt || 0), 0);
+  const maxImpact = Math.max(...materials.map((m) => m.impactResistance || 0), 0);
+
   return (
     <div className="min-h-screen bg-transparent font-sans">
       <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Materials library navigation">
@@ -106,14 +111,72 @@ export default function MaterialsPage() {
                 ) : (
                   <div className="h-16 w-full bg-gradient-to-r from-gray-50/50 to-gray-100/50 backdrop-blur-sm border-b border-gray-200/50"></div>
                 )}
-                
-                <div className="p-8 flex-1 flex flex-col">
+                               <div className="p-8 flex-1 flex flex-col">
                   <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{m.name}</h3>
                   {m.description ? (
-                    <p className="text-gray-600 flex-1 leading-relaxed">{m.description}</p>
+                    <p className="text-gray-600 leading-relaxed mb-6">{m.description}</p>
                   ) : (
-                    <p className="text-gray-400 italic flex-1 text-sm">High performance engineering-grade material.</p>
+                    <p className="text-gray-400 italic text-sm mb-6">High performance engineering-grade material.</p>
                   )}
+                  
+                  {/* Progress Bars for engineering properties */}
+                  <div className="space-y-4 mt-auto pt-4 border-t border-gray-100">
+                    {/* Tensile Strength */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-500">Tensile Strength</span>
+                        <span className="text-gray-900">{m.tensileStrength !== null && m.tensileStrength !== undefined ? `${m.tensileStrength} MPa` : "N/A"}</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                          style={{ width: `${m.tensileStrength && maxTensile ? (m.tensileStrength / maxTensile) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stiffness */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-500">Stiffness</span>
+                        <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness} GPa` : "N/A"}</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 rounded-full transition-all duration-500" 
+                          style={{ width: `${m.stiffness && maxStiffness ? (m.stiffness / maxStiffness) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* HDT */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-500">Heat Deflection Temp (HDT)</span>
+                        <span className="text-gray-900">{m.hdt !== null && m.hdt !== undefined ? `${m.hdt} °C` : "N/A"}</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-amber-500 rounded-full transition-all duration-500" 
+                          style={{ width: `${m.hdt && maxHdt ? (m.hdt / maxHdt) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Impact Resistance */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-gray-500">Impact Resistance</span>
+                        <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance} J/m` : "N/A"}</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                          style={{ width: `${m.impactResistance && maxImpact ? (m.impactResistance / maxImpact) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="mt-8 pt-6 border-t border-gray-200/50">
                     <Link 

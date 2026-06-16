@@ -12,14 +12,27 @@ export default function AdminMaterialsPage() {
   const router = useRouter();
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Add form states
   const [newMaterialName, setNewMaterialName] = useState("");
   const [newMaterialDesc, setNewMaterialDesc] = useState("");
   const [newMaterialImage, setNewMaterialImage] = useState<File | null>(null);
+  const [newTensileStrength, setNewTensileStrength] = useState("");
+  const [newStiffness, setNewStiffness] = useState("");
+  const [newHdt, setNewHdt] = useState("");
+  const [newImpactResistance, setNewImpactResistance] = useState("");
+
   const [isAdding, setIsAdding] = useState(false);
+
+  // Edit form states
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingDesc, setEditingDesc] = useState("");
   const [editingImage, setEditingImage] = useState<File | null>(null);
+  const [editingTensileStrength, setEditingTensileStrength] = useState("");
+  const [editingStiffness, setEditingStiffness] = useState("");
+  const [editingHdt, setEditingHdt] = useState("");
+  const [editingImpactResistance, setEditingImpactResistance] = useState("");
 
   const fetchMaterials = () => {
     fetch("/api/admin/materials")
@@ -53,6 +66,10 @@ export default function AdminMaterialsPage() {
     formData.append("name", newMaterialName);
     if (newMaterialDesc) formData.append("description", newMaterialDesc);
     if (newMaterialImage) formData.append("image", newMaterialImage);
+    if (newTensileStrength) formData.append("tensileStrength", newTensileStrength);
+    if (newStiffness) formData.append("stiffness", newStiffness);
+    if (newHdt) formData.append("hdt", newHdt);
+    if (newImpactResistance) formData.append("impactResistance", newImpactResistance);
 
     try {
       const res = await fetch("/api/admin/materials", {
@@ -64,6 +81,10 @@ export default function AdminMaterialsPage() {
         setNewMaterialName("");
         setNewMaterialDesc("");
         setNewMaterialImage(null);
+        setNewTensileStrength("");
+        setNewStiffness("");
+        setNewHdt("");
+        setNewImpactResistance("");
         setIsAdding(false);
         fetchMaterials();
       } else {
@@ -82,6 +103,10 @@ export default function AdminMaterialsPage() {
     formData.append("name", editingName);
     if (editingDesc) formData.append("description", editingDesc);
     if (editingImage) formData.append("image", editingImage);
+    formData.append("tensileStrength", editingTensileStrength);
+    formData.append("stiffness", editingStiffness);
+    formData.append("hdt", editingHdt);
+    formData.append("impactResistance", editingImpactResistance);
 
     try {
       const res = await fetch(`/api/admin/materials/${id}`, {
@@ -94,6 +119,10 @@ export default function AdminMaterialsPage() {
         setEditingName("");
         setEditingDesc("");
         setEditingImage(null);
+        setEditingTensileStrength("");
+        setEditingStiffness("");
+        setEditingHdt("");
+        setEditingImpactResistance("");
         fetchMaterials();
       } else {
         alert("Failed to update material");
@@ -124,6 +153,11 @@ export default function AdminMaterialsPage() {
   if (status === "loading" || loading) {
     return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading materials...</div>;
   }
+
+  const maxTensile = Math.max(...materials.map((m) => m.tensileStrength || 0), 0);
+  const maxStiffness = Math.max(...materials.map((m) => m.stiffness || 0), 0);
+  const maxHdt = Math.max(...materials.map((m) => m.hdt || 0), 0);
+  const maxImpact = Math.max(...materials.map((m) => m.impactResistance || 0), 0);
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col font-sans">
@@ -199,6 +233,52 @@ export default function AdminMaterialsPage() {
                   rows={3}
                 />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tensile Strength (MPa)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newTensileStrength}
+                    onChange={(e) => setNewTensileStrength(e.target.value)}
+                    placeholder="e.g. 50"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Stiffness (GPa)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newStiffness}
+                    onChange={(e) => setNewStiffness(e.target.value)}
+                    placeholder="e.g. 3.2"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Heat Deflection Temperature (°C)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newHdt}
+                    onChange={(e) => setNewHdt(e.target.value)}
+                    placeholder="e.g. 55"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Resistance (J/m)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newImpactResistance}
+                    onChange={(e) => setNewImpactResistance(e.target.value)}
+                    placeholder="e.g. 25"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Image (Optional, Max 5MB)</label>
                 <input
@@ -266,6 +346,52 @@ export default function AdminMaterialsPage() {
                         className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
                         rows={2}
                       />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Tensile Strength (MPa)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingTensileStrength}
+                            onChange={(e) => setEditingTensileStrength(e.target.value)}
+                            placeholder="e.g. 50"
+                            className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Stiffness (GPa)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingStiffness}
+                            onChange={(e) => setEditingStiffness(e.target.value)}
+                            placeholder="e.g. 3.2"
+                            className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Heat Deflection Temperature (°C)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingHdt}
+                            onChange={(e) => setEditingHdt(e.target.value)}
+                            placeholder="e.g. 55"
+                            className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Impact Resistance (J/m)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={editingImpactResistance}
+                            onChange={(e) => setEditingImpactResistance(e.target.value)}
+                            placeholder="e.g. 25"
+                            className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                          />
+                        </div>
+                      </div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <input
                           type="file"
@@ -286,6 +412,10 @@ export default function AdminMaterialsPage() {
                               setEditingName("");
                               setEditingDesc("");
                               setEditingImage(null);
+                              setEditingTensileStrength("");
+                              setEditingStiffness("");
+                              setEditingHdt("");
+                              setEditingImpactResistance("");
                             }}
                             className="text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
                           >
@@ -296,19 +426,80 @@ export default function AdminMaterialsPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center gap-4 flex-1">
-                        {m.imageId ? (
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                            <img src={`/api/download/${m.imageId}`} alt={m.name} className="w-full h-full object-cover" />
+                      <div className="flex flex-col gap-4 flex-1">
+                        <div className="flex items-center gap-4">
+                          {m.imageId ? (
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                              <img src={`/api/download/${m.imageId}`} alt={m.name} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-50 to-gray-100 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
+                              <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-gray-900 font-bold block text-lg">{m.name}</span>
+                            {m.description && <span className="text-gray-500 text-sm">{m.description}</span>}
                           </div>
-                        ) : (
-                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-50 to-gray-100 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
-                            <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
+                        </div>
+
+                        {/* Progress Bars */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-2 pt-3 border-t border-gray-100">
+                          {/* Tensile Strength */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-semibold">
+                              <span className="text-gray-500">Tensile Strength</span>
+                              <span className="text-gray-900">{m.tensileStrength !== null && m.tensileStrength !== undefined ? `${m.tensileStrength} MPa` : "N/A"}</span>
+                            </div>
+                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                                style={{ width: `${m.tensileStrength && maxTensile ? (m.tensileStrength / maxTensile) * 100 : 0}%` }}
+                              />
+                            </div>
                           </div>
-                        )}
-                        <div>
-                          <span className="text-gray-900 font-bold block">{m.name}</span>
-                          {m.description && <span className="text-gray-500 text-sm line-clamp-1">{m.description}</span>}
+
+                          {/* Stiffness */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-semibold">
+                              <span className="text-gray-500">Stiffness</span>
+                              <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness} GPa` : "N/A"}</span>
+                            </div>
+                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-blue-500 rounded-full transition-all duration-500" 
+                                style={{ width: `${m.stiffness && maxStiffness ? (m.stiffness / maxStiffness) * 100 : 0}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* HDT */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-semibold">
+                              <span className="text-gray-500">Heat Deflection Temp (HDT)</span>
+                              <span className="text-gray-900">{m.hdt !== null && m.hdt !== undefined ? `${m.hdt} °C` : "N/A"}</span>
+                            </div>
+                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-amber-500 rounded-full transition-all duration-500" 
+                                style={{ width: `${m.hdt && maxHdt ? (m.hdt / maxHdt) * 100 : 0}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Impact Resistance */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-semibold">
+                              <span className="text-gray-500">Impact Resistance</span>
+                              <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance} J/m` : "N/A"}</span>
+                            </div>
+                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                                style={{ width: `${m.impactResistance && maxImpact ? (m.impactResistance / maxImpact) * 100 : 0}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -317,6 +508,10 @@ export default function AdminMaterialsPage() {
                             setEditingId(m.id);
                             setEditingName(m.name);
                             setEditingDesc(m.description || "");
+                            setEditingTensileStrength(m.tensileStrength !== null && m.tensileStrength !== undefined ? m.tensileStrength.toString() : "");
+                            setEditingStiffness(m.stiffness !== null && m.stiffness !== undefined ? m.stiffness.toString() : "");
+                            setEditingHdt(m.hdt !== null && m.hdt !== undefined ? m.hdt.toString() : "");
+                            setEditingImpactResistance(m.impactResistance !== null && m.impactResistance !== undefined ? m.impactResistance.toString() : "");
                             setEditingImage(null);
                           }}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"

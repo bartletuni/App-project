@@ -20,6 +20,16 @@ export async function PATCH(
     const description = formData.get("description") as string | null;
     const file = formData.get("image") as File | null;
 
+    const tensileStrengthStr = formData.get("tensileStrength") as string | null;
+    const stiffnessStr = formData.get("stiffness") as string | null;
+    const hdtStr = formData.get("hdt") as string | null;
+    const impactResistanceStr = formData.get("impactResistance") as string | null;
+
+    const tensileStrength = (tensileStrengthStr && !isNaN(parseFloat(tensileStrengthStr))) ? parseFloat(tensileStrengthStr) : null;
+    const stiffness = (stiffnessStr && !isNaN(parseFloat(stiffnessStr))) ? parseFloat(stiffnessStr) : null;
+    const hdt = (hdtStr && !isNaN(parseFloat(hdtStr))) ? parseFloat(hdtStr) : null;
+    const impactResistance = (impactResistanceStr && !isNaN(parseFloat(impactResistanceStr))) ? parseFloat(impactResistanceStr) : null;
+
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
@@ -56,6 +66,10 @@ export async function PATCH(
     const updateData: any = { 
       name,
       description: description || null,
+      tensileStrength,
+      stiffness,
+      hdt,
+      impactResistance,
     };
 
     if (imageId) {
