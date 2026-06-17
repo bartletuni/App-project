@@ -21,15 +21,17 @@ export async function GET(
       return NextResponse.json({ error: "Invalid file ID" }, { status: 400 });
     }
 
+    // Require authentication for ALL downloads (BOLA fix)
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const partRequest = await prisma.partRequest.findFirst({
       where: { fileId },
     });
 
     if (partRequest) {
-      const session = await getServerSession(authOptions);
-      if (!session || !session.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
       if (partRequest.userId !== (session.user as any).id && !(session.user as any).isAdmin) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
