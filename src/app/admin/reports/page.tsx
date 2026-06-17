@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -64,15 +64,15 @@ export default function GenerateReportsPage() {
       doc.text("TakomoCo Request History Report", 14, 22);
 
       doc.setFontSize(11);
-      doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
-      doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
+      doc.text(`Date Range: ${formatDate(startObj, "MMM d, yyyy")} - ${formatDate(endObj, "MMM d, yyyy")}`, 14, 30);
+      doc.text(`Generated On: ${formatDate(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
 
       const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Material", "Quantity", "Status", "Invoice #", "Date Needed"];
       const tableRows: any[] = [];
 
       filteredRequests.forEach((req: any) => {
         const rowData = [
-          format(new Date(req.createdAt), "MM/dd/yyyy"),
+          formatDate(req.createdAt, "MM/dd/yyyy"),
           req.user?.name || "N/A",
           req.user?.email || "N/A",
           req.phoneNumber?.number || "N/A",
@@ -81,7 +81,7 @@ export default function GenerateReportsPage() {
           req.quantity.toString(),
           req.status,
           req.invoiceNumber || "N/A",
-          format(new Date(req.dateNeeded), "MM/dd/yyyy")
+          formatDate(req.dateNeeded, "MM/dd/yyyy")
         ];
         tableRows.push(rowData);
       });
@@ -95,7 +95,7 @@ export default function GenerateReportsPage() {
         styles: { fontSize: 9 }
       });
 
-      doc.save(`TakomoCo_Report_${format(startObj, "yyyyMMdd")}_${format(endObj, "yyyyMMdd")}.pdf`);
+      doc.save(`TakomoCo_Report_${formatDate(startObj, "yyyyMMdd")}_${formatDate(endObj, "yyyyMMdd")}.pdf`);
 
     } catch (err) {
       console.error(err);

@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import { Resend } from "resend";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
  
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
             fileName: file.name,
             quantity,
             material: material || "Not specified",
-            dateNeeded: format(dateNeeded, "PPP"),
+            dateNeeded: formatDate(dateNeeded, "PPP"),
             notes: notes || undefined,
           }),
         });

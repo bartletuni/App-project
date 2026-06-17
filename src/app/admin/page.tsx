@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -205,7 +205,7 @@ function AdminDashboardContent() {
     
     const matchesStatus = filterStatus === "ALL" || req.status === filterStatus;
     
-    const matchesDate = !filterDate || format(new Date(req.createdAt), "yyyy-MM-dd") === filterDate;
+    const matchesDate = !filterDate || formatDate(req.createdAt, "yyyy-MM-dd") === filterDate;
 
     return matchesUser && matchesInvoice && matchesStatus && matchesDate;
   });
@@ -388,7 +388,7 @@ function AdminDashboardContent() {
 
                       <div className="flex justify-between items-center pt-2">
                         <div className="text-xs text-gray-500">
-                          <span className="font-semibold text-gray-900">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
+                          <span className="font-semibold text-gray-900">Needed:</span> {formatDate(req.dateNeeded, "MMM d")}
                         </div>
                         <div className="flex gap-2">
                           <button
@@ -445,8 +445,8 @@ function AdminDashboardContent() {
                           <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
-                          <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
+                          <div className="text-sm font-semibold text-gray-900">Needed: {formatDate(req.dateNeeded, "MMM d, yyyy")}</div>
+                          <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {formatDate(req.createdAt, "MMM d")}</div>
                         </td>
                         <td className="px-6 py-4">
                           {req.invoiceNumber ? (
@@ -547,11 +547,11 @@ function AdminDashboardContent() {
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{formatDate(selectedRequest.dateNeeded, "MMM d, yyyy")}</dd>
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">Submitted On</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
+                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{formatDate(selectedRequest.createdAt, "MMM d, yyyy h:mm a")}</dd>
                     </div>
                     <div className="sm:col-span-2">
                         <dt className="text-sm font-medium text-gray-500">File</dt>
