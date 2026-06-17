@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
 import { addDays, format } from "date-fns";
 import { Resend } from "resend";
-import { NewRequestEmailHTML } from "@/lib/email-templates";
+import { NewRequestEmailHTML, RequestConfirmationEmailHTML } from "@/lib/email-templates";
  
 export const dynamic = 'force-dynamic';
 
@@ -149,20 +149,32 @@ export async function POST(req: NextRequest) {
         const resend = new Resend(resendApiKey);
         // Sanitize to prevent Email Header (CRLF) Injection
         const safeFileName = file.name.replace(/[\r\n]/g, '');
-        await resend.emails.send({
-          from: 'TakomoCo <onboarding@resend.dev>',
-          to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-          subject: `New Request: ${safeFileName}`,
-          html: NewRequestEmailHTML({
-            customerName: targetUserName,
-            customerEmail: targetUserEmail,
-            fileName: file.name,
-            quantity,
-            material: material || "Not specified",
-            dateNeeded: format(dateNeeded, "PPP"),
-            notes: notes || undefined,
+
+        await Promise.all([
+          resend.emails.send({
+            from: 'TakomoCo <onboarding@resend.dev>',
+            to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
+            subject: `New Request: ${safeFileName}`,
+            html: NewRequestEmailHTML({
+              customerName: targetUserName,
+              customerEmail: targetUserEmail,
+              fileName: file.name,
+              quantity,
+              material: material || "Not specified",
+              dateNeeded: format(dateNeeded, "PPP"),
+              notes: notes || undefined,
+            }),
           }),
-        });
+          resend.emails.send({
+            from: 'TakomoCo <onboarding@resend.dev>',
+            to: targetUserEmail, // Send to user
+            subject: `Request Received: ${safeFileName}`,
+            html: RequestConfirmationEmailHTML({
+              customerName: targetUserName,
+              fileName: safeFileName,
+            }),
+          })
+        ]);
       }
     } catch (emailError) {
       console.error("Failed to send email notification:", emailError);
