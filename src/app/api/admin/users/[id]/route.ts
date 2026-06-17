@@ -13,20 +13,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     const { id } = params;
 
-    // First delete dependent PartRequests
-    await prisma.partRequest.deleteMany({
-      where: { userId: id }
-    });
-
-    // Delete dependent PhoneNumbers
-    await prisma.phoneNumber.deleteMany({
-      where: { userId: id }
-    });
-
-    // Finally delete User
-    await prisma.user.delete({
-      where: { id }
-    });
+    // Delete User and dependent records in a single transaction
+    await prisma.$transaction([
+      prisma.partRequest.deleteMany({ where: { userId: id } }),
+      prisma.phoneNumber.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
