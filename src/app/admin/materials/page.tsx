@@ -67,9 +67,9 @@ export default function AdminMaterialsPage() {
     if (newMaterialDesc) formData.append("description", newMaterialDesc);
     if (newMaterialImage) formData.append("image", newMaterialImage);
     if (newTensileStrength) formData.append("tensileStrength", newTensileStrength);
-    if (newStiffness) formData.append("stiffness", newStiffness);
+    if (newStiffness) formData.append("stiffness", String(parseFloat(newStiffness) / 1000));
     if (newHdt) formData.append("hdt", newHdt);
-    if (newImpactResistance) formData.append("impactResistance", newImpactResistance);
+    if (newImpactResistance) formData.append("impactResistance", String(parseFloat(newImpactResistance) * 1000));
 
     try {
       const res = await fetch("/api/admin/materials", {
@@ -104,9 +104,9 @@ export default function AdminMaterialsPage() {
     if (editingDesc) formData.append("description", editingDesc);
     if (editingImage) formData.append("image", editingImage);
     formData.append("tensileStrength", editingTensileStrength);
-    formData.append("stiffness", editingStiffness);
+    formData.append("stiffness", editingStiffness ? String(parseFloat(editingStiffness) / 1000) : "");
     formData.append("hdt", editingHdt);
-    formData.append("impactResistance", editingImpactResistance);
+    formData.append("impactResistance", editingImpactResistance ? String(parseFloat(editingImpactResistance) * 1000) : "");
 
     try {
       const res = await fetch(`/api/admin/materials/${id}`, {
@@ -246,13 +246,13 @@ export default function AdminMaterialsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Stiffness (GPa)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Stiffness (MPa)</label>
                   <input
                     type="number"
                     step="any"
                     value={newStiffness}
                     onChange={(e) => setNewStiffness(e.target.value)}
-                    placeholder="e.g. 3.2"
+                    placeholder="e.g. 2400"
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -268,13 +268,13 @@ export default function AdminMaterialsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Resistance (J/m)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Resistance (KJ/m²)</label>
                   <input
                     type="number"
                     step="any"
                     value={newImpactResistance}
                     onChange={(e) => setNewImpactResistance(e.target.value)}
-                    placeholder="e.g. 25"
+                    placeholder="e.g. 0.025"
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -359,13 +359,13 @@ export default function AdminMaterialsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Stiffness (GPa)</label>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Stiffness (MPa)</label>
                           <input
                             type="number"
                             step="any"
                             value={editingStiffness}
                             onChange={(e) => setEditingStiffness(e.target.value)}
-                            placeholder="e.g. 3.2"
+                            placeholder="e.g. 2400"
                             className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
                           />
                         </div>
@@ -381,13 +381,13 @@ export default function AdminMaterialsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Impact Resistance (J/m)</label>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Impact Resistance (KJ/m²)</label>
                           <input
                             type="number"
                             step="any"
                             value={editingImpactResistance}
                             onChange={(e) => setEditingImpactResistance(e.target.value)}
-                            placeholder="e.g. 25"
+                            placeholder="e.g. 0.025"
                             className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
                           />
                         </div>
@@ -463,7 +463,7 @@ export default function AdminMaterialsPage() {
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs font-semibold">
                               <span className="text-gray-500">Stiffness</span>
-                              <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness} GPa` : "N/A"}</span>
+                              <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness * 1000} MPa` : "N/A"}</span>
                             </div>
                             <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                               <div 
@@ -491,7 +491,7 @@ export default function AdminMaterialsPage() {
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs font-semibold">
                               <span className="text-gray-500">Impact Resistance</span>
-                              <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance} J/m` : "N/A"}</span>
+                              <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance / 1000} KJ/m²` : "N/A"}</span>
                             </div>
                             <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                               <div 
@@ -509,9 +509,9 @@ export default function AdminMaterialsPage() {
                             setEditingName(m.name);
                             setEditingDesc(m.description || "");
                             setEditingTensileStrength(m.tensileStrength !== null && m.tensileStrength !== undefined ? m.tensileStrength.toString() : "");
-                            setEditingStiffness(m.stiffness !== null && m.stiffness !== undefined ? m.stiffness.toString() : "");
+                            setEditingStiffness(m.stiffness !== null && m.stiffness !== undefined ? (m.stiffness * 1000).toString() : "");
                             setEditingHdt(m.hdt !== null && m.hdt !== undefined ? m.hdt.toString() : "");
-                            setEditingImpactResistance(m.impactResistance !== null && m.impactResistance !== undefined ? m.impactResistance.toString() : "");
+                            setEditingImpactResistance(m.impactResistance !== null && m.impactResistance !== undefined ? (m.impactResistance / 1000).toString() : "");
                             setEditingImage(null);
                           }}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
