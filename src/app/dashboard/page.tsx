@@ -5,7 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RequestForm from "@/components/RequestForm";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -153,7 +153,7 @@ export default function DashboardPage() {
 
                           <div className="flex justify-between items-center pt-1">
                             <div className="text-[10px] text-gray-400">
-                              Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}
+                              Needed: {formatDate(req.dateNeeded, "MMM d, yyyy")}
                             </div>
                             <div className="flex gap-2">
                               {req.status === "PENDING" && isCancelable(req.createdAt) && (
@@ -196,7 +196,7 @@ export default function DashboardPage() {
                               {req.quantity}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {format(new Date(req.dateNeeded), "MMM d, yyyy")}
+                              {formatDate(req.dateNeeded, "MMM d, yyyy")}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
@@ -220,7 +220,7 @@ export default function DashboardPage() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {format(new Date(req.createdAt), "MMM d, h:mm a")}
+                              {formatDate(req.createdAt, "MMM d, h:mm a")}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
                               {isAdmin && (

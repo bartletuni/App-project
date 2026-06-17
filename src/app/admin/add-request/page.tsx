@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { format, addDays } from "date-fns";
+import { addDays } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,7 +29,7 @@ function AdminAddRequestContent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const minDate = format(addDays(new Date(), 5), "yyyy-MM-dd");
+  const minDate = formatDate(addDays(new Date(), 5), "yyyy-MM-dd");
 
   useEffect(() => {
     if (status === "unauthenticated") {

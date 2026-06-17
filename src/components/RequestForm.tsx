@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format, addDays } from "date-fns";
+import { addDays } from "date-fns";
+import { formatDate } from "@/lib/utils";
 
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [file, setFile] = useState<File | null>(null);
@@ -21,7 +22,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
 
-  const minDate = format(addDays(new Date(), 5), "yyyy-MM-dd");
+  const minDate = formatDate(addDays(new Date(), 5), "yyyy-MM-dd");
 
   useEffect(() => {
     fetch("/api/user/phone-numbers")

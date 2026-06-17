@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
                          </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                         {format(new Date(user.createdAt), "MMM d, yyyy")}
+                         {formatDate(user.createdAt, "MMM d, yyyy")}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
                           <button
@@ -227,7 +227,7 @@ export default function AdminUsersPage() {
                         </div>
                         <div>
                             <dt className="text-sm font-medium text-gray-500">Joined On</dt>
-                            <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedUser.createdAt), "MMM d, yyyy")}</dd>
+                            <dd className="mt-1 text-sm text-gray-900 font-semibold">{formatDate(selectedUser.createdAt, "MMM d, yyyy")}</dd>
                         </div>
                     </div>
                 </dl>
