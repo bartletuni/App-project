@@ -139,7 +139,7 @@ export default function MaterialsPage() {
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs font-semibold">
                         <span className="text-gray-500">Stiffness</span>
-                        <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness} GPa` : "N/A"}</span>
+                        <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness * 1000} MPa` : "N/A"}</span>
                       </div>
                       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                         <div 
@@ -167,7 +167,7 @@ export default function MaterialsPage() {
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs font-semibold">
                         <span className="text-gray-500">Impact Resistance</span>
-                        <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance} J/m` : "N/A"}</span>
+                        <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance / 1000} KJ/m²` : "N/A"}</span>
                       </div>
                       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                         <div 
