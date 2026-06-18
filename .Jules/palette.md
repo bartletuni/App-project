@@ -1,11 +1,3 @@
-## 2025-05-18 - Hidden Action Buttons on Touch Devices
-**Learning:** Hiding essential action buttons (like edit and delete) using `opacity-0` with a `group-hover:opacity-100` reveal pattern completely breaks usability on touch devices (mobile/tablet) because they cannot trigger a hover state. As a result, users cannot see or interact with these controls.
-**Action:** When using hover-to-reveal patterns for secondary actions, always use responsive classes (e.g., `opacity-100 sm:opacity-0 sm:group-hover:opacity-100`) to ensure the controls remain persistently visible on touch devices, or adopt alternative patterns like "swipe to reveal" or an explicit "More options" (kebab) menu.
-
-## 2026-06-14 - Focus Indicators on Navbar Links
-**Learning:** Navigation links inside a responsive layout might lose their implicit focus states when styled with Tailwind CSS, particularly if `outline-none` or similar resets are used. Keyboard users might tab through the Navbar without knowing where their focus is.
-**Action:** Add explicit `focus-visible:ring-2` or similar focus indicators to all interactive elements, especially primary navigation links and sign out buttons.
-
-## 2025-06-16 - Actionable Empty States
-**Learning:** Empty states that simply say "No data found" leave users stranded and increase cognitive load, as they have to manually figure out how to populate the list. Providing a clear Call-to-Action (CTA) within the empty state itself significantly improves user onboarding.
-**Action:** Always include a relevant helper text and a primary action button (e.g., "Add First Material" or "Start a Request") inside empty states to guide users directly to the next logical step. Ensure any decorative icons used in these states are marked with `aria-hidden="true"`.
+## 2024-05-18 - Inline Form Validation
+**Learning:** For file upload inputs, users can easily select files exceeding server limits. Standard HTML file inputs do not provide immediate feedback if a file is too large before submission.
+**Action:** When working with file uploads, proactively validate file size on the `onChange` event, explicitly announce the error using `aria-invalid` and `aria-describedby` linked to an accessible alert role element, and disable the form submission button to prevent unnecessary network requests.
