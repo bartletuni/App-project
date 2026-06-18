@@ -17,6 +17,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fileError, setFileError] = useState("");
   
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
@@ -65,7 +66,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     }
 
     if (file.size > 20 * 1024 * 1024) {
-      setError("File size exceeds the 20MB limit.");
+      setFileError("File size exceeds the 20MB limit.");
       setLoading(false);
       return;
     }
@@ -97,6 +98,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       }
 
       setFile(null);
+      setFileError("");
       setNotes("");
       if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
       setQuantity("1");
@@ -139,10 +141,26 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             id="fileUpload"
             type="file"
             accept=".stl,.zip"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onChange={(e) => {
+              const selectedFile = e.target.files?.[0] || null;
+              setFile(selectedFile);
+              if (selectedFile && selectedFile.size > 20 * 1024 * 1024) {
+                setFileError("File size exceeds the 20MB limit.");
+              } else {
+                setFileError("");
+              }
+            }}
+            className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border rounded-lg p-1.5 focus:outline-none focus:ring-2 ${fileError ? "border-red-300 focus:ring-red-500" : "border-gray-200 focus:ring-indigo-500"}`}
             required
+            aria-invalid={fileError ? "true" : "false"}
+            aria-describedby={fileError ? "fileUpload-error" : undefined}
           />
+          {fileError && (
+            <p className="mt-1.5 text-sm text-red-600 font-medium flex items-center gap-1.5" id="fileUpload-error" role="alert">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              {fileError}
+            </p>
+          )}
         </div>
 
         <div>
@@ -253,7 +271,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !!fileError}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
         >
           {loading ? (
