@@ -26,6 +26,7 @@ export async function GET(
     });
 
     if (partRequest) {
+      // For part requests, require authentication and authorization
       const session = await getServerSession(authOptions);
       if (!session || !session.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,12 +35,22 @@ export async function GET(
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     } else {
+      // If it's not a part request, check if it's a public material image
       const material = await prisma.material.findFirst({
         where: { imageId: fileId },
       });
       if (!material) {
+        // Since material images are public but this wasn't found,
+        // and we want to prevent enumerating files that might exist
+        // but aren't materials/requests or user is unauthenticated,
+        // we check session here as a fallback boundary for non-public assets.
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         return NextResponse.json({ error: "File not found" }, { status: 404 });
       }
+      // If material image is found, allow access (public asset)
     }
 
     const bucketName = process.env.R2_BUCKET_NAME || "";
