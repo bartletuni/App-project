@@ -13,6 +13,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
+    if (
+      name.length > 100 ||
+      email.length > 255 ||
+      password.length > 100 ||
+      shippingAddress.length > 500 ||
+      billingAddress.length > 500 ||
+      phone.length > 50
+    ) {
+      return NextResponse.json({ error: "One or more fields exceed maximum allowed length" }, { status: 400 });
+    }
+
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {

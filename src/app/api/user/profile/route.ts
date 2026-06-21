@@ -15,6 +15,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    if (name.length > 100) {
+      return NextResponse.json({ error: "Name exceeds maximum allowed length" }, { status: 400 });
+    }
+
     const userId = (session.user as any).id;
 
     await prisma.user.update({

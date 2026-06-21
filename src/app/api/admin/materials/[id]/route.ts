@@ -34,6 +34,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    if (name.length > 100 || (description && description.length > 2000)) {
+      return NextResponse.json({ error: "Input exceeds maximum allowed length" }, { status: 400 });
+    }
+
     let imageId: string | undefined;
 
     if (file && typeof file !== "string" && file.name) {
