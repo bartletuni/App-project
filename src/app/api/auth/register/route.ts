@@ -13,6 +13,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
+    // Length limits to prevent DoS
+    if (name.length > 100) return NextResponse.json({ error: "Name exceeds maximum length" }, { status: 400 });
+    if (email.length > 100) return NextResponse.json({ error: "Email exceeds maximum length" }, { status: 400 });
+    if (password.length > 100) return NextResponse.json({ error: "Password exceeds maximum length" }, { status: 400 });
+    if (shippingAddress.length > 500) return NextResponse.json({ error: "Shipping address exceeds maximum length" }, { status: 400 });
+    if (billingAddress.length > 500) return NextResponse.json({ error: "Billing address exceeds maximum length" }, { status: 400 });
+    if (phone.length > 50) return NextResponse.json({ error: "Phone number exceeds maximum length" }, { status: 400 });
+
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {

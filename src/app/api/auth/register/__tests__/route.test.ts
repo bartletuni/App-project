@@ -63,6 +63,29 @@ describe("POST /api/auth/register", () => {
     }
   });
 
+  it("should return 400 if any field exceeds maximum length", async () => {
+    const longString = "a".repeat(101);
+    const longAddress = "a".repeat(501);
+
+    const testCases = [
+      { field: "name", value: longString, error: "Name exceeds maximum length" },
+      { field: "email", value: longString, error: "Email exceeds maximum length" },
+      { field: "password", value: longString, error: "Password exceeds maximum length" },
+      { field: "shippingAddress", value: longAddress, error: "Shipping address exceeds maximum length" },
+      { field: "billingAddress", value: longAddress, error: "Billing address exceeds maximum length" },
+      { field: "phone", value: longString, error: "Phone number exceeds maximum length" },
+    ];
+
+    for (const { field, value, error } of testCases) {
+      const req = createRequest({ ...validBody, [field]: value });
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(json.error).toBe(error);
+    }
+  });
+
   it("should pass validation for valid passwords", async () => {
     // Mock user creation successful
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);

@@ -16,6 +16,11 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Prevent DoS by rejecting excessively long passwords
+        if (credentials.password.length > 100) {
+          return null;
+        }
+
         let user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });

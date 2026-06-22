@@ -20,6 +20,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Enforce strict length limits before further validation
+    if (newPassword.length > 100) {
+      return NextResponse.json(
+        { error: "Password exceeds maximum length" },
+        { status: 400 }
+      );
+    }
+
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return NextResponse.json(
