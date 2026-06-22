@@ -9,3 +9,7 @@
 ## 2025-06-16 - Actionable Empty States
 **Learning:** Empty states that simply say "No data found" leave users stranded and increase cognitive load, as they have to manually figure out how to populate the list. Providing a clear Call-to-Action (CTA) within the empty state itself significantly improves user onboarding.
 **Action:** Always include a relevant helper text and a primary action button (e.g., "Add First Material" or "Start a Request") inside empty states to guide users directly to the next logical step. Ensure any decorative icons used in these states are marked with `aria-hidden="true"`.
+
+## 2025-06-18 - Missing Loading States on Async Actions
+**Learning:** Performing asynchronous operations (like creating or updating database records) without providing visual feedback can lead users to believe the application is unresponsive. This is especially problematic on forms, where users might rapidly click "Save" multiple times, resulting in duplicate submissions or errors.
+**Action:** Always add explicit loading states (e.g., changing button text to "Saving..." and adding a spinner icon) and disable the submission button (`disabled={true}`) while the network request is pending.
