@@ -23,6 +23,7 @@ export default function AdminMaterialsPage() {
   const [newImpactResistance, setNewImpactResistance] = useState("");
 
   const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Edit form states
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export default function AdminMaterialsPage() {
   const [editingStiffness, setEditingStiffness] = useState("");
   const [editingHdt, setEditingHdt] = useState("");
   const [editingImpactResistance, setEditingImpactResistance] = useState("");
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const fetchMaterials = () => {
     fetch("/api/admin/materials")
@@ -61,6 +63,7 @@ export default function AdminMaterialsPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMaterialName.trim()) return;
+    setIsSaving(true);
 
     const formData = new FormData();
     formData.append("name", newMaterialName);
@@ -93,11 +96,14 @@ export default function AdminMaterialsPage() {
       }
     } catch (err) {
       alert("Error adding material");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdate = async (id: string) => {
     if (!editingName.trim()) return;
+    setIsUpdating(id);
 
     const formData = new FormData();
     formData.append("name", editingName);
@@ -129,6 +135,8 @@ export default function AdminMaterialsPage() {
       }
     } catch (err) {
       alert("Error updating material");
+    } finally {
+      setIsUpdating(null);
     }
   };
 
@@ -291,9 +299,20 @@ export default function AdminMaterialsPage() {
               <div className="flex gap-4 pt-2">
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold transition-colors"
+                  disabled={isSaving}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Save Material
+                  {isSaving ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Material"
+                  )}
                 </button>
                 <button
                   type="button"
@@ -402,9 +421,20 @@ export default function AdminMaterialsPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleUpdate(m.id)}
-                            className="text-green-600 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
+                            disabled={isUpdating === m.id}
+                            className="text-green-600 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <Check className="w-4 h-4" /> Save
+                            {isUpdating === m.id ? (
+                               <>
+                                 <svg className="animate-spin h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                 </svg>
+                                 Saving...
+                               </>
+                            ) : (
+                               <><Check className="w-4 h-4" aria-hidden="true" /> Save</>
+                            )}
                           </button>
                           <button
                             onClick={() => {
