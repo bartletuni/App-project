@@ -331,7 +331,7 @@ function AdminDashboardContent() {
                             setFilterStatus("ALL");
                             setFilterDate("");
                         }}
-                        className="mt-4 text-indigo-600 font-bold hover:underline"
+                        className="mt-4 text-indigo-600 font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg px-2 py-1"
                     >
                         Reset all filters
                     </button>
