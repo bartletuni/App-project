@@ -20,6 +20,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (currentPassword.length > 100 || newPassword.length > 100) {
+      return NextResponse.json(
+        { error: "Passwords must not exceed 100 characters" },
+        { status: 400 }
+      );
+    }
+
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return NextResponse.json(

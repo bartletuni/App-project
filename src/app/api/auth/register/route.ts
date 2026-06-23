@@ -13,6 +13,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
+    // Input length validation to prevent DoS attacks
+    if (name.length > 100 || email.length > 100 || password.length > 100) {
+      return NextResponse.json({ error: "Name, email, and password must not exceed 100 characters" }, { status: 400 });
+    }
+    if (shippingAddress.length > 500 || billingAddress.length > 500) {
+      return NextResponse.json({ error: "Addresses must not exceed 500 characters" }, { status: 400 });
+    }
+    if (phone.length > 50) {
+      return NextResponse.json({ error: "Phone number must not exceed 50 characters" }, { status: 400 });
+    }
+
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
