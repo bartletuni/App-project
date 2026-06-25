@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import AdminNav from "@/components/AdminNav";
+import AppShell from "@/components/AppShell";
 import { Plus, Trash2, Edit2, Check, X, Package } from "lucide-react";
 
 export default function AdminMaterialsPage() {
@@ -167,20 +167,19 @@ export default function AdminMaterialsPage() {
   const maxImpact = Math.max(...materials.map((m) => m.impactResistance || 0), 0);
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <AdminNav />
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div className="flex justify-between items-center mb-8">
+    <AppShell variant="admin">
+      <div className="max-w-4xl mx-auto px-5 sm:px-8 py-8 sm:py-10 w-full">
+        <div className="flex justify-between items-end gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-cream-200 tracking-tight">Material Management</h1>
-            <p className="text-cream-500 mt-1">Manage the materials available for part requests.</p>
+            <span className="eyebrow">CONSOLE ⁄ STOCK</span>
+            <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Stock <span className="italic text-clay-300">control</span></h1>
+            <p className="mt-2 text-cream-400">Manage the materials available for part requests.</p>
           </div>
           <button
             onClick={() => setIsAdding(true)}
-            className="flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-sm active:scale-95"
+            className="shrink-0 inline-flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Add Material
           </button>
         </div>
@@ -554,6 +553,6 @@ export default function AdminMaterialsPage() {
           )}
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

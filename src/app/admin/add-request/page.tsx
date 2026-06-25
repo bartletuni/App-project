@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
-import AdminNav from "@/components/AdminNav";
+import AppShell from "@/components/AppShell";
 
 function AdminAddRequestContent() {
   const { data: session, status } = useSession();
@@ -168,16 +168,15 @@ function AdminAddRequestContent() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <AdminNav />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <AppShell variant="admin">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8 sm:py-10 w-full">
         <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-cream-200 tracking-tight">Add Part Request</h1>
-            <p className="text-cream-500 mt-1">Submit a new request on behalf of a customer.</p>
+          <span className="eyebrow">CONSOLE ⁄ NEW ORDER</span>
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Add part <span className="italic text-clay-300">request</span></h1>
+          <p className="mt-2 text-cream-400">Submit a new request on behalf of a customer.</p>
         </div>
 
-        <div className="max-w-2xl bg-espresso-800/72 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-sm border border-clay-500/18">
+        <div className="max-w-2xl panel rounded-md p-6 sm:p-8">
 
           {error && (
             <div className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-center" role="alert">
@@ -353,7 +352,7 @@ function AdminAddRequestContent() {
           </form>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
 

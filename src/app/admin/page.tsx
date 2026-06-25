@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
-import AdminNav from "@/components/AdminNav";
+import AppShell from "@/components/AppShell";
 
 function AdminDashboardContent() {
   const { data: session, status } = useSession();
@@ -214,20 +214,14 @@ function AdminDashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <AdminNav />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div className="flex justify-between items-end mb-8">
-            <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-cream-200 tracking-tight">
-                  All System{" "}
-                  <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
-                    Requests
-                  </span>
-                </h1>
-               <p className="text-cream-500 mt-1">Manage, update, and review all user submissions.</p>
-            </div>
+    <AppShell variant="admin">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8 sm:py-10 w-full">
+        <div className="mb-8">
+          <span className="eyebrow">CONSOLE ⁄ ORDERS</span>
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">
+            All system <span className="italic text-clay-300">requests</span>
+          </h1>
+          <p className="mt-2 text-cream-400">Manage, update, and review every user submission.</p>
         </div>
 
         {/* Filters */}
@@ -622,7 +616,7 @@ function AdminDashboardContent() {
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }
 

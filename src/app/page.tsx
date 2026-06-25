@@ -2,23 +2,13 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
+  ArrowUpRight,
   Layers,
   Scan,
   Zap,
-  Shield,
-  CheckCircle2,
-  Sparkles,
-  Box,
-  Thermometer,
-  Ruler,
-  Clock,
-  ScanLine,
-  PencilRuler,
-  Printer,
-  PackageCheck,
+  Plus,
 } from "lucide-react";
 import {
   motion,
@@ -29,139 +19,85 @@ import {
   useMotionTemplate,
 } from "framer-motion";
 
+import SiteHeader from "@/components/SiteHeader";
 import Reveal from "@/components/ui/Reveal";
-import TiltCard from "@/components/ui/TiltCard";
+import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
-import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import Marquee from "@/components/ui/Marquee";
+import AnimatedCounter from "@/components/ui/AnimatedCounter";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.1 },
-  },
-};
+const heroSpecs = [
+  { k: "BUILD VOLUME", v: "256³", u: "mm" },
+  { k: "EXTRUSION", v: "320", u: "°C max" },
+  { k: "LAYER", v: "0.05", u: "mm" },
+  { k: "LEAD TIME", v: "72", u: "hours" },
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 90, damping: 16 },
-  },
-};
-
-const competencies = [
+const capabilities = [
   {
+    n: "01",
     icon: Layers,
     title: "Additive Manufacturing",
-    body: "Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade materials.",
-    accent: "indigo",
-    glow: "rgba(217,142,61,0.22)",
+    body: "Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade and fiber-reinforced materials.",
+    tags: ["FDM / FFF", "Carbon-Fiber", "Engineering-Grade"],
   },
   {
+    n: "02",
     icon: Scan,
-    title: "3D Scanning & Reverse Eng.",
-    body: "High-fidelity scanning for intricate part reproduction, exact 1:1 copies, and robust digital archiving.",
-    accent: "blue",
-    glow: "rgba(230,168,95,0.20)",
+    title: "Scanning & Reverse Engineering",
+    body: "High-fidelity 3D scanning for intricate part reproduction, exact 1:1 copies, and durable digital archiving of legacy components.",
+    tags: ["1:1 Reproduction", "Digital Archive", "CAD Rebuild"],
   },
   {
+    n: "03",
     icon: Zap,
     title: "Rapid Prototyping",
-    body: "Iterative design support to dramatically accelerate your product development cycles.",
-    accent: "purple",
-    glow: "rgba(193,122,75,0.22)",
+    body: "Iterative design support that compresses your development cycles — from first concept to validated, shippable part.",
+    tags: ["Iteration", "Validation", "Short Run"],
   },
-];
-
-const accentMap: Record<string, string> = {
-  indigo: "bg-clay-500/15 text-clay-300 group-hover:border-clay-500/40",
-  blue: "bg-ember-400/15 text-ember-300 group-hover:border-ember-400/40",
-  purple: "bg-clay-700/20 text-clay-200 group-hover:border-clay-600/40",
-};
-
-const stats = [
-  { value: 256, suffix: "mm³", label: "Max build volume", icon: Box },
-  { value: 320, suffix: "°C", label: "Extrusion capacity", icon: Thermometer },
-  { value: 0.05, suffix: "mm", label: "Layer precision", decimals: 2, icon: Ruler },
-  { value: 72, suffix: "h", label: "Rapid turnaround", icon: Clock },
-];
-
-const marqueeItems = [
-  "Carbon-Fiber Nylon",
-  "PETG-CF",
-  "ASA",
-  "Polycarbonate",
-  "TPU",
-  "PA12",
-  "Reverse Engineering",
-  "1:1 Reproduction",
-  "Engineering-Grade",
-  "Impact Resistant",
 ];
 
 const process = [
-  {
-    icon: ScanLine,
-    step: "01",
-    title: "Scan & Capture",
-    body: "We digitize your legacy or reference part with high-fidelity 3D scanning.",
-  },
-  {
-    icon: PencilRuler,
-    step: "02",
-    title: "Design & Engineer",
-    body: "CAD refinement, tolerancing, and material selection tuned to the application.",
-  },
-  {
-    icon: Printer,
-    step: "03",
-    title: "Print & Validate",
-    body: "Production on engineering-grade printers with dimensional verification.",
-  },
-  {
-    icon: PackageCheck,
-    step: "04",
-    title: "Deliver",
-    body: "Finished, inspected components shipped directly to your door.",
-  },
+  { n: "01", title: "Scan & Capture", body: "Digitize legacy or reference parts with high-fidelity scanning." },
+  { n: "02", title: "Design & Engineer", body: "CAD refinement, tolerancing, and material selection for the job." },
+  { n: "03", title: "Print & Validate", body: "Production on engineering printers with dimensional verification." },
+  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door." },
+];
+
+const specSheet = [
+  ["Maximum build volume", "256 × 256 × 256 mm"],
+  ["Extrusion temperature", "Up to 320 °C"],
+  ["Minimum layer height", "0.05 mm"],
+  ["Materials", "PA-CF · PETG-CF · PC · ASA · TPU · PA12"],
+  ["Scanning", "Intricate geometry · near-exact reproduction"],
+  ["Typical turnaround", "72 hours"],
+];
+
+const differentiators = [
+  { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
+  { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
+  { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
+];
+
+const marqueeItems = [
+  "Carbon-Fiber Nylon", "PETG-CF", "ASA", "Polycarbonate", "TPU",
+  "PA12", "Reverse Engineering", "1:1 Reproduction", "Impact Resistant",
 ];
 
 export default function LandingPage() {
   const heroRef = useRef<HTMLElement>(null);
 
-  // Scroll-driven parallax for hero content
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 90]);
 
-  // Pointer-reactive highlight inside the hero
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
-  const glowX = useSpring(useTransform(px, [0, 1], ["0%", "100%"]), {
-    stiffness: 80,
-    damping: 20,
-  });
-  const glowY = useSpring(useTransform(py, [0, 1], ["0%", "100%"]), {
-    stiffness: 80,
-    damping: 20,
-  });
-  const heroGlow = useMotionTemplate`radial-gradient(600px circle at ${glowX} ${glowY}, rgba(217,142,61,0.12), transparent 60%)`;
-
-  // Subtle headline tilt toward the cursor
-  const tiltX = useSpring(useTransform(py, [0, 1], [6, -6]), {
-    stiffness: 120,
-    damping: 18,
-  });
-  const tiltY = useSpring(useTransform(px, [0, 1], [-6, 6]), {
-    stiffness: 120,
-    damping: 18,
-  });
+  const glowX = useSpring(useTransform(px, [0, 1], ["0%", "100%"]), { stiffness: 80, damping: 20 });
+  const glowY = useSpring(useTransform(py, [0, 1], ["0%", "100%"]), { stiffness: 80, damping: 20 });
+  const heroGlow = useMotionTemplate`radial-gradient(620px circle at ${glowX} ${glowY}, rgba(217,142,61,0.13), transparent 60%)`;
 
   const handleHeroPointer = (e: React.MouseEvent<HTMLElement>) => {
     const rect = heroRef.current?.getBoundingClientRect();
@@ -171,261 +107,168 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent font-sans selection:bg-clay-500/30 selection:text-cream-100">
-      {/* Navigation */}
-      <nav
-        className="fixed top-0 w-full bg-espresso-800/62 backdrop-blur-xl z-50 border-b border-espresso-700/60"
-        aria-label="Landing page navigation"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="flex items-center gap-3"
-            >
-              <Image
-                src="/logo.png"
-                alt="TakomoCo Logo"
-                width={32}
-                height={32}
-                className="rounded-lg shadow-sm"
-              />
-              <span className="font-bold text-xl text-cream-200 tracking-tight">
-                TakomoCo
-              </span>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="flex items-center gap-6"
-            >
-              <Link
-                href="/materials"
-                className="group relative text-sm font-medium text-cream-400 hover:text-clay-300 transition-colors"
-              >
-                Materials
-                <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-clay-600 transition-all duration-300 group-hover:w-full" />
-              </Link>
-              <Magnetic strength={0.5}>
-                <Link
-                  href="/login"
-                  className="inline-block text-sm font-bold bg-clay-600 text-white px-5 py-2 rounded-full hover:bg-clay-700 transition-colors shadow-md hover:shadow-glow"
-                >
-                  Sign In
-                </Link>
-              </Magnetic>
-            </motion.div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-transparent font-sans text-cream-200 selection:bg-clay-500/30 selection:text-cream-100">
+      <SiteHeader />
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section
         ref={heroRef}
         onMouseMove={handleHeroPointer}
-        className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden"
+        className="relative overflow-hidden px-5 sm:px-8 pt-28 sm:pt-36 pb-16"
       >
-        {/* Pointer-reactive highlight */}
-        <motion.div
-          aria-hidden="true"
-          style={{ background: heroGlow }}
-          className="pointer-events-none absolute inset-0 z-0"
-        />
+        <motion.div aria-hidden="true" style={{ background: heroGlow }} className="pointer-events-none absolute inset-0 z-0" />
 
-        <motion.div
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.div variants={itemVariants} className="flex justify-center mb-8">
-              <span className="inline-flex items-center gap-2 rounded-full border border-clay-500/40 bg-espresso-800/72 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-clay-300 shadow-sm">
-                <Sparkles className="w-4 h-4" aria-hidden="true" />
-                Precision additive manufacturing studio
-              </span>
-            </motion.div>
-
-            <motion.h1
-              variants={itemVariants}
-              style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 1200 }}
-              className="text-5xl md:text-7xl font-extrabold text-cream-200 tracking-tight mb-8 leading-[1.05] [transform-style:preserve-3d]"
-            >
-              Digital Design <br className="hidden md:block" />
-              <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
-                Physical Reality
-              </span>
-            </motion.h1>
-
-            <motion.p
-              variants={itemVariants}
-              className="mt-4 max-w-2xl text-xl text-cream-400 mx-auto mb-10 leading-relaxed"
-            >
-              TakomoCo is a specialized additive manufacturing and rapid
-              prototyping studio. We offer high-precision 3D printing and 3D
-              scanning services for engineering and reproduction applications.
-            </motion.p>
-
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row justify-center gap-4"
-            >
-              <Magnetic strength={0.4}>
-                <Link
-                  href="/login"
-                  className="group inline-flex justify-center items-center gap-2 bg-clay-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-clay-700 transition-all shadow-lg hover:shadow-glow-lg hover:-translate-y-0.5"
-                >
-                  Start Your Project
-                  <ArrowRight
-                    className="w-5 h-5 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </Link>
-              </Magnetic>
-              <Magnetic strength={0.3}>
-                <Link
-                  href="/materials"
-                  className="inline-flex justify-center items-center bg-espresso-800/62 backdrop-blur-md text-cream-200 border border-espresso-600/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-espresso-800/90 transition-all shadow-sm hover:shadow-md"
-                >
-                  View Material Library
-                </Link>
-              </Magnetic>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        {/* Scroll cue */}
-        <motion.div
-          aria-hidden="true"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        >
-          <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-espresso-500/80 p-1.5">
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-              className="h-2 w-1 rounded-full bg-clay-500"
-            />
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Materials marquee strip */}
-      <section className="py-6 border-y border-espresso-600/50 bg-espresso-800/45 backdrop-blur-sm" aria-label="Supported materials and capabilities">
-        <Marquee>
-          {marqueeItems.map((item) => (
-            <span
-              key={item}
-              className="flex items-center gap-3 text-lg font-semibold text-cream-500 whitespace-nowrap"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-clay-400" />
-              {item}
-            </span>
-          ))}
-        </Marquee>
-      </section>
-
-      {/* Stats band */}
-      <section className="py-20" aria-label="Capability highlights">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <Reveal key={stat.label} direction="up" delay={i * 0.1}>
-                <div className="group h-full rounded-2xl border border-clay-500/25 bg-espresso-800/62 backdrop-blur-xl p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-clay-500/40">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-clay-500/15 text-clay-300 transition-transform group-hover:scale-110">
-                    <stat.icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                  <div className="text-3xl md:text-4xl font-extrabold text-cream-200">
-                    <AnimatedCounter
-                      value={stat.value}
-                      suffix={stat.suffix}
-                      decimals={stat.decimals ?? 0}
-                    />
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-cream-500">
-                    {stat.label}
-                  </p>
+        <motion.div style={{ y: heroY }} className="relative z-10 mx-auto max-w-6xl">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 items-end">
+            {/* Headline column */}
+            <div className="lg:col-span-8">
+              <Reveal direction="up">
+                <div className="flex items-center gap-3 mb-7">
+                  <span className="eyebrow">EST. UTAH</span>
+                  <span className="h-px w-10 bg-clay-500/40" />
+                  <span className="eyebrow">ADDITIVE MANUFACTURING</span>
                 </div>
               </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Core Competencies */}
-      <section className="py-20 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-16">
-            <h2 className="text-sm font-bold text-clay-300 uppercase tracking-widest mb-2">
-              Capabilities
-            </h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-cream-200">
-              Core Competencies
-            </h3>
-          </Reveal>
+              <h1 className="font-display font-semibold tracking-tight text-cream-100 text-[2.7rem] leading-[1.02] sm:text-6xl lg:text-7xl">
+                <Reveal direction="up" delay={0.05}>
+                  <span className="block">Forging digital</span>
+                </Reveal>
+                <Reveal direction="up" delay={0.12}>
+                  <span className="block">geometry into</span>
+                </Reveal>
+                <Reveal direction="up" delay={0.19}>
+                  <span className="block italic text-clay-300">physical parts.</span>
+                </Reveal>
+              </h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 [perspective:1200px]">
-            {competencies.map((c, i) => (
-              <Reveal key={c.title} direction="up" delay={i * 0.12}>
-                <TiltCard glowColor={c.glow} className="group h-full rounded-2xl">
-                  <div className="h-full bg-espresso-800/62 backdrop-blur-xl rounded-2xl p-8 border border-clay-500/20 transition-colors hover:shadow-xl">
-                    <div
-                      className={`w-14 h-14 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 border border-transparent transition-transform group-hover:scale-110 ${accentMap[c.accent]}`}
+              <Reveal direction="up" delay={0.28}>
+                <p className="mt-8 max-w-xl text-lg leading-relaxed text-cream-400">
+                  A specialized additive manufacturing and rapid prototyping
+                  studio — high-precision 3D printing and scanning for
+                  engineering and reproduction work.
+                </p>
+              </Reveal>
+
+              <Reveal direction="up" delay={0.36}>
+                <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                  <Magnetic strength={0.4}>
+                    <Link
+                      href="/login"
+                      className="group inline-flex items-center justify-center gap-2 bg-clay-600 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow"
                     >
-                      <c.icon className="w-7 h-7" aria-hidden="true" />
-                    </div>
-                    <h4 className="text-xl font-bold text-cream-200 mb-3">
-                      {c.title}
-                    </h4>
-                    <p className="text-cream-400 leading-relaxed">{c.body}</p>
-                  </div>
-                </TiltCard>
+                      Start a build
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                    </Link>
+                  </Magnetic>
+                  <Magnetic strength={0.3}>
+                    <Link
+                      href="/materials"
+                      className="group inline-flex items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
+                    >
+                      Material index
+                      <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                    </Link>
+                  </Magnetic>
+                </div>
               </Reveal>
-            ))}
+            </div>
+
+            {/* Spec stamp */}
+            <Reveal direction="left" delay={0.3} className="lg:col-span-4">
+              <Panel className="p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <span className="eyebrow">SHOP SPEC</span>
+                  <Plus className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
+                </div>
+                <dl className="divide-y divide-clay-500/12">
+                  {heroSpecs.map((s) => (
+                    <div key={s.k} className="flex items-baseline justify-between py-3">
+                      <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500">{s.k}</dt>
+                      <dd className="font-display text-2xl text-cream-100">
+                        {s.v}
+                        <span className="ml-1 font-mono text-[10px] tracking-normal text-clay-400">{s.u}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </Panel>
+            </Reveal>
           </div>
+        </motion.div>
+      </section>
+
+      {/* Materials ticker */}
+      <section className="border-y border-clay-500/12 bg-espresso-900/40" aria-label="Materials">
+        <div className="flex items-center">
+          <span className="hidden sm:block shrink-0 border-r border-clay-500/12 px-6 py-4 eyebrow">STOCK ⁄ FILAMENT</span>
+          <Marquee className="py-4">
+            {marqueeItems.map((m) => (
+              <span key={m} className="flex items-center gap-3 font-mono text-sm uppercase tracking-[0.15em] text-cream-500 whitespace-nowrap">
+                <span className="h-1 w-1 bg-clay-400" />
+                {m}
+              </span>
+            ))}
+          </Marquee>
         </div>
       </section>
 
-      {/* Process timeline */}
-      <section className="py-20" aria-label="Our process">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-16">
-            <h2 className="text-sm font-bold text-clay-300 uppercase tracking-widest mb-2">
-              Workflow
-            </h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-cream-200">
-              From Concept to Component
-            </h3>
-          </Reveal>
+      {/* Capabilities — numbered editorial rows */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28">
+        <Reveal>
+          <div className="flex items-end justify-between gap-6 mb-12">
+            <div>
+              <span className="eyebrow">CAPABILITIES</span>
+              <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we make</h2>
+            </div>
+            <span className="hidden sm:block font-mono text-xs text-cream-600">[ 03 DISCIPLINES ]</span>
+          </div>
+        </Reveal>
 
-          <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Connecting line */}
-            <div
-              aria-hidden="true"
-              className="hidden md:block absolute top-7 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-clay-500 to-transparent"
-            />
-            {process.map((p, i) => (
-              <Reveal key={p.step} direction="up" delay={i * 0.12}>
-                <div className="relative text-center">
-                  <div className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-espresso-800 border border-clay-500/25 text-clay-300 shadow-md">
-                    <p.icon className="h-6 w-6" aria-hidden="true" />
-                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-clay-600 text-[10px] font-bold text-white shadow">
-                      {p.step}
+        <div className="border-t border-clay-500/15">
+          {capabilities.map((c, i) => (
+            <Reveal key={c.n} delay={i * 0.08}>
+              <div className="group grid md:grid-cols-12 gap-4 md:gap-8 items-start border-b border-clay-500/15 py-8 transition-colors hover:bg-espresso-800/30">
+                <div className="md:col-span-1 flex md:block items-center gap-3">
+                  <span className="font-mono text-sm text-clay-400">{c.n}</span>
+                </div>
+                <div className="md:col-span-1">
+                  <span className="flex h-11 w-11 items-center justify-center border border-clay-500/25 text-clay-300 transition-colors group-hover:bg-clay-500/15">
+                    <c.icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                </div>
+                <h3 className="md:col-span-4 font-display text-2xl text-cream-100">{c.title}</h3>
+                <p className="md:col-span-4 text-cream-400 leading-relaxed">{c.body}</p>
+                <div className="md:col-span-2 flex flex-wrap gap-1.5">
+                  {c.tags.map((t) => (
+                    <span key={t} className="border border-clay-500/20 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-500">
+                      {t}
                     </span>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="border-y border-clay-500/12 bg-espresso-900/40">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-20">
+          <Reveal>
+            <span className="eyebrow">WORKFLOW</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-12">Concept to component</h2>
+          </Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-clay-500/15">
+            {process.map((p, i) => (
+              <Reveal key={p.n} delay={i * 0.1} className="bg-espresso-900">
+                <div className="h-full p-6 hover:bg-espresso-800/50 transition-colors">
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-display text-4xl text-clay-500/70">{p.n}</span>
+                    <span className="h-2 w-2 rounded-full bg-clay-400" />
                   </div>
-                  <h4 className="text-lg font-bold text-cream-200 mb-2">
-                    {p.title}
-                  </h4>
-                  <p className="text-sm text-cream-400 leading-relaxed">
-                    {p.body}
-                  </p>
+                  <h3 className="font-display text-xl text-cream-100 mb-2">{p.title}</h3>
+                  <p className="text-sm text-cream-400 leading-relaxed">{p.body}</p>
                 </div>
               </Reveal>
             ))}
@@ -433,151 +276,88 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Technical Specs & Differentiators */}
-      <section className="py-24 bg-espresso-950 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div
-          aria-hidden="true"
-          className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-clay-500/20 blur-[120px] animate-blob"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-clay-700/20 blur-[120px] animate-blob animation-delay-2000"
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Technical Specifications */}
-            <Reveal direction="right">
-              <h3 className="text-3xl font-extrabold mb-8 text-white">
-                Technical Specifications
-              </h3>
-              <div className="space-y-6">
-                {[
-                  {
-                    color: "text-ember-300",
-                    title: "Maximum Build Volume",
-                    body: "256mm x 256mm x 256mm space for dense, robust components.",
-                  },
-                  {
-                    color: "text-ember-300",
-                    title: "Advanced Thermal Capacity",
-                    body: "Optimized for specialized materials requiring up to 320°C extrusion temperature.",
-                  },
-                  {
-                    color: "text-clay-300",
-                    title: "Scanning Precision",
-                    body: "Capable of capturing highly intricate geometries for near-exact reproductions.",
-                  },
-                ].map((spec) => (
-                  <div
-                    key={spec.title}
-                    className="flex items-start gap-4 rounded-xl p-3 transition-colors hover:bg-white/5"
-                  >
-                    <div className={`mt-1 bg-white/10 p-2 rounded-lg ${spec.color}`}>
-                      <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-bold text-white">
-                        {spec.title}
-                      </h4>
-                      <p className="text-cream-500 mt-1">{spec.body}</p>
-                    </div>
-                  </div>
+      {/* Spec sheet + differentiators */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28 grid lg:grid-cols-12 gap-12">
+        <Reveal direction="right" className="lg:col-span-7">
+          <span className="eyebrow">SPECIFICATION</span>
+          <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The fine print</h2>
+          <Panel className="p-0 overflow-hidden">
+            <table className="w-full">
+              <tbody>
+                {specSheet.map(([k, v], i) => (
+                  <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
+                    <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
+                    <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
+                  </tr>
                 ))}
-              </div>
-            </Reveal>
+              </tbody>
+            </table>
+          </Panel>
+        </Reveal>
 
-            {/* Differentiators */}
-            <Reveal direction="left" delay={0.1}>
-              <div className="bg-white/5 border border-clay-500/12 rounded-3xl p-10 backdrop-blur-sm transition-colors hover:border-clay-500/25">
-                <h3 className="text-2xl font-extrabold mb-8 text-white flex items-center gap-3">
-                  <Shield className="w-7 h-7 text-ember-300" aria-hidden="true" />
-                  Why Choose TakomoCo?
-                </h3>
-                <ul className="space-y-8">
-                  <li>
-                    <h4 className="text-lg font-bold text-ember-300 mb-2">
-                      Material Mastery
-                    </h4>
-                    <p className="text-cream-500 leading-relaxed">
-                      Highly specialized in handling complex, abrasive, and
-                      carbon-fiber-reinforced composites.
-                    </p>
-                  </li>
-                  <li>
-                    <h4 className="text-lg font-bold text-ember-300 mb-2">
-                      End-to-End Workflow
-                    </h4>
-                    <p className="text-cream-500 leading-relaxed">
-                      From scanning a broken legacy part to engineering and
-                      delivering a fiber-reinforced replacement seamlessly.
-                    </p>
-                  </li>
-                  <li>
-                    <h4 className="text-lg font-bold text-clay-300 mb-2">
-                      Agile Response
-                    </h4>
-                    <p className="text-cream-500 leading-relaxed">
-                      Our small-scale focus allows for rapid pivots, personal
-                      attention, and dedicated engineering support.
-                    </p>
-                  </li>
-                </ul>
+        <Reveal direction="left" delay={0.1} className="lg:col-span-5">
+          <span className="eyebrow">WHY TAKOMO</span>
+          <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The difference</h2>
+          <div className="space-y-px bg-clay-500/15">
+            {differentiators.map((d) => (
+              <div key={d.title} className="bg-espresso-900 p-6">
+                <h3 className="font-display text-xl text-clay-300 mb-2">{d.title}</h3>
+                <p className="text-cream-400 leading-relaxed text-sm">{d.body}</p>
               </div>
-            </Reveal>
+            ))}
+            <div className="bg-espresso-900 p-6 flex items-end gap-6">
+              <div>
+                <div className="font-display text-5xl text-cream-100">
+                  <AnimatedCounter value={1} suffix=":1" />
+                </div>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500">Reproduction fidelity</p>
+              </div>
+              <div>
+                <div className="font-display text-5xl text-cream-100">
+                  <AnimatedCounter value={72} suffix="h" />
+                </div>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500">Typical turnaround</p>
+              </div>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      {/* Footer / CTA */}
-      <footer
-        className="bg-transparent py-16 border-t border-espresso-600/50"
-        aria-label="Site footer"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* CTA + footer */}
+      <footer className="border-t border-clay-500/15">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-20">
           <Reveal>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-cream-200 mb-6">
-              Ready to start building?
-            </h2>
-            <p className="text-xl text-cream-400 mb-8 max-w-2xl mx-auto">
-              Contact us today or log in to submit a request. We specialize in
-              high-strength, chemically and impact resistant composites.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
-              <Magnetic strength={0.4}>
-                <Link
-                  href="/login"
-                  className="inline-block bg-clay-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-clay-700 transition-all shadow-md hover:shadow-glow"
-                >
-                  Submit a Request
-                </Link>
-              </Magnetic>
-              <Magnetic strength={0.3}>
-                <a
-                  href="mailto:takomocompany@gmail.com"
-                  className="inline-block bg-espresso-800/62 backdrop-blur-md text-cream-200 border border-espresso-600/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-espresso-800/90 transition-all shadow-sm hover:shadow-md"
-                >
+            <div className="grid lg:grid-cols-12 gap-10 items-center">
+              <div className="lg:col-span-8">
+                <h2 className="font-display text-4xl sm:text-6xl text-cream-100 leading-[1.05]">
+                  Ready to start <span className="italic text-clay-300">building?</span>
+                </h2>
+                <p className="mt-5 max-w-lg text-cream-400">
+                  Submit a request or reach out directly. We specialize in
+                  high-strength, chemically and impact-resistant composites.
+                </p>
+              </div>
+              <div className="lg:col-span-4 flex flex-col gap-3">
+                <Magnetic strength={0.3}>
+                  <Link href="/login" className="group flex items-center justify-between gap-2 bg-clay-600 px-6 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors">
+                    Submit a request
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </Link>
+                </Magnetic>
+                <a href="mailto:takomocompany@gmail.com" className="group flex items-center justify-between gap-2 border border-clay-500/30 px-6 py-4 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors">
                   takomocompany@gmail.com
+                  <ArrowUpRight className="h-4 w-4 text-clay-300" aria-hidden="true" />
                 </a>
-              </Magnetic>
+              </div>
             </div>
           </Reveal>
 
-          <div className="pt-8 border-t border-espresso-600/50 flex flex-col md:flex-row justify-between items-center text-sm text-cream-500">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Image
-                src="/logo.png"
-                alt="TakomoCo Logo"
-                width={24}
-                height={24}
-                className="rounded"
-              />
-              <span className="font-semibold text-cream-200">TakomoCo</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center">
-              <span>📞 385-695-4178</span>
-              <span>Primary NAICS: 333248, 541330, 541420</span>
-              <span>© {new Date().getFullYear()} TakomoCo. All rights reserved.</span>
+          <div className="mt-16 pt-8 border-t border-clay-500/12 flex flex-col sm:flex-row justify-between gap-6 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-600">
+            <span className="text-cream-300">TAKOMO<span className="text-clay-400">⁄</span>CO</span>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
+              <span>☎ 385-695-4178</span>
+              <span>NAICS 333248 · 541330 · 541420</span>
+              <span>© {new Date().getFullYear()}</span>
             </div>
           </div>
         </div>

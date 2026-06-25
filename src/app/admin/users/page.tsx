@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import AdminNav from "@/components/AdminNav";
+import AppShell from "@/components/AppShell";
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
@@ -69,18 +69,15 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <AdminNav />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div className="flex justify-between items-end mb-8">
-            <div>
-               <h1 className="text-3xl font-extrabold text-cream-200 tracking-tight">User Management</h1>
-               <p className="text-cream-500 mt-1">View and manage registered users.</p>
-            </div>
+    <AppShell variant="admin">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-8 sm:py-10 w-full">
+        <div className="mb-8">
+          <span className="eyebrow">CONSOLE ⁄ CLIENTS</span>
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Client <span className="italic text-clay-300">registry</span></h1>
+          <p className="mt-2 text-cream-400">View and manage registered users.</p>
         </div>
 
-        <div className="bg-espresso-800/72 backdrop-blur-md rounded-2xl shadow-sm border border-clay-500/18 overflow-hidden">
+        <div className="panel rounded-md overflow-hidden">
           {users.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
                 <svg className="w-12 h-12 text-cream-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -214,6 +211,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 }

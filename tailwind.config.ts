@@ -46,6 +46,14 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
+        display: [
+          '"Iowan Old Style"',
+          '"Palatino Linotype"',
+          "Palatino",
+          "Georgia",
+          "Cambria",
+          "serif",
+        ],
       },
       boxShadow: {
         glow: "0 0 55px -15px rgba(217, 142, 61, 0.55)",
