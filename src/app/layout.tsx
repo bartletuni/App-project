@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -19,6 +19,11 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "TakomoCo — Additive Manufacturing & Rapid Prototyping",
   description: "TakomoCo is a specialized additive manufacturing and rapid prototyping studio offering high-precision 3D printing and 3D scanning services.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
