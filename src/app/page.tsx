@@ -71,6 +71,11 @@ const specSheet = [
   ["Materials", "PA-CF · PETG-CF · PC · ASA · TPU · PA12"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
   ["Typical turnaround", "72 hours"],
+const stats = [
+  { value: 256, suffix: "mm³", label: "Max build volume", icon: Box },
+  { value: 320, suffix: "°C", label: "Extrusion capacity", icon: Thermometer },
+  { value: 0.05, suffix: "mm", label: "Layer precision", decimals: 2, icon: Ruler },
+  { value: 72, suffix: "h", label: "Rapid turnaround", icon: Clock },
 ];
 
 const differentiators = [
