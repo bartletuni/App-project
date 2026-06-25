@@ -28,7 +28,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
 
-  const minDate = format(addDays(new Date(), 5), "yyyy-MM-dd");
+  const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
   useEffect(() => {
     fetch("/api/user/phone-numbers")
@@ -161,7 +161,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             <input id="dateNeeded" type="date" min={minDate} value={dateNeeded} onChange={(e) => setDateNeeded(e.target.value)} className={field} required />
           </div>
         </div>
-        <p className="-mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-600">Min 5-day lead time</p>
+        <p className="-mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-600">Min 3-day lead time</p>
 
         <div>
           <label htmlFor="phoneNumber" className={labelCls}>Phone number <span className="text-clay-400">*</span></label>

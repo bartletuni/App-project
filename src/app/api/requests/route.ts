@@ -64,14 +64,14 @@ export async function POST(req: NextRequest) {
     }
 
     const dateNeeded = new Date(dateNeededStr);
-    const minDate = addDays(new Date(), 5);
+    const minDate = addDays(new Date(), 3);
 
     // reset time part for comparison
     dateNeeded.setHours(0, 0, 0, 0);
     minDate.setHours(0, 0, 0, 0);
 
     if (dateNeeded < minDate) {
-      return NextResponse.json({ error: "Lead time must be at least 5 days" }, { status: 400 });
+      return NextResponse.json({ error: "Lead time must be at least 3 days" }, { status: 400 });
     }
 
     // Handle Target User

@@ -27,7 +27,7 @@ function AdminAddRequestContent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const minDate = format(addDays(new Date(), 5), "yyyy-MM-dd");
+  const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -245,7 +245,7 @@ function AdminAddRequestContent() {
 
             <div>
               <label htmlFor="dateNeeded" className="block text-sm font-semibold text-cream-300 mb-1.5">
-                Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Min 5 days lead time)</span>
+                Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Min 3 days lead time)</span>
               </label>
               <input
                 id="dateNeeded"
