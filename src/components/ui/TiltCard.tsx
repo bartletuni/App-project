@@ -8,6 +8,7 @@ import {
   useTransform,
   useMotionTemplate,
 } from "framer-motion";
+import useFinePointer from "./useFinePointer";
 
 interface TiltCardProps {
   children: ReactNode;
@@ -20,8 +21,11 @@ interface TiltCardProps {
 
 /**
  * A card that tilts in 3D toward the pointer and renders a soft
- * radial spotlight that tracks the cursor. Falls back gracefully
- * to a static card when the pointer leaves.
+ * radial spotlight that tracks the cursor.
+ *
+ * On touch devices (no fine pointer) the 3D transforms and spotlight
+ * are disabled — the card renders flat with a subtle tap-press effect
+ * so it stays interactive and never looks broken.
  */
 export default function TiltCard({
   children,
@@ -30,6 +34,7 @@ export default function TiltCard({
   glowColor = "rgba(99,102,241,0.18)",
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const fine = useFinePointer();
 
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
@@ -65,6 +70,19 @@ export default function TiltCard({
   };
 
   const spotlight = useMotionTemplate`radial-gradient(220px circle at ${mouseX}px ${mouseY}px, ${glowColor}, transparent 70%)`;
+
+  // Touch / coarse-pointer path: flat card with a tap-press cue.
+  if (!fine) {
+    return (
+      <motion.div
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className={`relative ${className}`}
+      >
+        <div className="relative h-full">{children}</div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

@@ -29,7 +29,6 @@ import {
   useMotionTemplate,
 } from "framer-motion";
 
-import ScrollProgress from "@/components/ui/ScrollProgress";
 import Reveal from "@/components/ui/Reveal";
 import TiltCard from "@/components/ui/TiltCard";
 import Magnetic from "@/components/ui/Magnetic";
@@ -173,8 +172,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      <ScrollProgress />
-
       {/* Navigation */}
       <nav
         className="fixed top-0 w-full bg-white/60 backdrop-blur-xl z-50 border-b border-gray-100/60"

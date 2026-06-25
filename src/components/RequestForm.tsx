@@ -254,7 +254,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm hover:shadow-glow text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
         >
           {loading ? (
              <span className="flex items-center gap-2">

@@ -6,6 +6,10 @@ import Image from "next/image";
 import { ArrowLeft, Beaker, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
+import Reveal from "@/components/ui/Reveal";
+import TiltCard from "@/components/ui/TiltCard";
+import Magnetic from "@/components/ui/Magnetic";
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -15,13 +19,42 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100 },
+    transition: { type: "spring" as const, stiffness: 90, damping: 16 },
   },
 };
+
+interface PropertyBarProps {
+  label: string;
+  display: string;
+  value: number | null | undefined;
+  max: number;
+  color: string;
+}
+
+function PropertyBar({ label, display, value, max, color }: PropertyBarProps) {
+  const pct = value && max ? (value / max) * 100 : 0;
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs font-semibold">
+        <span className="text-gray-500">{label}</span>
+        <span className="text-gray-900">{display}</span>
+      </div>
+      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <motion.div
+          className={`h-full rounded-full ${color}`}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${pct}%` }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<any[]>([]);
@@ -54,140 +87,171 @@ export default function MaterialsPage() {
 
   return (
     <div className="min-h-screen bg-transparent font-sans">
-      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Materials library navigation">
+      <nav
+        className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50"
+        aria-label="Materials library navigation"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-semibold text-sm">
-              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-              Back to Home
-            </Link>
-            <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
-              <span className="font-bold text-xl text-gray-900 tracking-tight">TakomoCo</span>
-            </div>
-            <Link 
-              href="/login" 
-              className="text-sm font-bold bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors shadow-sm"
+          <div className="flex justify-between h-16 items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-semibold text-sm shrink-0"
             >
-              Sign In
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Back to Home</span>
             </Link>
+            <Link href="/" className="flex items-center gap-2 min-w-0">
+              <Image
+                src="/logo.png"
+                alt="TakomoCo Logo"
+                width={32}
+                height={32}
+                className="rounded-lg shadow-sm shrink-0"
+              />
+              <span className="font-bold text-lg sm:text-xl text-gray-900 tracking-tight truncate">
+                TakomoCo
+              </span>
+            </Link>
+            <Magnetic strength={0.4}>
+              <Link
+                href="/login"
+                className="inline-block text-sm font-bold bg-indigo-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-glow shrink-0"
+              >
+                Sign In
+              </Link>
+            </Magnetic>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <Reveal className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-white/70 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm mb-6">
+            <Beaker className="w-4 h-4" aria-hidden="true" />
+            Engineering-grade thermoplastics
+          </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            Material Library
+            Material{" "}
+            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+              Library
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed">
-            We work with a wide array of high-performance thermoplastics. Explore our technical materials specialized for high-strength, chemically resistant, and impact-resistant applications.
+          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+            We work with a wide array of high-performance thermoplastics. Explore
+            our technical materials specialized for high-strength, chemically
+            resistant, and impact-resistant applications.
           </p>
-        </div>
+        </Reveal>
 
         {materials.length === 0 ? (
-          <div className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm border border-white/20 p-16 text-center max-w-2xl mx-auto">
+          <Reveal className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm border border-white/20 p-10 sm:p-16 text-center max-w-2xl mx-auto">
             <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" aria-hidden="true" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No materials listed yet</h3>
-            <p className="text-gray-500">Check back later as we update our comprehensive material library.</p>
-          </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              No materials listed yet
+            </h3>
+            <p className="text-gray-500">
+              Check back later as we update our comprehensive material library.
+            </p>
+          </Reveal>
         ) : (
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 [perspective:1200px]"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
             {materials.map((m) => (
-              <motion.div variants={itemVariants} key={m.id} className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm hover:shadow-xl border border-white/20 overflow-hidden flex flex-col transition-all group hover:-translate-y-1">
-                {m.imageId ? (
-                  <div className="h-48 w-full bg-gray-100/50 backdrop-blur-sm relative overflow-hidden border-b border-gray-200/50">
-                    <img 
-                      src={`/api/download/${m.imageId}`} 
-                      alt={m.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-16 w-full bg-gradient-to-r from-gray-50/50 to-gray-100/50 backdrop-blur-sm border-b border-gray-200/50"></div>
-                )}
-                               <div className="p-8 flex-1 flex flex-col">
-                  <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{m.name}</h3>
-                  {m.description ? (
-                    <p className="text-gray-600 leading-relaxed mb-6">{m.description}</p>
-                  ) : (
-                    <p className="text-gray-400 italic text-sm mb-6">High performance engineering-grade material.</p>
-                  )}
-                  
-                  {/* Progress Bars for engineering properties */}
-                  <div className="space-y-4 mt-auto pt-4 border-t border-gray-100">
-                    {/* Tensile Strength */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-gray-500">Tensile Strength</span>
-                        <span className="text-gray-900">{m.tensileStrength !== null && m.tensileStrength !== undefined ? `${m.tensileStrength} MPa` : "N/A"}</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${m.tensileStrength && maxTensile ? (m.tensileStrength / maxTensile) * 100 : 0}%` }}
+              <motion.div variants={itemVariants} key={m.id}>
+                <TiltCard
+                  intensity={6}
+                  glowColor="rgba(99,102,241,0.16)"
+                  className="group h-full rounded-3xl"
+                >
+                  <div className="h-full bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm hover:shadow-xl border border-white/20 overflow-hidden flex flex-col transition-all">
+                    {m.imageId ? (
+                      <div className="h-48 w-full bg-gray-100/50 backdrop-blur-sm relative overflow-hidden border-b border-gray-200/50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/api/download/${m.imageId}`}
+                          alt={m.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                    </div>
+                    ) : (
+                      <div className="h-16 w-full bg-gradient-to-r from-indigo-50/60 to-blue-50/60 backdrop-blur-sm border-b border-gray-200/50"></div>
+                    )}
+                    <div className="p-6 sm:p-8 flex-1 flex flex-col">
+                      <h3 className="text-2xl font-extrabold text-gray-900 mb-3">
+                        {m.name}
+                      </h3>
+                      {m.description ? (
+                        <p className="text-gray-600 leading-relaxed mb-6">
+                          {m.description}
+                        </p>
+                      ) : (
+                        <p className="text-gray-400 italic text-sm mb-6">
+                          High performance engineering-grade material.
+                        </p>
+                      )}
 
-                    {/* Stiffness */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-gray-500">Stiffness</span>
-                        <span className="text-gray-950">{(m.stiffness !== null && m.stiffness !== undefined) ? `${m.stiffness * 1000} MPa` : "N/A"}</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${m.stiffness && maxStiffness ? (m.stiffness / maxStiffness) * 100 : 0}%` }}
+                      {/* Engineering properties */}
+                      <div className="space-y-4 mt-auto pt-4 border-t border-gray-100">
+                        <PropertyBar
+                          label="Tensile Strength"
+                          display={
+                            m.tensileStrength !== null && m.tensileStrength !== undefined
+                              ? `${m.tensileStrength} MPa`
+                              : "N/A"
+                          }
+                          value={m.tensileStrength}
+                          max={maxTensile}
+                          color="bg-indigo-500"
+                        />
+                        <PropertyBar
+                          label="Stiffness"
+                          display={
+                            m.stiffness !== null && m.stiffness !== undefined
+                              ? `${m.stiffness * 1000} MPa`
+                              : "N/A"
+                          }
+                          value={m.stiffness}
+                          max={maxStiffness}
+                          color="bg-blue-500"
+                        />
+                        <PropertyBar
+                          label="Heat Deflection Temp (HDT)"
+                          display={
+                            m.hdt !== null && m.hdt !== undefined ? `${m.hdt} °C` : "N/A"
+                          }
+                          value={m.hdt}
+                          max={maxHdt}
+                          color="bg-amber-500"
+                        />
+                        <PropertyBar
+                          label="Impact Resistance"
+                          display={
+                            m.impactResistance !== null && m.impactResistance !== undefined
+                              ? `${m.impactResistance / 1000} KJ/m²`
+                              : "N/A"
+                          }
+                          value={m.impactResistance}
+                          max={maxImpact}
+                          color="bg-emerald-500"
                         />
                       </div>
-                    </div>
 
-                    {/* HDT */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-gray-500">Heat Deflection Temp (HDT)</span>
-                        <span className="text-gray-900">{m.hdt !== null && m.hdt !== undefined ? `${m.hdt} °C` : "N/A"}</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-amber-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${m.hdt && maxHdt ? (m.hdt / maxHdt) * 100 : 0}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Impact Resistance */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-gray-500">Impact Resistance</span>
-                        <span className="text-gray-900">{m.impactResistance !== null && m.impactResistance !== undefined ? `${m.impactResistance / 1000} KJ/m²` : "N/A"}</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${m.impactResistance && maxImpact ? (m.impactResistance / maxImpact) * 100 : 0}%` }}
-                        />
+                      <div className="mt-8 pt-6 border-t border-gray-200/50">
+                        <Link
+                          href={`/dashboard?material=${encodeURIComponent(m.name)}`}
+                          className="w-full inline-flex justify-center items-center gap-2 bg-white/50 backdrop-blur-sm hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200/50 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-[0.98]"
+                        >
+                          <Zap className="w-4 h-4" aria-hidden="true" />
+                          Build With This Material
+                        </Link>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="mt-8 pt-6 border-t border-gray-200/50">
-                    <Link 
-                      href={`/dashboard?material=${encodeURIComponent(m.name)}`}
-                      className="w-full inline-flex justify-center items-center gap-2 bg-white/50 backdrop-blur-sm hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200/50 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all shadow-sm"
-                    >
-                      <Zap className="w-4 h-4" aria-hidden="true" />
-                      Build With This Material
-                    </Link>
-                  </div>
-                </div>
+                </TiltCard>
               </motion.div>
             ))}
           </motion.div>

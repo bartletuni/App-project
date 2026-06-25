@@ -2,6 +2,7 @@
 
 import { useRef, ReactNode } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import useFinePointer from "./useFinePointer";
 
 interface MagneticProps {
   children: ReactNode;
@@ -13,6 +14,9 @@ interface MagneticProps {
 /**
  * Wraps an element so it is gently "pulled" toward the cursor while
  * hovered, then springs back to rest on leave. Great for CTAs.
+ *
+ * On touch devices the magnetic pull is replaced with a tap-press
+ * scale so the control still gives tactile feedback on a phone.
  */
 export default function Magnetic({
   children,
@@ -20,11 +24,24 @@ export default function Magnetic({
   strength = 0.4,
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const fine = useFinePointer();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
   const springX = useSpring(x, { stiffness: 250, damping: 18, mass: 0.4 });
   const springY = useSpring(y, { stiffness: 250, damping: 18, mass: 0.4 });
+
+  if (!fine) {
+    return (
+      <motion.div
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className={`inline-block ${className}`}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = ref.current?.getBoundingClientRect();
