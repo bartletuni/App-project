@@ -220,8 +220,9 @@ export default function AdminMaterialsPage() {
             <h2 className="text-lg font-bold text-gray-900 mb-4">New Material</h2>
             <form onSubmit={handleAdd} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Material Name</label>
+                <label htmlFor="newMaterialName" className="block text-sm font-semibold text-gray-700 mb-1">Material Name</label>
                 <input
+                  id="newMaterialName"
                   type="text"
                   autoFocus
                   value={newMaterialName}
@@ -232,8 +233,9 @@ export default function AdminMaterialsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Description (Optional)</label>
+                <label htmlFor="newMaterialDesc" className="block text-sm font-semibold text-gray-700 mb-1">Description (Optional)</label>
                 <textarea
+                  id="newMaterialDesc"
                   value={newMaterialDesc}
                   onChange={(e) => setNewMaterialDesc(e.target.value)}
                   placeholder="Short description of the material's properties..."
@@ -243,8 +245,9 @@ export default function AdminMaterialsPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tensile Strength (MPa)</label>
+                  <label htmlFor="newTensileStrength" className="block text-sm font-semibold text-gray-700 mb-1">Tensile Strength (MPa)</label>
                   <input
+                    id="newTensileStrength"
                     type="number"
                     step="any"
                     value={newTensileStrength}
@@ -254,8 +257,9 @@ export default function AdminMaterialsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Stiffness (MPa)</label>
+                  <label htmlFor="newStiffness" className="block text-sm font-semibold text-gray-700 mb-1">Stiffness (MPa)</label>
                   <input
+                    id="newStiffness"
                     type="number"
                     step="any"
                     value={newStiffness}
@@ -265,8 +269,9 @@ export default function AdminMaterialsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Heat Deflection Temperature (°C)</label>
+                  <label htmlFor="newHdt" className="block text-sm font-semibold text-gray-700 mb-1">Heat Deflection Temperature (°C)</label>
                   <input
+                    id="newHdt"
                     type="number"
                     step="any"
                     value={newHdt}
@@ -276,8 +281,9 @@ export default function AdminMaterialsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Resistance (KJ/m²)</label>
+                  <label htmlFor="newImpactResistance" className="block text-sm font-semibold text-gray-700 mb-1">Impact Resistance (KJ/m²)</label>
                   <input
+                    id="newImpactResistance"
                     type="number"
                     step="any"
                     value={newImpactResistance}
@@ -288,8 +294,9 @@ export default function AdminMaterialsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Image (Optional, Max 5MB)</label>
+                <label htmlFor="newMaterialImage" className="block text-sm font-semibold text-gray-700 mb-1">Image (Optional, Max 5MB)</label>
                 <input
+                  id="newMaterialImage"
                   type="file"
                   accept="image/*"
                   onChange={(e) => setNewMaterialImage(e.target.files?.[0] || null)}
@@ -350,7 +357,9 @@ export default function AdminMaterialsPage() {
                 <li key={m.id} className="p-4 hover:bg-gray-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between group gap-4">
                   {editingId === m.id ? (
                     <div className="flex-1 flex flex-col gap-3 w-full">
+                      <label htmlFor={`editMaterialName-${m.id}`} className="sr-only">Edit Material Name</label>
                       <input
+                        id={`editMaterialName-${m.id}`}
                         type="text"
                         autoFocus
                         value={editingName}
@@ -358,7 +367,9 @@ export default function AdminMaterialsPage() {
                         placeholder="Material Name"
                         className="w-full border border-indigo-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                       />
+                      <label htmlFor={`editMaterialDesc-${m.id}`} className="sr-only">Edit Description</label>
                       <textarea
+                        id={`editMaterialDesc-${m.id}`}
                         value={editingDesc}
                         onChange={(e) => setEditingDesc(e.target.value)}
                         placeholder="Description (Optional)"
@@ -367,8 +378,9 @@ export default function AdminMaterialsPage() {
                       />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Tensile Strength (MPa)</label>
+                          <label htmlFor={`editTensileStrength-${m.id}`} className="block text-xs font-semibold text-gray-500 mb-1">Tensile Strength (MPa)</label>
                           <input
+                            id={`editTensileStrength-${m.id}`}
                             type="number"
                             step="any"
                             value={editingTensileStrength}
@@ -378,8 +390,9 @@ export default function AdminMaterialsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Stiffness (MPa)</label>
+                          <label htmlFor={`editStiffness-${m.id}`} className="block text-xs font-semibold text-gray-500 mb-1">Stiffness (MPa)</label>
                           <input
+                            id={`editStiffness-${m.id}`}
                             type="number"
                             step="any"
                             value={editingStiffness}
@@ -389,8 +402,9 @@ export default function AdminMaterialsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Heat Deflection Temperature (°C)</label>
+                          <label htmlFor={`editHdt-${m.id}`} className="block text-xs font-semibold text-gray-500 mb-1">Heat Deflection Temperature (°C)</label>
                           <input
+                            id={`editHdt-${m.id}`}
                             type="number"
                             step="any"
                             value={editingHdt}
@@ -400,8 +414,9 @@ export default function AdminMaterialsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Impact Resistance (KJ/m²)</label>
+                          <label htmlFor={`editImpactResistance-${m.id}`} className="block text-xs font-semibold text-gray-500 mb-1">Impact Resistance (KJ/m²)</label>
                           <input
+                            id={`editImpactResistance-${m.id}`}
                             type="number"
                             step="any"
                             value={editingImpactResistance}
@@ -412,12 +427,14 @@ export default function AdminMaterialsPage() {
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div><label htmlFor={`editMaterialImage-${m.id}`} className="sr-only">Edit Image</label>
                         <input
+                          id={`editMaterialImage-${m.id}`}
                           type="file"
                           accept="image/*"
                           onChange={(e) => setEditingImage(e.target.files?.[0] || null)}
                           className="block w-full sm:w-auto text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
-                        />
+                        /></div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleUpdate(m.id)}

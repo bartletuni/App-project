@@ -1,15 +1,5 @@
-## 2025-05-18 - Hidden Action Buttons on Touch Devices
-**Learning:** Hiding essential action buttons (like edit and delete) using `opacity-0` with a `group-hover:opacity-100` reveal pattern completely breaks usability on touch devices (mobile/tablet) because they cannot trigger a hover state. As a result, users cannot see or interact with these controls.
-**Action:** When using hover-to-reveal patterns for secondary actions, always use responsive classes (e.g., `opacity-100 sm:opacity-0 sm:group-hover:opacity-100`) to ensure the controls remain persistently visible on touch devices, or adopt alternative patterns like "swipe to reveal" or an explicit "More options" (kebab) menu.
+## 2024-06-25 - Form Accessibility
 
-## 2026-06-14 - Focus Indicators on Navbar Links
-**Learning:** Navigation links inside a responsive layout might lose their implicit focus states when styled with Tailwind CSS, particularly if `outline-none` or similar resets are used. Keyboard users might tab through the Navbar without knowing where their focus is.
-**Action:** Add explicit `focus-visible:ring-2` or similar focus indicators to all interactive elements, especially primary navigation links and sign out buttons.
+**Learning:** Forms require proper linkage between `label` elements and `input` elements using `htmlFor` and `id` attributes. This enables screen readers to accurately identify fields, and makes fields easier to click. Without this, inputs fail fundamental accessibility standards.
 
-## 2025-06-16 - Actionable Empty States
-**Learning:** Empty states that simply say "No data found" leave users stranded and increase cognitive load, as they have to manually figure out how to populate the list. Providing a clear Call-to-Action (CTA) within the empty state itself significantly improves user onboarding.
-**Action:** Always include a relevant helper text and a primary action button (e.g., "Add First Material" or "Start a Request") inside empty states to guide users directly to the next logical step. Ensure any decorative icons used in these states are marked with `aria-hidden="true"`.
-
-## 2025-06-18 - Missing Loading States on Async Actions
-**Learning:** Performing asynchronous operations (like creating or updating database records) without providing visual feedback can lead users to believe the application is unresponsive. This is especially problematic on forms, where users might rapidly click "Save" multiple times, resulting in duplicate submissions or errors.
-**Action:** Always add explicit loading states (e.g., changing button text to "Saving..." and adding a spinner icon) and disable the submission button (`disabled={true}`) while the network request is pending.
+**Action:** Consistently apply `htmlFor` and `id` tags in forms or add `aria-label` / screen-reader only classes (`sr-only`) on labels when direct visual placement isn't desired. Ensure ID's are dynamic when dealing with repeated components to avoid duplication. Ensure no temporary files created during string manipulation remain in the workspace.
