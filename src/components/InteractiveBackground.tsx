@@ -361,15 +361,15 @@ export default function InteractiveBackground() {
       <motion.div
         className="absolute rounded-full mix-blend-screen blur-[100px] pointer-events-none transition-opacity duration-500"
         style={{
-          width: isMobile ? 240 : 480,
-          height: isMobile ? 240 : 480,
-          top: isMobile ? -120 : -240,
-          left: isMobile ? -120 : -240,
+          width: isMobile ? 120 : 220,
+          height: isMobile ? 120 : 220,
+          top: isMobile ? -60 : -110,
+          left: isMobile ? -60 : -110,
           background:
-            "radial-gradient(circle, rgba(230,168,95,0.28) 0%, rgba(193,122,75,0.12) 50%, rgba(21,16,12,0) 100%)",
+            "radial-gradient(circle, rgba(230,168,95,0.18) 0%, rgba(193,122,75,0.08) 50%, rgba(21,16,12,0) 100%)",
           x: cursorX,
           y: cursorY,
-          opacity: isActive ? (isMobile ? 0.14 : 0.16) : 0,
+          opacity: isActive ? (isMobile ? 0.07 : 0.08) : 0,
         }}
       />
     </div>
