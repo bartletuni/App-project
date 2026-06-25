@@ -32,23 +32,51 @@ const isLand = (lon: number, lat: number) => {
 };
 
 // Mercator latitude → y in projection units
-const LAT_TOP = 78;
-const LAT_BOTTOM = -56;
 const mercY = (latDeg: number) => {
   const l = (Math.max(-82, Math.min(82, latDeg)) * Math.PI) / 180;
   return Math.log(Math.tan(Math.PI / 4 + l / 2));
 };
-const M_TOP = mercY(LAT_TOP);
-const M_BOTTOM = mercY(LAT_BOTTOM);
 
-/** Project lon/lat to screen pixels, true Mercator aspect, centered. */
-function project(lon: number, lat: number, W: number, H: number) {
+type Region = {
+  lonMin: number;
+  lonMax: number;
+  latMin: number;
+  latMax: number;
+  /** "world" = true-aspect centered map; "fill" = stretch to fill screen. */
+  mode: "world" | "fill";
+  excludeGreenland?: boolean;
+};
+
+// Desktop: the whole world, true Mercator aspect, centered.
+const WORLD_REGION: Region = {
+  lonMin: -180, lonMax: 180, latMin: -56, latMax: 78, mode: "world",
+};
+// Mobile: just the Americas, stretched to fill the (portrait) screen.
+const AMERICAS_REGION: Region = {
+  lonMin: -170, lonMax: -34, latMin: -56, latMax: 74, mode: "fill", excludeGreenland: true,
+};
+
+/** Project lon/lat to screen pixels for the given region. */
+function project(lon: number, lat: number, W: number, H: number, region: Region) {
+  const mTop = mercY(region.latMax);
+  const mBot = mercY(region.latMin);
+  const fy = (mTop - mercY(lat)) / (mTop - mBot);
+
+  if (region.mode === "fill") {
+    const padX = W * 0.04;
+    const padY = H * 0.05;
+    const x = padX + ((lon - region.lonMin) / (region.lonMax - region.lonMin)) * (W - 2 * padX);
+    const y = padY + fy * (H - 2 * padY);
+    return { x, y };
+  }
+
+  // World: true Mercator aspect, centered.
   const mapW = W * 0.92;
-  const mapH = mapW / 1.82; // mercator aspect for this lat band
+  const mapH = mapW / 1.82;
   const mapX = (W - mapW) / 2;
   const mapY = (H - mapH) / 2;
   const x = mapX + ((lon + 180) / 360) * mapW;
-  const y = mapY + ((M_TOP - mercY(lat)) / (M_TOP - M_BOTTOM)) * mapH;
+  const y = mapY + fy * mapH;
   return { x, y };
 }
 
@@ -255,15 +283,16 @@ export default function InteractiveBackground() {
 
     type Home = { x: number; y: number; weight: number; key: number };
 
-    const buildHomes = (W: number, H: number) => {
+    const buildHomes = (W: number, H: number, region: Region) => {
       const homes: Home[] = [];
       const step = 0.5; // degrees — finer grid for denser clustering
-      for (let lon = -180; lon <= 180; lon += step) {
-        for (let lat = LAT_BOTTOM; lat <= LAT_TOP; lat += step) {
-          if (isLand(lon, lat)) {
-            const p = project(lon, lat, W, H);
-            homes.push({ x: p.x, y: p.y, weight: popWeight(lon, lat), key: 0 });
-          }
+      for (let lon = region.lonMin; lon <= region.lonMax; lon += step) {
+        for (let lat = region.latMin; lat <= region.latMax; lat += step) {
+          if (!isLand(lon, lat)) continue;
+          // Drop Greenland so the mobile view reads as just the Americas.
+          if (region.excludeGreenland && lon > -52 && lat > 58) continue;
+          const p = project(lon, lat, W, H, region);
+          homes.push({ x: p.x, y: p.y, weight: popWeight(lon, lat), key: 0 });
         }
       }
       return homes;
@@ -272,9 +301,11 @@ export default function InteractiveBackground() {
     const init = () => {
       const W = canvas.width;
       const H = canvas.height;
-      const homes = buildHomes(W, H);
+      const mobile = window.innerWidth < 768;
+      const region = mobile ? AMERICAS_REGION : WORLD_REGION;
+      const homes = buildHomes(W, H, region);
       // Another 5x the dot count (divisors cut to a fifth again).
-      const divisor = window.innerWidth < 768 ? 180 : 90;
+      const divisor = mobile ? 180 : 90;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
       // Weighted sampling without replacement (Efraimidis–Spirakis):
       // key = U^(1/weight); keeping the largest keys makes populous
