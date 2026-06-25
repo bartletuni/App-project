@@ -11,14 +11,45 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // Warm dark "rustic" palette
+        espresso: {
+          950: "#15100c",
+          900: "#1c1611",
+          800: "#241d17",
+          700: "#2c241d",
+          600: "#382d24",
+          500: "#4a3d31",
+        },
+        clay: {
+          50: "#f8efe7",
+          200: "#e3be9a",
+          300: "#d9a87f",
+          400: "#cf8f5f",
+          500: "#c17a4b",
+          600: "#a9663c",
+          700: "#8a5230",
+        },
+        ember: {
+          300: "#f0c08a",
+          400: "#e6a85f",
+          500: "#d98e3d",
+        },
+        cream: {
+          100: "#f3ece1",
+          200: "#ece3d6",
+          300: "#dccfbd",
+          400: "#bcaa93",
+          500: "#9c8a74",
+          600: "#7e6e5b",
+        },
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 60px -15px rgba(99, 102, 241, 0.5)",
-        "glow-lg": "0 0 90px -10px rgba(99, 102, 241, 0.45)",
+        glow: "0 0 55px -15px rgba(217, 142, 61, 0.55)",
+        "glow-lg": "0 0 90px -10px rgba(217, 142, 61, 0.5)",
       },
       transitionTimingFunction: {
         spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",

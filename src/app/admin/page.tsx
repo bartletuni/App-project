@@ -210,7 +210,7 @@ function AdminDashboardContent() {
   });
 
   if (status === "loading" || loading) {
-    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading admin dashboard...</div>;
   }
 
   return (
@@ -220,44 +220,44 @@ function AdminDashboardContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="flex justify-between items-end mb-8">
             <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-cream-200 tracking-tight">
                   All System{" "}
-                  <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+                  <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
                     Requests
                   </span>
                 </h1>
-               <p className="text-gray-500 mt-1">Manage, update, and review all user submissions.</p>
+               <p className="text-cream-500 mt-1">Manage, update, and review all user submissions.</p>
             </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="bg-espresso-800/72 backdrop-blur-md rounded-2xl shadow-sm border border-clay-500/18 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filter by User</label>
+                <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Filter by User</label>
                 <input
                     type="text"
                     value={filterUser}
                     onChange={(e) => setFilterUser(e.target.value)}
                     placeholder="Name or Email"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Invoice Number</label>
+                <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Invoice Number</label>
                 <input
                     type="text"
                     value={filterInvoice}
                     onChange={(e) => setFilterInvoice(e.target.value)}
                     placeholder="Search Invoice #"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
+                <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Status</label>
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 >
                     <option value="ALL">All Statuses</option>
                     <option value="PENDING">PENDING</option>
@@ -270,18 +270,18 @@ function AdminDashboardContent() {
                 </select>
             </div>
             <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Submission Date</label>
+                <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Submission Date</label>
                 <div className="flex gap-2">
                     <input
                         type="date"
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                     />
                     {filterDate && (
                         <button 
                             onClick={() => setFilterDate("")}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                            className="bg-espresso-600 hover:bg-espresso-500 text-cream-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
                         >
                             Clear
                         </button>
@@ -290,14 +290,14 @@ function AdminDashboardContent() {
             </div>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
+        <div className="bg-espresso-800/72 backdrop-blur-md rounded-2xl shadow-sm border border-clay-500/18 overflow-hidden">
           {filteredRequests.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
-                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                  <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                <div className="w-24 h-24 bg-espresso-700 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-10 h-10 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">No requests match filters</h3>
-                <p className="text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+                <h3 className="text-lg font-bold text-cream-200">No requests match filters</h3>
+                <p className="text-cream-500">Try adjusting your filters to find what you're looking for.</p>
                 {(filterUser || filterInvoice || filterStatus !== "ALL" || filterDate) && (
                     <button 
                         onClick={() => {
@@ -306,7 +306,7 @@ function AdminDashboardContent() {
                             setFilterStatus("ALL");
                             setFilterDate("");
                         }}
-                        className="mt-4 text-indigo-600 font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg px-2 py-1"
+                        className="mt-4 text-clay-300 font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-lg px-2 py-1"
                     >
                         Reset all filters
                     </button>
@@ -316,26 +316,26 @@ function AdminDashboardContent() {
             <>
               {/* Mobile Card View (shown only on small screens) */}
               <div className="block lg:hidden">
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-espresso-700">
                   {filteredRequests.map((req) => (
-                    <div key={req.id} className="p-4 space-y-4 hover:bg-gray-50 transition-colors">
+                    <div key={req.id} className="p-4 space-y-4 hover:bg-espresso-700 transition-colors">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">Customer</div>
-                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
-                          <div className="text-xs text-gray-500">{req.user?.email || "N/A"}</div>
+                          <div className="text-[10px] font-bold text-clay-300 uppercase tracking-tight">Customer</div>
+                          <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs text-cream-500">{req.user?.email || "N/A"}</div>
                         </div>
                         <select
                           value={req.status}
                           onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 border ${
-                            req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                            req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                            req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
-                            req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
-                            req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
-                            req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
-                            'bg-gray-50 text-gray-800 border-gray-200'
+                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-clay-500 border ${
+                            req.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-200 border-yellow-500/30' :
+                            req.status === 'ACTIVE' ? 'bg-ember-400/12 text-ember-300 border-ember-400/30' :
+                            req.status === 'COMPLETED' ? 'bg-green-500/15 text-green-200 border-green-500/30' :
+                            req.status === 'NEEDS REVIEW' ? 'bg-clay-700/12 text-clay-200 border-clay-600/30' :
+                            req.status === 'CANCELLED' ? 'bg-red-500/15 text-red-200 border-red-500/30' :
+                            req.status === 'SHIPPED' ? 'bg-teal-500/15 text-teal-200 border-teal-500/30' :
+                            'bg-espresso-700 text-cream-300 border-espresso-600'
                           }`}
                         >
                           <option value="PENDING">PENDING</option>
@@ -350,31 +350,31 @@ function AdminDashboardContent() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">File</div>
-                          <div className="text-sm font-semibold text-gray-900 truncate" title={req.fileName}>{req.fileName}</div>
+                          <div className="text-[10px] font-bold text-cream-500 uppercase tracking-tight">File</div>
+                          <div className="text-sm font-semibold text-cream-200 truncate" title={req.fileName}>{req.fileName}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Invoice</div>
-                          <div className="text-sm font-bold text-indigo-700">
-                            {req.invoiceNumber ? `#${req.invoiceNumber}` : <span className="text-gray-300 font-normal italic text-xs">Pending</span>}
+                          <div className="text-[10px] font-bold text-cream-500 uppercase tracking-tight">Invoice</div>
+                          <div className="text-sm font-bold text-clay-300">
+                            {req.invoiceNumber ? `#${req.invoiceNumber}` : <span className="text-cream-600 font-normal italic text-xs">Pending</span>}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex justify-between items-center pt-2">
-                        <div className="text-xs text-gray-500">
-                          <span className="font-semibold text-gray-900">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
+                        <div className="text-xs text-cream-500">
+                          <span className="font-semibold text-cream-200">Needed:</span> {format(new Date(req.dateNeeded), "MMM d")}
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => openModal(req)}
-                            className="text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold"
+                            className="text-clay-300 bg-clay-500/12 px-3 py-1.5 rounded-lg text-xs font-bold"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDelete(req.id)}
-                            className="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold"
+                            className="text-red-300 bg-red-500/15 px-3 py-1.5 rounded-lg text-xs font-bold"
                           >
                             Delete
                           </button>
@@ -387,63 +387,63 @@ function AdminDashboardContent() {
 
               {/* Desktop Table View (hidden on mobile) */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100/50">
+                <table className="min-w-full divide-y divide-espresso-700/50">
                   <caption className="sr-only">Admin requests table</caption>
-                  <thead className="bg-gray-50/50">
+                  <thead className="bg-espresso-700/50">
                     <tr>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User / Phone</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">File & Notes</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dates</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                      <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">User / Phone</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">File & Notes</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">Quantity</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">Dates</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">Invoice #</th>
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-cream-500 uppercase tracking-wider">Status</th>
+                      <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-cream-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-transparent divide-y divide-gray-100/50">
+                  <tbody className="bg-transparent divide-y divide-espresso-700/50">
                     {filteredRequests.map((req) => (
-                      <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={req.id} className="hover:bg-espresso-700/50 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1">Customer</div>
-                          <div className="text-sm font-bold text-gray-900">{req.user?.name || "N/A"}</div>
-                          <div className="text-xs font-medium text-gray-500">{req.user?.email || "N/A"}</div>
-                          <div className="text-xs font-medium text-gray-400">{req.phoneNumber?.number || "N/A"}</div>
+                          <div className="text-xs font-bold text-clay-300 uppercase tracking-tight mb-1">Customer</div>
+                          <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
+                          <div className="text-xs font-medium text-cream-500">{req.user?.email || "N/A"}</div>
+                          <div className="text-xs font-medium text-cream-500">{req.phoneNumber?.number || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-gray-900">{req.fileName}</div>
+                          <div className="text-sm font-bold text-cream-200">{req.fileName}</div>
                           <div className="flex gap-2 mt-1">
-                              {req.material && <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
-                              {req.notes && <div className="text-xs text-gray-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                              {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
+                              {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-gray-900">{req.quantity}</div>
+                          <div className="text-sm font-bold text-cream-200">{req.quantity}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-gray-900">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
-                          <div className="text-xs font-medium text-gray-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
+                          <div className="text-sm font-semibold text-cream-200">Needed: {format(new Date(req.dateNeeded), "MMM d, yyyy")}</div>
+                          <div className="text-xs font-medium text-cream-500 mt-0.5">Submitted: {format(new Date(req.createdAt), "MMM d")}</div>
                         </td>
                         <td className="px-6 py-4">
                           {req.invoiceNumber ? (
-                            <span className="text-sm font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
+                            <span className="text-sm font-bold text-clay-300 bg-clay-500/12 px-2 py-1 rounded border border-clay-500/25">
                               #{req.invoiceNumber}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">Pending</span>
+                            <span className="text-xs text-cream-500 italic">Pending</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <select
                               value={req.status}
                               onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer border ${
-                                req.status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                                req.status === 'ACTIVE' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                                req.status === 'COMPLETED' ? 'bg-green-50 text-green-800 border-green-200' :
-                                req.status === 'NEEDS REVIEW' ? 'bg-purple-50 text-purple-800 border-purple-200' :
-                                req.status === 'CANCELLED' ? 'bg-red-50 text-red-800 border-red-200' :
-                                req.status === 'SHIPPED' ? 'bg-teal-50 text-teal-800 border-teal-200' :
-                                'bg-gray-50 text-gray-800 border-gray-200'
+                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500 cursor-pointer border ${
+                                req.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-200 border-yellow-500/30' :
+                                req.status === 'ACTIVE' ? 'bg-ember-400/12 text-ember-300 border-ember-400/30' :
+                                req.status === 'COMPLETED' ? 'bg-green-500/15 text-green-200 border-green-500/30' :
+                                req.status === 'NEEDS REVIEW' ? 'bg-clay-700/12 text-clay-200 border-clay-600/30' :
+                                req.status === 'CANCELLED' ? 'bg-red-500/15 text-red-200 border-red-500/30' :
+                                req.status === 'SHIPPED' ? 'bg-teal-500/15 text-teal-200 border-teal-500/30' :
+                                'bg-espresso-700 text-cream-300 border-espresso-600'
                               }`}
                           >
                               <option value="PENDING">PENDING</option>
@@ -458,14 +458,14 @@ function AdminDashboardContent() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
                             <button
                                 onClick={() => openModal(req)}
-                                className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                                className="inline-flex items-center gap-1.5 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 View Order
                             </button>
                             <button
                               onClick={() => handleDelete(req.id)}
-                              className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                              className="text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
                             >
                               Delete
                             </button>
@@ -483,14 +483,14 @@ function AdminDashboardContent() {
       {/* Modal */}
       {isModalOpen && selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/25 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex justify-between items-center sticky top-0 z-10">
-                <h3 id="modal-title" className="text-xl leading-6 font-bold text-gray-900">
+          <div className="bg-espresso-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-clay-500/20 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45 flex justify-between items-center sticky top-0 z-10">
+                <h3 id="modal-title" className="text-xl leading-6 font-bold text-cream-200">
                   Ticket Details
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="text-cream-500 hover:text-cream-400 hover:bg-espresso-600 p-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                   aria-label="Close ticket details"
                   title="Close ticket details"
                 >
@@ -501,41 +501,41 @@ function AdminDashboardContent() {
             <div className="px-6 py-6 sm:p-8">
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Name (Company/Personal)</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.name}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Name (Company/Personal)</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.user?.name}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">User Email</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.user?.email}</dd>
+                        <dt className="text-sm font-medium text-cream-500">User Email</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.user?.email}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.phoneNumber?.number}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Phone Number</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.phoneNumber?.number}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Quantity</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.quantity}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Quantity</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.quantity}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Material</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{selectedRequest.material || "N/A"}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Material</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.material || "N/A"}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Date Needed</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Date Needed</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Submitted On</dt>
-                        <dd className="mt-1 text-sm text-gray-900 font-semibold">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
+                        <dt className="text-sm font-medium text-cream-500">Submitted On</dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy h:mm a")}</dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">File</dt>
-                        <dd className="mt-2 text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-cream-500">File</dt>
+                        <dd className="mt-2 text-sm text-cream-200">
                            <a
                               href={`/api/download/${selectedRequest.fileId}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors font-semibold"
+                              className="inline-flex items-center gap-2 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-4 py-2 rounded-lg transition-colors font-semibold"
                            >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                               Download {selectedRequest.fileName}
@@ -544,43 +544,43 @@ function AdminDashboardContent() {
                     </div>
                     {selectedRequest.notes && (
                       <div className="sm:col-span-2">
-                          <dt className="text-sm font-medium text-gray-500">Notes</dt>
-                          <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100">{selectedRequest.notes}</dd>
+                          <dt className="text-sm font-medium text-cream-500">Notes</dt>
+                          <dd className="mt-1 text-sm text-cream-200 bg-espresso-700 p-4 rounded-lg border border-espresso-700">{selectedRequest.notes}</dd>
                       </div>
                     )}
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">Invoice Number</dt>
+                        <dt className="text-sm font-medium text-cream-500">Invoice Number</dt>
                         <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"
                               value={invoiceInput}
                               onChange={(e) => setInvoiceInput(e.target.value)}
                               placeholder="Enter Invoice #"
-                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
+                              className="border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 w-48 bg-espresso-800 text-black"
                             />
                             <button
                               onClick={() => handleSaveInvoice(selectedRequest.id)}
                               disabled={savingInvoice || invoiceInput === selectedRequest.invoiceNumber || (!invoiceInput && !selectedRequest.invoiceNumber)}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingInvoice ? "Saving..." : "Save Invoice"}
                             </button>
                         </dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">USPS Tracking Number</dt>
+                        <dt className="text-sm font-medium text-cream-500">USPS Tracking Number</dt>
                         <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"
                               value={trackingInput}
                               onChange={(e) => setTrackingInput(e.target.value)}
                               placeholder="Enter Tracking #"
-                              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 bg-white text-black"
+                              className="border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 w-48 bg-espresso-800 text-black"
                             />
                             <button
                               onClick={() => handleSaveTracking(selectedRequest.id)}
                               disabled={savingTracking || trackingInput === selectedRequest.trackingNumber || (!trackingInput && !selectedRequest.trackingNumber)}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingTracking ? "Saving..." : "Save Tracking"}
                             </button>
@@ -589,16 +589,16 @@ function AdminDashboardContent() {
                 </dl>
             </div>
 
-            <div className="px-6 py-5 border-t border-gray-200/50 bg-white/40">
-               <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Admin Actions</h4>
+            <div className="px-6 py-5 border-t border-espresso-600/50 bg-espresso-800/45">
+               <h4 className="text-sm font-bold text-cream-200 mb-4 uppercase tracking-wider">Admin Actions</h4>
                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                    <div className="flex items-center gap-3">
-                       <label htmlFor="status-select" className="text-sm font-medium text-gray-700">Update Status:</label>
+                       <label htmlFor="status-select" className="text-sm font-medium text-cream-300">Update Status:</label>
                        <select
                             id="status-select"
                             value={selectedRequest.status}
                             onChange={(e) => handleStatusChange(selectedRequest.id, e.target.value)}
-                            className="text-sm font-bold rounded-lg px-3 py-2 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer text-black"
+                            className="text-sm font-bold rounded-lg px-3 py-2 bg-espresso-800 border border-espresso-500 focus:outline-none focus:ring-2 focus:ring-clay-500 cursor-pointer text-black"
                          >
                             <option value="PENDING">PENDING</option>
                             <option value="ACTIVE">ACTIVE</option>
@@ -612,7 +612,7 @@ function AdminDashboardContent() {
                    {selectedRequest.status !== 'CANCELLED' && (
                        <button
                          onClick={() => handleCancel(selectedRequest.id)}
-                         className="text-red-700 bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
+                         className="text-red-300 bg-red-500/18 hover:bg-red-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
                        >
                          Cancel Request
                        </button>
@@ -628,7 +628,7 @@ function AdminDashboardContent() {
 
 export default function AdminDashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading dashboard...</div>}>
       <AdminDashboardContent />
     </Suspense>
   );

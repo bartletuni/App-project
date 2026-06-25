@@ -164,7 +164,7 @@ function AdminAddRequestContent() {
   };
 
   if (status === "loading") {
-      return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading admin dashboard...</div>;
+      return <div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading admin dashboard...</div>;
   }
 
   return (
@@ -173,21 +173,21 @@ function AdminAddRequestContent() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Add Part Request</h1>
-            <p className="text-gray-500 mt-1">Submit a new request on behalf of a customer.</p>
+            <h1 className="text-3xl font-extrabold text-cream-200 tracking-tight">Add Part Request</h1>
+            <p className="text-cream-500 mt-1">Submit a new request on behalf of a customer.</p>
         </div>
 
-        <div className="max-w-2xl bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-sm border border-white/20">
+        <div className="max-w-2xl bg-espresso-800/72 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-sm border border-clay-500/18">
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex gap-2 items-center" role="alert">
+            <div className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-center" role="alert">
               <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex gap-2 items-center" role="status">
+            <div className="mb-6 p-4 bg-green-500/15 border border-green-500/30 text-green-300 rounded-xl text-sm flex gap-2 items-center" role="status">
               <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               Request successfully submitted.
             </div>
@@ -195,14 +195,14 @@ function AdminAddRequestContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="customer" className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="customer" className="block text-sm font-semibold text-cream-300 mb-1.5">
                 Select User <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <select
                 id="customer"
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
+                className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800"
                 required
               >
                 {users.length === 0 ? (
@@ -216,21 +216,21 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Max 20MB)</span>
+              <label htmlFor="fileUpload" className="block text-sm font-semibold text-cream-300 mb-1.5">
+                .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Max 20MB)</span>
               </label>
               <input
                 id="fileUpload"
                 type="file"
                 accept=".stl,.zip"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors file:cursor-pointer cursor-pointer border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="block w-full text-sm text-cream-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-clay-500/12 file:text-clay-300 hover:file:bg-clay-500/15 transition-colors file:cursor-pointer cursor-pointer border border-espresso-600 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="quantity" className="block text-sm font-semibold text-cream-300 mb-1.5">
                 Quantity <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <input
@@ -239,14 +239,14 @@ function AdminAddRequestContent() {
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
+                className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="dateNeeded" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-gray-400 font-normal ml-1">(Min 5 days lead time)</span>
+              <label htmlFor="dateNeeded" className="block text-sm font-semibold text-cream-300 mb-1.5">
+                Date Needed <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Min 5 days lead time)</span>
               </label>
               <input
                 id="dateNeeded"
@@ -254,13 +254,13 @@ function AdminAddRequestContent() {
                 min={minDate}
                 value={dateNeeded}
                 onChange={(e) => setDateNeeded(e.target.value)}
-                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700"
+                className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-cream-300 mb-1.5">
                 Phone Number <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               {isAddingPhone || pastPhones.length === 0 ? (
@@ -270,12 +270,12 @@ function AdminAddRequestContent() {
                         type="tel"
                         value={newPhoneNumber}
                         onChange={(e) => setNewPhoneNumber(e.target.value)}
-                        className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700"
+                        className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300"
                         placeholder="e.g., (123) 456-7890"
                         required
                     />
                     {pastPhones.length > 0 && (
-                        <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                        <button type="button" onClick={() => setIsAddingPhone(false)} className="text-sm font-medium text-clay-300 hover:text-clay-200 hover:bg-clay-500/18 px-3 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                             Cancel
                         </button>
                     )}
@@ -286,14 +286,14 @@ function AdminAddRequestContent() {
                         id="phoneNumber"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
+                        className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800"
                         required
                     >
                         {pastPhones.map((phone) => (
                             <option key={phone.id} value={phone.number}>{phone.number}</option>
                         ))}
                     </select>
-                    <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                    <button type="button" onClick={() => setIsAddingPhone(true)} className="text-sm font-medium text-clay-300 hover:text-clay-200 hover:bg-clay-500/18 px-3 py-2 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                         + Add New
                     </button>
                  </div>
@@ -301,14 +301,14 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="material" className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="material" className="block text-sm font-semibold text-cream-300 mb-1.5">
                 Material <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <select
                 id="material"
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
-                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 bg-white"
+                className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800"
                 required
               >
                 {availableMaterials.length === 0 ? (
@@ -322,15 +322,15 @@ function AdminAddRequestContent() {
             </div>
 
             <div>
-              <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Notes <span className="text-gray-400 font-normal ml-1">(Color, etc.) - Optional</span>
+              <label htmlFor="notes" className="block text-sm font-semibold text-cream-300 mb-1.5">
+                Notes <span className="text-cream-500 font-normal ml-1">(Color, etc.) - Optional</span>
               </label>
               <textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-700 resize-none"
+                className="block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 resize-none"
                 placeholder="Any special instructions?"
               />
             </div>
@@ -338,7 +338,7 @@ function AdminAddRequestContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-clay-600 hover:bg-clay-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
             >
               {loading ? (
                  <span className="flex items-center gap-2">
@@ -359,7 +359,7 @@ function AdminAddRequestContent() {
 
 export default function AdminAddRequestPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading dashboard...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading dashboard...</div>}>
       <AdminAddRequestContent />
     </Suspense>
   );

@@ -40,10 +40,10 @@ function PropertyBar({ label, display, value, max, color }: PropertyBarProps) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs font-semibold">
-        <span className="text-gray-500">{label}</span>
-        <span className="text-gray-900">{display}</span>
+        <span className="text-cream-500">{label}</span>
+        <span className="text-cream-200">{display}</span>
       </div>
-      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-espresso-600 rounded-full overflow-hidden">
         <motion.div
           className={`h-full rounded-full ${color}`}
           initial={{ width: 0 }}
@@ -74,7 +74,7 @@ export default function MaterialsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">
+      <div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">
         Loading material library...
       </div>
     );
@@ -88,14 +88,14 @@ export default function MaterialsPage() {
   return (
     <div className="min-h-screen bg-transparent font-sans">
       <nav
-        className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50"
+        className="bg-espresso-800/62 backdrop-blur-xl shadow-sm border-b border-espresso-600/50 sticky top-0 z-50"
         aria-label="Materials library navigation"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors font-semibold text-sm shrink-0"
+              className="flex items-center gap-2 text-cream-500 hover:text-clay-300 transition-colors font-semibold text-sm shrink-0"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Back to Home</span>
@@ -108,14 +108,14 @@ export default function MaterialsPage() {
                 height={32}
                 className="rounded-lg shadow-sm shrink-0"
               />
-              <span className="font-bold text-lg sm:text-xl text-gray-900 tracking-tight truncate">
+              <span className="font-bold text-lg sm:text-xl text-cream-200 tracking-tight truncate">
                 TakomoCo
               </span>
             </Link>
             <Magnetic strength={0.4}>
               <Link
                 href="/login"
-                className="inline-block text-sm font-bold bg-indigo-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-glow shrink-0"
+                className="inline-block text-sm font-bold bg-clay-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-clay-700 transition-colors shadow-sm hover:shadow-glow shrink-0"
               >
                 Sign In
               </Link>
@@ -126,17 +126,17 @@ export default function MaterialsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <Reveal className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-white/70 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm mb-6">
+          <span className="inline-flex items-center gap-2 rounded-full border border-clay-500/40 bg-espresso-800/72 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-clay-300 shadow-sm mb-6">
             <Beaker className="w-4 h-4" aria-hidden="true" />
             Engineering-grade thermoplastics
           </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-cream-200 tracking-tight mb-4">
             Material{" "}
-            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
               Library
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+          <p className="text-lg sm:text-xl text-cream-400 leading-relaxed">
             We work with a wide array of high-performance thermoplastics. Explore
             our technical materials specialized for high-strength, chemically
             resistant, and impact-resistant applications.
@@ -144,12 +144,12 @@ export default function MaterialsPage() {
         </Reveal>
 
         {materials.length === 0 ? (
-          <Reveal className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm border border-white/20 p-10 sm:p-16 text-center max-w-2xl mx-auto">
-            <Beaker className="w-16 h-16 text-gray-300 mx-auto mb-4" aria-hidden="true" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+          <Reveal className="bg-espresso-800/62 backdrop-blur-xl rounded-3xl shadow-sm border border-clay-500/18 p-10 sm:p-16 text-center max-w-2xl mx-auto">
+            <Beaker className="w-16 h-16 text-cream-600 mx-auto mb-4" aria-hidden="true" />
+            <h3 className="text-2xl font-bold text-cream-200 mb-2">
               No materials listed yet
             </h3>
-            <p className="text-gray-500">
+            <p className="text-cream-500">
               Check back later as we update our comprehensive material library.
             </p>
           </Reveal>
@@ -167,9 +167,9 @@ export default function MaterialsPage() {
                   glowColor="rgba(99,102,241,0.16)"
                   className="group h-full rounded-3xl"
                 >
-                  <div className="h-full bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm hover:shadow-xl border border-white/20 overflow-hidden flex flex-col transition-all">
+                  <div className="h-full bg-espresso-800/62 backdrop-blur-xl rounded-3xl shadow-sm hover:shadow-xl border border-clay-500/18 overflow-hidden flex flex-col transition-all">
                     {m.imageId ? (
-                      <div className="h-48 w-full bg-gray-100/50 backdrop-blur-sm relative overflow-hidden border-b border-gray-200/50">
+                      <div className="h-48 w-full bg-espresso-600/50 backdrop-blur-sm relative overflow-hidden border-b border-espresso-600/50">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={`/api/download/${m.imageId}`}
@@ -178,24 +178,24 @@ export default function MaterialsPage() {
                         />
                       </div>
                     ) : (
-                      <div className="h-16 w-full bg-gradient-to-r from-indigo-50/60 to-blue-50/60 backdrop-blur-sm border-b border-gray-200/50"></div>
+                      <div className="h-16 w-full bg-gradient-to-r from-espresso-700/60 to-espresso-600/60 backdrop-blur-sm border-b border-espresso-600/50"></div>
                     )}
                     <div className="p-6 sm:p-8 flex-1 flex flex-col">
-                      <h3 className="text-2xl font-extrabold text-gray-900 mb-3">
+                      <h3 className="text-2xl font-extrabold text-cream-200 mb-3">
                         {m.name}
                       </h3>
                       {m.description ? (
-                        <p className="text-gray-600 leading-relaxed mb-6">
+                        <p className="text-cream-400 leading-relaxed mb-6">
                           {m.description}
                         </p>
                       ) : (
-                        <p className="text-gray-400 italic text-sm mb-6">
+                        <p className="text-cream-500 italic text-sm mb-6">
                           High performance engineering-grade material.
                         </p>
                       )}
 
                       {/* Engineering properties */}
-                      <div className="space-y-4 mt-auto pt-4 border-t border-gray-100">
+                      <div className="space-y-4 mt-auto pt-4 border-t border-espresso-700">
                         <PropertyBar
                           label="Tensile Strength"
                           display={
@@ -205,7 +205,7 @@ export default function MaterialsPage() {
                           }
                           value={m.tensileStrength}
                           max={maxTensile}
-                          color="bg-indigo-500"
+                          color="bg-clay-500"
                         />
                         <PropertyBar
                           label="Stiffness"
@@ -216,7 +216,7 @@ export default function MaterialsPage() {
                           }
                           value={m.stiffness}
                           max={maxStiffness}
-                          color="bg-blue-500"
+                          color="bg-ember-400"
                         />
                         <PropertyBar
                           label="Heat Deflection Temp (HDT)"
@@ -240,10 +240,10 @@ export default function MaterialsPage() {
                         />
                       </div>
 
-                      <div className="mt-8 pt-6 border-t border-gray-200/50">
+                      <div className="mt-8 pt-6 border-t border-espresso-600/50">
                         <Link
                           href={`/dashboard?material=${encodeURIComponent(m.name)}`}
-                          className="w-full inline-flex justify-center items-center gap-2 bg-white/50 backdrop-blur-sm hover:bg-indigo-600 text-indigo-600 hover:text-white border border-gray-200/50 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-[0.98]"
+                          className="w-full inline-flex justify-center items-center gap-2 bg-espresso-800/55 backdrop-blur-sm hover:bg-clay-600 text-clay-300 hover:text-white border border-espresso-600/50 hover:border-transparent px-6 py-3 rounded-xl font-bold transition-all shadow-sm active:scale-[0.98]"
                         >
                           <Zap className="w-4 h-4" aria-hidden="true" />
                           Build With This Material

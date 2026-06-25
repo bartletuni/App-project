@@ -31,7 +31,7 @@ export default function TiltCard({
   children,
   className = "",
   intensity = 8,
-  glowColor = "rgba(99,102,241,0.18)",
+  glowColor = "rgba(230,168,95,0.20)",
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const fine = useFinePointer();

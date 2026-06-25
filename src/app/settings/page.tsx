@@ -109,32 +109,32 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-transparent py-10">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-cream-200 tracking-tight">
             Account{" "}
-            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
               Settings
             </span>
           </h1>
-          <p className="text-gray-500 mt-2 text-base sm:text-lg">Manage your profile and security preferences.</p>
+          <p className="text-cream-500 mt-2 text-base sm:text-lg">Manage your profile and security preferences.</p>
         </Reveal>
 
         <div className="space-y-6">
           {/* Profile Section */}
-          <Reveal direction="up" className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-600" aria-hidden="true" />
-              <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
+          <Reveal direction="up" className="bg-espresso-800/72 backdrop-blur-md shadow-sm border border-clay-500/18 rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45 flex items-center gap-2">
+              <User className="w-5 h-5 text-clay-300" aria-hidden="true" />
+              <h2 className="text-xl font-bold text-cream-200">Profile Information</h2>
             </div>
             <form onSubmit={handleProfileUpdate} className="p-6 space-y-6">
               {profileError && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
+                <div className="bg-red-500/15 text-red-300 p-4 rounded-xl flex items-start gap-3 border border-red-500/25" role="alert">
                   <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{profileError}</p>
                 </div>
               )}
               
               {profileSuccess && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
+                <div className="bg-green-500/15 text-green-300 p-4 rounded-xl flex items-start gap-3 border border-green-500/25" role="status">
                   <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">Profile updated successfully.</p>
                 </div>
@@ -142,34 +142,34 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Company / Personal Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-cream-300 mb-1">Company / Personal Name</label>
                   <input
                     id="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                    className="w-full px-4 py-2.5 bg-espresso-700 border border-espresso-600 rounded-xl focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-all outline-none text-cream-200"
                     placeholder="Your Name / Company Name"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                  <div className="text-sm font-medium text-gray-500">Email Address</div>
-                  <div className="sm:col-span-2 text-gray-400 font-medium bg-gray-50/50 px-4 py-2 rounded-lg border border-gray-100 italic">
+                  <div className="text-sm font-medium text-cream-500">Email Address</div>
+                  <div className="sm:col-span-2 text-cream-500 font-medium bg-espresso-700/50 px-4 py-2 rounded-lg border border-espresso-700 italic">
                     {session?.user?.email || "Loading..."}
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pt-2">
-                <p className="text-xs text-gray-500 sm:max-w-[60%]">
+                <p className="text-xs text-cream-500 sm:max-w-[60%]">
                   Your email is used for login and notifications and cannot be changed.
                 </p>
                 <button
                   type="submit"
                   disabled={profileLoading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm active:scale-[0.98] w-full sm:w-auto"
+                  className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm active:scale-[0.98] w-full sm:w-auto"
                 >
                   {profileLoading ? (
                     <>
@@ -188,22 +188,22 @@ export default function SettingsPage() {
           </Reveal>
 
           {/* Password Change Section */}
-          <Reveal direction="up" delay={0.1} className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
-              <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
+          <Reveal direction="up" delay={0.1} className="bg-espresso-800/72 backdrop-blur-md shadow-sm border border-clay-500/18 rounded-2xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45 flex items-center gap-2">
+              <Lock className="w-5 h-5 text-clay-300" aria-hidden="true" />
+              <h2 className="text-xl font-bold text-cream-200">Change Password</h2>
             </div>
             
             <form onSubmit={handlePasswordChange} className="p-6 space-y-6">
               {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
+                <div className="bg-red-500/15 text-red-300 p-4 rounded-xl flex items-start gap-3 border border-red-500/25" role="alert">
                   <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{error}</p>
                 </div>
               )}
               
               {success && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
+                <div className="bg-green-500/15 text-green-300 p-4 rounded-xl flex items-start gap-3 border border-green-500/25" role="status">
                   <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <p className="font-medium text-sm">{success}</p>
                 </div>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-cream-300 mb-1">Current Password</label>
                   <div className="relative">
                     <input
                       id="currentPassword"
@@ -219,13 +219,13 @@ export default function SettingsPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-2.5 pr-12 bg-espresso-700 border border-espresso-600 rounded-xl focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-all outline-none text-cream-200"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 focus-visible:ring-2 focus-visible:ring-clay-500 rounded outline-none p-1 transition-colors"
                       aria-label={showCurrentPassword ? "Hide password" : "Show password"}
                     >
                       {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -233,10 +233,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                <div className="pt-2 border-t border-gray-100"></div>
+                <div className="pt-2 border-t border-espresso-700"></div>
 
                 <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-cream-300 mb-1">New Password</label>
                   <div className="relative">
                     <input
                       id="newPassword"
@@ -245,13 +245,13 @@ export default function SettingsPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-2.5 pr-12 bg-espresso-700 border border-espresso-600 rounded-xl focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-all outline-none text-cream-200"
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 focus-visible:ring-2 focus-visible:ring-clay-500 rounded outline-none p-1 transition-colors"
                       aria-label={showNewPassword ? "Hide password" : "Show password"}
                     >
                       {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -260,7 +260,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-cream-300 mb-1">Confirm New Password</label>
                   <div className="relative">
                     <input
                       id="confirmPassword"
@@ -269,12 +269,12 @@ export default function SettingsPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
+                      className="w-full px-4 py-2.5 pr-12 bg-espresso-700 border border-espresso-600 rounded-xl focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-all outline-none text-cream-200"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 focus-visible:ring-2 focus-visible:ring-clay-500 rounded outline-none p-1 transition-colors"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     >
                       {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -287,7 +287,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] w-full sm:w-auto"
+                  className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] w-full sm:w-auto"
                 >
                   {loading ? (
                     <>

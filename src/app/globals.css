@@ -3,15 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #1c1611;
+  --foreground: #ece3d6;
 }
 
 body {
@@ -22,13 +15,29 @@ body {
 }
 
 html {
-  background: #f8fafc;
+  /* Warm espresso base so there is never a flash of white */
+  background: #1c1611;
   scroll-behavior: smooth;
 }
 
+/* Dark, warm form controls (forced so legacy inline light classes
+   never reintroduce a white field on the rustic theme) */
 input, select, textarea {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+  background-color: #241d17 !important;
+  color: #ece3d6 !important;
+  border-color: #4a3d31;
+}
+input::placeholder, textarea::placeholder {
+  color: #8a7a66 !important;
+}
+/* Native date/select indicators tinted for dark backgrounds */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(0.3) saturate(2) hue-rotate(350deg);
+  cursor: pointer;
+}
+select option {
+  background-color: #241d17;
+  color: #ece3d6;
 }
 
 @layer utilities {
@@ -55,6 +64,17 @@ input, select, textarea {
   .preserve-3d { transform-style: preserve-3d; }
   .backface-hidden { backface-visibility: hidden; }
 
+  /* Subtle rustic grain texture overlay */
+  .grain-overlay::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   /* Shimmer sweep overlay */
   .shimmer-overlay {
     position: relative;
@@ -68,7 +88,7 @@ input, select, textarea {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.55),
+      rgba(230, 168, 95, 0.35),
       transparent
     );
     animation: shimmer 2.5s ease-in-out infinite;
@@ -82,27 +102,27 @@ input, select, textarea {
   inherits: false;
 }
 
-/* Custom selection */
+/* Warm selection */
 ::selection {
-  background: rgba(99, 102, 241, 0.18);
-  color: #312e81;
+  background: rgba(193, 122, 75, 0.32);
+  color: #f3ece1;
 }
 
-/* Refined custom scrollbar */
+/* Refined warm scrollbar */
 ::-webkit-scrollbar {
   width: 11px;
   height: 11px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #1c1611;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #818cf8, #6366f1);
+  background: linear-gradient(180deg, #c17a4b, #a9663c);
   border-radius: 999px;
-  border: 3px solid #f8fafc;
+  border: 3px solid #1c1611;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6366f1, #4f46e5);
+  background: linear-gradient(180deg, #cf8f5f, #8a5230);
 }
 
 /* ADA: Respect user motion preferences */
@@ -122,6 +142,6 @@ input, select, textarea {
 
 /* ADA: Enhanced focus visibility for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid #cf8f5f;
   outline-offset: 2px;
 }

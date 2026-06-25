@@ -112,11 +112,11 @@ export default function Home() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-transparent">
-        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="animate-spin h-10 w-10 text-clay-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p className="text-gray-500 font-medium">Checking authentication...</p>
+        <p className="text-cream-500 font-medium">Checking authentication...</p>
         <span className="sr-only">Loading, please wait</span>
       </div>
     );
@@ -125,52 +125,52 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-stretch bg-transparent">
       {/* Left Column - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden" aria-hidden="true">
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-clay-600 via-espresso-700 to-espresso-950 text-white p-12 flex-col justify-center relative overflow-hidden" aria-hidden="true">
         {/* Decorative background shapes */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl animate-blob"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-overlay blur-3xl animate-blob animation-delay-2000"></div>
+          <div className="absolute top-10 left-10 w-64 h-64 bg-espresso-800 rounded-full mix-blend-overlay blur-3xl animate-blob"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-clay-400 rounded-full mix-blend-overlay blur-3xl animate-blob animation-delay-2000"></div>
         </div>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
 
         <div className="relative z-10 max-w-lg mx-auto">
           <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
             TakomoCo <br />
-            <span className="text-blue-300">Request Management</span>
+            <span className="text-ember-300">Request Management</span>
           </h1>
-          <p className="text-lg text-indigo-100 mb-8 leading-relaxed">
+          <p className="text-lg text-cream-300 mb-8 leading-relaxed">
             Streamline your additive manufacturing workflows. Upload your custom part specifications, track progress in real-time, and get your parts delivered faster than ever.
           </p>
 
           <div className="grid grid-cols-2 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-clay-500/18 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-clay-500/35">
               <div className="text-3xl font-bold mb-1 animate-float">⚡️</div>
               <h3 className="font-semibold text-lg mb-1">Lightning Fast</h3>
-              <p className="text-sm text-indigo-200">Rapid turnaround times for all prototyping.</p>
+              <p className="text-sm text-cream-400">Rapid turnaround times for all prototyping.</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-clay-500/18 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-clay-500/35">
               <div className="text-3xl font-bold mb-1 animate-float animation-delay-1000">🎯</div>
               <h3 className="font-semibold text-lg mb-1">High Precision</h3>
-              <p className="text-sm text-indigo-200">State of the art 3D printing accuracy.</p>
+              <p className="text-sm text-cream-400">State of the art 3D printing accuracy.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Column - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white/80 backdrop-blur-xl border-l border-gray-200/50 shadow-2xl z-10">
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-espresso-800/85 backdrop-blur-xl border-l border-espresso-600/50 shadow-2xl z-10">
         <div className="w-full max-w-md">
           {/* Mobile Header (Hidden on Desktop) */}
           <div className="lg:hidden mb-10 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">TakomoCo</h1>
-            <p className="text-gray-500">Request Management Portal</p>
+            <h1 className="text-4xl font-bold text-cream-200 mb-2">TakomoCo</h1>
+            <p className="text-cream-500">Request Management Portal</p>
           </div>
 
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-bold text-cream-200 mb-2">
               {isLogin ? "Welcome Back" : "Create an Account"}
             </h2>
-            <p className="text-gray-500">
+            <p className="text-cream-500">
               {isLogin
                 ? "Enter your details to access your dashboard."
                 : "Sign up to start requesting custom parts."}
@@ -178,7 +178,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md text-sm" role="alert">
+            <div className="mb-6 p-4 bg-red-500/15 border-l-4 border-red-500 text-red-300 rounded-md text-sm" role="alert">
               {error}
             </div>
           )}
@@ -186,7 +186,7 @@ export default function Home() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
+                <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="name">
                   Company / Personal Name
                 </label>
                 <input
@@ -195,14 +195,14 @@ export default function Home() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 text-gray-900 px-4 py-3"
+                  className="block w-full rounded-xl border-espresso-500 shadow-sm focus:border-clay-500 focus:ring-clay-500 bg-espresso-700 text-cream-200 px-4 py-3"
                   placeholder="ACME Corp / Jane Doe"
                   autoComplete="name"
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
+              <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="email">
                 Email Address
               </label>
               <input
@@ -211,14 +211,14 @@ export default function Home() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                 placeholder="you@company.com"
                 autoComplete="email"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
+              <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="password">
                 Password
               </label>
               <div className="relative">
@@ -228,14 +228,14 @@ export default function Home() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                  className="w-full px-4 py-3 pr-12 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                   placeholder="••••••••"
                   autoComplete={isLogin ? "current-password" : "new-password"}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 focus-visible:ring-2 focus-visible:ring-clay-500 rounded outline-none p-1 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -245,11 +245,11 @@ export default function Home() {
 
             {!isLogin && (
               <>
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Information</h3>
+                <div className="pt-4 border-t border-espresso-700">
+                  <h3 className="text-lg font-bold text-cream-200 mb-4">Shipping Information</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingStreet">
+                      <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="shippingStreet">
                         Street Address
                       </label>
                       <input
@@ -258,13 +258,13 @@ export default function Home() {
                         required={!isLogin}
                         value={shippingStreet}
                         onChange={(e) => setShippingStreet(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                         placeholder="123 Main St"
                         autoComplete="shipping street-address"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingApt">
+                      <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="shippingApt">
                         Apartment, suite, etc. (optional)
                       </label>
                       <input
@@ -272,13 +272,13 @@ export default function Home() {
                         type="text"
                         value={shippingApt}
                         onChange={(e) => setShippingApt(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                         placeholder="Apt 4B"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingCity">
+                        <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="shippingCity">
                           City
                         </label>
                         <input
@@ -287,12 +287,12 @@ export default function Home() {
                           required={!isLogin}
                           value={shippingCity}
                           onChange={(e) => setShippingCity(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                           placeholder="City"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingState">
+                        <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="shippingState">
                           State / Province
                         </label>
                         <input
@@ -301,13 +301,13 @@ export default function Home() {
                           required={!isLogin}
                           value={shippingState}
                           onChange={(e) => setShippingState(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                           placeholder="ST"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingZip">
+                      <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="shippingZip">
                         ZIP / Postal Code
                       </label>
                       <input
@@ -316,31 +316,31 @@ export default function Home() {
                         required={!isLogin}
                         value={shippingZip}
                         onChange={(e) => setShippingZip(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                        className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                         placeholder="12345"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-gray-100">
+                <div className="pt-6 border-t border-espresso-700">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">Billing Information</h3>
+                    <h3 className="text-lg font-bold text-cream-200">Billing Information</h3>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={sameAsShipping}
                         onChange={(e) => setSameAsShipping(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        className="w-4 h-4 text-clay-300 border-espresso-500 rounded focus:ring-clay-500"
                       />
-                      <span className="text-sm font-medium text-gray-600">Same as shipping</span>
+                      <span className="text-sm font-medium text-cream-400">Same as shipping</span>
                     </label>
                   </div>
                   
                   {!sameAsShipping && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingStreet">
+                        <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="billingStreet">
                           Street Address
                         </label>
                         <input
@@ -349,12 +349,12 @@ export default function Home() {
                           required={!isLogin && !sameAsShipping}
                           value={billingStreet}
                           onChange={(e) => setBillingStreet(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                           placeholder="123 Main St"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingApt">
+                        <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="billingApt">
                           Apartment, suite, etc. (optional)
                         </label>
                         <input
@@ -362,13 +362,13 @@ export default function Home() {
                           type="text"
                           value={billingApt}
                           onChange={(e) => setBillingApt(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                           placeholder="Apt 4B"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingCity">
+                          <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="billingCity">
                             City
                           </label>
                           <input
@@ -377,12 +377,12 @@ export default function Home() {
                             required={!isLogin && !sameAsShipping}
                             value={billingCity}
                             onChange={(e) => setBillingCity(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                            className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                             placeholder="City"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingState">
+                          <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="billingState">
                             State / Province
                           </label>
                           <input
@@ -391,13 +391,13 @@ export default function Home() {
                             required={!isLogin && !sameAsShipping}
                             value={billingState}
                             onChange={(e) => setBillingState(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                            className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                             placeholder="ST"
                           />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingZip">
+                        <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="billingZip">
                           ZIP / Postal Code
                         </label>
                         <input
@@ -406,7 +406,7 @@ export default function Home() {
                           required={!isLogin && !sameAsShipping}
                           value={billingZip}
                           onChange={(e) => setBillingZip(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                           placeholder="12345"
                         />
                       </div>
@@ -414,7 +414,7 @@ export default function Home() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
+                  <label className="block text-sm font-medium text-cream-300 mb-2" htmlFor="phone">
                     Phone Number
                   </label>
                   <input
@@ -423,7 +423,7 @@ export default function Home() {
                     required={!isLogin}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
+                    className="w-full px-4 py-3 rounded-lg border border-espresso-500 focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-colors shadow-sm"
                     placeholder="(555) 555-5555"
                     autoComplete="tel"
                   />
@@ -434,7 +434,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-clay-600 hover:bg-clay-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -458,7 +458,7 @@ export default function Home() {
                 setIsLogin(!isLogin);
                 setError("");
               }}
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              className="text-sm text-clay-300 hover:text-clay-200 font-medium transition-colors"
             >
               {isLogin
                 ? "Don't have an account? Create one now."
@@ -466,10 +466,10 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="mt-6 text-center border-t border-gray-100 pt-6">
+          <div className="mt-6 text-center border-t border-espresso-700 pt-6">
             <Link
               href="/materials"
-              className="text-sm text-gray-500 hover:text-indigo-600 font-medium transition-colors flex items-center justify-center gap-2"
+              className="text-sm text-cream-500 hover:text-clay-300 font-medium transition-colors flex items-center justify-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></svg>
               View Materials Library

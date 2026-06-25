@@ -204,7 +204,15 @@ export default function InteractiveBackground() {
         this.size = (Math.random() * 3 + 1) * 0.75;
         this.speedX = Math.random() * 0.5 - 0.25;
         this.speedY = Math.random() * 0.5 - 0.25;
-        this.color = `rgba(139, 92, 246, ${Math.random() * 0.3 + 0.1})`;
+        // Warm ember tones (amber → terracotta), drifting like firelight motes
+        const emberPalette = [
+          [230, 168, 95], // amber
+          [193, 122, 75], // clay
+          [217, 142, 61], // ochre
+          [207, 143, 95], // warm tan
+        ];
+        const [r, g, b] = emberPalette[Math.floor(Math.random() * emberPalette.length)];
+        this.color = `rgba(${r}, ${g}, ${b}, ${Math.random() * 0.4 + 0.25})`;
         this.density = (Math.random() * 30) + 1;
       }
 
@@ -417,7 +425,7 @@ export default function InteractiveBackground() {
             }
           }
 
-          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+          ctx.strokeStyle = `rgba(217, 142, 61, ${alpha})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -455,26 +463,29 @@ export default function InteractiveBackground() {
 
   if (!isClient) {
     return (
-      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#f9fafb]">
+      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#1c1611]">
         {/* Fallback background */}
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#f8fafc]">
-      {/* Soft aurora mesh wash that subtly drifts and shifts with scroll */}
+    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#1c1611]">
+      {/* Deep warm vignette so the edges fall into shadow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#2a201700_0%,#15100c_85%)]"></div>
+
+      {/* Soft warm aurora wash that drifts and shifts with scroll */}
       <div
-        className="absolute inset-0 transition-transform duration-700 ease-out"
+        className="absolute inset-0 transition-transform duration-700 ease-out mix-blend-screen"
         style={{ transform: `translateY(${scrollY * 0.04}px)` }}
       >
-        <div className="absolute -top-1/4 left-0 w-[60vw] h-[60vw] bg-indigo-300/30 rounded-full blur-[140px] animate-aurora"></div>
-        <div className="absolute top-1/3 -right-1/4 w-[55vw] h-[55vw] bg-blue-300/30 rounded-full blur-[150px] animate-aurora animation-delay-3000"></div>
+        <div className="absolute -top-1/4 left-0 w-[60vw] h-[60vw] bg-[#a9663c]/25 rounded-full blur-[140px] animate-aurora"></div>
+        <div className="absolute top-1/3 -right-1/4 w-[55vw] h-[55vw] bg-[#8a5230]/25 rounded-full blur-[150px] animate-aurora animation-delay-3000"></div>
       </div>
 
       {/* Base grid pattern that gently parallaxes against the scroll */}
       <div
-        className="absolute inset-0 bg-[linear-gradient(to_right,#6366f111_1px,transparent_1px),linear-gradient(to_bottom,#6366f111_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(to_right,#c17a4b12_1px,transparent_1px),linear-gradient(to_bottom,#c17a4b12_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
         style={{ transform: `translateY(${scrollY * 0.08}px)` }}
       ></div>
 
@@ -484,28 +495,28 @@ export default function InteractiveBackground() {
         className="absolute inset-0 pointer-events-none"
       />
 
-      {/* Large subtle glowing orb that tracks mouse */}
+      {/* Large firelight glow that tracks the cursor */}
       <motion.div
-        className="absolute rounded-full mix-blend-multiply blur-[100px] pointer-events-none transition-opacity duration-500"
+        className="absolute rounded-full mix-blend-screen blur-[100px] pointer-events-none transition-opacity duration-500"
         style={{
           width: isMobile ? 320 : 800,
           height: isMobile ? 320 : 800,
           top: isMobile ? -160 : -400,
           left: isMobile ? -160 : -400,
-          background: "radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(139,92,246,0.3) 50%, rgba(255,255,255,0) 100%)",
+          background: "radial-gradient(circle, rgba(230,168,95,0.55) 0%, rgba(193,122,75,0.28) 50%, rgba(21,16,12,0) 100%)",
           x: cursorX,
           y: cursorY,
-          opacity: isActive ? (isMobile ? 0.35 : 0.40) : 0,
+          opacity: isActive ? (isMobile ? 0.4 : 0.5) : 0,
         }}
       />
 
-      {/* Secondary accent orbs with scroll-driven parallax */}
+      {/* Secondary ember orbs with scroll-driven parallax */}
       <div
-        className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+        className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#c17a4b] rounded-full mix-blend-screen filter blur-3xl opacity-[0.12] animate-blob"
         style={{ transform: `translateY(${scrollY * -0.06}px)` }}
       ></div>
       <div
-        className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-blob animation-delay-2000"
+        className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-[#8a5230] rounded-full mix-blend-screen filter blur-[120px] opacity-[0.14] animate-blob animation-delay-2000"
         style={{ transform: `translateY(${scrollY * 0.05}px)` }}
       ></div>
     </div>

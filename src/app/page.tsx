@@ -58,28 +58,28 @@ const competencies = [
     title: "Additive Manufacturing",
     body: "Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade materials.",
     accent: "indigo",
-    glow: "rgba(99,102,241,0.22)",
+    glow: "rgba(217,142,61,0.22)",
   },
   {
     icon: Scan,
     title: "3D Scanning & Reverse Eng.",
     body: "High-fidelity scanning for intricate part reproduction, exact 1:1 copies, and robust digital archiving.",
     accent: "blue",
-    glow: "rgba(59,130,246,0.22)",
+    glow: "rgba(230,168,95,0.20)",
   },
   {
     icon: Zap,
     title: "Rapid Prototyping",
     body: "Iterative design support to dramatically accelerate your product development cycles.",
     accent: "purple",
-    glow: "rgba(168,85,247,0.22)",
+    glow: "rgba(193,122,75,0.22)",
   },
 ];
 
 const accentMap: Record<string, string> = {
-  indigo: "bg-indigo-100/80 text-indigo-600 group-hover:border-indigo-200",
-  blue: "bg-blue-100/80 text-blue-600 group-hover:border-blue-200",
-  purple: "bg-purple-100/80 text-purple-600 group-hover:border-purple-200",
+  indigo: "bg-clay-500/15 text-clay-300 group-hover:border-clay-500/40",
+  blue: "bg-ember-400/15 text-ember-300 group-hover:border-ember-400/40",
+  purple: "bg-clay-700/20 text-clay-200 group-hover:border-clay-600/40",
 };
 
 const stats = [
@@ -151,7 +151,7 @@ export default function LandingPage() {
     stiffness: 80,
     damping: 20,
   });
-  const heroGlow = useMotionTemplate`radial-gradient(600px circle at ${glowX} ${glowY}, rgba(99,102,241,0.12), transparent 60%)`;
+  const heroGlow = useMotionTemplate`radial-gradient(600px circle at ${glowX} ${glowY}, rgba(217,142,61,0.12), transparent 60%)`;
 
   // Subtle headline tilt toward the cursor
   const tiltX = useSpring(useTransform(py, [0, 1], [6, -6]), {
@@ -171,10 +171,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-transparent font-sans selection:bg-clay-500/30 selection:text-cream-100">
       {/* Navigation */}
       <nav
-        className="fixed top-0 w-full bg-white/60 backdrop-blur-xl z-50 border-b border-gray-100/60"
+        className="fixed top-0 w-full bg-espresso-800/62 backdrop-blur-xl z-50 border-b border-espresso-700/60"
         aria-label="Landing page navigation"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -192,7 +192,7 @@ export default function LandingPage() {
                 height={32}
                 className="rounded-lg shadow-sm"
               />
-              <span className="font-bold text-xl text-gray-900 tracking-tight">
+              <span className="font-bold text-xl text-cream-200 tracking-tight">
                 TakomoCo
               </span>
             </motion.div>
@@ -204,15 +204,15 @@ export default function LandingPage() {
             >
               <Link
                 href="/materials"
-                className="group relative text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors"
+                className="group relative text-sm font-medium text-cream-400 hover:text-clay-300 transition-colors"
               >
                 Materials
-                <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-indigo-600 transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-clay-600 transition-all duration-300 group-hover:w-full" />
               </Link>
               <Magnetic strength={0.5}>
                 <Link
                   href="/login"
-                  className="inline-block text-sm font-bold bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors shadow-md hover:shadow-glow"
+                  className="inline-block text-sm font-bold bg-clay-600 text-white px-5 py-2 rounded-full hover:bg-clay-700 transition-colors shadow-md hover:shadow-glow"
                 >
                   Sign In
                 </Link>
@@ -245,7 +245,7 @@ export default function LandingPage() {
             animate="visible"
           >
             <motion.div variants={itemVariants} className="flex justify-center mb-8">
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-white/70 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-clay-500/40 bg-espresso-800/72 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-clay-300 shadow-sm">
                 <Sparkles className="w-4 h-4" aria-hidden="true" />
                 Precision additive manufacturing studio
               </span>
@@ -254,17 +254,17 @@ export default function LandingPage() {
             <motion.h1
               variants={itemVariants}
               style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 1200 }}
-              className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-[1.05] [transform-style:preserve-3d]"
+              className="text-5xl md:text-7xl font-extrabold text-cream-200 tracking-tight mb-8 leading-[1.05] [transform-style:preserve-3d]"
             >
               Digital Design <br className="hidden md:block" />
-              <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+              <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-clay-400 via-ember-400 to-clay-300">
                 Physical Reality
               </span>
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
-              className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto mb-10 leading-relaxed"
+              className="mt-4 max-w-2xl text-xl text-cream-400 mx-auto mb-10 leading-relaxed"
             >
               TakomoCo is a specialized additive manufacturing and rapid
               prototyping studio. We offer high-precision 3D printing and 3D
@@ -278,7 +278,7 @@ export default function LandingPage() {
               <Magnetic strength={0.4}>
                 <Link
                   href="/login"
-                  className="group inline-flex justify-center items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-glow-lg hover:-translate-y-0.5"
+                  className="group inline-flex justify-center items-center gap-2 bg-clay-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-clay-700 transition-all shadow-lg hover:shadow-glow-lg hover:-translate-y-0.5"
                 >
                   Start Your Project
                   <ArrowRight
@@ -290,7 +290,7 @@ export default function LandingPage() {
               <Magnetic strength={0.3}>
                 <Link
                   href="/materials"
-                  className="inline-flex justify-center items-center bg-white/60 backdrop-blur-md text-gray-900 border border-gray-200/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-white/90 transition-all shadow-sm hover:shadow-md"
+                  className="inline-flex justify-center items-center bg-espresso-800/62 backdrop-blur-md text-cream-200 border border-espresso-600/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-espresso-800/90 transition-all shadow-sm hover:shadow-md"
                 >
                   View Material Library
                 </Link>
@@ -307,25 +307,25 @@ export default function LandingPage() {
           transition={{ delay: 1.2 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
         >
-          <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-gray-300/80 p-1.5">
+          <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-espresso-500/80 p-1.5">
             <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-              className="h-2 w-1 rounded-full bg-indigo-500"
+              className="h-2 w-1 rounded-full bg-clay-500"
             />
           </div>
         </motion.div>
       </section>
 
       {/* Materials marquee strip */}
-      <section className="py-6 border-y border-gray-200/50 bg-white/40 backdrop-blur-sm" aria-label="Supported materials and capabilities">
+      <section className="py-6 border-y border-espresso-600/50 bg-espresso-800/45 backdrop-blur-sm" aria-label="Supported materials and capabilities">
         <Marquee>
           {marqueeItems.map((item) => (
             <span
               key={item}
-              className="flex items-center gap-3 text-lg font-semibold text-gray-400 whitespace-nowrap"
+              className="flex items-center gap-3 text-lg font-semibold text-cream-500 whitespace-nowrap"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-clay-400" />
               {item}
             </span>
           ))}
@@ -338,18 +338,18 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
               <Reveal key={stat.label} direction="up" delay={i * 0.1}>
-                <div className="group h-full rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-indigo-200">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100/80 text-indigo-600 transition-transform group-hover:scale-110">
+                <div className="group h-full rounded-2xl border border-clay-500/25 bg-espresso-800/62 backdrop-blur-xl p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:border-clay-500/40">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-clay-500/15 text-clay-300 transition-transform group-hover:scale-110">
                     <stat.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
-                  <div className="text-3xl md:text-4xl font-extrabold text-gray-900">
+                  <div className="text-3xl md:text-4xl font-extrabold text-cream-200">
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}
                       decimals={stat.decimals ?? 0}
                     />
                   </div>
-                  <p className="mt-2 text-sm font-medium text-gray-500">
+                  <p className="mt-2 text-sm font-medium text-cream-500">
                     {stat.label}
                   </p>
                 </div>
@@ -363,10 +363,10 @@ export default function LandingPage() {
       <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
-            <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-2">
+            <h2 className="text-sm font-bold text-clay-300 uppercase tracking-widest mb-2">
               Capabilities
             </h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+            <h3 className="text-3xl md:text-4xl font-extrabold text-cream-200">
               Core Competencies
             </h3>
           </Reveal>
@@ -375,16 +375,16 @@ export default function LandingPage() {
             {competencies.map((c, i) => (
               <Reveal key={c.title} direction="up" delay={i * 0.12}>
                 <TiltCard glowColor={c.glow} className="group h-full rounded-2xl">
-                  <div className="h-full bg-white/60 backdrop-blur-xl rounded-2xl p-8 border border-white/30 transition-colors hover:shadow-xl">
+                  <div className="h-full bg-espresso-800/62 backdrop-blur-xl rounded-2xl p-8 border border-clay-500/20 transition-colors hover:shadow-xl">
                     <div
                       className={`w-14 h-14 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 border border-transparent transition-transform group-hover:scale-110 ${accentMap[c.accent]}`}
                     >
                       <c.icon className="w-7 h-7" aria-hidden="true" />
                     </div>
-                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                    <h4 className="text-xl font-bold text-cream-200 mb-3">
                       {c.title}
                     </h4>
-                    <p className="text-gray-600 leading-relaxed">{c.body}</p>
+                    <p className="text-cream-400 leading-relaxed">{c.body}</p>
                   </div>
                 </TiltCard>
               </Reveal>
@@ -397,10 +397,10 @@ export default function LandingPage() {
       <section className="py-20" aria-label="Our process">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
-            <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-2">
+            <h2 className="text-sm font-bold text-clay-300 uppercase tracking-widest mb-2">
               Workflow
             </h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+            <h3 className="text-3xl md:text-4xl font-extrabold text-cream-200">
               From Concept to Component
             </h3>
           </Reveal>
@@ -409,21 +409,21 @@ export default function LandingPage() {
             {/* Connecting line */}
             <div
               aria-hidden="true"
-              className="hidden md:block absolute top-7 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-indigo-300 to-transparent"
+              className="hidden md:block absolute top-7 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-clay-500 to-transparent"
             />
             {process.map((p, i) => (
               <Reveal key={p.step} direction="up" delay={i * 0.12}>
                 <div className="relative text-center">
-                  <div className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-indigo-100 text-indigo-600 shadow-md">
+                  <div className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-espresso-800 border border-clay-500/25 text-clay-300 shadow-md">
                     <p.icon className="h-6 w-6" aria-hidden="true" />
-                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow">
+                    <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-clay-600 text-[10px] font-bold text-white shadow">
                       {p.step}
                     </span>
                   </div>
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">
+                  <h4 className="text-lg font-bold text-cream-200 mb-2">
                     {p.title}
                   </h4>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-cream-400 leading-relaxed">
                     {p.body}
                   </p>
                 </div>
@@ -434,15 +434,15 @@ export default function LandingPage() {
       </section>
 
       {/* Technical Specs & Differentiators */}
-      <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
+      <section className="py-24 bg-espresso-950 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div
           aria-hidden="true"
-          className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-600/20 blur-[120px] animate-blob"
+          className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-clay-500/20 blur-[120px] animate-blob"
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px] animate-blob animation-delay-2000"
+          className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-clay-700/20 blur-[120px] animate-blob animation-delay-2000"
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -454,17 +454,17 @@ export default function LandingPage() {
               <div className="space-y-6">
                 {[
                   {
-                    color: "text-indigo-300",
+                    color: "text-ember-300",
                     title: "Maximum Build Volume",
                     body: "256mm x 256mm x 256mm space for dense, robust components.",
                   },
                   {
-                    color: "text-blue-300",
+                    color: "text-ember-300",
                     title: "Advanced Thermal Capacity",
                     body: "Optimized for specialized materials requiring up to 320°C extrusion temperature.",
                   },
                   {
-                    color: "text-purple-300",
+                    color: "text-clay-300",
                     title: "Scanning Precision",
                     body: "Capable of capturing highly intricate geometries for near-exact reproductions.",
                   },
@@ -480,7 +480,7 @@ export default function LandingPage() {
                       <h4 className="text-xl font-bold text-white">
                         {spec.title}
                       </h4>
-                      <p className="text-gray-400 mt-1">{spec.body}</p>
+                      <p className="text-cream-500 mt-1">{spec.body}</p>
                     </div>
                   </div>
                 ))}
@@ -489,35 +489,35 @@ export default function LandingPage() {
 
             {/* Differentiators */}
             <Reveal direction="left" delay={0.1}>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-sm transition-colors hover:border-white/20">
+              <div className="bg-white/5 border border-clay-500/12 rounded-3xl p-10 backdrop-blur-sm transition-colors hover:border-clay-500/25">
                 <h3 className="text-2xl font-extrabold mb-8 text-white flex items-center gap-3">
-                  <Shield className="w-7 h-7 text-indigo-400" aria-hidden="true" />
+                  <Shield className="w-7 h-7 text-ember-300" aria-hidden="true" />
                   Why Choose TakomoCo?
                 </h3>
                 <ul className="space-y-8">
                   <li>
-                    <h4 className="text-lg font-bold text-indigo-300 mb-2">
+                    <h4 className="text-lg font-bold text-ember-300 mb-2">
                       Material Mastery
                     </h4>
-                    <p className="text-gray-400 leading-relaxed">
+                    <p className="text-cream-500 leading-relaxed">
                       Highly specialized in handling complex, abrasive, and
                       carbon-fiber-reinforced composites.
                     </p>
                   </li>
                   <li>
-                    <h4 className="text-lg font-bold text-blue-300 mb-2">
+                    <h4 className="text-lg font-bold text-ember-300 mb-2">
                       End-to-End Workflow
                     </h4>
-                    <p className="text-gray-400 leading-relaxed">
+                    <p className="text-cream-500 leading-relaxed">
                       From scanning a broken legacy part to engineering and
                       delivering a fiber-reinforced replacement seamlessly.
                     </p>
                   </li>
                   <li>
-                    <h4 className="text-lg font-bold text-purple-300 mb-2">
+                    <h4 className="text-lg font-bold text-clay-300 mb-2">
                       Agile Response
                     </h4>
-                    <p className="text-gray-400 leading-relaxed">
+                    <p className="text-cream-500 leading-relaxed">
                       Our small-scale focus allows for rapid pivots, personal
                       attention, and dedicated engineering support.
                     </p>
@@ -531,15 +531,15 @@ export default function LandingPage() {
 
       {/* Footer / CTA */}
       <footer
-        className="bg-transparent py-16 border-t border-gray-200/50"
+        className="bg-transparent py-16 border-t border-espresso-600/50"
         aria-label="Site footer"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Reveal>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-cream-200 mb-6">
               Ready to start building?
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-cream-400 mb-8 max-w-2xl mx-auto">
               Contact us today or log in to submit a request. We specialize in
               high-strength, chemically and impact resistant composites.
             </p>
@@ -547,7 +547,7 @@ export default function LandingPage() {
               <Magnetic strength={0.4}>
                 <Link
                   href="/login"
-                  className="inline-block bg-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-indigo-700 transition-all shadow-md hover:shadow-glow"
+                  className="inline-block bg-clay-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-clay-700 transition-all shadow-md hover:shadow-glow"
                 >
                   Submit a Request
                 </Link>
@@ -555,7 +555,7 @@ export default function LandingPage() {
               <Magnetic strength={0.3}>
                 <a
                   href="mailto:takomocompany@gmail.com"
-                  className="inline-block bg-white/60 backdrop-blur-md text-gray-900 border border-gray-200/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-white/90 transition-all shadow-sm hover:shadow-md"
+                  className="inline-block bg-espresso-800/62 backdrop-blur-md text-cream-200 border border-espresso-600/60 px-8 py-4 rounded-full text-lg font-bold hover:bg-espresso-800/90 transition-all shadow-sm hover:shadow-md"
                 >
                   takomocompany@gmail.com
                 </a>
@@ -563,7 +563,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+          <div className="pt-8 border-t border-espresso-600/50 flex flex-col md:flex-row justify-between items-center text-sm text-cream-500">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
               <Image
                 src="/logo.png"
@@ -572,7 +572,7 @@ export default function LandingPage() {
                 height={24}
                 className="rounded"
               />
-              <span className="font-semibold text-gray-900">TakomoCo</span>
+              <span className="font-semibold text-cream-200">TakomoCo</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center">
               <span>📞 385-695-4178</span>
