@@ -128,9 +128,10 @@ export default function Home() {
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden" aria-hidden="true">
         {/* Decorative background shapes */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-overlay blur-3xl"></div>
+          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl animate-blob"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-overlay blur-3xl animate-blob animation-delay-2000"></div>
         </div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
 
         <div className="relative z-10 max-w-lg mx-auto">
           <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
@@ -142,13 +143,13 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-2 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-              <div className="text-3xl font-bold mb-1">⚡️</div>
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
+              <div className="text-3xl font-bold mb-1 animate-float">⚡️</div>
               <h3 className="font-semibold text-lg mb-1">Lightning Fast</h3>
               <p className="text-sm text-indigo-200">Rapid turnaround times for all prototyping.</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-              <div className="text-3xl font-bold mb-1">🎯</div>
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
+              <div className="text-3xl font-bold mb-1 animate-float animation-delay-1000">🎯</div>
               <h3 className="font-semibold text-lg mb-1">High Precision</h3>
               <p className="text-sm text-indigo-200">State of the art 3D printing accuracy.</p>
             </div>

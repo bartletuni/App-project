@@ -9,6 +9,8 @@ export default function InteractiveBackground() {
   const [isMobile, setIsMobile] = useState(false);
   const [isActive, setIsActive] = useState(true); // Default to true for desktop on load
 
+  const [scrollY, setScrollY] = useState(0);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({
     x: 0,
@@ -130,12 +132,22 @@ export default function InteractiveBackground() {
       setIsActive(false);
     };
 
+    let scrollRaf = 0;
+    const handleScroll = () => {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+        scrollRaf = 0;
+      });
+    };
+
     window.addEventListener("mousemove", updateMousePosition);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("touchend", handleTouchEnd);
     window.addEventListener("touchcancel", handleTouchEnd);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
@@ -145,6 +157,8 @@ export default function InteractiveBackground() {
       window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("touchcancel", handleTouchEnd);
       window.removeEventListener("deviceorientation", handleOrientation);
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
     };
   }, []);
 
@@ -372,8 +386,48 @@ export default function InteractiveBackground() {
         }
       }
 
+      // Update all particles first
       for (let i = 0; i < particlesArray.length; i++) {
         particlesArray[i].update();
+      }
+
+      // Constellation: connect nearby particles with lines that
+      // brighten as they approach the cursor.
+      const linkDistance = 120;
+      const mouseActive = mouseRef.current.active;
+      for (let i = 0; i < particlesArray.length; i++) {
+        const a = particlesArray[i];
+        for (let j = i + 1; j < particlesArray.length; j++) {
+          const b = particlesArray[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          if (Math.abs(dx) > linkDistance || Math.abs(dy) > linkDistance) continue;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist >= linkDistance) continue;
+
+          let alpha = (1 - dist / linkDistance) * 0.16;
+
+          // Boost links near the pointer for a reactive "web" feel
+          if (mouseActive) {
+            const mx = (a.x + b.x) / 2 - mouseRef.current.x;
+            const my = (a.y + b.y) / 2 - mouseRef.current.y;
+            const mDist = Math.sqrt(mx * mx + my * my);
+            if (mDist < 200) {
+              alpha += (1 - mDist / 200) * 0.35;
+            }
+          }
+
+          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      // Draw particles on top of the links
+      for (let i = 0; i < particlesArray.length; i++) {
         particlesArray[i].draw();
       }
       animationFrameId = requestAnimationFrame(animate);
@@ -408,11 +462,23 @@ export default function InteractiveBackground() {
   }
 
   return (
-    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#f9fafb]">
-      {/* Base gradient pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#f8fafc]">
+      {/* Soft aurora mesh wash that subtly drifts and shifts with scroll */}
+      <div
+        className="absolute inset-0 transition-transform duration-700 ease-out"
+        style={{ transform: `translateY(${scrollY * 0.04}px)` }}
+      >
+        <div className="absolute -top-1/4 left-0 w-[60vw] h-[60vw] bg-indigo-300/30 rounded-full blur-[140px] animate-aurora"></div>
+        <div className="absolute top-1/3 -right-1/4 w-[55vw] h-[55vw] bg-blue-300/30 rounded-full blur-[150px] animate-aurora animation-delay-3000"></div>
+      </div>
 
-      {/* Particle Canvas */}
+      {/* Base grid pattern that gently parallaxes against the scroll */}
+      <div
+        className="absolute inset-0 bg-[linear-gradient(to_right,#6366f111_1px,transparent_1px),linear-gradient(to_bottom,#6366f111_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
+        style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+      ></div>
+
+      {/* Particle / constellation Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 pointer-events-none"
@@ -433,9 +499,15 @@ export default function InteractiveBackground() {
         }}
       />
 
-      {/* Secondary accent orb */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-blob animation-delay-2000"></div>
+      {/* Secondary accent orbs with scroll-driven parallax */}
+      <div
+        className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+        style={{ transform: `translateY(${scrollY * -0.06}px)` }}
+      ></div>
+      <div
+        className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-blob animation-delay-2000"
+        style={{ transform: `translateY(${scrollY * 0.05}px)` }}
+      ></div>
     </div>
   );
 }
