@@ -18,6 +18,14 @@ html {
   /* Warm espresso base so there is never a flash of white */
   background: #1c1611;
   scroll-behavior: smooth;
+  /* Never allow sideways scrolling (clip preserves position: sticky,
+     unlike overflow-x: hidden) */
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* Dark, warm form controls (forced so legacy inline light classes
