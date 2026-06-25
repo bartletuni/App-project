@@ -2,50 +2,34 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useSpring } from "framer-motion";
+import { LAND_W, LAND_H, LAND_MASK_B64 } from "./worldLandMask";
 
 /**
- * Coarse continental outlines as [lon, lat] polygons. Rough by design —
- * enough to read as a world map once projected and dotted. Ray-casting
- * point-in-polygon decides which lon/lat samples are "land".
+ * Decoded equirectangular land bitmask (Natural Earth 50m, 0.5°). Bit
+ * `row * LAND_W + col` is set where there is land, giving an accurate
+ * coastline to sample dots onto.
  */
-const CONTINENTS: number[][][] = [
-  // North America
-  [[-165, 66], [-140, 71], [-105, 72], [-83, 70], [-62, 60], [-55, 49], [-67, 45], [-76, 38], [-81, 30], [-90, 29], [-97, 22], [-106, 23], [-115, 32], [-125, 42], [-135, 55], [-152, 60]],
-  // Greenland
-  [[-46, 60], [-30, 60], [-18, 66], [-22, 76], [-38, 82], [-55, 79], [-52, 68]],
-  // South America
-  [[-79, 9], [-69, 11], [-60, 5], [-51, 0], [-35, -6], [-39, -16], [-49, -25], [-58, -34], [-66, -43], [-73, -52], [-74, -44], [-71, -33], [-71, -20], [-77, -12], [-81, -3]],
-  // Africa
-  [[-16, 21], [-9, 30], [0, 35], [11, 34], [24, 32], [35, 31], [44, 11], [51, 12], [48, 2], [41, -12], [38, -20], [27, -33], [19, -35], [13, -23], [9, -1], [3, 5], [-8, 4], [-16, 10]],
-  // Europe (+ western Russia)
-  [[-9, 37], [-9, 44], [-3, 49], [2, 51], [-5, 58], [8, 63], [18, 69], [28, 71], [30, 62], [40, 60], [55, 58], [60, 50], [48, 46], [40, 44], [28, 41], [20, 38], [12, 37], [2, 36]],
-  // Asia
-  [[40, 45], [45, 60], [55, 68], [70, 73], [100, 77], [130, 73], [160, 68], [180, 66], [178, 60], [160, 58], [145, 48], [140, 38], [122, 40], [120, 30], [122, 22], [110, 18], [105, 8], [97, 6], [88, 21], [80, 8], [76, 18], [70, 24], [62, 25], [56, 30], [48, 38]],
-  // Australia
-  [[114, -22], [122, -18], [132, -12], [142, -11], [147, -20], [150, -28], [146, -38], [138, -36], [129, -32], [120, -34], [114, -29]],
-  // Indonesia / SE-Asia archipelago
-  [[95, 5], [120, 5], [140, -5], [120, -10], [100, -2]],
-  // Japan
-  [[130, 31], [136, 34], [142, 40], [140, 44], [133, 36]],
-  // British Isles
-  [[-6, 50], [-2, 52], [-3, 58], [-7, 57]],
-];
-
-function pointInPolygon(lon: number, lat: number, poly: number[][]): boolean {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i][0], yi = poly[i][1];
-    const xj = poly[j][0], yj = poly[j][1];
-    const intersect =
-      yi > lat !== yj > lat &&
-      lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
-    if (intersect) inside = !inside;
+const LAND_BYTES = (() => {
+  try {
+    if (typeof atob !== "undefined") {
+      const bin = atob(LAND_MASK_B64);
+      const a = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+      return a;
+    }
+  } catch {
+    /* ignore */
   }
-  return inside;
-}
+  return new Uint8Array(0);
+})();
 
-const isLand = (lon: number, lat: number) =>
-  CONTINENTS.some((p) => pointInPolygon(lon, lat, p));
+const isLand = (lon: number, lat: number) => {
+  const c = Math.floor(((lon + 180) / 360) * LAND_W);
+  const r = Math.floor(((90 - lat) / 180) * LAND_H);
+  if (c < 0 || c >= LAND_W || r < 0 || r >= LAND_H) return false;
+  const i = r * LAND_W + c;
+  return (LAND_BYTES[i >> 3] & (1 << (i & 7))) !== 0;
+};
 
 // Mercator latitude → y in projection units
 const LAT_TOP = 78;
