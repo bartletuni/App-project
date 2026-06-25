@@ -35,12 +35,12 @@ const config: Config = {
           500: "#d98e3d",
         },
         cream: {
-          100: "#f3ece1",
-          200: "#ece3d6",
-          300: "#dccfbd",
-          400: "#bcaa93",
-          500: "#9c8a74",
-          600: "#7e6e5b",
+          100: "#fbf6ee",
+          200: "#f4ecdf",
+          300: "#e7dccb",
+          400: "#d2c4ab",
+          500: "#b6a589",
+          600: "#9a886c",
         },
       },
       fontFamily: {

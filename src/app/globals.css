@@ -4,7 +4,7 @@
 
 :root {
   --background: #1c1611;
-  --foreground: #ece3d6;
+  --foreground: #f4ecdf;
 }
 
 body {
@@ -24,7 +24,7 @@ html {
    never reintroduce a white field on the rustic theme) */
 input, select, textarea {
   background-color: #241d17 !important;
-  color: #ece3d6 !important;
+  color: #f4ecdf !important;
   border-color: #4a3d31;
 }
 input::placeholder, textarea::placeholder {
@@ -37,7 +37,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 select option {
   background-color: #241d17;
-  color: #ece3d6;
+  color: #f4ecdf;
 }
 
 @layer components {
@@ -48,7 +48,7 @@ select option {
     line-height: 1;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: #cf8f5f;
+    color: #e0a877;
   }
 
   /* Thin warm dividing rule that fades at the ends */
