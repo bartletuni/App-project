@@ -257,10 +257,10 @@ export default function InteractiveBackground() {
 
       draw() {
         if (!ctx) return;
+        // Square micro-dots: far cheaper than arc() at this density.
         ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        const s = this.size * 1.6;
+        ctx.fillRect(this.x, this.y, s, s);
       }
     }
 
@@ -284,8 +284,8 @@ export default function InteractiveBackground() {
       const W = canvas.width;
       const H = canvas.height;
       const homes = buildHomes(W, H);
-      // 5x the previous dot count (divisors cut to a fifth).
-      const divisor = window.innerWidth < 768 ? 900 : 450;
+      // Another 5x the dot count (divisors cut to a fifth again).
+      const divisor = window.innerWidth < 768 ? 180 : 90;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
       // Weighted sampling without replacement (Efraimidis–Spirakis):
       // key = U^(1/weight); keeping the largest keys makes populous
