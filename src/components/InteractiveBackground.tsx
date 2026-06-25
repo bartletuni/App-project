@@ -68,6 +68,48 @@ function project(lon: number, lat: number, W: number, H: number) {
   return { x, y };
 }
 
+/**
+ * Rough population-density centers as [lon, lat, weight, sigma(deg)].
+ * Used to bias dot placement so populous regions congregate more dots.
+ */
+const POP_CENTERS: number[][] = [
+  [77, 21, 1.0, 9],   // India
+  [88, 24, 0.8, 6],   // Bangladesh / E. India
+  [114, 31, 1.0, 8],  // Eastern China
+  [104, 30, 0.7, 6],  // Central China
+  [120, 23, 0.5, 4],  // SE China / Taiwan
+  [139, 36, 0.6, 4],  // Japan
+  [107, 16, 0.5, 5],  // Vietnam
+  [110, -7, 0.7, 5],  // Java / Indonesia
+  [121, 14, 0.4, 4],  // Philippines
+  [10, 50, 0.7, 7],   // Central Europe
+  [-1, 52, 0.4, 4],   // UK
+  [13, 43, 0.4, 5],   // Italy
+  [31, 28, 0.5, 5],   // Egypt / Nile
+  [7, 9, 0.6, 6],     // Nigeria / W. Africa
+  [38, 9, 0.4, 4],    // Ethiopia
+  [-75, 40, 0.6, 5],  // US Northeast
+  [-87, 41, 0.3, 4],  // US Midwest
+  [-118, 34, 0.4, 4], // US West
+  [-99, 19, 0.5, 4],  // Mexico City
+  [-46, -23, 0.5, 5], // Brazil SE
+  [-58, -34, 0.3, 3], // Buenos Aires
+  [44, 33, 0.4, 5],   // Middle East
+  [51, 35, 0.3, 4],   // Iran
+  [28, -26, 0.3, 4],  // South Africa
+];
+
+const popWeight = (lon: number, lat: number) => {
+  let w = 0.08; // baseline so sparse land still gets some coverage
+  for (let i = 0; i < POP_CENTERS.length; i++) {
+    const [clon, clat, cw, sig] = POP_CENTERS[i];
+    const dlon = lon - clon;
+    const dlat = lat - clat;
+    w += cw * Math.exp(-(dlon * dlon + dlat * dlat) / (2 * sig * sig));
+  }
+  return w;
+};
+
 export default function InteractiveBackground() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isClient, setIsClient] = useState(false);
@@ -173,7 +215,7 @@ export default function InteractiveBackground() {
         // Fly in from a random spot, or start settled when reduced-motion.
         this.x = reduced ? hx : Math.random() * canvas.width;
         this.y = reduced ? hy : Math.random() * canvas.height;
-        this.size = Math.random() * 1.5 + 0.9;
+        this.size = (Math.random() * 1.5 + 0.9) * 0.5;
         this.phase = Math.random() * Math.PI * 2;
         this.speed = 0.3 + Math.random() * 0.5;
         const c = emberPalette[Math.floor(Math.random() * emberPalette.length)];
@@ -222,18 +264,18 @@ export default function InteractiveBackground() {
       }
     }
 
+    type Home = { x: number; y: number; weight: number; key: number };
+
     const buildHomes = (W: number, H: number) => {
-      const homes: { x: number; y: number }[] = [];
-      const step = 1; // degrees
+      const homes: Home[] = [];
+      const step = 0.5; // degrees — finer grid for denser clustering
       for (let lon = -180; lon <= 180; lon += step) {
         for (let lat = LAT_BOTTOM; lat <= LAT_TOP; lat += step) {
-          if (isLand(lon, lat)) homes.push(project(lon, lat, W, H));
+          if (isLand(lon, lat)) {
+            const p = project(lon, lat, W, H);
+            homes.push({ x: p.x, y: p.y, weight: popWeight(lon, lat), key: 0 });
+          }
         }
-      }
-      // Shuffle so subsampling is even across the map.
-      for (let i = homes.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [homes[i], homes[j]] = [homes[j], homes[i]];
       }
       return homes;
     };
@@ -242,9 +284,16 @@ export default function InteractiveBackground() {
       const W = canvas.width;
       const H = canvas.height;
       const homes = buildHomes(W, H);
-      // Density (divisors halved here doubles the dot count).
-      const divisor = window.innerWidth < 768 ? 4500 : 2250;
+      // 5x the previous dot count (divisors cut to a fifth).
+      const divisor = window.innerWidth < 768 ? 900 : 450;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
+      // Weighted sampling without replacement (Efraimidis–Spirakis):
+      // key = U^(1/weight); keeping the largest keys makes populous
+      // regions congregate proportionally more dots.
+      for (let i = 0; i < homes.length; i++) {
+        homes[i].key = Math.pow(Math.random(), 1 / homes[i].weight);
+      }
+      homes.sort((a, b) => b.key - a.key);
       particles = [];
       for (let i = 0; i < target; i++) {
         particles.push(new Particle(homes[i].x, homes[i].y));
