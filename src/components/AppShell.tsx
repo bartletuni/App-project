@@ -111,12 +111,14 @@ export default function AppShell({
               <ArrowLeft className="h-[18px] w-[18px]" aria-hidden="true" />
             </Link>
           )}
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-clay-500/15 border border-clay-500/30 font-mono text-xs font-bold text-clay-200"
-            title={email}
+          <Link
+            href="/settings"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-clay-500/15 border border-clay-500/30 font-mono text-xs font-bold text-clay-200 hover:bg-clay-500/25 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+            title={`${email} — Account settings`}
+            aria-label="Account settings"
           >
             {initial}
-          </div>
+          </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-cream-500 hover:text-red-300 hover:bg-red-500/10 transition"
