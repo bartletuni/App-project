@@ -76,9 +76,13 @@ export default function InteractiveBackground() {
   const [scrollY, setScrollY] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Live pointer position for the particle interaction (read inside the
+  // animation loop). `active` flips off when the pointer leaves so dots
+  // ease back to their map home.
+  const mouseRef = useRef({ x: 0, y: 0, active: false });
 
-  // Input tracking (drives only the ambient cursor glow now — particles
-  // no longer react to the pointer).
+  // Input tracking: drives the ambient cursor glow and the short-range
+  // particle "tracking" interaction.
   useEffect(() => {
     setIsClient(true);
     const mobile = window.innerWidth < 768;
@@ -87,13 +91,20 @@ export default function InteractiveBackground() {
 
     const onMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
+      mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
       setIsActive(true);
     };
     const onTouch = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        setMousePosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        const tx = e.touches[0].clientX;
+        const ty = e.touches[0].clientY;
+        setMousePosition({ x: tx, y: ty });
+        mouseRef.current = { x: tx, y: ty, active: true };
         setIsActive(true);
       }
+    };
+    const onPointerLeave = () => {
+      mouseRef.current.active = false;
     };
 
     let scrollRaf = 0;
@@ -108,12 +119,18 @@ export default function InteractiveBackground() {
     window.addEventListener("mousemove", onMove);
     window.addEventListener("touchstart", onTouch, { passive: true });
     window.addEventListener("touchmove", onTouch, { passive: true });
+    window.addEventListener("touchend", onPointerLeave);
+    window.addEventListener("touchcancel", onPointerLeave);
+    document.addEventListener("mouseleave", onPointerLeave);
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("touchstart", onTouch);
       window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("touchend", onPointerLeave);
+      window.removeEventListener("touchcancel", onPointerLeave);
+      document.removeEventListener("mouseleave", onPointerLeave);
       window.removeEventListener("scroll", onScroll);
       if (scrollRaf) cancelAnimationFrame(scrollRaf);
     };
@@ -172,8 +189,28 @@ export default function InteractiveBackground() {
         // Gentle idle bob around the home position.
         const bobX = Math.sin(t * this.speed + this.phase) * 1.6;
         const bobY = Math.cos(t * this.speed * 0.9 + this.phase) * 1.6;
-        this.x += (this.hx + bobX - this.x) * 0.05;
-        this.y += (this.hy + bobY - this.y) * 0.05;
+        let tx = this.hx + bobX;
+        let ty = this.hy + bobY;
+
+        // Short-range pointer tracking: only dots very close to the cursor
+        // are pulled toward it; everything else stays on the map. When the
+        // pointer leaves, the target reverts to home and the spring below
+        // eases each dot back to its original position.
+        const m = mouseRef.current;
+        if (m.active) {
+          const RADIUS = 110;
+          const mdx = m.x - tx;
+          const mdy = m.y - ty;
+          const md = Math.hypot(mdx, mdy);
+          if (md < RADIUS) {
+            const influence = (RADIUS - md) / RADIUS; // 0..1, strongest up close
+            tx += mdx * influence * 0.65;
+            ty += mdy * influence * 0.65;
+          }
+        }
+
+        this.x += (tx - this.x) * 0.08;
+        this.y += (ty - this.y) * 0.08;
       }
 
       draw() {
@@ -205,8 +242,8 @@ export default function InteractiveBackground() {
       const W = canvas.width;
       const H = canvas.height;
       const homes = buildHomes(W, H);
-      // Halved density vs. the previous field (divisors doubled).
-      const divisor = window.innerWidth < 768 ? 9000 : 4500;
+      // Density (divisors halved here doubles the dot count).
+      const divisor = window.innerWidth < 768 ? 4500 : 2250;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
       particles = [];
       for (let i = 0; i < target; i++) {
