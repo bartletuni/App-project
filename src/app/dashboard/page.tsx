@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RequestForm from "@/components/RequestForm";
 import { format } from "date-fns";
+import { FileStack, Clock, Loader2, CheckCircle2 } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
+import AnimatedCounter from "@/components/ui/AnimatedCounter";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -79,22 +82,55 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-transparent text-gray-900 font-sans">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome, {session?.user?.name || (session?.user as any)?.email}</h1>
-          <p className="text-gray-500 mt-2 text-lg">Manage your custom part requests and track their status.</p>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Reveal className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+            Welcome,{" "}
+            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+              {session?.user?.name || (session?.user as any)?.email}
+            </span>
+          </h1>
+          <p className="text-gray-500 mt-2 text-base sm:text-lg">
+            Manage your custom part requests and track their status.
+          </p>
+        </Reveal>
+
+        {/* Stats summary */}
+        {requests.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+            {[
+              { label: "Total", value: requests.length, icon: FileStack, color: "text-indigo-600 bg-indigo-100/80" },
+              { label: "Pending", value: requests.filter((r) => r.status === "PENDING").length, icon: Clock, color: "text-amber-600 bg-amber-100/80" },
+              { label: "Active", value: requests.filter((r) => r.status === "ACTIVE").length, icon: Loader2, color: "text-blue-600 bg-blue-100/80" },
+              { label: "Completed", value: requests.filter((r) => ["COMPLETED", "SHIPPED"].includes(r.status)).length, icon: CheckCircle2, color: "text-emerald-600 bg-emerald-100/80" },
+            ].map((stat, i) => (
+              <Reveal key={stat.label} direction="up" delay={i * 0.08}>
+                <div className="h-full rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-4 sm:p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                  <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    <AnimatedCounter value={stat.value} />
+                  </div>
+                  <p className="mt-0.5 text-xs sm:text-sm font-medium text-gray-500">
+                    {stat.label}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column: Request Form */}
           {!isAdmin && (
-            <div className="xl:col-span-1">
+            <Reveal direction="right" className="xl:col-span-1">
               <RequestForm onFormSubmit={fetchRequests} />
-            </div>
+            </Reveal>
           )}
 
           {/* Right Column: Past Requests */}
-          <div className={isAdmin ? "xl:col-span-3" : "xl:col-span-2"}>
+          <Reveal direction="up" delay={0.1} className={isAdmin ? "xl:col-span-3" : "xl:col-span-2"}>
             <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40">
                 <h2 className="text-xl font-bold text-gray-900">Recent Requests</h2>
@@ -252,7 +288,7 @@ export default function DashboardPage() {
                 </>
               )}
             </div>
-          </div>
+          </Reveal>
         </div>
       </main>
     </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import Reveal from "@/components/ui/Reveal";
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
@@ -107,14 +108,19 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-transparent py-10">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Account Settings</h1>
-          <p className="text-gray-500 mt-2 text-lg">Manage your profile and security preferences.</p>
-        </div>
+        <Reveal className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+            Account{" "}
+            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+              Settings
+            </span>
+          </h1>
+          <p className="text-gray-500 mt-2 text-base sm:text-lg">Manage your profile and security preferences.</p>
+        </Reveal>
 
         <div className="space-y-6">
           {/* Profile Section */}
-          <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
+          <Reveal direction="up" className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
               <User className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
@@ -156,14 +162,14 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-2">
-                <p className="text-xs text-gray-500 max-w-[60%]">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pt-2">
+                <p className="text-xs text-gray-500 sm:max-w-[60%]">
                   Your email is used for login and notifications and cannot be changed.
                 </p>
                 <button
                   type="submit"
                   disabled={profileLoading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm active:scale-[0.98] w-full sm:w-auto"
                 >
                   {profileLoading ? (
                     <>
@@ -179,10 +185,10 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </Reveal>
 
           {/* Password Change Section */}
-          <div className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
+          <Reveal direction="up" delay={0.1} className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
               <Lock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
               <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
@@ -281,7 +287,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] w-full sm:w-auto"
                 >
                   {loading ? (
                     <>
@@ -297,7 +303,7 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </Reveal>
         </div>
       </div>
     </div>

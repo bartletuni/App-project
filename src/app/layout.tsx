@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import InteractiveBackground from "@/components/InteractiveBackground";
+import ScrollProgress from "@/components/ui/ScrollProgress";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,6 +39,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <Providers>
+          <ScrollProgress />
           <InteractiveBackground />
           <Navbar />
           <main id="main-content" className="relative z-0">

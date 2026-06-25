@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
-import Image from "next/image";
+import AdminNav from "@/components/AdminNav";
 
 function AdminAddRequestContent() {
   const { data: session, status } = useSession();
@@ -170,37 +169,7 @@ function AdminAddRequestContent() {
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-               <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
-               <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
-            </div>
-            <div className="flex items-center gap-6">
-               <Link href="/admin" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Requests
-               </Link>
-               <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Users
-               </Link>
-               <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Materials
-               </Link>
-               <Link href="/admin/add-request" className="text-sm font-bold text-indigo-600 transition-colors">
-                 Add Request
-               </Link>
-               <Link href="/admin/reports" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors bg-indigo-50 px-3 py-1.5 rounded-lg">
-                 Generate Reports
-               </Link>
-               <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1">
-                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                 Back to Dashboard
-               </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <AdminNav />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="mb-8">

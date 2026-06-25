@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import AdminNav from "@/components/AdminNav";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -111,36 +110,7 @@ export default function GenerateReportsPage() {
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <nav className="bg-white/60 backdrop-blur-xl shadow-sm border-b border-gray-200/50 sticky top-0 z-50" aria-label="Admin navigation">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-               <Image src="/logo.png" alt="TakomoCo Logo" width={32} height={32} className="rounded-lg shadow-sm" />
-               <span className="font-bold text-xl text-gray-900 tracking-tight">Admin Console</span>
-            </div>
-            <div className="flex items-center gap-6">
-               <Link href="/admin" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Requests
-               </Link>
-               <Link href="/admin/users" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Users
-               </Link>
-               <Link href="/admin/materials" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Materials
-               </Link>
-               <Link href="/admin/add-request" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Add Request
-               </Link>
-               <Link href="/admin/reports" className="text-sm font-bold text-indigo-600 transition-colors">
-                 Reports
-               </Link>
-               <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                 Back to Dashboard
-               </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <AdminNav />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
