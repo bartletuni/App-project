@@ -224,14 +224,16 @@ export default function InteractiveBackground() {
         // eases each dot back to its original position.
         const m = mouseRef.current;
         if (m.active) {
-          const RADIUS = 110;
+          const RADIUS = 280;
           const mdx = m.x - tx;
           const mdy = m.y - ty;
           const md = Math.hypot(mdx, mdy);
           if (md < RADIUS) {
-            const influence = (RADIUS - md) / RADIUS; // 0..1, strongest up close
-            tx += mdx * influence * 0.65;
-            ty += mdy * influence * 0.65;
+            // Eased falloff so dots drift in smoothly from a wide area and
+            // pull harder the closer they get to the cursor.
+            const influence = Math.pow((RADIUS - md) / RADIUS, 1.6);
+            tx += mdx * influence * 0.85;
+            ty += mdy * influence * 0.85;
           }
         }
 
