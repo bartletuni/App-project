@@ -232,8 +232,8 @@ export default function InteractiveBackground() {
             // Eased falloff so dots drift in smoothly from a wide area and
             // pull harder the closer they get to the cursor.
             const influence = Math.pow((RADIUS - md) / RADIUS, 1.6);
-            tx += mdx * influence * 0.85;
-            ty += mdy * influence * 0.85;
+            tx += mdx * influence * 0.425;
+            ty += mdy * influence * 0.425;
           }
         }
 
