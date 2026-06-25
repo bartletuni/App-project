@@ -237,8 +237,11 @@ export default function InteractiveBackground() {
           }
         }
 
-        this.x += (tx - this.x) * 0.08;
-        this.y += (ty - this.y) * 0.08;
+        // Constant subtle jostle; the home-easing above keeps the random
+        // walk from wandering off position.
+        const J = 0.55;
+        this.x += (tx - this.x) * 0.08 + (Math.random() - 0.5) * J;
+        this.y += (ty - this.y) * 0.08 + (Math.random() - 0.5) * J;
       }
 
       draw() {
