@@ -2,9 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+
+const field =
+  "w-full border border-clay-500/25 px-4 py-3 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
+const label =
+  "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
 export default function Home() {
   const router = useRouter();
@@ -18,13 +24,13 @@ export default function Home() {
   const [shippingCity, setShippingCity] = useState("");
   const [shippingState, setShippingState] = useState("");
   const [shippingZip, setShippingZip] = useState("");
-  
+
   const [billingStreet, setBillingStreet] = useState("");
   const [billingApt, setBillingApt] = useState("");
   const [billingCity, setBillingCity] = useState("");
   const [billingState, setBillingState] = useState("");
   const [billingZip, setBillingZip] = useState("");
-  
+
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
@@ -61,10 +67,9 @@ export default function Home() {
           router.push("/dashboard");
         }
       } else {
-        // Handle registration
         const finalShippingAddress = `${shippingStreet}${shippingApt ? `, ${shippingApt}` : ""}, ${shippingCity}, ${shippingState} ${shippingZip}`;
-        const finalBillingAddress = sameAsShipping 
-          ? finalShippingAddress 
+        const finalBillingAddress = sameAsShipping
+          ? finalShippingAddress
           : `${billingStreet}${billingApt ? `, ${billingApt}` : ""}, ${billingCity}, ${billingState} ${billingZip}`;
 
         const registerRes = await fetch("/api/auth/register", {
@@ -72,13 +77,13 @@ export default function Home() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            name, 
-            email, 
-            password, 
-            shippingAddress: finalShippingAddress, 
-            billingAddress: finalBillingAddress, 
-            phone 
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            shippingAddress: finalShippingAddress,
+            billingAddress: finalBillingAddress,
+            phone,
           }),
         });
 
@@ -89,7 +94,6 @@ export default function Home() {
           return;
         }
 
-        // Auto sign-in after registration
         const result = await signIn("credentials", {
           redirect: false,
           email,
@@ -112,368 +116,205 @@ export default function Home() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-transparent">
-        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p className="text-gray-500 font-medium">Checking authentication...</p>
-        <span className="sr-only">Loading, please wait</span>
+        <span className="h-8 w-8 rounded-full border-2 border-clay-500/30 border-t-clay-400 animate-spin mb-4" />
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500">Checking credentials…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-stretch bg-transparent">
-      {/* Left Column - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 text-white p-12 flex-col justify-center relative overflow-hidden" aria-hidden="true">
-        {/* Decorative background shapes */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay blur-3xl animate-blob"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300 rounded-full mix-blend-overlay blur-3xl animate-blob animation-delay-2000"></div>
-        </div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+    <div className="min-h-screen bg-transparent text-cream-200">
+      <div className="mx-auto grid min-h-screen max-w-6xl lg:grid-cols-2">
+        {/* Left editorial plate */}
+        <div className="hidden lg:flex flex-col justify-between border-r border-clay-500/12 p-12">
+          <Link href="/" className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500 hover:text-clay-300 transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Back to index
+          </Link>
 
-        <div className="relative z-10 max-w-lg mx-auto">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-            TakomoCo <br />
-            <span className="text-blue-300">Request Management</span>
-          </h1>
-          <p className="text-lg text-indigo-100 mb-8 leading-relaxed">
-            Streamline your additive manufacturing workflows. Upload your custom part specifications, track progress in real-time, and get your parts delivered faster than ever.
-          </p>
-
-          <div className="grid grid-cols-2 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
-              <div className="text-3xl font-bold mb-1 animate-float">⚡️</div>
-              <h3 className="font-semibold text-lg mb-1">Lightning Fast</h3>
-              <p className="text-sm text-indigo-200">Rapid turnaround times for all prototyping.</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:-translate-y-1 hover:border-white/40">
-              <div className="text-3xl font-bold mb-1 animate-float animation-delay-1000">🎯</div>
-              <h3 className="font-semibold text-lg mb-1">High Precision</h3>
-              <p className="text-sm text-indigo-200">State of the art 3D printing accuracy.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Column - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white/80 backdrop-blur-xl border-l border-gray-200/50 shadow-2xl z-10">
-        <div className="w-full max-w-md">
-          {/* Mobile Header (Hidden on Desktop) */}
-          <div className="lg:hidden mb-10 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">TakomoCo</h1>
-            <p className="text-gray-500">Request Management Portal</p>
-          </div>
-
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {isLogin ? "Welcome Back" : "Create an Account"}
-            </h2>
-            <p className="text-gray-500">
-              {isLogin
-                ? "Enter your details to access your dashboard."
-                : "Sign up to start requesting custom parts."}
+          <div>
+            <Image src="/logo.png" alt="TakomoCo" width={44} height={44} className="rounded-lg ring-1 ring-clay-500/30 mb-8" />
+            <h1 className="font-display text-5xl leading-[1.05] text-cream-100">
+              The bench is <span className="italic text-clay-300">open.</span>
+            </h1>
+            <p className="mt-6 max-w-sm text-cream-400 leading-relaxed">
+              Sign in to submit parts, track builds in real time, and manage
+              your additive manufacturing requests end to end.
             </p>
+            <div className="mt-10 grid grid-cols-2 gap-px bg-clay-500/15 max-w-sm">
+              {[
+                ["72h", "Typical turnaround"],
+                ["256³", "Build volume / mm"],
+                ["320°C", "Extrusion capacity"],
+                ["1:1", "Reproduction"],
+              ].map(([v, k]) => (
+                <div key={k} className="bg-espresso-900 p-4">
+                  <div className="font-display text-2xl text-cream-100">{v}</div>
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.15em] text-cream-500">{k}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md text-sm" role="alert">
-              {error}
-            </div>
-          )}
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-600">
+            TAKOMO<span className="text-clay-400">⁄</span>CO · ADDITIVE MFG.
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
-                  Company / Personal Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 text-gray-900 px-4 py-3"
-                  placeholder="ACME Corp / Jane Doe"
-                  autoComplete="name"
-                />
+        {/* Form */}
+        <div className="flex flex-col justify-center px-5 sm:px-10 py-12">
+          <div className="lg:hidden mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500 hover:text-clay-300">
+              <ArrowLeft className="h-4 w-4" /> Index
+            </Link>
+          </div>
+
+          <div className="w-full max-w-md mx-auto">
+            <span className="eyebrow">{isLogin ? "AUTHENTICATE" : "NEW ACCOUNT"}</span>
+            <h2 className="mt-3 font-display text-4xl text-cream-100">
+              {isLogin ? "Welcome back." : "Open an account."}
+            </h2>
+            <p className="mt-2 text-sm text-cream-400">
+              {isLogin
+                ? "Enter your credentials to reach your desk."
+                : "Register to start requesting custom parts."}
+            </p>
+
+            {error && (
+              <div className="mt-6 border-l-2 border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">
+                {error}
               </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                placeholder="you@company.com"
-                autoComplete="email"
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                  placeholder="••••••••"
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            {!isLogin && (
-              <>
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingStreet">
-                        Street Address
-                      </label>
-                      <input
-                        id="shippingStreet"
-                        type="text"
-                        required={!isLogin}
-                        value={shippingStreet}
-                        onChange={(e) => setShippingStreet(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="123 Main St"
-                        autoComplete="shipping street-address"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingApt">
-                        Apartment, suite, etc. (optional)
-                      </label>
-                      <input
-                        id="shippingApt"
-                        type="text"
-                        value={shippingApt}
-                        onChange={(e) => setShippingApt(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="Apt 4B"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingCity">
-                          City
-                        </label>
-                        <input
-                          id="shippingCity"
-                          type="text"
-                          required={!isLogin}
-                          value={shippingCity}
-                          onChange={(e) => setShippingCity(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="City"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingState">
-                          State / Province
-                        </label>
-                        <input
-                          id="shippingState"
-                          type="text"
-                          required={!isLogin}
-                          value={shippingState}
-                          onChange={(e) => setShippingState(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="ST"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="shippingZip">
-                        ZIP / Postal Code
-                      </label>
-                      <input
-                        id="shippingZip"
-                        type="text"
-                        required={!isLogin}
-                        value={shippingZip}
-                        onChange={(e) => setShippingZip(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                        placeholder="12345"
-                      />
-                    </div>
-                  </div>
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              {!isLogin && (
+                <div>
+                  <label className={label} htmlFor="name">Company / Personal name</label>
+                  <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className={field} placeholder="ACME Corp / Jane Doe" autoComplete="name" />
                 </div>
+              )}
+              <div>
+                <label className={label} htmlFor="email">Email address</label>
+                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={field} placeholder="you@company.com" autoComplete="email" />
+              </div>
+              <div>
+                <label className={label} htmlFor="password">Password</label>
+                <div className="relative">
+                  <input id="password" type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className={`${field} pr-12`} placeholder="••••••••" autoComplete={isLogin ? "current-password" : "new-password"} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
 
-                <div className="pt-6 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">Billing Information</h3>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={sameAsShipping}
-                        onChange={(e) => setSameAsShipping(e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                      />
-                      <span className="text-sm font-medium text-gray-600">Same as shipping</span>
-                    </label>
-                  </div>
-                  
-                  {!sameAsShipping && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              {!isLogin && (
+                <>
+                  <div className="pt-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="eyebrow">SHIPPING</span>
+                      <span className="hairline flex-1" />
+                    </div>
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingStreet">
-                          Street Address
-                        </label>
-                        <input
-                          id="billingStreet"
-                          type="text"
-                          required={!isLogin && !sameAsShipping}
-                          value={billingStreet}
-                          onChange={(e) => setBillingStreet(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="123 Main St"
-                        />
+                        <label className={label} htmlFor="shippingStreet">Street address</label>
+                        <input id="shippingStreet" type="text" required={!isLogin} value={shippingStreet} onChange={(e) => setShippingStreet(e.target.value)} className={field} placeholder="123 Main St" autoComplete="shipping street-address" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingApt">
-                          Apartment, suite, etc. (optional)
-                        </label>
-                        <input
-                          id="billingApt"
-                          type="text"
-                          value={billingApt}
-                          onChange={(e) => setBillingApt(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="Apt 4B"
-                        />
+                        <label className={label} htmlFor="shippingApt">Apartment, suite, etc. (optional)</label>
+                        <input id="shippingApt" type="text" value={shippingApt} onChange={(e) => setShippingApt(e.target.value)} className={field} placeholder="Apt 4B" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingCity">
-                            City
-                          </label>
-                          <input
-                            id="billingCity"
-                            type="text"
-                            required={!isLogin && !sameAsShipping}
-                            value={billingCity}
-                            onChange={(e) => setBillingCity(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                            placeholder="City"
-                          />
+                          <label className={label} htmlFor="shippingCity">City</label>
+                          <input id="shippingCity" type="text" required={!isLogin} value={shippingCity} onChange={(e) => setShippingCity(e.target.value)} className={field} placeholder="City" />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingState">
-                            State / Province
-                          </label>
-                          <input
-                            id="billingState"
-                            type="text"
-                            required={!isLogin && !sameAsShipping}
-                            value={billingState}
-                            onChange={(e) => setBillingState(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                            placeholder="ST"
-                          />
+                          <label className={label} htmlFor="shippingState">State / Province</label>
+                          <input id="shippingState" type="text" required={!isLogin} value={shippingState} onChange={(e) => setShippingState(e.target.value)} className={field} placeholder="ST" />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="billingZip">
-                          ZIP / Postal Code
-                        </label>
-                        <input
-                          id="billingZip"
-                          type="text"
-                          required={!isLogin && !sameAsShipping}
-                          value={billingZip}
-                          onChange={(e) => setBillingZip(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                          placeholder="12345"
-                        />
+                        <label className={label} htmlFor="shippingZip">ZIP / Postal code</label>
+                        <input id="shippingZip" type="text" required={!isLogin} value={shippingZip} onChange={(e) => setShippingZip(e.target.value)} className={field} placeholder="12345" />
                       </div>
                     </div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
-                    Phone Number
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    required={!isLogin}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 transition-colors shadow-sm"
-                    placeholder="(555) 555-5555"
-                    autoComplete="tel"
-                  />
-                </div>
-              </>
-            )}
+                  </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </span>
-              ) : isLogin ? (
-                "Sign In"
-              ) : (
-                "Create Account"
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="eyebrow">BILLING</span>
+                        <span className="hairline flex-1" />
+                      </div>
+                      <label className="ml-4 flex items-center gap-2 cursor-pointer shrink-0">
+                        <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} className="h-4 w-4 accent-clay-500" />
+                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">Same as shipping</span>
+                      </label>
+                    </div>
+
+                    {!sameAsShipping && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className={label} htmlFor="billingStreet">Street address</label>
+                          <input id="billingStreet" type="text" required={!isLogin && !sameAsShipping} value={billingStreet} onChange={(e) => setBillingStreet(e.target.value)} className={field} placeholder="123 Main St" />
+                        </div>
+                        <div>
+                          <label className={label} htmlFor="billingApt">Apartment, suite, etc. (optional)</label>
+                          <input id="billingApt" type="text" value={billingApt} onChange={(e) => setBillingApt(e.target.value)} className={field} placeholder="Apt 4B" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className={label} htmlFor="billingCity">City</label>
+                            <input id="billingCity" type="text" required={!isLogin && !sameAsShipping} value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className={field} placeholder="City" />
+                          </div>
+                          <div>
+                            <label className={label} htmlFor="billingState">State / Province</label>
+                            <input id="billingState" type="text" required={!isLogin && !sameAsShipping} value={billingState} onChange={(e) => setBillingState(e.target.value)} className={field} placeholder="ST" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className={label} htmlFor="billingZip">ZIP / Postal code</label>
+                          <input id="billingZip" type="text" required={!isLogin && !sameAsShipping} value={billingZip} onChange={(e) => setBillingZip(e.target.value)} className={field} placeholder="12345" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className={label} htmlFor="phone">Phone number</label>
+                    <input id="phone" type="tel" required={!isLogin} value={phone} onChange={(e) => setPhone(e.target.value)} className={field} placeholder="(555) 555-5555" autoComplete="tel" />
+                  </div>
+                </>
               )}
-            </button>
-          </form>
 
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError("");
-              }}
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-            >
-              {isLogin
-                ? "Don't have an account? Create one now."
-                : "Already have an account? Sign in here."}
-            </button>
-          </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow"
+              >
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    {isLogin ? "Sign in" : "Create account"}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </>
+                )}
+              </button>
+            </form>
 
-          <div className="mt-6 text-center border-t border-gray-100 pt-6">
-            <Link
-              href="/materials"
-              className="text-sm text-gray-500 hover:text-indigo-600 font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></svg>
-              View Materials Library
-            </Link>
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                onClick={() => { setIsLogin(!isLogin); setError(""); }}
+                className="font-mono text-[11px] uppercase tracking-[0.15em] text-clay-300 hover:text-clay-200 transition-colors"
+              >
+                {isLogin ? "Need an account?" : "Have an account?"}
+              </button>
+              <Link href="/materials" className="font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500 hover:text-cream-200 transition-colors">
+                Material index →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

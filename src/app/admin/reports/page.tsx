@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import AdminNav from "@/components/AdminNav";
+import AppShell from "@/components/AppShell";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -105,20 +105,22 @@ export default function GenerateReportsPage() {
   };
 
   if (status === "loading") {
-    return <div className="min-h-screen bg-transparent flex items-center justify-center text-indigo-600 font-semibold animate-pulse">Loading...</div>;
+    return <div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col font-sans">
-      <AdminNav />
-
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-white/20 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40">
-                <h3 className="text-xl leading-6 font-bold text-gray-900">
-                  Generate Reports
+    <AppShell variant="admin">
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-14 w-full">
+        <div className="mb-8">
+          <span className="eyebrow">CONSOLE ⁄ REPORTS</span>
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Generate <span className="italic text-clay-300">reports</span></h1>
+        </div>
+        <div className="panel rounded-md overflow-hidden">
+            <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45">
+                <h3 className="font-display text-xl text-cream-100">
+                  Export to PDF
                 </h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                <p className="mt-1 max-w-2xl text-sm text-cream-500">
                   Export request history into a downloadable PDF document.
                 </p>
             </div>
@@ -126,23 +128,23 @@ export default function GenerateReportsPage() {
             <div className="px-6 py-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                     <div>
-                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                        <label htmlFor="startDate" className="block text-sm font-medium text-cream-300 mb-2">Start Date</label>
                         <input
                             type="date"
                             id="startDate"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full border border-espresso-500 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
                         />
                     </div>
                     <div>
-                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                        <label htmlFor="endDate" className="block text-sm font-medium text-cream-300 mb-2">End Date</label>
                         <input
                             type="date"
                             id="endDate"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full border border-espresso-500 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
                         />
                     </div>
                 </div>
@@ -151,7 +153,7 @@ export default function GenerateReportsPage() {
                     <button
                         onClick={handleGeneratePDF}
                         disabled={loading || !startDate || !endDate}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="bg-clay-600 hover:bg-clay-700 text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         {loading ? (
                              <span className="flex items-center gap-2">
@@ -172,6 +174,6 @@ export default function GenerateReportsPage() {
             </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

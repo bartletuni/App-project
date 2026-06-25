@@ -3,11 +3,21 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+
+import AppShell from "@/components/AppShell";
 import Reveal from "@/components/ui/Reveal";
+import Panel from "@/components/ui/Panel";
+
+const field =
+  "w-full border border-clay-500/25 px-4 py-2.5 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
+const labelCls =
+  "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
+const btn =
+  "inline-flex items-center justify-center gap-2 bg-clay-600 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] w-full sm:w-auto";
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
-  
+
   const [name, setName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -47,13 +57,9 @@ export default function SettingsPage() {
         setProfileError(data.error || "Failed to update profile.");
       } else {
         setProfileSuccess(true);
-        // Update the session to reflect the new name
         await update({
           ...session,
-          user: {
-            ...session?.user,
-            name: name,
-          },
+          user: { ...session?.user, name: name },
         });
       }
     } catch (err) {
@@ -106,206 +112,124 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent py-10">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Reveal className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-            Account{" "}
-            <span className="animate-gradient-text animate-gradient-x bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
-              Settings
-            </span>
-          </h1>
-          <p className="text-gray-500 mt-2 text-base sm:text-lg">Manage your profile and security preferences.</p>
+    <AppShell variant="user">
+      <div className="mx-auto max-w-3xl px-5 sm:px-8 py-8 sm:py-12">
+        <Reveal>
+          <span className="eyebrow">ACCOUNT ⁄ CONFIG</span>
+          <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Settings</h1>
+          <p className="mt-2 text-cream-400">Manage your profile and security credentials.</p>
         </Reveal>
 
-        <div className="space-y-6">
-          {/* Profile Section */}
-          <Reveal direction="up" className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-600" aria-hidden="true" />
-              <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
-            </div>
-            <form onSubmit={handleProfileUpdate} className="p-6 space-y-6">
-              {profileError && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  <p className="font-medium text-sm">{profileError}</p>
-                </div>
-              )}
-              
-              {profileSuccess && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
-                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  <p className="font-medium text-sm">Profile updated successfully.</p>
-                </div>
-              )}
+        <div className="mt-10 space-y-6">
+          {/* Profile */}
+          <Reveal>
+            <Panel className="p-6 sm:p-7 rounded-md">
+              <div className="flex items-center gap-3 mb-6">
+                <User className="h-4 w-4 text-clay-300" aria-hidden="true" />
+                <span className="eyebrow">PROFILE</span>
+                <span className="hairline flex-1" />
+              </div>
 
-              <div className="space-y-4">
+              <form onSubmit={handleProfileUpdate} className="space-y-5">
+                {profileError && (
+                  <div className="border-l-2 border-red-500 bg-red-500/10 px-4 py-3 flex items-start gap-3" role="alert">
+                    <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-red-300">{profileError}</p>
+                  </div>
+                )}
+                {profileSuccess && (
+                  <div className="border-l-2 border-green-500 bg-green-500/10 px-4 py-3 flex items-start gap-3" role="status">
+                    <CheckCircle2 className="h-4 w-4 text-green-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-green-300">Profile updated successfully.</p>
+                  </div>
+                )}
+
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Company / Personal Name</label>
-                  <input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
-                    placeholder="Your Name / Company Name"
-                  />
+                  <label htmlFor="name" className={labelCls}>Company / Personal name</label>
+                  <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className={field} placeholder="Your Name / Company" />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                  <div className="text-sm font-medium text-gray-500">Email Address</div>
-                  <div className="sm:col-span-2 text-gray-400 font-medium bg-gray-50/50 px-4 py-2 rounded-lg border border-gray-100 italic">
-                    {session?.user?.email || "Loading..."}
+                <div>
+                  <label className={labelCls}>Email address</label>
+                  <div className="border border-clay-500/15 bg-espresso-800/40 px-4 py-2.5 rounded-md font-mono text-sm text-cream-500">
+                    {session?.user?.email || "Loading…"}
                   </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pt-2">
-                <p className="text-xs text-gray-500 sm:max-w-[60%]">
-                  Your email is used for login and notifications and cannot be changed.
-                </p>
-                <button
-                  type="submit"
-                  disabled={profileLoading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm active:scale-[0.98] w-full sm:w-auto"
-                >
-                  {profileLoading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Name"
-                  )}
-                </button>
-              </div>
-            </form>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-cream-600 sm:max-w-[55%]">
+                    Email is used for login and notifications — it cannot be changed.
+                  </p>
+                  <button type="submit" disabled={profileLoading} className={btn}>
+                    {profileLoading ? (
+                      <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" /> Saving…</>
+                    ) : "Save name"}
+                  </button>
+                </div>
+              </form>
+            </Panel>
           </Reveal>
 
-          {/* Password Change Section */}
-          <Reveal direction="up" delay={0.1} className="bg-white/70 backdrop-blur-md shadow-sm border border-white/20 rounded-2xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-200/50 bg-white/40 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
-              <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
-            </div>
-            
-            <form onSubmit={handlePasswordChange} className="p-6 space-y-6">
-              {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100" role="alert">
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  <p className="font-medium text-sm">{error}</p>
-                </div>
-              )}
-              
-              {success && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 border border-green-100" role="status">
-                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  <p className="font-medium text-sm">{success}</p>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                  <div className="relative">
-                    <input
-                      id="currentPassword"
-                      type={showCurrentPassword ? "text" : "password"}
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
-                      autoComplete="current-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
-                      aria-label={showCurrentPassword ? "Hide password" : "Show password"}
-                    >
-                      {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="pt-2 border-t border-gray-100"></div>
-
-                <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                  <div className="relative">
-                    <input
-                      id="newPassword"
-                      type={showNewPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      minLength={8}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
-                      autoComplete="new-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
-                      aria-label={showNewPassword ? "Hide password" : "Show password"}
-                    >
-                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                  <div className="relative">
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      minLength={8}
-                      className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-gray-900"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded outline-none p-1 transition-colors"
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                    >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
+          {/* Password */}
+          <Reveal delay={0.1}>
+            <Panel className="p-6 sm:p-7 rounded-md">
+              <div className="flex items-center gap-3 mb-6">
+                <Lock className="h-4 w-4 text-clay-300" aria-hidden="true" />
+                <span className="eyebrow">SECURITY</span>
+                <span className="hairline flex-1" />
               </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] w-full sm:w-auto"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Updating...
-                    </>
-                  ) : (
-                    "Update Password"
-                  )}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handlePasswordChange} className="space-y-5">
+                {error && (
+                  <div className="border-l-2 border-red-500 bg-red-500/10 px-4 py-3 flex items-start gap-3" role="alert">
+                    <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-red-300">{error}</p>
+                  </div>
+                )}
+                {success && (
+                  <div className="border-l-2 border-green-500 bg-green-500/10 px-4 py-3 flex items-start gap-3" role="status">
+                    <CheckCircle2 className="h-4 w-4 text-green-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-green-300">{success}</p>
+                  </div>
+                )}
+
+                {[
+                  { id: "currentPassword", lbl: "Current password", val: currentPassword, set: setCurrentPassword, show: showCurrentPassword, setShow: setShowCurrentPassword, ac: "current-password" as const },
+                  { id: "newPassword", lbl: "New password", val: newPassword, set: setNewPassword, show: showNewPassword, setShow: setShowNewPassword, ac: "new-password" as const },
+                  { id: "confirmPassword", lbl: "Confirm new password", val: confirmPassword, set: setConfirmPassword, show: showConfirmPassword, setShow: setShowConfirmPassword, ac: "new-password" as const },
+                ].map((f) => (
+                  <div key={f.id}>
+                    <label htmlFor={f.id} className={labelCls}>{f.lbl}</label>
+                    <div className="relative">
+                      <input
+                        id={f.id}
+                        type={f.show ? "text" : "password"}
+                        value={f.val}
+                        onChange={(e) => f.set(e.target.value)}
+                        required
+                        minLength={f.id === "currentPassword" ? undefined : 8}
+                        className={`${field} pr-12`}
+                        autoComplete={f.ac}
+                      />
+                      <button type="button" onClick={() => f.setShow(!f.show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 transition-colors" aria-label={f.show ? "Hide password" : "Show password"}>
+                        {f.show ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex justify-end pt-1">
+                  <button type="submit" disabled={loading} className={btn}>
+                    {loading ? (
+                      <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" /> Updating…</>
+                    ) : "Update password"}
+                  </button>
+                </div>
+              </form>
+            </Panel>
           </Reveal>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
