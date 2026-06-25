@@ -86,7 +86,7 @@ const stats = [
   { value: 256, suffix: "mm³", label: "Max build volume", icon: Box },
   { value: 320, suffix: "°C", label: "Extrusion capacity", icon: Thermometer },
   { value: 0.05, suffix: "mm", label: "Layer precision", decimals: 2, icon: Ruler },
-  { value: 24, suffix: "h", label: "Rapid turnaround", icon: Clock },
+  { value: 72, suffix: "h", label: "Rapid turnaround", icon: Clock },
 ];
 
 const marqueeItems = [
