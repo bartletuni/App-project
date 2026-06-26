@@ -77,6 +77,7 @@ export default function AppShell({
               <Link
                 key={it.href}
                 href={it.href}
+                aria-current={on ? "page" : undefined}
                 className={`group relative flex w-16 flex-col items-center gap-1 rounded-lg py-2.5 transition-colors ${
                   on ? "text-clay-300" : "text-cream-500 hover:text-cream-200"
                 }`}
@@ -164,6 +165,7 @@ export default function AppShell({
               <Link
                 key={it.href}
                 href={it.href}
+                aria-current={on ? "page" : undefined}
                 className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 transition-colors ${
                   on ? "text-clay-300" : "text-cream-500"
                 }`}
