@@ -216,6 +216,8 @@ export default function InteractiveBackground() {
       hy: number;
       x: number;
       y: number;
+      vx: number;
+      vy: number;
       size: number;
       phase: number;
       speed: number;
@@ -227,6 +229,8 @@ export default function InteractiveBackground() {
         // Fly in from a random spot, or start settled when reduced-motion.
         this.x = reduced ? hx : Math.random() * canvas.width;
         this.y = reduced ? hy : Math.random() * canvas.height;
+        this.vx = 0;
+        this.vy = 0;
         this.size = (Math.random() * 1.5 + 0.9) * 0.5;
         this.phase = Math.random() * Math.PI * 2;
         this.speed = 0.3 + Math.random() * 0.5;
@@ -268,8 +272,13 @@ export default function InteractiveBackground() {
         // Constant subtle jostle; the home-easing above keeps the random
         // walk from wandering off position.
         const J = 0.55;
-        this.x += (tx - this.x) * 0.08 + (Math.random() - 0.5) * J;
-        this.y += (ty - this.y) * 0.08 + (Math.random() - 0.5) * J;
+        this.x += (tx - this.x) * 0.08 + (Math.random() - 0.5) * J + this.vx;
+        this.y += (ty - this.y) * 0.08 + (Math.random() - 0.5) * J + this.vy;
+
+        // Scatter velocity from clicks decays; the home-easing then draws
+        // each dot slowly back into place.
+        this.vx *= 0.9;
+        this.vy *= 0.9;
       }
 
       draw() {
@@ -304,8 +313,8 @@ export default function InteractiveBackground() {
       const mobile = window.innerWidth < 768;
       const region = mobile ? AMERICAS_REGION : WORLD_REGION;
       const homes = buildHomes(W, H, region);
-      // Another 5x the dot count (divisors cut to a fifth again).
-      const divisor = mobile ? 180 : 90;
+      // Desktop density; mobile carries 25% more dots (divisor 180 -> 144).
+      const divisor = mobile ? 144 : 90;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
       // Weighted sampling without replacement (Efraimidis–Spirakis):
       // key = U^(1/weight); keeping the largest keys makes populous
@@ -329,6 +338,25 @@ export default function InteractiveBackground() {
 
     window.addEventListener("resize", resize);
 
+    // Click: nudge nearby dots outward; they slowly drift back home.
+    const scatter = (cx: number, cy: number) => {
+      if (reduced) return;
+      const RADIUS = 320;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const d = Math.hypot(dx, dy) || 1;
+        if (d < RADIUS) {
+          const force = (1 - d / RADIUS) * 7;
+          p.vx += (dx / d) * force;
+          p.vy += (dy / d) * force;
+        }
+      }
+    };
+    const onClick = (e: MouseEvent) => scatter(e.clientX, e.clientY);
+    window.addEventListener("click", onClick);
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const t = performance.now() / 1000;
@@ -344,6 +372,7 @@ export default function InteractiveBackground() {
 
     return () => {
       window.removeEventListener("resize", resize);
+      window.removeEventListener("click", onClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, [isClient]);
