@@ -68,7 +68,7 @@ const specSheet = [
   ["Maximum build volume", "256 × 256 × 256 mm"],
   ["Extrusion temperature", "Up to 320 °C"],
   ["Minimum layer height", "0.05 mm"],
-  ["Materials", "PA-CF · PETG-CF · PC · ASA · TPU · PA12"],
+  ["Materials", "PA-CF · PETG-CF · PA12-CF · PC · PC-CF · ASA · ABS · PETG · PLA · TPU · PA6 · PA12 · Nylon · and more"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
   ["Typical turnaround", "72 hours"],
 ];
