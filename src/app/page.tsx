@@ -66,9 +66,9 @@ const process = [
 
 const specSheet = [
   ["Maximum build volume", "256 × 256 × 256 mm"],
-  ["Extrusion temperature", "Up to 320 °C"],
+  ["Max heat deflection temperature", "Up to 485 °F / 252 °C"],
   ["Minimum layer height", "0.05 mm"],
-  ["Materials", "PA-CF · PETG-CF · PA12-CF · PC · PC-CF · ASA · ABS · PETG · PLA · TPU · PA6 · PA12 · Nylon · and more"],
+  ["Materials", "PPA-CF · PPS-CF · PPS-GF · PETG-CF · PA12-CF · PC · PC-CF/FR · ASA-CF/GF · ABS · PETG · PLA · TPU · PA6-CF · PA12-CF · PA612-CF · and more"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
   ["Typical turnaround", "72 hours"],
 ];
@@ -80,8 +80,9 @@ const differentiators = [
 ];
 
 const marqueeItems = [
-  "Carbon-Fiber Nylon", "PETG-CF", "ASA", "Polycarbonate", "TPU",
-  "PA12", "Reverse Engineering", "1:1 Reproduction", "Impact Resistant",
+  "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF"
+  "PPS-CF/GF", "PEBA", "Reverse Engineering", "3D Scanning", "1:1 Reproduction",
+  "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials"
 ];
 
 export default function LandingPage() {
