@@ -50,6 +50,7 @@ export default function SiteHeader() {
                 <Link
                   key={n.href}
                   href={n.href}
+                  aria-current={isActive(n.href) ? "page" : undefined}
                   className="group relative hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors"
                 >
                   {n.label}
