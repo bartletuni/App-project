@@ -272,8 +272,9 @@ export default function InteractiveBackground() {
         // Constant subtle jostle; the home-easing above keeps the random
         // walk from wandering off position.
         const J = 0.55;
-        this.x += (tx - this.x) * 0.08 + (Math.random() - 0.5) * J + this.vx;
-        this.y += (ty - this.y) * 0.08 + (Math.random() - 0.5) * J + this.vy;
+        // Ease toward home (0.06 = ~25% slower assembly than the prior 0.08).
+        this.x += (tx - this.x) * 0.06 + (Math.random() - 0.5) * J + this.vx;
+        this.y += (ty - this.y) * 0.06 + (Math.random() - 0.5) * J + this.vy;
 
         // Scatter velocity from clicks decays; the home-easing then draws
         // each dot slowly back into place.
