@@ -360,6 +360,12 @@ export default function LandingPage() {
               <span>© {new Date().getFullYear()}</span>
             </div>
           </div>
+
+          <p className="mt-6 max-w-3xl font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-600">
+            Operating in accordance with ISO 9001:2015 quality-management
+            standards. Not ISO-certified, and not endorsed by or affiliated
+            with the International Organization for Standardization.
+          </p>
         </div>
       </footer>
     </div>
