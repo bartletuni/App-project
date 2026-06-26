@@ -76,9 +76,8 @@ const differentiators: {
   title: string;
   body: string;
   note?: boolean;
-  feature?: boolean;
 }[] = [
-  { title: "ISO 9001:2015-aligned", body: "Our workflow follows ISO 9001:2015 quality-management standards for consistent, traceable, repeatable parts.", note: true, feature: true },
+  { title: "ISO 9001:2015-aligned", body: "Our workflow follows ISO 9001:2015 quality-management standards for consistent, traceable, repeatable parts.", note: true },
   { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
   { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
   { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
@@ -306,10 +305,7 @@ export default function LandingPage() {
           <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The difference</h2>
           <div className="space-y-px bg-clay-500/15">
             {differentiators.map((d) => (
-              <div
-                key={d.title}
-                className={`p-6 ${d.feature ? "bg-clay-500/10 border-l-2 border-clay-500" : "bg-espresso-900"}`}
-              >
+              <div key={d.title} className="bg-espresso-900 p-6">
                 <h3 className="font-display text-xl text-clay-300 mb-2">
                   {d.title}
                   {d.note && <sup className="ml-0.5 align-super font-mono text-[10px] text-clay-400">1</sup>}
