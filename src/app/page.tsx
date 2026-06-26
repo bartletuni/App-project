@@ -70,7 +70,6 @@ const specSheet = [
   ["Minimum layer height", "0.05 mm"],
   ["Materials", "PPA-CF · PPS-CF · PPS-GF · PETG-CF · PA12-CF · PC · PC-CF/FR · ASA-CF/GF · ABS · PETG · PLA · TPU · PA6-CF · PA12-CF · PA612-CF · and more"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
-  ["Typical turnaround", "72 hours"],
 ];
 
 const differentiators = [
@@ -80,9 +79,9 @@ const differentiators = [
 ];
 
 const marqueeItems = [
-  "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF"
+  "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF",
   "PPS-CF/GF", "PEBA", "Reverse Engineering", "3D Scanning", "1:1 Reproduction",
-  "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials"
+  "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials",
 ];
 
 export default function LandingPage() {
