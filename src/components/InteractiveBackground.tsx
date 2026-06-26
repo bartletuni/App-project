@@ -313,8 +313,8 @@ export default function InteractiveBackground() {
       const mobile = window.innerWidth < 768;
       const region = mobile ? AMERICAS_REGION : WORLD_REGION;
       const homes = buildHomes(W, H, region);
-      // Another 5x the dot count (divisors cut to a fifth again).
-      const divisor = mobile ? 180 : 90;
+      // Desktop density; mobile carries 25% more dots (divisor 180 -> 144).
+      const divisor = mobile ? 144 : 90;
       const target = Math.min(Math.floor((W * H) / divisor), homes.length);
       // Weighted sampling without replacement (Efraimidis–Spirakis):
       // key = U^(1/weight); keeping the largest keys makes populous
