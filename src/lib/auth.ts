@@ -16,6 +16,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        if (credentials.email.length > 255 || credentials.password.length > 100) {
+          return null;
+        }
+
         let user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
