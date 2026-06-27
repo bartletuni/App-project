@@ -6,3 +6,6 @@
 ## 2026-06-26 - Add aria-current to navigation
 **Learning:** Screen readers need context for active elements in navigation structures. Simply relying on visual cues (like an underline or active styling) is not enough for accessibility.
 **Action:** Always conditionally append `aria-current="page"` on routing Links to ensure proper semantic structure.
+## 2024-06-27 - Custom File Input Keyboard Focus
+**Learning:** When creating custom styled file upload inputs by hiding the default `<input type="file">` with `.sr-only` and styling the adjacent `<label>`, keyboard users lose visual focus indication entirely, making the form inaccessible via Tab navigation.
+**Action:** Use Tailwind's `peer` pattern. Place the hidden `<input class="sr-only peer">` immediately *before* the `<label>`, and apply `peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500` classes to the label so a focus ring appears when the hidden input receives keyboard focus.
