@@ -51,6 +51,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File size exceeds the 20MB limit" }, { status: 400 });
     }
 
+    // Convert file to Buffer early for magic number validation
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Magic number validation for ZIP, ASCII STL, and Binary STL
+    const isZip = buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4B;
+    const isAsciiStl = buffer.length >= 5 && buffer.subarray(0, 5).toString("ascii").toLowerCase() === "solid";
+    let isBinaryStl = false;
+    if (buffer.length >= 84) {
+      const triangleCount = buffer.readUInt32LE(80);
+      const expectedSize = 84 + (triangleCount * 50);
+      isBinaryStl = buffer.length === expectedSize;
+    }
+
+    if (!isZip && !isAsciiStl && !isBinaryStl) {
+      return NextResponse.json({ error: "Only valid .STL and .ZIP files are allowed" }, { status: 400 });
+    }
+
     if (!dateNeededStr) {
       return NextResponse.json({ error: "Date needed is required" }, { status: 400 });
     }
@@ -106,8 +123,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Convert file to Buffer and Upload to R2
-    const buffer = Buffer.from(await file.arrayBuffer());
     let fileId: string | undefined;
 
     try {
