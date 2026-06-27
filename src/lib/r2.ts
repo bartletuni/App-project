@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { randomUUID } from "crypto";
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || "";
 const accessKeyId = process.env.R2_ACCESS_KEY_ID || "";
@@ -25,7 +26,7 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
   }
 
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_") || "unnamed_file";
-  const objectKey = `${Date.now()}-${sanitizedFileName}`;
+  const objectKey = `${randomUUID()}-${sanitizedFileName}`;
 
   try {
     await s3Client.send(
