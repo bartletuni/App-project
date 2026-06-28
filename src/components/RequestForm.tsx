@@ -144,11 +144,11 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           <label htmlFor="fileUpload" className={labelCls}>
             STL / ZIP file <span className="text-clay-400">*</span> <span className="text-cream-600 normal-case tracking-normal">(max 20MB)</span>
           </label>
-          <label htmlFor="fileUpload" className="flex cursor-pointer items-center gap-3 border border-dashed border-clay-500/30 px-4 py-3 rounded-md hover:border-clay-400 hover:bg-clay-500/5 transition-colors">
+          <input id="fileUpload" type="file" accept=".stl,.zip" onChange={(e) => setFile(e.target.files?.[0] || null)} className="sr-only peer" required />
+          <label htmlFor="fileUpload" className="flex cursor-pointer items-center gap-3 border border-dashed border-clay-500/30 px-4 py-3 rounded-md hover:border-clay-400 hover:bg-clay-500/5 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500">
             <UploadCloud className="h-5 w-5 text-clay-400 shrink-0" aria-hidden="true" />
             <span className="truncate text-sm text-cream-300">{file ? file.name : "Choose a file to upload"}</span>
           </label>
-          <input id="fileUpload" type="file" accept=".stl,.zip" onChange={(e) => setFile(e.target.files?.[0] || null)} className="sr-only" required />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
