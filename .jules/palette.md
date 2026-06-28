@@ -9,3 +9,7 @@
 ## 2025-06-16 - Actionable Empty States
 **Learning:** Empty states that simply say "No data found" leave users stranded and increase cognitive load, as they have to manually figure out how to populate the list. Providing a clear Call-to-Action (CTA) within the empty state itself significantly improves user onboarding.
 **Action:** Always include a relevant helper text and a primary action button (e.g., "Add First Material" or "Start a Request") inside empty states to guide users directly to the next logical step. Ensure any decorative icons used in these states are marked with `aria-hidden="true"`.
+
+## 2025-06-28 - Custom File Upload Focus States
+**Learning:** Custom styled file upload buttons that use a visually hidden `<input type="file" className="sr-only">` coupled with a `<label>` lose their keyboard focus indicator. Users navigating via Tab key cannot see when the file upload is focused.
+**Action:** Place the hidden `<input className="sr-only">` immediately *before* its custom visual `<label>` and apply Tailwind's `peer` class to the input. Then, use `peer-focus-visible` classes (e.g., `peer-focus-visible:ring-2`) on the label to provide a clear, visible focus indicator for keyboard users.
