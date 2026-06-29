@@ -6,3 +6,6 @@
 ## 2026-06-26 - Add aria-current to navigation
 **Learning:** Screen readers need context for active elements in navigation structures. Simply relying on visual cues (like an underline or active styling) is not enough for accessibility.
 **Action:** Always conditionally append `aria-current="page"` on routing Links to ensure proper semantic structure.
+## 2024-06-29 - Explicit Focus Indicators for Keyboard Users
+**Learning:** Default browser focus outlines often fail to provide sufficient contrast on dark themes, making keyboard navigation difficult or invisible for interactive elements like navigation links and icon buttons.
+**Action:** Always explicitly define custom focus styles (e.g. `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500`) on interactive elements to ensure high-contrast, theme-consistent focus indicators for keyboard users.
