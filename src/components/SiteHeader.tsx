@@ -27,7 +27,7 @@ export default function SiteHeader() {
       <div className="bg-espresso-900/70 backdrop-blur-xl border-b border-clay-500/12">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md">
               <Image
                 src="/logo.png"
                 alt="TakomoCo"
@@ -51,7 +51,7 @@ export default function SiteHeader() {
                   key={n.href}
                   href={n.href}
                   aria-current={isActive(n.href) ? "page" : undefined}
-                  className="group relative hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors"
+                  className="group relative hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
                   {n.label}
                   <span
@@ -64,7 +64,7 @@ export default function SiteHeader() {
               <Magnetic strength={0.5}>
                 <Link
                   href="/login"
-                  className="group inline-flex items-center gap-1.5 border border-clay-500/40 bg-clay-500/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors"
+                  className="group inline-flex items-center gap-1.5 border border-clay-500/40 bg-clay-500/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
                   Enter
                   <ArrowUpRight className="h-3.5 w-3.5 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

@@ -64,7 +64,7 @@ export default function AppShell({
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-20 flex-col items-center border-r border-clay-500/12 bg-espresso-900/70 backdrop-blur-xl">
         <Link
           href={variant === "admin" ? "/admin" : "/dashboard"}
-          className="mt-5 mb-6 flex h-11 w-11 items-center justify-center rounded-lg ring-1 ring-clay-500/30 hover:ring-clay-400/60 transition"
+          className="mt-5 mb-6 flex h-11 w-11 items-center justify-center rounded-lg ring-1 ring-clay-500/30 hover:ring-clay-400/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
           aria-label="Home"
         >
           <Image src="/logo.png" alt="TakomoCo" width={28} height={28} className="rounded" />
@@ -78,7 +78,7 @@ export default function AppShell({
                 key={it.href}
                 href={it.href}
                 aria-current={on ? "page" : undefined}
-                className={`group relative flex w-16 flex-col items-center gap-1 rounded-lg py-2.5 transition-colors ${
+                className={`group relative flex w-16 flex-col items-center gap-1 rounded-lg py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 ${
                   on ? "text-clay-300" : "text-cream-500 hover:text-cream-200"
                 }`}
               >
@@ -106,7 +106,7 @@ export default function AppShell({
           {variant === "admin" && (
             <Link
               href="/dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-cream-500 hover:text-cream-200 hover:bg-espresso-700/60 transition"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-cream-500 hover:text-cream-200 hover:bg-espresso-700/60 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
               title="Exit to site"
             >
               <ArrowLeft className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -122,7 +122,7 @@ export default function AppShell({
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-cream-500 hover:text-red-300 hover:bg-red-500/10 transition"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-cream-500 hover:text-red-300 hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             title="Sign out"
             aria-label="Sign out"
           >
@@ -133,7 +133,7 @@ export default function AppShell({
 
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 flex h-14 items-center justify-between border-b border-clay-500/12 bg-espresso-900/80 backdrop-blur-xl px-4">
-        <Link href={variant === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2">
+        <Link href={variant === "admin" ? "/admin" : "/dashboard"} className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md">
           <Image src="/logo.png" alt="TakomoCo" width={26} height={26} className="rounded ring-1 ring-clay-500/30" />
           <span className="font-mono text-xs font-bold tracking-[0.2em] text-cream-200">
             TAKOMO<span className="text-clay-400">⁄</span>CO
@@ -141,7 +141,7 @@ export default function AppShell({
         </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex items-center gap-1.5 text-red-300 font-mono text-[10px] uppercase tracking-[0.15em]"
+          className="flex items-center gap-1.5 text-red-300 font-mono text-[10px] uppercase tracking-[0.15em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-md px-2 py-1 -mr-2"
           aria-label="Sign out"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" /> Exit
@@ -166,7 +166,7 @@ export default function AppShell({
                 key={it.href}
                 href={it.href}
                 aria-current={on ? "page" : undefined}
-                className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 transition-colors ${
+                className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 ${
                   on ? "text-clay-300" : "text-cream-500"
                 }`}
               >
