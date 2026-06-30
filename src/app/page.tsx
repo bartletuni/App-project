@@ -10,14 +10,7 @@ import {
   Zap,
   Plus,
 } from "lucide-react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useMotionValue,
-  useSpring,
-  useMotionTemplate,
-} from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 import SiteHeader from "@/components/SiteHeader";
 import Reveal from "@/components/ui/Reveal";
@@ -98,19 +91,6 @@ export default function LandingPage() {
   });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 90]);
 
-  const px = useMotionValue(0.5);
-  const py = useMotionValue(0.5);
-  const glowX = useSpring(useTransform(px, [0, 1], ["0%", "100%"]), { stiffness: 80, damping: 20 });
-  const glowY = useSpring(useTransform(py, [0, 1], ["0%", "100%"]), { stiffness: 80, damping: 20 });
-  const heroGlow = useMotionTemplate`radial-gradient(620px circle at ${glowX} ${glowY}, rgba(217,142,61,0.13), transparent 60%)`;
-
-  const handleHeroPointer = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = heroRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    px.set((e.clientX - rect.left) / rect.width);
-    py.set((e.clientY - rect.top) / rect.height);
-  };
-
   return (
     <div className="min-h-screen bg-transparent font-sans text-cream-200 selection:bg-clay-500/30 selection:text-cream-100">
       <SiteHeader />
@@ -118,11 +98,8 @@ export default function LandingPage() {
       {/* Hero */}
       <section
         ref={heroRef}
-        onMouseMove={handleHeroPointer}
         className="relative overflow-hidden px-5 sm:px-8 pt-28 sm:pt-36 pb-16"
       >
-        <motion.div aria-hidden="true" style={{ background: heroGlow }} className="pointer-events-none absolute inset-0 z-0" />
-
         <motion.div style={{ y: heroY }} className="relative z-10 mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 items-end">
             {/* Headline column */}
