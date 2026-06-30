@@ -31,7 +31,7 @@ const capabilities = [
     n: "01",
     icon: Layers,
     title: "Additive Manufacturing",
-    body: "Expert FDM/FFF printing with a strict focus on high-performance, engineering-grade and fiber-reinforced materials.",
+    body: "Expert FDM/FFF printing focused on high-performance, engineering-grade, and fiber-reinforced materials.",
     tags: ["FDM / FFF", "Carbon-Fiber", "Engineering-Grade"],
   },
   {
