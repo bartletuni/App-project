@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, useSpring } from "framer-motion";
 import { LAND_W, LAND_H, LAND_MASK_B64 } from "./worldLandMask";
 
 /**
@@ -123,10 +122,7 @@ const popWeight = (lon: number, lat: number) => {
 };
 
 export default function InteractiveBackground() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isClient, setIsClient] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isActive, setIsActive] = useState(true);
   const [scrollY, setScrollY] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -135,26 +131,20 @@ export default function InteractiveBackground() {
   // ease back to their map home.
   const mouseRef = useRef({ x: 0, y: 0, active: false });
 
-  // Input tracking: drives the ambient cursor glow and the short-range
-  // particle "tracking" interaction.
+  // Input tracking: drives the short-range particle "tracking" interaction.
   useEffect(() => {
     setIsClient(true);
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    setIsActive(!mobile);
 
     const onMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
       mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
-      setIsActive(true);
     };
     const onTouch = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        const tx = e.touches[0].clientX;
-        const ty = e.touches[0].clientY;
-        setMousePosition({ x: tx, y: ty });
-        mouseRef.current = { x: tx, y: ty, active: true };
-        setIsActive(true);
+        mouseRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          active: true,
+        };
       }
     };
     const onPointerLeave = () => {
@@ -202,6 +192,8 @@ export default function InteractiveBackground() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let particles: Particle[] = [];
+    // Home-easing speed (assembly). Faster on mobile; set in init().
+    let easeFactor = 0.015;
     let animationFrameId: number;
 
     const emberPalette = [
@@ -272,9 +264,9 @@ export default function InteractiveBackground() {
         // Constant subtle jostle; the home-easing above keeps the random
         // walk from wandering off position.
         const J = 0.55;
-        // Ease toward home (0.015 = double the prior 0.0075).
-        this.x += (tx - this.x) * 0.015 + (Math.random() - 0.5) * J + this.vx;
-        this.y += (ty - this.y) * 0.015 + (Math.random() - 0.5) * J + this.vy;
+        // Ease toward home (desktop 0.015; mobile 0.03 for faster assembly).
+        this.x += (tx - this.x) * easeFactor + (Math.random() - 0.5) * J + this.vx;
+        this.y += (ty - this.y) * easeFactor + (Math.random() - 0.5) * J + this.vy;
 
         // Scatter velocity from clicks decays; the home-easing then draws
         // each dot slowly back into place.
@@ -312,6 +304,8 @@ export default function InteractiveBackground() {
       const W = canvas.width;
       const H = canvas.height;
       const mobile = window.innerWidth < 768;
+      // Dots assemble faster on mobile.
+      easeFactor = mobile ? 0.03 : 0.015;
       const region = mobile ? AMERICAS_REGION : WORLD_REGION;
       const homes = buildHomes(W, H, region);
       // Desktop density; mobile carries 25% more dots (divisor 180 -> 144).
@@ -378,17 +372,6 @@ export default function InteractiveBackground() {
     };
   }, [isClient]);
 
-  const springConfig = { damping: 25, stiffness: 120 };
-  const cursorX = useSpring(0, springConfig);
-  const cursorY = useSpring(0, springConfig);
-
-  useEffect(() => {
-    if (isClient) {
-      cursorX.set(mousePosition.x);
-      cursorY.set(mousePosition.y);
-    }
-  }, [mousePosition, cursorX, cursorY, isClient]);
-
   if (!isClient) {
     return (
       <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#1c1611]" />
@@ -417,22 +400,6 @@ export default function InteractiveBackground() {
 
       {/* World-map particle field */}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
-
-      {/* Large firelight glow that tracks the cursor (ambient light only) */}
-      <motion.div
-        className="absolute rounded-full mix-blend-screen blur-[100px] pointer-events-none transition-opacity duration-500"
-        style={{
-          width: isMobile ? 120 : 220,
-          height: isMobile ? 120 : 220,
-          top: isMobile ? -60 : -110,
-          left: isMobile ? -60 : -110,
-          background:
-            "radial-gradient(circle, rgba(230,168,95,0.18) 0%, rgba(193,122,75,0.08) 50%, rgba(21,16,12,0) 100%)",
-          x: cursorX,
-          y: cursorY,
-          opacity: isActive ? (isMobile ? 0.07 : 0.08) : 0,
-        }}
-      />
     </div>
   );
 }
