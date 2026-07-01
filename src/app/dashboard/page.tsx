@@ -153,7 +153,7 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm text-cream-500">Submit your first part with the composer.</p>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  className="mt-5 inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors"
+                  className="mt-5 inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
                   <ArrowUp className="h-3.5 w-3.5" /> Start a request
                 </button>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                         {req.status === "PENDING" && isCancelable(req.createdAt) && (
                           <button
                             onClick={() => handleCancel(req.id)}
-                            className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-300 hover:text-red-200 transition-colors"
+                            className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-300 hover:text-red-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-sm"
                           >
                             Cancel
                           </button>

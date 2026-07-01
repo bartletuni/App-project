@@ -200,7 +200,7 @@ export default function Home() {
                 <label className={label} htmlFor="password">Password</label>
                 <div className="relative">
                   <input id="password" type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className={`${field} pr-12`} placeholder="••••••••" autoComplete={isLogin ? "current-password" : "new-password"} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500" aria-label={showPassword ? "Hide password" : "Show password"}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -288,7 +288,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow"
+                className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {loading ? (
                   <>
@@ -307,11 +307,11 @@ export default function Home() {
             <div className="mt-6 flex items-center justify-between">
               <button
                 onClick={() => { setIsLogin(!isLogin); setError(""); }}
-                className="font-mono text-[11px] uppercase tracking-[0.15em] text-clay-300 hover:text-clay-200 transition-colors"
+                className="font-mono text-[11px] uppercase tracking-[0.15em] text-clay-300 hover:text-clay-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {isLogin ? "Need an account?" : "Have an account?"}
               </button>
-              <Link href="/materials" className="font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500 hover:text-cream-200 transition-colors">
+              <Link href="/materials" className="font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500 hover:text-cream-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm">
                 Material index →
               </Link>
             </div>
