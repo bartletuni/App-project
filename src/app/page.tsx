@@ -181,34 +181,24 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Shop floor — live voxel build preview */}
+      {/* Shop floor — live voxel build preview + specification */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20 sm:pb-24" aria-label="Shop floor">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <Reveal direction="right" className="lg:col-span-5">
-            <span className="eyebrow">SHOP FLOOR ⁄ LIVE</span>
-            <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">
-              Always <span className="italic text-clay-300">printing.</span>
-            </h2>
-            <p className="mt-5 max-w-md text-cream-400 leading-relaxed">
-              The bench never really stops. Watch a queue of shop parts come
-              together the way every real job does — one 0.2&nbsp;mm layer at
-              a time, from first pass to finished component.
-            </p>
-            <div className="mt-8 max-w-md space-y-px bg-clay-500/15">
-              {[
-                ["01", "GEAR-07", "Drive gear · PPA-CF"],
-                ["02", "FLANGE-12", "Bolt flange · PC"],
-                ["03", "BRACKET-L3", "L-bracket · PA12-CF"],
-                ["04", "NOZZLE-V2", "Cone nozzle · ASA"],
-                ["05", "STANDOFF-M8", "Hex standoff · PETG-CF"],
-              ].map(([n, id, desc]) => (
-                <div key={id} className="flex items-baseline gap-4 bg-espresso-900 px-4 py-3">
-                  <span className="font-mono text-[10px] text-clay-400">{n}</span>
-                  <span className="font-mono text-xs tracking-[0.15em] text-cream-200">{id}</span>
-                  <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">{desc}</span>
-                </div>
-              ))}
-            </div>
+            <span className="eyebrow">SPECIFICATION</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The fine print</h2>
+            <Panel className="p-0 overflow-hidden">
+              <table className="w-full">
+                <tbody>
+                  {specSheet.map(([k, v], i) => (
+                    <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
+                      <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
+                      <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Panel>
           </Reveal>
           <Reveal direction="left" delay={0.15} className="lg:col-span-7">
             <Panel className="p-3 sm:p-4">
@@ -296,29 +286,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Spec sheet + differentiators */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28 grid lg:grid-cols-12 gap-12">
-        <Reveal direction="right" className="lg:col-span-7">
-          <span className="eyebrow">SPECIFICATION</span>
-          <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The fine print</h2>
-          <Panel className="p-0 overflow-hidden">
-            <table className="w-full">
-              <tbody>
-                {specSheet.map(([k, v], i) => (
-                  <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
-                    <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
-                    <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Panel>
-        </Reveal>
-
-        <Reveal direction="left" delay={0.1} className="lg:col-span-5">
+      {/* Differentiators */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28">
+        <Reveal>
           <span className="eyebrow">WHY TAKOMO</span>
           <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The difference</h2>
-          <div className="space-y-px bg-clay-500/15">
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-clay-500/15">
             {differentiators.map((d) => (
               <div key={d.title} className="bg-espresso-900 p-6">
                 <h3 className="font-display text-xl text-clay-300 mb-2">
