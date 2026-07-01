@@ -13,6 +13,7 @@ import {
 import { motion, useScroll, useTransform } from "framer-motion";
 
 import SiteHeader from "@/components/SiteHeader";
+import BuildPlate from "@/components/BuildPlate";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
@@ -74,6 +75,7 @@ const differentiators: {
   { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
   { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
   { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
+  { title: "Dimensional verification", body: "Every part checked against the model before it ships — no surprises on arrival." },
 ];
 
 const marqueeItems = [
@@ -180,6 +182,33 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* Shop floor — live voxel build preview + specification */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20 sm:pb-24" aria-label="Shop floor">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <Reveal direction="right" className="lg:col-span-5">
+            <span className="eyebrow">SPECIFICATION</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The fine print</h2>
+            <Panel className="p-0 overflow-hidden">
+              <table className="w-full">
+                <tbody>
+                  {specSheet.map(([k, v], i) => (
+                    <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
+                      <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
+                      <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Panel>
+          </Reveal>
+          <Reveal direction="left" delay={0.15} className="lg:col-span-7">
+            <Panel className="p-3 sm:p-4">
+              <BuildPlate />
+            </Panel>
+          </Reveal>
+        </div>
+      </section>
+
       {/* Materials ticker */}
       <section className="border-y border-clay-500/12 bg-espresso-900/40" aria-label="Materials">
         <div className="flex items-center">
@@ -258,29 +287,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Spec sheet + differentiators */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28 grid lg:grid-cols-12 gap-12">
-        <Reveal direction="right" className="lg:col-span-7">
-          <span className="eyebrow">SPECIFICATION</span>
-          <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The fine print</h2>
-          <Panel className="p-0 overflow-hidden">
-            <table className="w-full">
-              <tbody>
-                {specSheet.map(([k, v], i) => (
-                  <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
-                    <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
-                    <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Panel>
-        </Reveal>
-
-        <Reveal direction="left" delay={0.1} className="lg:col-span-5">
+      {/* Differentiators */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28">
+        <Reveal>
           <span className="eyebrow">WHY TAKOMO</span>
           <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100 mb-8">The difference</h2>
-          <div className="space-y-px bg-clay-500/15">
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-clay-500/15">
             {differentiators.map((d) => (
               <div key={d.title} className="bg-espresso-900 p-6">
                 <h3 className="font-display text-xl text-clay-300 mb-2">
