@@ -13,6 +13,7 @@ import {
 import { motion, useScroll, useTransform } from "framer-motion";
 
 import SiteHeader from "@/components/SiteHeader";
+import BuildPlate from "@/components/BuildPlate";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
@@ -178,6 +179,43 @@ export default function LandingPage() {
             </Reveal>
           </div>
         </motion.div>
+      </section>
+
+      {/* Shop floor — live voxel build preview */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20 sm:pb-24" aria-label="Shop floor">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <Reveal direction="right" className="lg:col-span-5">
+            <span className="eyebrow">SHOP FLOOR ⁄ LIVE</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">
+              Always <span className="italic text-clay-300">printing.</span>
+            </h2>
+            <p className="mt-5 max-w-md text-cream-400 leading-relaxed">
+              The bench never really stops. Watch a queue of shop parts come
+              together the way every real job does — one 0.2&nbsp;mm layer at
+              a time, from first pass to finished component.
+            </p>
+            <div className="mt-8 max-w-md space-y-px bg-clay-500/15">
+              {[
+                ["01", "GEAR-07", "Drive gear · PPA-CF"],
+                ["02", "FLANGE-12", "Bolt flange · PC"],
+                ["03", "BRACKET-L3", "L-bracket · PA12-CF"],
+                ["04", "NOZZLE-V2", "Cone nozzle · ASA"],
+                ["05", "STANDOFF-M8", "Hex standoff · PETG-CF"],
+              ].map(([n, id, desc]) => (
+                <div key={id} className="flex items-baseline gap-4 bg-espresso-900 px-4 py-3">
+                  <span className="font-mono text-[10px] text-clay-400">{n}</span>
+                  <span className="font-mono text-xs tracking-[0.15em] text-cream-200">{id}</span>
+                  <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal direction="left" delay={0.15} className="lg:col-span-7">
+            <Panel className="p-3 sm:p-4">
+              <BuildPlate />
+            </Panel>
+          </Reveal>
+        </div>
       </section>
 
       {/* Materials ticker */}
