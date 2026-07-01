@@ -75,6 +75,7 @@ const differentiators: {
   { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
   { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
   { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
+  { title: "Dimensional verification", body: "Every part checked against the model before it ships — no surprises on arrival." },
 ];
 
 const marqueeItems = [
