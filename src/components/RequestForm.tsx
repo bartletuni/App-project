@@ -169,7 +169,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             <div className="flex gap-2">
               <input id="phoneNumber" type="tel" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} className={field} placeholder="(123) 456-7890" required />
               {pastPhones.length > 0 && (
-                <button type="button" onClick={() => setIsAddingPhone(false)} className="shrink-0 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-cream-400 hover:text-clay-300 hover:border-clay-400 rounded-md transition-colors">
+                <button type="button" onClick={() => setIsAddingPhone(false)} className="shrink-0 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-cream-400 hover:text-clay-300 hover:border-clay-400 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                   Cancel
                 </button>
               )}
@@ -181,7 +181,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                   <option key={phone.id} value={phone.number}>{phone.number}</option>
                 ))}
               </select>
-              <button type="button" onClick={() => setIsAddingPhone(true)} className="shrink-0 inline-flex items-center gap-1 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-300 hover:bg-clay-500/15 rounded-md transition-colors">
+              <button type="button" onClick={() => setIsAddingPhone(true)} className="shrink-0 inline-flex items-center gap-1 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-300 hover:bg-clay-500/15 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                 <Plus className="h-3 w-3" /> New
               </button>
             </div>
@@ -207,7 +207,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <button
           type="submit"
           disabled={loading}
-          className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow"
+          className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
         >
           {loading ? (
             <>
