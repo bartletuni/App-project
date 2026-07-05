@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   const isAdmin = (session?.user as any)?.isAdmin;
 
@@ -68,6 +69,7 @@ export default function DashboardPage() {
 
   const handleCancel = async (id: string) => {
     if (!confirm("Are you sure you want to cancel this request?")) return;
+    setCancelingId(id);
     try {
       const res = await fetch(`/api/requests/${id}/cancel`, { method: "POST" });
       if (res.ok) {
@@ -79,6 +81,8 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Failed to cancel request", error);
       alert("An error occurred while canceling the request.");
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -180,9 +184,17 @@ export default function DashboardPage() {
                         {req.status === "PENDING" && isCancelable(req.createdAt) && (
                           <button
                             onClick={() => handleCancel(req.id)}
-                            className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-300 hover:text-red-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-sm"
+                            disabled={cancelingId === req.id}
+                            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-red-300 hover:text-red-200 disabled:opacity-60 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-sm"
                           >
-                            Cancel
+                            {cancelingId === req.id ? (
+                              <>
+                                <span className="h-2.5 w-2.5 rounded-full border border-red-300/40 border-t-red-300 animate-spin" aria-hidden="true" />
+                                Canceling
+                              </>
+                            ) : (
+                              "Cancel"
+                            )}
                           </button>
                         )}
                         {req.status === "PENDING" && !isCancelable(req.createdAt) && (
