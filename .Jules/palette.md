@@ -10,3 +10,6 @@
 ## 2026-07-05 - Added Async Feedback to Dashboard Action Buttons
 **Learning:** Users lack confidence when critical destructive actions (like canceling a request) have no immediate UI feedback, especially if the API call is slow.
 **Action:** Always wrap destructive or state-changing action buttons with an inline loading spinner and disable them during the fetch lifecycle to prevent duplicate submissions and provide immediate feedback.
+## 2024-07-07 - Add Keyboard Focus Rings to CTA Links
+**Learning:** By default, highly-customized buttons and links built with Tailwind CSS may lose standard browser focus rings, leaving keyboard users with no visual indicator of where they are tabbing on the page. Missing focus indicators on primary calls-to-action is a critical accessibility failure.
+**Action:** Always add explicit keyboard focus indicators (e.g., `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm`) to all interactive elements, especially complex anchor links (`<Link>`) functioning as buttons, to ensure WCAG compliance.

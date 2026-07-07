@@ -133,7 +133,7 @@ export default function MaterialsPage() {
 
                     <Link
                       href={`/dashboard?material=${encodeURIComponent(m.name)}`}
-                      className="group/cta mt-6 inline-flex items-center justify-between gap-2 border border-clay-500/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-cream-200 hover:bg-clay-500/15 hover:border-clay-400 transition-colors"
+                      className="group/cta mt-6 inline-flex items-center justify-between gap-2 border border-clay-500/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-cream-200 hover:bg-clay-500/15 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                     >
                       Build with this
                       <ArrowRight className="h-4 w-4 text-clay-300 transition-transform group-hover/cta:translate-x-1" aria-hidden="true" />
