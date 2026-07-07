@@ -67,3 +67,7 @@
 **Vulnerability:** The `/api/requests` endpoint relied entirely on the file extension (`.stl`, `.zip`) to validate uploaded files. An attacker could rename a malicious executable or script to bypass the filter. When attempting to fix this by relying entirely on magic numbers (file headers), it opened up a polyglot vulnerability where an attacker could upload an executable with valid ZIP headers or an HTML file starting with `solid`, leading to Stored XSS or Arbitrary File Hosting.
 **Learning:** Security validation is defense-in-depth. Replacing one validation method (extensions) with another (magic bytes) can introduce regression vulnerabilities if not combined.
 **Prevention:** Always validate *both* the file extension and the magic bytes (file content signatures) simultaneously to ensure the file is exactly what it claims to be, and handle file buffers early to enforce this before saving or uploading.
+## 2024-05-31 - Missing Strict Type Validation on Registration Inputs
+**Vulnerability:** Registration API route accepted arbitrary input types (e.g., arrays, objects) for string fields, which could bypass string length validations and potentially cause DoS or downstream errors.
+**Learning:** Always validate that incoming JSON fields match the expected primitive type (`string`, `number`, etc.) before calling type-specific methods (like `.length`).
+**Prevention:** Implement explicit `typeof` checks for all expected fields in API route handlers before proceeding with further validation or database operations.
