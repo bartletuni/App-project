@@ -13,6 +13,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string' || typeof shippingAddress !== 'string' || typeof billingAddress !== 'string' || typeof phone !== 'string') {
+      return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
+    }
+
     // Input length validation to prevent DoS attacks
     if (name.length > 100 || email.length > 100 || password.length > 100) {
       return NextResponse.json({ error: "Name, email, and password must not exceed 100 characters" }, { status: 400 });
