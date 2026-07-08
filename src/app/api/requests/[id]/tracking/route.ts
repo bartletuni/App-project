@@ -22,6 +22,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Tracking number provided is undefined" }, { status: 400 });
     }
 
+    if (trackingNumber !== null && trackingNumber !== "" && typeof trackingNumber !== 'string') {
+      return NextResponse.json({ error: "Invalid tracking number format" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findUnique({
       where: { id },
       include: {

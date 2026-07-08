@@ -11,6 +11,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { name } = await req.json();
+    if (typeof name !== 'string') {
+      return NextResponse.json({ error: "Invalid input type" }, { status: 400 });
+    }
+
     if (!name || name.trim().length === 0) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }

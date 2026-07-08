@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+      return NextResponse.json({ error: "Invalid password format" }, { status: 400 });
+    }
+
     if (currentPassword.length > 100 || newPassword.length > 100) {
       return NextResponse.json(
         { error: "Passwords must not exceed 100 characters" },

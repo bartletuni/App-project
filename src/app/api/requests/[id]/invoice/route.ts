@@ -23,6 +23,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Invoice number provided is undefined" }, { status: 400 });
     }
 
+    if (invoiceNumber !== null && invoiceNumber !== "" && typeof invoiceNumber !== 'string') {
+      return NextResponse.json({ error: "Invalid invoice number format" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findUnique({
       where: { id },
       include: {

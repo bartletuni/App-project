@@ -20,6 +20,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const body = await req.json();
     const { status } = body;
 
+    if (typeof status !== 'string') {
+      return NextResponse.json({ error: "Invalid status format" }, { status: 400 });
+    }
+
     // Validate valid statuses
     const validStatuses = ["PENDING", "ACTIVE", "COMPLETED", "NEEDS REVIEW", "CANCELLED", "INVOICE SENT", "SHIPPED"];
     if (!status || !validStatuses.includes(status)) {
