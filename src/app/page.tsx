@@ -8,7 +8,6 @@ import {
   Layers,
   Scan,
   Zap,
-  Plus,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
@@ -19,13 +18,6 @@ import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
 import Marquee from "@/components/ui/Marquee";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
-
-const heroSpecs = [
-  { k: "BUILD VOLUME", v: "256³", u: "mm" },
-  { k: "EXTRUSION", v: "320", u: "°C max" },
-  { k: "LAYER", v: "0.05", u: "mm" },
-  { k: "LEAD TIME", v: "72", u: "hours" },
-];
 
 const capabilities = [
   {
@@ -64,6 +56,7 @@ const specSheet = [
   ["Minimum layer height", "0.05 mm"],
   ["Materials", "PPA-CF · PPS-CF · PPS-GF · PETG-CF · PA12-CF · PC · PC-CF/FR · ASA-CF/GF · ABS · PETG · PLA · TPU · PA6-CF · PA12-CF · PA612-CF · and more"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
+  ["Lead time", "72 hours"],
 ];
 
 const differentiators: {
@@ -105,7 +98,7 @@ export default function LandingPage() {
         <motion.div style={{ y: heroY }} className="relative z-10 mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 items-end">
             {/* Headline column */}
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-12">
               <Reveal direction="up">
                 <div className="flex items-center gap-3 mb-7">
                   <span className="eyebrow">EST. UTAH</span>
@@ -157,27 +150,6 @@ export default function LandingPage() {
                 </div>
               </Reveal>
             </div>
-
-            {/* Spec stamp */}
-            <Reveal direction="left" delay={0.3} className="lg:col-span-4">
-              <Panel className="p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <span className="eyebrow">SHOP SPEC</span>
-                  <Plus className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
-                </div>
-                <dl className="divide-y divide-clay-500/12">
-                  {heroSpecs.map((s) => (
-                    <div key={s.k} className="flex items-baseline justify-between py-3">
-                      <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500">{s.k}</dt>
-                      <dd className="font-display text-2xl text-cream-100">
-                        {s.v}
-                        <span className="ml-1 font-mono text-[10px] tracking-normal text-clay-400">{s.u}</span>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </Panel>
-            </Reveal>
           </div>
         </motion.div>
       </section>
@@ -230,7 +202,7 @@ export default function LandingPage() {
           <div className="flex items-end justify-between gap-6 mb-12">
             <div>
               <span className="eyebrow">CAPABILITIES</span>
-              <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we make</h2>
+              <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we do</h2>
             </div>
             <span className="hidden sm:block font-mono text-xs text-cream-600">[ 03 DISCIPLINES ]</span>
           </div>
