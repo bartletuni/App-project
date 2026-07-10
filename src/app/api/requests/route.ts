@@ -6,6 +6,7 @@ import { uploadToR2 } from "@/lib/r2";
 import { addDays, format } from "date-fns";
 import { Resend } from "resend";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
+import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
  
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,26 @@ export async function POST(req: NextRequest) {
     const dateNeededStr = formData.get("dateNeeded") as string | null;
     let phoneNumberString = formData.get("phoneNumber") as string | null;
     const requestedUserId = formData.get("userId") as string | null;
+    const printSettingsRaw = formData.get("printSettings") as string | null;
+
+    // Optional custom slicer settings; absent/empty means AUTO.
+    let customSettings: CustomPrintSettings | null = null;
+    if (printSettingsRaw) {
+      if (printSettingsRaw.length > 5000) {
+        return NextResponse.json({ error: "Print settings payload too large" }, { status: 400 });
+      }
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(printSettingsRaw);
+      } catch {
+        return NextResponse.json({ error: "Invalid print settings" }, { status: 400 });
+      }
+      const result = validateCustomSettings(parsed);
+      if ("error" in result) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      customSettings = result.settings;
+    }
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
@@ -153,6 +174,7 @@ export async function POST(req: NextRequest) {
         quantity,
         material,
         notes,
+        printSettings: customSettings ? JSON.stringify(customSettings) : null,
         dateNeeded,
       },
     });
@@ -176,6 +198,7 @@ export async function POST(req: NextRequest) {
             material: material || "Not specified",
             dateNeeded: format(dateNeeded, "PPP"),
             notes: notes || undefined,
+            printSettings: summarizeSettings(customSettings),
           }),
         });
       }

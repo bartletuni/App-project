@@ -64,6 +64,23 @@ export async function GET(
       Key: fileId,
     });
 
+    // inline=1 streams the bytes through this route (same-origin) so the
+    // in-browser 3D viewer can fetch STL data without hitting CORS on the
+    // presigned R2 URL. Regular downloads keep the redirect.
+    if (req.nextUrl.searchParams.get("inline") === "1") {
+      const object = await s3Client.send(command);
+      if (!object.Body) {
+        return NextResponse.json({ error: "File not found" }, { status: 404 });
+      }
+      return new NextResponse(object.Body.transformToWebStream() as ReadableStream, {
+        headers: {
+          "Content-Type": object.ContentType || "application/octet-stream",
+          ...(object.ContentLength ? { "Content-Length": String(object.ContentLength) } : {}),
+          "Cache-Control": "private, max-age=3600",
+        },
+      });
+    }
+
     // Generate a presigned URL valid for 1 hour (3600 seconds)
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 

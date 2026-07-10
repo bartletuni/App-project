@@ -1,18 +1,36 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
-import { AlertTriangle, UploadCloud, Plus, ArrowRight } from "lucide-react";
+import { AlertTriangle, UploadCloud, Plus, ArrowRight, X } from "lucide-react";
 import Panel from "@/components/ui/Panel";
+import StlViewer from "@/components/StlViewer";
+import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
+import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
+import { isStlFileName } from "@/lib/stl";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-2.5 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
 const labelCls =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function isAcceptedFile(f: File): boolean {
+  const name = f.name.toLowerCase();
+  return name.endsWith(".stl") || name.endsWith(".zip");
+}
+
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [notes, setNotes] = useState("");
   const [material, setMaterial] = useState("");
   const [availableMaterials, setAvailableMaterials] = useState<{ id: string; name: string }[]>([]);
@@ -22,6 +40,10 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [isAddingPhone, setIsAddingPhone] = useState(false);
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
+  const [printSettings, setPrintSettings] = useState<PrintSettingsState>({
+    mode: "AUTO",
+    custom: { ...DEFAULT_CUSTOM_SETTINGS },
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,6 +82,29 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       });
   }, [initialMaterial]);
 
+  const acceptFile = useCallback((f: File | null) => {
+    setError("");
+    if (!f) {
+      setFile(null);
+      return;
+    }
+    if (!isAcceptedFile(f)) {
+      setError("Only .STL and .ZIP files are accepted.");
+      return;
+    }
+    if (f.size > MAX_FILE_BYTES) {
+      setError("File size exceeds the 20MB limit.");
+      return;
+    }
+    setFile(f);
+  }, []);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    acceptFile(e.dataTransfer.files?.[0] || null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -71,7 +116,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       return;
     }
 
-    if (file.size > 20 * 1024 * 1024) {
+    if (file.size > MAX_FILE_BYTES) {
       setError("File size exceeds the 20MB limit.");
       setLoading(false);
       return;
@@ -84,6 +129,17 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       return;
     }
 
+    let printSettingsJson = "";
+    if (printSettings.mode === "CUSTOM") {
+      const result = validateCustomSettings(printSettings.custom);
+      if ("error" in result) {
+        setError(`Print settings: ${result.error}`);
+        setLoading(false);
+        return;
+      }
+      printSettingsJson = JSON.stringify(result.settings);
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("quantity", quantity);
@@ -91,6 +147,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
+    if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
       const res = await fetch("/api/requests", {
@@ -110,6 +167,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       setDateNeeded("");
       setNewPhoneNumber("");
       setIsAddingPhone(false);
+      setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
       onFormSubmit();
     } catch (err: any) {
       setError(err.message);
@@ -144,11 +202,59 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           <label htmlFor="fileUpload" className={labelCls}>
             STL / ZIP file <span className="text-clay-400">*</span> <span className="text-cream-600 normal-case tracking-normal">(max 20MB)</span>
           </label>
-          <input id="fileUpload" type="file" accept=".stl,.zip" onChange={(e) => setFile(e.target.files?.[0] || null)} className="sr-only peer" required />
-          <label htmlFor="fileUpload" className="flex cursor-pointer items-center gap-3 border border-dashed border-clay-500/30 px-4 py-3 rounded-md hover:border-clay-400 hover:bg-clay-500/5 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500">
-            <UploadCloud className="h-5 w-5 text-clay-400 shrink-0" aria-hidden="true" />
-            <span className="truncate text-sm text-cream-300">{file ? file.name : "Choose a file to upload"}</span>
+          <input
+            id="fileUpload"
+            type="file"
+            accept=".stl,.zip"
+            onChange={(e) => {
+              acceptFile(e.target.files?.[0] || null);
+              e.target.value = ""; // allow re-selecting the same file after removal
+            }}
+            className="sr-only peer"
+          />
+          <label
+            htmlFor="fileUpload"
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center gap-2 border border-dashed px-4 py-6 rounded-md transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500 ${
+              dragging
+                ? "border-clay-400 bg-clay-500/10"
+                : "border-clay-500/30 hover:border-clay-400 hover:bg-clay-500/5"
+            }`}
+          >
+            <UploadCloud className="h-6 w-6 text-clay-400 shrink-0" aria-hidden="true" />
+            {file ? (
+              <span className="flex items-center gap-2 max-w-full">
+                <span className="truncate text-sm text-cream-200">{file.name}</span>
+                <span className="shrink-0 font-mono text-[10px] text-cream-600">{formatBytes(file.size)}</span>
+              </span>
+            ) : (
+              <span className="text-center text-sm text-cream-300">
+                Drag &amp; drop your file here, or <span className="text-clay-300 underline underline-offset-2">browse</span>
+              </span>
+            )}
           </label>
+          {file && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cream-500">
+                  {isStlFileName(file.name) ? "3D preview — check your part before submitting" : "Preview"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => acceptFile(null)}
+                  className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-500 hover:text-red-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-sm"
+                >
+                  <X className="h-3 w-3" aria-hidden="true" /> Remove file
+                </button>
+              </div>
+              <StlViewer file={file} fileName={file.name} className="h-64 w-full" />
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -198,6 +304,8 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             )}
           </select>
         </div>
+
+        <PrintSettingsFields value={printSettings} onChange={setPrintSettings} idPrefix="user-ps" />
 
         <div>
           <label htmlFor="notes" className={labelCls}>Notes <span className="text-cream-600 normal-case tracking-normal">(color, etc. — optional)</span></label>

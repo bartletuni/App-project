@@ -5,6 +5,10 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import AppShell from "@/components/AppShell";
+import StlThumbnail from "@/components/StlThumbnail";
+import StlViewer from "@/components/StlViewer";
+import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
+import { parseStoredSettings } from "@/lib/print-settings";
 
 function AdminDashboardContent() {
   const { data: session, status } = useSession();
@@ -343,9 +347,12 @@ function AdminDashboardContent() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-[10px] font-bold text-cream-500 uppercase tracking-tight">File</div>
-                          <div className="text-sm font-semibold text-cream-200 truncate" title={req.fileName}>{req.fileName}</div>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <StlThumbnail fileId={req.fileId} fileName={req.fileName} size={44} />
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-cream-500 uppercase tracking-tight">File</div>
+                            <div className="text-sm font-semibold text-cream-200 truncate" title={req.fileName}>{req.fileName}</div>
+                          </div>
                         </div>
                         <div>
                           <div className="text-[10px] font-bold text-cream-500 uppercase tracking-tight">Invoice</div>
@@ -404,10 +411,16 @@ function AdminDashboardContent() {
                           <div className="text-xs font-medium text-cream-500">{req.phoneNumber?.number || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-cream-200">{req.fileName}</div>
-                          <div className="flex gap-2 mt-1">
-                              {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
-                              {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                          <div className="flex items-center gap-3">
+                            <StlThumbnail fileId={req.fileId} fileName={req.fileName} size={48} />
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold text-cream-200">{req.fileName}</div>
+                              <div className="flex gap-2 mt-1">
+                                  {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
+                                  {req.printSettings && <span className="text-[10px] font-bold bg-teal-500/15 text-teal-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer supplied custom slicer settings">Custom settings</span>}
+                                  {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
+                              </div>
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -493,6 +506,14 @@ function AdminDashboardContent() {
             </div>
 
             <div className="px-6 py-6 sm:p-8">
+                <div className="mb-8">
+                    <div className="text-sm font-medium text-cream-500 mb-2">3D Preview</div>
+                    <StlViewer
+                        fileId={selectedRequest.fileId}
+                        fileName={selectedRequest.fileName}
+                        className="h-72 w-full"
+                    />
+                </div>
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Name (Company/Personal)</dt>
@@ -534,6 +555,12 @@ function AdminDashboardContent() {
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                               Download {selectedRequest.fileName}
                            </a>
+                        </dd>
+                    </div>
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-cream-500">Print Settings</dt>
+                        <dd className="mt-2 text-sm text-cream-200 bg-espresso-700/60 p-4 rounded-lg border border-espresso-600/50">
+                            <PrintSettingsSummary settings={parseStoredSettings(selectedRequest.printSettings)} />
                         </dd>
                     </div>
                     {selectedRequest.notes && (

@@ -16,6 +16,7 @@ export const NewRequestEmailHTML = (data: {
   material: string;
   dateNeeded: string;
   notes?: string;
+  printSettings?: string;
 }) => `
 <!DOCTYPE html>
 <html>
@@ -65,6 +66,13 @@ export const NewRequestEmailHTML = (data: {
         <div class="label">Date Needed</div>
         <div class="value">${escapeHtml(data.dateNeeded)}</div>
       </div>
+
+      ${data.printSettings ? `
+      <div class="field">
+        <div class="label">Print Settings</div>
+        <div class="value">${escapeHtml(data.printSettings)}</div>
+      </div>
+      ` : ''}
 
       ${data.notes ? `
       <div class="notes-box">

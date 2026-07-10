@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { FileStack, Clock, Loader2, CheckCircle2, FileText, ArrowUp } from "lucide-react";
+import { FileStack, Clock, Loader2, CheckCircle2, FileText, ArrowUp, X, Download } from "lucide-react";
 
 import AppShell from "@/components/AppShell";
 import RequestForm from "@/components/RequestForm";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import StlThumbnail from "@/components/StlThumbnail";
+import StlViewer from "@/components/StlViewer";
+import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
+import { parseStoredSettings } from "@/lib/print-settings";
 
 const statusStyle: Record<string, string> = {
   PENDING: "text-yellow-300 border-yellow-500/30 bg-yellow-500/10",
@@ -38,6 +42,7 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
   const isAdmin = (session?.user as any)?.isAdmin;
 
@@ -74,6 +79,7 @@ export default function DashboardPage() {
       const res = await fetch(`/api/requests/${id}/cancel`, { method: "POST" });
       if (res.ok) {
         fetchRequests();
+        setSelectedRequest((prev: any) => (prev && prev.id === id ? { ...prev, status: "CANCELLED" } : prev));
       } else {
         const data = await res.json();
         alert(data.error || "Failed to cancel request");
@@ -167,18 +173,26 @@ export default function DashboardPage() {
                 {requests.map((req) => (
                   <Panel key={req.id} ticks={false} className="p-4 sm:p-5 rounded-md hover:border-clay-500/30 transition-colors">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <FileText className="h-3.5 w-3.5 text-clay-400 shrink-0" aria-hidden="true" />
-                          <h3 className="font-display text-lg text-cream-100 truncate">{req.fileName}</h3>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRequest(req)}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
+                        title="Review this submission"
+                      >
+                        <StlThumbnail fileId={req.fileId} fileName={req.fileName} size={56} />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <FileText className="h-3.5 w-3.5 text-clay-400 shrink-0" aria-hidden="true" />
+                            <h3 className="font-display text-lg text-cream-100 truncate">{req.fileName}</h3>
+                          </div>
+                          <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.1em] text-cream-500">
+                            <span>QTY <span className="text-cream-200">{req.quantity}</span></span>
+                            <span>INV <span className="text-clay-300">{req.invoiceNumber || "—"}</span></span>
+                            <span>NEED <span className="text-cream-200">{format(new Date(req.dateNeeded), "MMM d")}</span></span>
+                            {req.trackingNumber && <span>USPS <span className="text-teal-300">{req.trackingNumber}</span></span>}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.1em] text-cream-500">
-                          <span>QTY <span className="text-cream-200">{req.quantity}</span></span>
-                          <span>INV <span className="text-clay-300">{req.invoiceNumber || "—"}</span></span>
-                          <span>NEED <span className="text-cream-200">{format(new Date(req.dateNeeded), "MMM d")}</span></span>
-                          {req.trackingNumber && <span>USPS <span className="text-teal-300">{req.trackingNumber}</span></span>}
-                        </div>
-                      </div>
+                      </button>
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <StatusChip status={req.status} />
                         {req.status === "PENDING" && isCancelable(req.createdAt) && (
@@ -209,6 +223,114 @@ export default function DashboardPage() {
           </Reveal>
         </div>
       </div>
+
+      {/* Submission review modal */}
+      {selectedRequest && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="review-modal-title"
+          onClick={() => setSelectedRequest(null)}
+        >
+          <div
+            className="panel w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-md bg-espresso-900/95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-clay-500/15 bg-espresso-900/95 px-5 sm:px-6 py-4">
+              <div className="min-w-0">
+                <span className="eyebrow">SUBMISSION ⁄ REVIEW</span>
+                <h3 id="review-modal-title" className="mt-1 font-display text-xl text-cream-100 truncate">
+                  {selectedRequest.fileName}
+                </h3>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <StatusChip status={selectedRequest.status} />
+                <button
+                  onClick={() => setSelectedRequest(null)}
+                  className="text-cream-500 hover:text-cream-200 p-1.5 rounded-md hover:bg-espresso-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                  aria-label="Close submission review"
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-6">
+              <StlViewer
+                fileId={selectedRequest.fileId}
+                fileName={selectedRequest.fileName}
+                className="h-72 sm:h-80 w-full"
+              />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3">
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Quantity</div>
+                  <div className="text-sm text-cream-200">{selectedRequest.quantity}</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Material</div>
+                  <div className="text-sm text-cream-200">{selectedRequest.material || "—"}</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Date needed</div>
+                  <div className="text-sm text-cream-200">{format(new Date(selectedRequest.dateNeeded), "MMM d, yyyy")}</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Submitted</div>
+                  <div className="text-sm text-cream-200">{format(new Date(selectedRequest.createdAt), "MMM d, yyyy")}</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Invoice</div>
+                  <div className="text-sm text-clay-300">{selectedRequest.invoiceNumber || "Pending"}</div>
+                </div>
+                <div className="col-span-1 sm:col-span-3">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Tracking</div>
+                  <div className="text-sm text-teal-300">{selectedRequest.trackingNumber || "—"}</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cream-500">PRINT SETTINGS</span>
+                  <span className="hairline flex-1" />
+                </div>
+                <PrintSettingsSummary settings={parseStoredSettings(selectedRequest.printSettings)} />
+              </div>
+
+              {selectedRequest.notes && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cream-500">NOTES</span>
+                    <span className="hairline flex-1" />
+                  </div>
+                  <p className="text-sm text-cream-200 whitespace-pre-wrap">{selectedRequest.notes}</p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-clay-500/15">
+                <a
+                  href={`/api/download/${selectedRequest.fileId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                >
+                  <Download className="h-3.5 w-3.5" aria-hidden="true" /> Download file
+                </a>
+                {selectedRequest.status === "PENDING" && isCancelable(selectedRequest.createdAt) && (
+                  <button
+                    onClick={() => handleCancel(selectedRequest.id)}
+                    disabled={cancelingId === selectedRequest.id}
+                    className="inline-flex items-center gap-2 border border-red-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-red-300 hover:bg-red-500/15 disabled:opacity-60 disabled:cursor-not-allowed transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                  >
+                    {cancelingId === selectedRequest.id ? "Canceling…" : "Cancel request"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }
