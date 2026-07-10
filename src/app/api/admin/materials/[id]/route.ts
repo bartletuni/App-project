@@ -34,6 +34,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    if (name.length > 100) {
+      return NextResponse.json({ error: "Name must not exceed 100 characters" }, { status: 400 });
+    }
+
+    if (description && description.length > 1000) {
+      return NextResponse.json({ error: "Description must not exceed 1000 characters" }, { status: 400 });
+    }
+
     let imageId: string | undefined;
 
     if (file && typeof file !== "string" && file.name) {
@@ -42,16 +50,25 @@ export async function PATCH(
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
+
       let mimeType = "application/octet-stream";
       const fileNameLower = file.name.toLowerCase();
-      if (fileNameLower.endsWith(".png")) {
+
+      const isPng = buffer.length > 8 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+      const isJpeg = buffer.length > 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+      const isWebp = buffer.length > 12 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+      const isGif = buffer.length > 6 && buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46;
+
+      if (fileNameLower.endsWith(".png") && isPng) {
         mimeType = "image/png";
-      } else if (fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg")) {
+      } else if ((fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".jpeg")) && isJpeg) {
         mimeType = "image/jpeg";
-      } else if (fileNameLower.endsWith(".webp")) {
+      } else if (fileNameLower.endsWith(".webp") && isWebp) {
         mimeType = "image/webp";
-      } else if (fileNameLower.endsWith(".gif")) {
+      } else if (fileNameLower.endsWith(".gif") && isGif) {
         mimeType = "image/gif";
+      } else {
+        return NextResponse.json({ error: "Invalid image format. Only PNG, JPEG, WEBP, and GIF are allowed." }, { status: 400 });
       }
       
       try {
