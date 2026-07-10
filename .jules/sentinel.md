@@ -71,3 +71,7 @@
 **Vulnerability:** Type Confusion / DoS via JSON parsing
 **Learning:** Next.js `req.json()` returns an `any` type (or structurally untyped data) which developers often immediately destructure without verifying the type. Malicious payloads sending objects or arrays instead of expected strings can cause properties like `.length` or `.trim()` to fail, leading to 500 errors or potentially unexpected bypasses of length restrictions.
 **Prevention:** Always add explicit `typeof === 'string'` checks for all expected string properties from JSON request bodies before calling string methods or checking their length.
+## 2024-06-25 - [MEDIUM] Fixed Insecure File Upload in Materials API
+**Vulnerability:** The `/api/admin/materials/route.ts` and `/api/admin/materials/[id]/route.ts` endpoints only checked file extensions for uploaded images and lacked any magic number validation or input length limits for `name` and `description`.
+**Learning:** Checking only file extensions allows attackers to upload arbitrary files (e.g., scripts or executables) by simply renaming them. Unbounded text inputs also expose the database to exhaustion.
+**Prevention:** Always validate both the file extension and the magic bytes (content signatures) for uploaded files. Additionally, enforce strict length limits on all user-provided strings.
