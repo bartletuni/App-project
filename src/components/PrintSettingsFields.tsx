@@ -6,7 +6,6 @@ import {
   CustomPrintSettings,
   INFILL_PATTERNS,
   SEAM_OPTIONS,
-  SUPPORT_OPTIONS,
 } from "@/lib/print-settings";
 
 export type PrintSettingsMode = "AUTO" | "CUSTOM";
@@ -31,7 +30,7 @@ const labelCls =
 /**
  * Auto vs. custom slicer settings for the submission forms. Custom mode
  * exposes the standard slicer knobs: layer height, walls, infill, temps,
- * speed, supports, adhesion, seam, ironing, and free-form extras.
+ * speed, adhesion, seam, ironing, and free-form extras.
  */
 export default function PrintSettingsFields({
   value,
@@ -257,24 +256,7 @@ export default function PrintSettingsFields({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label htmlFor={`${idPrefix}-supports`} className={labelCls}>
-                Supports
-              </label>
-              <select
-                id={`${idPrefix}-supports`}
-                value={custom.supports}
-                onChange={(e) => setCustom({ supports: e.target.value as any })}
-                className={field}
-              >
-                {SUPPORT_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor={`${idPrefix}-adhesion`} className={labelCls}>
                 Plate adhesion
@@ -366,7 +348,6 @@ export function PrintSettingsSummary({
     ["Infill", `${settings.infillPercent}% · ${settings.infillPattern}`],
     ["Nozzle / bed temp", `${settings.nozzleTemp}°C / ${settings.bedTemp}°C`],
     ["Print speed", `${settings.printSpeed} mm/s`],
-    ["Supports", settings.supports],
     ["Plate adhesion", settings.adhesion],
     ["Seam", settings.seam],
     ["Ironing", settings.ironing ? "Yes" : "No"],
