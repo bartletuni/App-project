@@ -13,19 +13,11 @@ export const INFILL_PATTERNS = [
   "Lightning",
 ] as const;
 
-export const SUPPORT_OPTIONS = [
-  "None",
-  "Touching buildplate",
-  "Everywhere",
-  "Tree",
-] as const;
-
 export const ADHESION_OPTIONS = ["None", "Skirt", "Brim", "Raft"] as const;
 
 export const SEAM_OPTIONS = ["Aligned", "Back", "Nearest", "Random"] as const;
 
 export type InfillPattern = (typeof INFILL_PATTERNS)[number];
-export type SupportOption = (typeof SUPPORT_OPTIONS)[number];
 export type AdhesionOption = (typeof ADHESION_OPTIONS)[number];
 export type SeamOption = (typeof SEAM_OPTIONS)[number];
 
@@ -40,7 +32,6 @@ export interface CustomPrintSettings {
   nozzleTemp: number; // °C
   bedTemp: number; // °C
   printSpeed: number; // mm/s
-  supports: SupportOption;
   adhesion: AdhesionOption;
   seam: SeamOption;
   ironing: boolean;
@@ -58,7 +49,6 @@ export const DEFAULT_CUSTOM_SETTINGS: CustomPrintSettings = {
   nozzleTemp: 210,
   bedTemp: 60,
   printSpeed: 60,
-  supports: "None",
   adhesion: "Skirt",
   seam: "Aligned",
   ironing: false,
@@ -116,11 +106,6 @@ export function validateCustomSettings(
   }
   out.infillPattern = obj.infillPattern as InfillPattern;
 
-  if (!SUPPORT_OPTIONS.includes(obj.supports as SupportOption)) {
-    return { error: "Invalid support option" };
-  }
-  out.supports = obj.supports as SupportOption;
-
   if (!ADHESION_OPTIONS.includes(obj.adhesion as AdhesionOption)) {
     return { error: "Invalid build plate adhesion option" };
   }
@@ -168,7 +153,6 @@ export function summarizeSettings(settings: CustomPrintSettings | null): string 
     `${settings.infillPercent}% ${settings.infillPattern.toLowerCase()} infill`,
     `${settings.nozzleTemp}°C/${settings.bedTemp}°C`,
     `${settings.printSpeed}mm/s`,
-    `supports: ${settings.supports.toLowerCase()}`,
     `adhesion: ${settings.adhesion.toLowerCase()}`,
   ];
   if (settings.ironing) parts.push("ironing");
