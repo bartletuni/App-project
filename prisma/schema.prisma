@@ -55,6 +55,7 @@ model PartRequest {
   quantity       Int         @default(1)
   material       String?
   notes          String?
+  printSettings  String? // JSON CustomPrintSettings; null = auto (shop chooses)
   dateNeeded     DateTime
   status         String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
   invoiceNumber  String?

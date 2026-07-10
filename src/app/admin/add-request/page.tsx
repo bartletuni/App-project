@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 import AppShell from "@/components/AppShell";
+import StlViewer from "@/components/StlViewer";
+import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
+import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 
 function AdminAddRequestContent() {
   const { data: session, status } = useSession();
@@ -23,6 +26,10 @@ function AdminAddRequestContent() {
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [isAddingPhone, setIsAddingPhone] = useState(false);
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
+  const [printSettings, setPrintSettings] = useState<PrintSettingsState>({
+    mode: "AUTO",
+    custom: { ...DEFAULT_CUSTOM_SETTINGS },
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -116,6 +123,17 @@ function AdminAddRequestContent() {
         return;
     }
 
+    let printSettingsJson = "";
+    if (printSettings.mode === "CUSTOM") {
+      const result = validateCustomSettings(printSettings.custom);
+      if ("error" in result) {
+        setError(`Print settings: ${result.error}`);
+        setLoading(false);
+        return;
+      }
+      printSettingsJson = JSON.stringify(result.settings);
+    }
+
     const formData = new FormData();
     formData.append("userId", selectedUserId);
     formData.append("file", file);
@@ -124,6 +142,7 @@ function AdminAddRequestContent() {
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
+    if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
       const res = await fetch("/api/requests", {
@@ -143,6 +162,7 @@ function AdminAddRequestContent() {
       setQuantity("1");
       setDateNeeded("");
       setNewPhoneNumber("");
+      setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
 
       // refresh phones list
       fetch(`/api/admin/users/${selectedUserId}/phone-numbers`)
@@ -226,6 +246,12 @@ function AdminAddRequestContent() {
                 className="block w-full text-sm text-cream-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-clay-500/12 file:text-clay-300 hover:file:bg-clay-500/15 transition-colors file:cursor-pointer cursor-pointer border border-espresso-600 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
                 required
               />
+              {file && (
+                <div className="mt-3">
+                  <div className="text-xs text-cream-500 mb-2">3D preview — verify the part before submitting</div>
+                  <StlViewer file={file} fileName={file.name} className="h-64 w-full" />
+                </div>
+              )}
             </div>
 
             <div>
@@ -319,6 +345,8 @@ function AdminAddRequestContent() {
                 )}
               </select>
             </div>
+
+            <PrintSettingsFields value={printSettings} onChange={setPrintSettings} idPrefix="admin-ps" />
 
             <div>
               <label htmlFor="notes" className="block text-sm font-semibold text-cream-300 mb-1.5">
