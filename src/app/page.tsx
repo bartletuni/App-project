@@ -202,7 +202,7 @@ export default function LandingPage() {
           <div className="flex items-end justify-between gap-6 mb-12">
             <div>
               <span className="eyebrow">CAPABILITIES</span>
-              <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we make</h2>
+              <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we do</h2>
             </div>
             <span className="hidden sm:block font-mono text-xs text-cream-600">[ 03 DISCIPLINES ]</span>
           </div>
