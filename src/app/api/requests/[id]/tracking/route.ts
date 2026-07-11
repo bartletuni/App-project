@@ -26,6 +26,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Invalid tracking number format" }, { status: 400 });
     }
 
+    if (typeof trackingNumber === 'string' && trackingNumber.length > 100) {
+      return NextResponse.json({ error: "Tracking number exceeds maximum length" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findUnique({
       where: { id },
       include: {
