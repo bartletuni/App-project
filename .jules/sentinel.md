@@ -75,3 +75,7 @@
 **Vulnerability:** The `/api/admin/materials/route.ts` and `/api/admin/materials/[id]/route.ts` endpoints only checked file extensions for uploaded images and lacked any magic number validation or input length limits for `name` and `description`.
 **Learning:** Checking only file extensions allows attackers to upload arbitrary files (e.g., scripts or executables) by simply renaming them. Unbounded text inputs also expose the database to exhaustion.
 **Prevention:** Always validate both the file extension and the magic bytes (content signatures) for uploaded files. Additionally, enforce strict length limits on all user-provided strings.
+## 2024-05-27 - [Input Length Missing Constraints]
+**Vulnerability:** Unconstrained length on API string inputs (`invoiceNumber`, `trackingNumber`) allowing for Denial of Service (DoS) via database exhaustion/memory exhaustion payload parsing.
+**Learning:** Database schemas relying implicitly on general types and string fields must enforce boundaries strictly at the API controller layer (or middleware) to protect the backend. Missing payload limits can bypass constraints intended to protect data processing.
+**Prevention:** Always enforce explicit maximum length limits on user-provided text inputs and string fields using constraints before persisting to database when handling API route submissions.

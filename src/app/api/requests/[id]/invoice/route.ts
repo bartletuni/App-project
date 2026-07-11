@@ -27,6 +27,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Invalid invoice number format" }, { status: 400 });
     }
 
+    if (typeof invoiceNumber === 'string' && invoiceNumber.length > 100) {
+      return NextResponse.json({ error: "Invoice number exceeds maximum length" }, { status: 400 });
+    }
+
     const partRequest = await prisma.partRequest.findUnique({
       where: { id },
       include: {
