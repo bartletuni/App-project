@@ -13,6 +13,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = () => {
     fetch("/api/admin/users")
@@ -40,6 +41,7 @@ export default function AdminUsersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user? This will also delete all of their requests and phone numbers. This cannot be undone.")) return;
+    setDeletingId(id);
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -51,6 +53,8 @@ export default function AdminUsersPage() {
     } catch (err) {
       console.error(err);
       alert("Error deleting user");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -121,16 +125,24 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
                           <button
                             onClick={() => openModal(user)}
-                            className="text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                            className="text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           >
                             Display Information
                           </button>
                           {!user.isAdmin && (
                               <button
                                 onClick={() => handleDelete(user.id)}
-                                className="text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                                disabled={deletingId === user.id}
+                                className="inline-flex items-center gap-1.5 text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                               >
-                                Delete
+                                {deletingId === user.id ? (
+                                  <>
+                                    <span className="h-3.5 w-3.5 rounded-full border-2 border-red-300/40 border-t-red-300 animate-spin" />
+                                    Deleting
+                                  </>
+                                ) : (
+                                  "Delete"
+                                )}
                               </button>
                           )}
                       </td>
@@ -203,7 +215,7 @@ export default function AdminUsersPage() {
             <div className="px-6 py-5 border-t border-espresso-600/50 bg-espresso-800/45 text-right">
                 <button
                   onClick={closeModal}
-                  className="bg-espresso-950 hover:bg-espresso-900 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors"
+                  className="bg-espresso-950 hover:bg-espresso-900 text-white font-semibold py-2 px-6 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                 >
                   Close
                 </button>

@@ -10,3 +10,6 @@
 ## 2026-07-05 - Added Async Feedback to Dashboard Action Buttons
 **Learning:** Users lack confidence when critical destructive actions (like canceling a request) have no immediate UI feedback, especially if the API call is slow.
 **Action:** Always wrap destructive or state-changing action buttons with an inline loading spinner and disable them during the fetch lifecycle to prevent duplicate submissions and provide immediate feedback.
+## 2024-07-13 - Async Feedback & Keyboard Focus in Admin Tables
+**Learning:** Destructive actions in data tables (like deleting a user) often lack immediate UI feedback and keyboard focus styles, leading to uncertain user interactions and poor accessibility for keyboard users.
+**Action:** Always wrap destructive actions with an inline loading spinner and disable them during the fetch lifecycle. Additionally, ensure all table action buttons include high-contrast `focus-visible` ring styles.
