@@ -85,8 +85,14 @@ export async function POST(req: NextRequest) {
       isBinaryStl = buffer.length === expectedSize;
     }
 
-    if (!isZip && !isAsciiStl && !isBinaryStl) {
-      return NextResponse.json({ error: "Only valid .STL and .ZIP files are allowed" }, { status: 400 });
+    const ext = file.name.toLowerCase().split('.').pop();
+    if (ext === "zip" && !isZip) {
+      return NextResponse.json({ error: "File content does not match its extension" }, { status: 400 });
+    } else if (ext === "stl" && !isAsciiStl && !isBinaryStl) {
+      return NextResponse.json({ error: "File content does not match its extension" }, { status: 400 });
+    } else if (ext !== "zip" && ext !== "stl") {
+      // Just in case it bypassed the first check (shouldn't happen)
+      return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
     }
 
     if (!dateNeededStr) {
