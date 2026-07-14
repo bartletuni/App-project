@@ -79,3 +79,8 @@
 **Vulnerability:** Unconstrained length on API string inputs (`invoiceNumber`, `trackingNumber`) allowing for Denial of Service (DoS) via database exhaustion/memory exhaustion payload parsing.
 **Learning:** Database schemas relying implicitly on general types and string fields must enforce boundaries strictly at the API controller layer (or middleware) to protect the backend. Missing payload limits can bypass constraints intended to protect data processing.
 **Prevention:** Always enforce explicit maximum length limits on user-provided text inputs and string fields using constraints before persisting to database when handling API route submissions.
+
+## 2026-06-25 - [HIGH] Fix Polyglot File Upload Vulnerability in API Route
+**Vulnerability:** The application was vulnerable to polyglot file uploads in `/api/requests`. The validation logic separated extension checking from magic bytes checking. This meant an attacker could upload an executable payload (with an `.stl` extension) disguised as a `.zip` file using valid ZIP magic bytes, completely bypassing the validation intent and potentially triggering unintended processing downstream.
+**Learning:** Checking the file extension and magic numbers independently is not sufficient if the system allows multiple distinct valid types. Attackers can combine properties of both to bypass the filter (polyglots).
+**Prevention:** Enforce a strict coupling between file extensions and their corresponding file signatures (magic bytes). If a file claims to be a `.zip` by extension, its magic bytes must exactly match a ZIP format. If it claims to be a `.stl`, its content must match STL standards.

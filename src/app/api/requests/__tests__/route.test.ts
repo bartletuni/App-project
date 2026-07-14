@@ -73,7 +73,7 @@ describe("POST /api/requests", () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toBe("Only valid .STL and .ZIP files are allowed");
+    expect(body.error).toBe("File content does not match its extension");
   });
 
   it("should reject files with invalid extension but valid magic numbers", async () => {
@@ -82,5 +82,21 @@ describe("POST /api/requests", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe("Only .STL and .ZIP files are allowed");
+  });
+
+  it("should reject polyglot files (e.g. ZIP extension with STL magic numbers)", async () => {
+    const req = createRequest("polyglot.zip", Buffer.from("solid test"));
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("File content does not match its extension");
+  });
+
+  it("should reject polyglot files (e.g. STL extension with ZIP magic numbers)", async () => {
+    const req = createRequest("polyglot.stl", Buffer.from([0x50, 0x4B, 0x03, 0x04]));
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("File content does not match its extension");
   });
 });
