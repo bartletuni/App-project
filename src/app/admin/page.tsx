@@ -29,6 +29,7 @@ function AdminDashboardContent() {
   const [savingInvoice, setSavingInvoice] = useState(false);
   const [trackingInput, setTrackingInput] = useState("");
   const [savingTracking, setSavingTracking] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchRequests = () => {
     fetch("/api/requests")
@@ -114,6 +115,7 @@ function AdminDashboardContent() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to completely delete this request? This cannot be undone.")) return;
+    setDeletingId(id);
     try {
       const res = await fetch(`/api/requests/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -125,6 +127,8 @@ function AdminDashboardContent() {
     } catch (err) {
       console.error(err);
       alert("Error deleting request");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -279,7 +283,7 @@ function AdminDashboardContent() {
                     {filterDate && (
                         <button 
                             onClick={() => setFilterDate("")}
-                            className="bg-espresso-600 hover:bg-espresso-500 text-cream-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
+                            className="bg-espresso-600 hover:bg-espresso-500 text-cream-500 px-3 py-2 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                         >
                             Clear
                         </button>
@@ -369,15 +373,23 @@ function AdminDashboardContent() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => openModal(req)}
-                            className="text-clay-300 bg-clay-500/12 px-3 py-1.5 rounded-lg text-xs font-bold"
+                            className="text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDelete(req.id)}
-                            className="text-red-300 bg-red-500/15 px-3 py-1.5 rounded-lg text-xs font-bold"
+                            disabled={deletingId === req.id}
+                            className="inline-flex items-center gap-1.5 text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                           >
-                            Delete
+                            {deletingId === req.id ? (
+                                <>
+                                  <span className="h-3 w-3 rounded-full border-2 border-red-300/40 border-t-red-300 animate-spin" />
+                                  Deleting
+                                </>
+                            ) : (
+                                "Delete"
+                            )}
                           </button>
                         </div>
                       </div>
@@ -465,16 +477,24 @@ function AdminDashboardContent() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
                             <button
                                 onClick={() => openModal(req)}
-                                className="inline-flex items-center gap-1.5 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                                className="inline-flex items-center gap-1.5 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 View Order
                             </button>
                             <button
                               onClick={() => handleDelete(req.id)}
-                              className="text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                              disabled={deletingId === req.id}
+                              className="inline-flex items-center gap-1.5 text-red-300 hover:text-red-200 bg-red-500/15 hover:bg-red-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                             >
-                              Delete
+                              {deletingId === req.id ? (
+                                  <>
+                                    <span className="h-3.5 w-3.5 rounded-full border-2 border-red-300/40 border-t-red-300 animate-spin" />
+                                    Deleting
+                                  </>
+                              ) : (
+                                  "Delete"
+                              )}
                             </button>
                         </td>
                       </tr>
