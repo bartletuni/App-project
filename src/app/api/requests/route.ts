@@ -108,6 +108,10 @@ export async function POST(req: NextRequest) {
     }
 
     const dateNeeded = new Date(dateNeededStr);
+    if (isNaN(dateNeeded.getTime())) {
+      return NextResponse.json({ error: "Invalid date provided" }, { status: 400 });
+    }
+
     const minDate = addDays(new Date(), 3);
 
     // reset time part for comparison
@@ -235,10 +239,17 @@ export async function GET(req: NextRequest) {
 
     let dateFilter: any = {};
     if (startDateParam && endDateParam) {
+      const gteDate = new Date(`${startDateParam}T00:00:00.000Z`);
+      const lteDate = new Date(`${endDateParam}T23:59:59.999Z`);
+
+      if (isNaN(gteDate.getTime()) || isNaN(lteDate.getTime())) {
+        return NextResponse.json({ error: "Invalid date format provided" }, { status: 400 });
+      }
+
       dateFilter = {
         createdAt: {
-          gte: new Date(`${startDateParam}T00:00:00.000Z`),
-          lte: new Date(`${endDateParam}T23:59:59.999Z`),
+          gte: gteDate,
+          lte: lteDate,
         }
       };
     }
