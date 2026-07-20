@@ -45,6 +45,10 @@ export async function PATCH(
     let imageId: string | undefined;
 
     if (file && typeof file !== "string" && file.name) {
+      if (file.name.length > 255) {
+        return NextResponse.json({ error: "File name exceeds maximum allowed length" }, { status: 400 });
+      }
+
       if (file.size > 5 * 1024 * 1024) {
         return NextResponse.json({ error: "Image size exceeds the 5MB limit" }, { status: 400 });
       }
