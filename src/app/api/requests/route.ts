@@ -56,12 +56,20 @@ export async function POST(req: NextRequest) {
        return NextResponse.json({ error: "Notes exceed maximum allowed length" }, { status: 400 });
     }
 
+    if (material && material.length > 100) {
+      return NextResponse.json({ error: "Material name exceeds maximum allowed length" }, { status: 400 });
+    }
+
     if (!file) {
       return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
     }
 
     if (typeof file === "string" || !file.name) {
       return NextResponse.json({ error: "Invalid file uploaded" }, { status: 400 });
+    }
+
+    if (file.name.length > 255) {
+      return NextResponse.json({ error: "File name exceeds maximum allowed length" }, { status: 400 });
     }
 
     if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
