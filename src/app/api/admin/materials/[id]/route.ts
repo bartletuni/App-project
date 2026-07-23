@@ -25,6 +25,17 @@ export async function PATCH(
     const hdtStr = formData.get("hdt") as string | null;
     const impactResistanceStr = formData.get("impactResistance") as string | null;
 
+    if (
+      (name !== null && typeof name !== "string") ||
+      (description !== null && typeof description !== "string") ||
+      (tensileStrengthStr !== null && typeof tensileStrengthStr !== "string") ||
+      (stiffnessStr !== null && typeof stiffnessStr !== "string") ||
+      (hdtStr !== null && typeof hdtStr !== "string") ||
+      (impactResistanceStr !== null && typeof impactResistanceStr !== "string")
+    ) {
+      return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
+    }
+
     const tensileStrength = (tensileStrengthStr && !isNaN(parseFloat(tensileStrengthStr))) ? parseFloat(tensileStrengthStr) : null;
     const stiffness = (stiffnessStr && !isNaN(parseFloat(stiffnessStr))) ? parseFloat(stiffnessStr) : null;
     const hdt = (hdtStr && !isNaN(parseFloat(hdtStr))) ? parseFloat(hdtStr) : null;
