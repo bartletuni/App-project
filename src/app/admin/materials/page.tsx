@@ -34,6 +34,7 @@ export default function AdminMaterialsPage() {
   const [editingHdt, setEditingHdt] = useState("");
   const [editingImpactResistance, setEditingImpactResistance] = useState("");
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchMaterials = () => {
     fetch("/api/admin/materials")
@@ -142,6 +143,7 @@ export default function AdminMaterialsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this material? Existing requests using this material will keep the name, but new requests won't be able to select it.")) return;
 
+    setDeletingId(id);
     try {
       const res = await fetch(`/api/admin/materials/${id}`, {
         method: "DELETE",
@@ -154,6 +156,8 @@ export default function AdminMaterialsPage() {
       }
     } catch (err) {
       alert("Error deleting material");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -538,11 +542,16 @@ export default function AdminMaterialsPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(m.id)}
-                          className="p-2 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                          disabled={deletingId === m.id}
+                          className="p-2 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 disabled:opacity-60 disabled:cursor-not-allowed"
                           title="Delete material"
                           aria-label="Delete material"
                         >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          {deletingId === m.id ? (
+                            <span className="h-4 w-4 rounded-full border-2 border-red-300/40 border-t-red-300 animate-spin block" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          )}
                         </button>
                       </div>
                     </>
