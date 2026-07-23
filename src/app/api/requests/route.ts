@@ -27,6 +27,18 @@ export async function POST(req: NextRequest) {
     const requestedUserId = formData.get("userId") as string | null;
     const printSettingsRaw = formData.get("printSettings") as string | null;
 
+    if (
+      (quantityStr !== null && typeof quantityStr !== "string") ||
+      (notes !== null && typeof notes !== "string") ||
+      (material !== null && typeof material !== "string") ||
+      (dateNeededStr !== null && typeof dateNeededStr !== "string") ||
+      (phoneNumberString !== null && typeof phoneNumberString !== "string") ||
+      (requestedUserId !== null && typeof requestedUserId !== "string") ||
+      (printSettingsRaw !== null && typeof printSettingsRaw !== "string")
+    ) {
+      return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
+    }
+
     // Optional custom slicer settings; absent/empty means AUTO.
     let customSettings: CustomPrintSettings | null = null;
     if (printSettingsRaw) {
