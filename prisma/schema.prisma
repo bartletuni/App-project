@@ -44,6 +44,47 @@ model Material {
   impactResistance Float?
 }
 
+/// A block of the public pricing sheet (e.g. "3D Printing", "Scanning").
+model PricingSection {
+  id        String   @id @default(cuid())
+  title     String
+  intro     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items PricingItem[]
+}
+
+/// A single priced line inside a pricing section.
+model PricingItem {
+  id        String         @id @default(cuid())
+  sectionId String
+  section   PricingSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  label     String
+  detail    String?
+  price     String?
+  note      String?
+  sortOrder Int            @default(0)
+}
+
+/// A row of the material selection matrix on the pricing sheet.
+model PricingMatrixRow {
+  id              String @id @default(cuid())
+  materialClass   String
+  gradeType       String
+  characteristics String
+  applications    String
+  sortOrder       Int    @default(0)
+}
+
+/// Free-form copy on the pricing sheet (hero text, contact details, notes).
+model PricingSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model PartRequest {
   id             String      @id @default(cuid())
   userId         String

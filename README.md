@@ -32,3 +32,17 @@ The first time you log in, an account is automatically created. To make yourself
 Start the development server using your package manager run scripts.
 
 Open `http://localhost:3000` in your browser.
+
+## Pricing Page
+
+The public service catalog lives at `/pricing` and is edited by admins at `/admin/pricing`
+(Console → Rates). Page copy, contact details, every service section and line item, and the
+material selection matrix are stored in the database and editable in the browser; "Defaults"
+restores the built-in TakomoCo catalog.
+
+Until an admin saves, the page serves the built-in catalog, so `/pricing` renders even on a
+fresh database. Saving requires the pricing tables, so run `npx prisma db push` after deploying
+this change.
+
+Per-gram material rates are intentionally not on this sheet — material cost is carried by each
+material record in the stock index (`/admin/materials`).

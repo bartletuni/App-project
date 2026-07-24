@@ -15,6 +15,7 @@ import {
   PlusSquare,
   FileBarChart,
   ClipboardList,
+  Tag,
   ArrowLeft,
   LucideIcon,
 } from "lucide-react";
@@ -29,6 +30,7 @@ interface NavItem {
 const userNav: NavItem[] = [
   { href: "/dashboard", label: "Desk", icon: LayoutDashboard, exact: true },
   { href: "/materials", label: "Stock", icon: Boxes },
+  { href: "/pricing", label: "Rates", icon: Tag },
   { href: "/contact", label: "Help", icon: LifeBuoy },
   { href: "/settings", label: "Account", icon: Settings },
 ];
@@ -37,6 +39,7 @@ const adminNav: NavItem[] = [
   { href: "/admin", label: "Orders", icon: ClipboardList, exact: true },
   { href: "/admin/users", label: "Clients", icon: Users },
   { href: "/admin/materials", label: "Stock", icon: Boxes },
+  { href: "/admin/pricing", label: "Rates", icon: Tag },
   { href: "/admin/add-request", label: "New", icon: PlusSquare },
   { href: "/admin/reports", label: "Reports", icon: FileBarChart },
 ];

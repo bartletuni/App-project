@@ -10,6 +10,7 @@ import Magnetic from "@/components/ui/Magnetic";
 const nav = [
   { href: "/", label: "Index" },
   { href: "/materials", label: "Materials" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 /**
