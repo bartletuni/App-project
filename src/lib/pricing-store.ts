@@ -18,16 +18,15 @@ export interface PricingContentResult extends PricingContent {
  */
 export async function getPricingContent(): Promise<PricingContentResult> {
   try {
-    const [sections, matrix, settingRows] = await Promise.all([
+    const [sections, settingRows] = await Promise.all([
       prisma.pricingSection.findMany({
         orderBy: { sortOrder: "asc" },
         include: { items: { orderBy: { sortOrder: "asc" } } },
       }),
-      prisma.pricingMatrixRow.findMany({ orderBy: { sortOrder: "asc" } }),
       prisma.pricingSetting.findMany(),
     ]);
 
-    if (sections.length === 0 && matrix.length === 0 && settingRows.length === 0) {
+    if (sections.length === 0 && settingRows.length === 0) {
       return { ...DEFAULT_PRICING, isDefault: true };
     }
 
@@ -51,12 +50,6 @@ export async function getPricingContent(): Promise<PricingContentResult> {
           note: i.note || "",
         })),
       })),
-      matrix: matrix.map((r) => ({
-        materialClass: r.materialClass,
-        gradeType: r.gradeType,
-        characteristics: r.characteristics,
-        applications: r.applications,
-      })),
     };
   } catch (error) {
     console.error("Failed to load pricing content, serving defaults:", error);
@@ -69,7 +62,6 @@ export async function savePricingContent(content: PricingContent): Promise<void>
   await prisma.$transaction(async (tx) => {
     await tx.pricingItem.deleteMany();
     await tx.pricingSection.deleteMany();
-    await tx.pricingMatrixRow.deleteMany();
     await tx.pricingSetting.deleteMany();
 
     for (let index = 0; index < content.sections.length; index++) {
@@ -88,19 +80,6 @@ export async function savePricingContent(content: PricingContent): Promise<void>
               sortOrder: itemIndex,
             })),
           },
-        },
-      });
-    }
-
-    for (let index = 0; index < content.matrix.length; index++) {
-      const row = content.matrix[index];
-      await tx.pricingMatrixRow.create({
-        data: {
-          materialClass: row.materialClass,
-          gradeType: row.gradeType,
-          characteristics: row.characteristics,
-          applications: row.applications,
-          sortOrder: index,
         },
       });
     }

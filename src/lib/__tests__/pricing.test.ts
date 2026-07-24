@@ -12,19 +12,11 @@ describe("sanitizePricingContent", () => {
   it("rejects payloads that are not shaped like a pricing sheet", () => {
     expect(sanitizePricingContent(null)).toBeNull();
     expect(sanitizePricingContent("nope")).toBeNull();
-    expect(sanitizePricingContent({ settings: {}, sections: [] })).toBeNull();
+    expect(sanitizePricingContent({ settings: {} })).toBeNull();
+    expect(sanitizePricingContent({ settings: {}, sections: {} })).toBeNull();
+    expect(sanitizePricingContent({ settings: {}, sections: [null] })).toBeNull();
     expect(
-      sanitizePricingContent({ settings: {}, sections: {}, matrix: [] })
-    ).toBeNull();
-    expect(
-      sanitizePricingContent({ settings: {}, sections: [null], matrix: [] })
-    ).toBeNull();
-    expect(
-      sanitizePricingContent({
-        settings: { heroTitle: 42 },
-        sections: [],
-        matrix: [],
-      })
+      sanitizePricingContent({ settings: { heroTitle: 42 }, sections: [] })
     ).toBeNull();
   });
 
@@ -34,7 +26,6 @@ describe("sanitizePricingContent", () => {
       sanitizePricingContent({
         settings: {},
         sections: new Array(PRICING_LIMITS.maxSections + 1).fill(section),
-        matrix: [],
       })
     ).toBeNull();
 
@@ -49,7 +40,6 @@ describe("sanitizePricingContent", () => {
             }),
           },
         ],
-        matrix: [],
       })
     ).toBeNull();
   });
@@ -63,7 +53,6 @@ describe("sanitizePricingContent", () => {
           items: [{ label: "  Small scan  ", price: "  $75.00  " }],
         },
       ],
-      matrix: [],
     });
 
     expect(result).not.toBeNull();
@@ -81,29 +70,17 @@ describe("sanitizePricingContent", () => {
     });
   });
 
-  it("drops untitled sections, unlabelled lines, and blank matrix rows", () => {
+  it("drops untitled sections and unlabelled lines", () => {
     const result = sanitizePricingContent({
       settings: {},
       sections: [
         { title: "   ", items: [{ label: "orphan" }] },
         { title: "Printing", items: [{ label: "" }, { label: "Setup fee" }] },
       ],
-      matrix: [
-        { materialClass: "", gradeType: "", characteristics: "", applications: "" },
-        { materialClass: "High Impact", gradeType: "PC" },
-      ],
     });
 
     expect(result).not.toBeNull();
     expect(result!.sections).toHaveLength(1);
     expect(result!.sections[0].items.map((i) => i.label)).toEqual(["Setup fee"]);
-    expect(result!.matrix).toEqual([
-      {
-        materialClass: "High Impact",
-        gradeType: "PC",
-        characteristics: "",
-        applications: "",
-      },
-    ]);
   });
 });

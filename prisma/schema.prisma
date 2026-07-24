@@ -68,16 +68,6 @@ model PricingItem {
   sortOrder Int            @default(0)
 }
 
-/// A row of the material selection matrix on the pricing sheet.
-model PricingMatrixRow {
-  id              String @id @default(cuid())
-  materialClass   String
-  gradeType       String
-  characteristics String
-  applications    String
-  sortOrder       Int    @default(0)
-}
-
 /// Free-form copy on the pricing sheet (hero text, contact details, notes).
 model PricingSetting {
   key       String   @id

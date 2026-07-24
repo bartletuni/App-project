@@ -20,7 +20,6 @@ import {
   PRICING_LIMITS,
   type PricingContent,
   type PricingItemData,
-  type PricingMatrixRowData,
   type PricingSectionData,
   type PricingSettingsData,
 } from "@/lib/pricing";
@@ -30,12 +29,6 @@ const inputClass =
 const labelClass = "block text-xs font-semibold text-cream-500 mb-1";
 
 const emptyItem: PricingItemData = { label: "", detail: "", price: "", note: "" };
-const emptyMatrixRow: PricingMatrixRowData = {
-  materialClass: "",
-  gradeType: "",
-  characteristics: "",
-  applications: "",
-};
 
 /** Move an entry within a list, returning a new array. */
 function move<T>(list: T[], index: number, delta: number): T[] {
@@ -58,8 +51,6 @@ const settingFields: {
   { key: "heroIntro", label: "Intro / capabilities summary", multiline: true },
   { key: "advantageLabel", label: "Callout label" },
   { key: "advantageBody", label: "Callout body", multiline: true },
-  { key: "matrixTitle", label: "Material matrix title" },
-  { key: "matrixIntro", label: "Material matrix intro", multiline: true },
   { key: "contactPhone", label: "Phone" },
   { key: "contactEmail", label: "Email" },
   { key: "contactWeb", label: "Web" },
@@ -79,11 +70,7 @@ export default function AdminPricingPage() {
 
   const applyResponse = useCallback((data: any) => {
     if (data && Array.isArray(data.sections) && data.settings) {
-      setContent({
-        settings: data.settings,
-        sections: data.sections,
-        matrix: Array.isArray(data.matrix) ? data.matrix : [],
-      });
+      setContent({ settings: data.settings, sections: data.sections });
       setIsDefault(Boolean(data.isDefault));
     }
   }, []);
@@ -132,12 +119,6 @@ export default function AdminPricingPage() {
             }
           : s
       ),
-    }));
-
-  const updateMatrixRow = (index: number, patch: Partial<PricingMatrixRowData>) =>
-    setContent((c) => ({
-      ...c,
-      matrix: c.matrix.map((r, i) => (i === index ? { ...r, ...patch } : r)),
     }));
 
   const handleSave = async () => {
@@ -295,7 +276,7 @@ export default function AdminPricingPage() {
         </section>
 
         {/* Service sections */}
-        <section className="mb-6">
+        <section className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-cream-200">Service sections</h2>
             <button
@@ -545,114 +526,6 @@ export default function AdminPricingPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Material matrix */}
-        <section className="bg-espresso-800/72 backdrop-blur-md p-5 sm:p-6 rounded-2xl shadow-sm border border-clay-500/18 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-cream-200">Material selection matrix</h2>
-            <button
-              onClick={() =>
-                setContent((c) =>
-                  c.matrix.length >= PRICING_LIMITS.maxMatrixRows
-                    ? c
-                    : { ...c, matrix: [...c.matrix, { ...emptyMatrixRow }] }
-                )
-              }
-              className="inline-flex items-center gap-1.5 text-clay-300 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" /> Add row
-            </button>
-          </div>
-
-          <ul className="flex flex-col gap-3">
-            {content.matrix.map((row, index) => (
-              <li key={index} className="rounded-xl border border-espresso-600 bg-espresso-900/40 p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor={`matrix-class-${index}`} className={labelClass}>
-                      Material class
-                    </label>
-                    <input
-                      id={`matrix-class-${index}`}
-                      type="text"
-                      maxLength={PRICING_LIMITS.matrixCell}
-                      value={row.materialClass}
-                      onChange={(e) => updateMatrixRow(index, { materialClass: e.target.value })}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor={`matrix-grade-${index}`} className={labelClass}>
-                      Grade / type
-                    </label>
-                    <input
-                      id={`matrix-grade-${index}`}
-                      type="text"
-                      maxLength={PRICING_LIMITS.matrixCell}
-                      value={row.gradeType}
-                      onChange={(e) => updateMatrixRow(index, { gradeType: e.target.value })}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor={`matrix-characteristics-${index}`} className={labelClass}>
-                      Primary characteristics
-                    </label>
-                    <input
-                      id={`matrix-characteristics-${index}`}
-                      type="text"
-                      maxLength={PRICING_LIMITS.matrixCell}
-                      value={row.characteristics}
-                      onChange={(e) => updateMatrixRow(index, { characteristics: e.target.value })}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor={`matrix-applications-${index}`} className={labelClass}>
-                      Key applications
-                    </label>
-                    <input
-                      id={`matrix-applications-${index}`}
-                      type="text"
-                      maxLength={PRICING_LIMITS.matrixCell}
-                      value={row.applications}
-                      onChange={(e) => updateMatrixRow(index, { applications: e.target.value })}
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-3 flex justify-end gap-1">
-                  <button
-                    onClick={() => setContent((c) => ({ ...c, matrix: move(c.matrix, index, -1) }))}
-                    disabled={index === 0}
-                    className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    aria-label={`Move row ${row.materialClass || index + 1} up`}
-                  >
-                    <ArrowUp className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                  <button
-                    onClick={() => setContent((c) => ({ ...c, matrix: move(c.matrix, index, 1) }))}
-                    disabled={index === content.matrix.length - 1}
-                    className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    aria-label={`Move row ${row.materialClass || index + 1} down`}
-                  >
-                    <ArrowDown className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setContent((c) => ({ ...c, matrix: c.matrix.filter((_, i) => i !== index) }))
-                    }
-                    className="p-1.5 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all"
-                    aria-label={`Delete row ${row.materialClass || index + 1}`}
-                  >
-                    <Trash2 className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
         </section>
 
         <div className="flex flex-col sm:flex-row gap-3">

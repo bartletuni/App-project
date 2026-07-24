@@ -13,14 +13,6 @@ export interface PricingSectionData {
   items: PricingItemData[];
 }
 
-/** One row of the material selection matrix. */
-export interface PricingMatrixRowData {
-  materialClass: string;
-  gradeType: string;
-  characteristics: string;
-  applications: string;
-}
-
 /** Free-form copy blocks, keyed so the admin editor can address them. */
 export interface PricingSettingsData {
   heroEyebrow: string;
@@ -29,8 +21,6 @@ export interface PricingSettingsData {
   heroIntro: string;
   advantageLabel: string;
   advantageBody: string;
-  matrixTitle: string;
-  matrixIntro: string;
   contactPhone: string;
   contactEmail: string;
   contactWeb: string;
@@ -40,21 +30,18 @@ export interface PricingSettingsData {
 export interface PricingContent {
   settings: PricingSettingsData;
   sections: PricingSectionData[];
-  matrix: PricingMatrixRowData[];
 }
 
 /** Guard rails so a bad (or hostile) payload can't blow up the page or the DB. */
 export const PRICING_LIMITS = {
   maxSections: 20,
   maxItemsPerSection: 40,
-  maxMatrixRows: 40,
   title: 120,
   intro: 2000,
   label: 200,
   detail: 600,
   price: 120,
   note: 300,
-  matrixCell: 400,
   setting: 2000,
 } as const;
 
@@ -65,8 +52,6 @@ export const SETTING_KEYS: (keyof PricingSettingsData)[] = [
   "heroIntro",
   "advantageLabel",
   "advantageBody",
-  "matrixTitle",
-  "matrixIntro",
   "contactPhone",
   "contactEmail",
   "contactWeb",
@@ -90,9 +75,6 @@ export const DEFAULT_PRICING: PricingContent = {
     advantageLabel: "KEY ADVANTAGE",
     advantageBody:
       "24-Hour Express Turnaround available for urgent local engineering deadlines.",
-    matrixTitle: "Material selection matrix",
-    matrixIntro:
-      "Pick the class that matches the load case. Per-gram rates are listed with each material in the stock index.",
     contactPhone: "(385) 695-4178",
     contactEmail: "takomocompany@gmail.com",
     contactWeb: "takomo.vercel.app",
@@ -226,47 +208,6 @@ export const DEFAULT_PRICING: PricingContent = {
       ],
     },
   ],
-  matrix: [
-    {
-      materialClass: "High-Temp / Chemical",
-      gradeType: "PPS-CF / PPS-GF",
-      characteristics:
-        "High heat deflection temp, UL94 V-0, solvent immunity",
-      applications:
-        "Engine/chamber adjacent parts, fluid manifolds, sensor housings",
-    },
-    {
-      materialClass: "Structural Composite",
-      gradeType: "PA12-CF / PA6-CF",
-      characteristics:
-        "High stiffness-to-weight, impact strength, fatigue resistance",
-      applications:
-        "Structural brackets, drone mounts, high-cycle mechanical gears",
-    },
-    {
-      materialClass: "High Impact",
-      gradeType: "Polycarbonate (PC)",
-      characteristics:
-        "Exceptional toughness, clarity/opacity, dimensional stability",
-      applications:
-        "Protective guards, housings, enclosures, high-cycle covers",
-    },
-    {
-      materialClass: "UV & Weather",
-      gradeType: "ASA",
-      characteristics: "High UV stability, thermal endurance, weatherproofing",
-      applications:
-        "Outdoor equipment, electrical cabinet vent covers, housings",
-    },
-    {
-      materialClass: "Flexible / Utility",
-      gradeType: "TPU / PETG / PLA",
-      characteristics:
-        "Elastomeric compliance (TPU), chemical resistance (PETG), rapid verification (PLA)",
-      applications:
-        "Gaskets, seals, light-duty fluid contact, rapid concept checks",
-    },
-  ],
 };
 
 function str(value: unknown, max: number): string {
@@ -282,14 +223,9 @@ export function sanitizePricingContent(input: unknown): PricingContent | null {
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
 
-  if (!Array.isArray(raw.sections) || !Array.isArray(raw.matrix)) return null;
+  if (!Array.isArray(raw.sections)) return null;
   if (!raw.settings || typeof raw.settings !== "object") return null;
-  if (
-    raw.sections.length > PRICING_LIMITS.maxSections ||
-    raw.matrix.length > PRICING_LIMITS.maxMatrixRows
-  ) {
-    return null;
-  }
+  if (raw.sections.length > PRICING_LIMITS.maxSections) return null;
 
   const rawSettings = raw.settings as Record<string, unknown>;
   const settings = { ...DEFAULT_PRICING.settings };
@@ -331,17 +267,5 @@ export function sanitizePricingContent(input: unknown): PricingContent | null {
     });
   }
 
-  const matrix: PricingMatrixRowData[] = [];
-  for (const rawRow of raw.matrix) {
-    if (!rawRow || typeof rawRow !== "object") return null;
-    const row = rawRow as Record<string, unknown>;
-    const materialClass = str(row.materialClass, PRICING_LIMITS.matrixCell);
-    const gradeType = str(row.gradeType, PRICING_LIMITS.matrixCell);
-    const characteristics = str(row.characteristics, PRICING_LIMITS.matrixCell);
-    const applications = str(row.applications, PRICING_LIMITS.matrixCell);
-    if (!materialClass && !gradeType && !characteristics && !applications) continue;
-    matrix.push({ materialClass, gradeType, characteristics, applications });
-  }
-
-  return { settings, sections, matrix };
+  return { settings, sections };
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Mail, Phone, Globe, Zap } from "lucide-react";
+import { ArrowRight, Mail, Phone, Globe, Zap } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
 import Reveal from "@/components/ui/Reveal";
@@ -37,7 +37,7 @@ export default function PricingPage() {
     );
   }
 
-  const { settings, sections, matrix } = content;
+  const { settings, sections } = content;
   const coordinates = [
     { icon: Phone, k: "VOICE", v: settings.contactPhone, href: `tel:${settings.contactPhone.replace(/[^\d+]/g, "")}` },
     { icon: Mail, k: "EMAIL", v: settings.contactEmail, href: `mailto:${settings.contactEmail}` },
@@ -173,80 +173,6 @@ export default function PricingPage() {
             </Reveal>
           ))}
         </div>
-
-        {/* Material selection matrix */}
-        {matrix.length > 0 && (
-          <Reveal className="mt-16">
-            <div className="mb-6">
-              <span className="eyebrow">SELECTION GUIDE</span>
-              <h2 className="mt-3 font-display text-3xl sm:text-4xl text-cream-100">
-                {settings.matrixTitle}
-              </h2>
-              {settings.matrixIntro && (
-                <p className="mt-3 max-w-3xl text-cream-400 leading-relaxed">
-                  {settings.matrixIntro}
-                </p>
-              )}
-            </div>
-
-            <Panel className="p-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[46rem] text-left">
-                  <thead>
-                    <tr className="border-b border-clay-500/20">
-                      {["Material class", "Grade / type", "Primary characteristics", "Key applications"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            scope="col"
-                            className="px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500"
-                          >
-                            {h}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matrix.map((row, i) => (
-                      <tr
-                        key={`${row.materialClass}-${i}`}
-                        className={i % 2 ? "bg-espresso-800/30" : ""}
-                      >
-                        <th
-                          scope="row"
-                          className="px-5 py-4 align-top text-left font-mono text-[11px] uppercase tracking-[0.12em] text-clay-300"
-                        >
-                          {row.materialClass}
-                        </th>
-                        <td className="px-5 py-4 align-top text-sm font-medium text-cream-100">
-                          {row.gradeType}
-                        </td>
-                        <td className="px-5 py-4 align-top text-sm text-cream-400">
-                          {row.characteristics}
-                        </td>
-                        <td className="px-5 py-4 align-top text-sm text-cream-400">
-                          {row.applications}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Panel>
-
-            <Link
-              href="/materials"
-              className="group mt-4 inline-flex items-center gap-2 border border-clay-500/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-cream-200 hover:bg-clay-500/15 hover:border-clay-400 transition-colors"
-            >
-              See the full material index
-              <ArrowUpRight
-                className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-          </Reveal>
-        )}
 
         {/* Close */}
         <Reveal className="mt-16">
