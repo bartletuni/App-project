@@ -15,12 +15,18 @@ export default function AdminUsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchUsers = () => {
-    fetch("/api/admin/users")
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchUsers = (page: number) => {
+    setLoading(true);
+    fetch(`/api/admin/users?page=${page}&limit=20`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-           setUsers(data);
+        if (data && Array.isArray(data.users)) {
+           setUsers(data.users);
+           setCurrentPage(data.page || 1);
+           setTotalPages(data.totalPages || 1);
         }
         setLoading(false);
       })
@@ -35,9 +41,9 @@ export default function AdminUsersPage() {
           router.push("/dashboard");
           return;
       }
-      fetchUsers();
+      fetchUsers(currentPage);
     }
-  }, [status, router, session]);
+  }, [status, router, session, currentPage]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user? This will also delete all of their requests and phone numbers. This cannot be undone.")) return;
@@ -45,7 +51,7 @@ export default function AdminUsersPage() {
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
       if (res.ok) {
-        fetchUsers();
+        fetchUsers(currentPage);
       } else {
         const data = await res.json();
         alert(data.error || "Failed to delete user");
@@ -150,6 +156,27 @@ export default function AdminUsersPage() {
                   ))}
                 </tbody>
               </table>
+              {totalPages > 1 && (
+                <div className="px-6 py-4 flex items-center justify-between border-t border-espresso-700/50">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1 || loading}
+                    className="text-sm font-medium text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-cream-400">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages || loading}
+                    className="text-sm font-medium text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
