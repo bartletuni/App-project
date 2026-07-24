@@ -94,7 +94,13 @@ export default function MaterialsPage() {
           <Panel className="p-12 sm:p-16 text-center max-w-2xl mx-auto">
             <Beaker className="w-12 h-12 text-clay-400 mx-auto mb-4" aria-hidden="true" />
             <h3 className="font-display text-2xl text-cream-100 mb-2">Index is empty</h3>
-            <p className="text-cream-500">Check back as we expand the material library.</p>
+            <p className="text-cream-500 mb-6">Check back as we expand the material library.</p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+            >
+              Return Home
+            </Link>
           </Panel>
         ) : (
           <motion.div
