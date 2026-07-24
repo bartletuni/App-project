@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.name = user.name;
-        token.isAdmin = (user as any).isAdmin;
+        token.isAdmin = user.isAdmin;
       }
       if (trigger === "update" && session?.user?.name) {
         token.name = session.user.name;
@@ -60,9 +60,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id as string;
+        session.user.id = token.id as string;
         session.user.name = token.name as string;
-        (session.user as any).isAdmin = token.isAdmin as boolean;
+        session.user.isAdmin = token.isAdmin as boolean;
       }
       return session;
     },
