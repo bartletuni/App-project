@@ -13,11 +13,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
 
-    const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-          id: true,
-          name: true,
+    const { searchParams } = new URL(req.url);
+    const pageParam = searchParams.get('page');
+    const limitParam = searchParams.get('limit');
+
+    let page = parseInt(pageParam || '1', 10);
+    if (isNaN(page) || page < 1) page = 1;
+
+    let limit = parseInt(limitParam || '20', 10);
+    if (isNaN(limit) || limit < 1) limit = 20;
+    if (limit > 100) limit = 100; // Enforce maximum limit
+
+    const skip = (page - 1) * limit;
+
+    const [users, totalCount] = await Promise.all([
+      prisma.user.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+            id: true,
+            name: true,
           email: true,
           phoneNumbers: {
             select: {
@@ -28,9 +44,11 @@ export async function GET(req: NextRequest) {
           isAdmin: true,
           shippingAddress: true,
           billingAddress: true,
-          createdAt: true,
-      }
-    });
+            createdAt: true,
+        }
+      }),
+      prisma.user.count()
+    ]);
 
     // Map to include the first phone number as a top-level property
     const formattedUsers = users.map((user: any) => ({
@@ -39,7 +57,15 @@ export async function GET(req: NextRequest) {
       phoneNumbers: undefined // remove the array
     }));
 
-    return NextResponse.json(formattedUsers);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return NextResponse.json({
+      users: formattedUsers,
+      totalCount,
+      page,
+      limit,
+      totalPages
+    });
 
   } catch (error) {
     console.error("Failed to fetch users:", error);

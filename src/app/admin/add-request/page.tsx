@@ -46,13 +46,13 @@ function AdminAddRequestContent() {
       }
 
       // Fetch users
-      fetch("/api/admin/users")
+      fetch("/api/admin/users?limit=100")
         .then(res => res.json())
         .then(data => {
-            if (Array.isArray(data)) {
-                setUsers(data);
-                if (data.length > 0) {
-                    setSelectedUserId(data[0].id);
+            if (data && Array.isArray(data.users)) {
+                setUsers(data.users);
+                if (data.users.length > 0) {
+                    setSelectedUserId(data.users[0].id);
                 }
             }
         });
