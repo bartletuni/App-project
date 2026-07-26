@@ -12,3 +12,8 @@
 **Vulnerability:** Denial of Service (DoS) via memory exhaustion due to unbounded database queries fetching all users.
 **Learning:** Returning all records from a database table without limits or pagination can easily be exploited by attackers to crash the server or degrade performance as the dataset grows.
 **Prevention:** Always implement pagination on collection endpoints, and enforce a hard upper limit (e.g., `Math.min(parsedLimit, 100)`) on the number of records returned per request.
+
+## 2026-07-25 - Fix Unbounded Queries DoS Vulnerability on /api/requests
+**Vulnerability:** The API route for fetching part requests (`/api/requests`) was querying the database using `findMany` without any constraints or pagination logic, causing the server to fetch and return all records in a single array.
+**Learning:** Returning all records from an unbounded table query introduces a Denial of Service (DoS) vulnerability via memory and CPU exhaustion. As the `partRequest` table grows over time, this endpoint could crash the application or database.
+**Prevention:** Always implement pagination logic and cap incoming limit parameters against a hard upper bound (e.g., `take: Math.min(parsedLimit, 100)`) on all endpoints that retrieve collections from the database.

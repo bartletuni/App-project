@@ -257,6 +257,15 @@ export async function GET(req: NextRequest) {
     const startDateParam = req.nextUrl.searchParams.get("startDate");
     const endDateParam = req.nextUrl.searchParams.get("endDate");
 
+    const limitParam = req.nextUrl.searchParams.get("limit");
+    let limit = 50; // Default limit
+    if (limitParam) {
+      const parsedLimit = parseInt(limitParam, 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        limit = Math.min(parsedLimit, 100);
+      }
+    }
+
     let dateFilter: any = {};
     if (startDateParam && endDateParam) {
       const gteDate = new Date(`${startDateParam}T00:00:00.000Z`);
@@ -282,6 +291,7 @@ export async function GET(req: NextRequest) {
         where: {
           ...dateFilter,
         },
+        take: limit,
         include: {
           user: {
             select: {
@@ -301,6 +311,7 @@ export async function GET(req: NextRequest) {
           userId,
           ...dateFilter,
         },
+        take: limit,
         include: {
           user: {
             select: {
