@@ -17,3 +17,8 @@
 **Vulnerability:** The API route for fetching part requests (`/api/requests`) was querying the database using `findMany` without any constraints or pagination logic, causing the server to fetch and return all records in a single array.
 **Learning:** Returning all records from an unbounded table query introduces a Denial of Service (DoS) vulnerability via memory and CPU exhaustion. As the `partRequest` table grows over time, this endpoint could crash the application or database.
 **Prevention:** Always implement pagination logic and cap incoming limit parameters against a hard upper bound (e.g., `take: Math.min(parsedLimit, 100)`) on all endpoints that retrieve collections from the database.
+
+## 2024-05-27 - Case-sensitive Email Vulnerability
+**Vulnerability:** The authentication and registration flows treated emails as case-sensitive, meaning `Test@example.com` and `test@example.com` were treated as distinct accounts.
+**Learning:** This can lead to account duplication or confusion vulnerabilities, where users might accidentally create multiple accounts with the same email in different cases, or attackers might try to hijack/confuse an existing account by registering a similarly-cased email.
+**Prevention:** Always normalize (lowercase) email addresses during registration and login flows.

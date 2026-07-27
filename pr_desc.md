@@ -1,5 +1,0 @@
-🚨 Severity: HIGH
-💡 Vulnerability: Type Confusion DoS. The `formData.get()` method in Next.js API routes returns a `File` object when a file is uploaded. However, the code blindly cast extracted values as `string | null`. If an attacker sent a file for a field expecting a string (like `notes` or `material`), checking its `.length` would evaluate to `undefined` instead of a number. This bypasses length constraints and can crash database queries that expect string data.
-🎯 Impact: This vulnerability allows malicious users to bypass string length restrictions, potentially inserting massive `File` objects into text fields, which leads to memory exhaustion and Denial of Service (DoS).
-🔧 Fix: Explicitly checked that values pulled from `FormData` intended for text fields are actually of type `string` before processing. If not, a `400 Bad Request` is returned.
-✅ Verification: Review the changes in `src/app/api/requests/route.ts` and `src/app/api/admin/materials/[id]/route.ts`. Check that inputs like `notes`, `name`, and `description` are validated with `typeof field !== "string"`. Tests passed via `npx jest` and `pnpm lint`.
