@@ -7,15 +7,18 @@ import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/e
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, password, shippingAddress, billingAddress, phone } = body;
+    const { name, email: rawEmail, password, shippingAddress, billingAddress, phone } = body;
 
-    if (!name || !email || !password || !shippingAddress || !billingAddress || !phone) {
+    if (!name || !rawEmail || !password || !shippingAddress || !billingAddress || !phone) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
-    if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string' || typeof shippingAddress !== 'string' || typeof billingAddress !== 'string' || typeof phone !== 'string') {
+    if (typeof name !== 'string' || typeof rawEmail !== 'string' || typeof password !== 'string' || typeof shippingAddress !== 'string' || typeof billingAddress !== 'string' || typeof phone !== 'string') {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
+
+    // Normalize email to prevent account duplication/confusion vulnerabilities
+    const email = rawEmail.toLowerCase();
 
     // Input length validation to prevent DoS attacks
     if (name.length > 100 || email.length > 100 || password.length > 100) {
