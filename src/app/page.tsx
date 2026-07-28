@@ -128,22 +128,33 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal direction="up" delay={0.36}>
-                <div className="mt-10 flex flex-col sm:flex-row gap-3">
-                  <Magnetic strength={0.4}>
-                    <Link
-                      href="/login"
-                      className="group inline-flex items-center justify-center gap-2 bg-clay-600 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow"
-                    >
-                      Start a build
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                    </Link>
-                  </Magnetic>
+                <div className="mt-10 flex flex-col items-stretch sm:items-start gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Magnetic strength={0.4}>
+                      <Link
+                        href="/login"
+                        className="group inline-flex items-center justify-center gap-2 bg-clay-600 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow"
+                      >
+                        Start a build
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                      </Link>
+                    </Magnetic>
+                    <Magnetic strength={0.3}>
+                      <Link
+                        href="/materials"
+                        className="group inline-flex items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
+                      >
+                        Material index
+                        <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                      </Link>
+                    </Magnetic>
+                  </div>
                   <Magnetic strength={0.3}>
                     <Link
-                      href="/materials"
+                      href="/pricing"
                       className="group inline-flex items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
                     >
-                      Material index
+                      View pricing
                       <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                     </Link>
                   </Magnetic>
