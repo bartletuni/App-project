@@ -22,3 +22,8 @@
 **Vulnerability:** The authentication and registration flows treated emails as case-sensitive, meaning `Test@example.com` and `test@example.com` were treated as distinct accounts.
 **Learning:** This can lead to account duplication or confusion vulnerabilities, where users might accidentally create multiple accounts with the same email in different cases, or attackers might try to hijack/confuse an existing account by registering a similarly-cased email.
 **Prevention:** Always normalize (lowercase) email addresses during registration and login flows.
+
+## 2024-05-27 - Missing Authentication on Admin Endpoint
+**Vulnerability:** The `GET` handler in `/api/admin/materials/route.ts` lacked an authentication/authorization check, exposing administrative data to unauthenticated users.
+**Learning:** Even if `POST`, `PATCH`, and `DELETE` handlers in an admin route are properly secured, the `GET` handler might be overlooked, leading to an Information Disclosure vulnerability.
+**Prevention:** Always verify that *every* exported HTTP method handler in administrative or sensitive routes implements the required `getServerSession` and authorization checks before executing any database operations or returning data.
