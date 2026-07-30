@@ -165,10 +165,16 @@ export default function AdminMaterialsPage() {
     return <div className="min-h-screen bg-transparent flex items-center justify-center text-clay-300 font-semibold animate-pulse">Loading materials...</div>;
   }
 
-  const maxTensile = Math.max(...materials.map((m) => m.tensileStrength || 0), 0);
-  const maxStiffness = Math.max(...materials.map((m) => m.stiffness || 0), 0);
-  const maxHdt = Math.max(...materials.map((m) => m.hdt || 0), 0);
-  const maxImpact = Math.max(...materials.map((m) => m.impactResistance || 0), 0);
+  const { maxTensile, maxStiffness, maxHdt, maxImpact } = materials.reduce(
+    (acc, m) => {
+      if ((m.tensileStrength || 0) > acc.maxTensile) acc.maxTensile = m.tensileStrength || 0;
+      if ((m.stiffness || 0) > acc.maxStiffness) acc.maxStiffness = m.stiffness || 0;
+      if ((m.hdt || 0) > acc.maxHdt) acc.maxHdt = m.hdt || 0;
+      if ((m.impactResistance || 0) > acc.maxImpact) acc.maxImpact = m.impactResistance || 0;
+      return acc;
+    },
+    { maxTensile: 0, maxStiffness: 0, maxHdt: 0, maxImpact: 0 }
+  );
 
   return (
     <AppShell variant="admin">
