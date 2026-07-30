@@ -30,6 +30,7 @@ function AdminDashboardContent() {
   const [trackingInput, setTrackingInput] = useState("");
   const [savingTracking, setSavingTracking] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   const fetchRequests = () => {
     fetch("/api/requests")
@@ -97,6 +98,7 @@ function AdminDashboardContent() {
 
   const handleCancel = async (id: string) => {
     if (!confirm("Are you sure you want to cancel this request? Admins bypass the 30-minute limit.")) return;
+    setCancelingId(id);
     try {
       const res = await fetch(`/api/requests/${id}/cancel`, { method: "POST" });
       if (res.ok) {
@@ -110,6 +112,8 @@ function AdminDashboardContent() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -653,9 +657,17 @@ function AdminDashboardContent() {
                    {selectedRequest.status !== 'CANCELLED' && (
                        <button
                          onClick={() => handleCancel(selectedRequest.id)}
-                         className="text-red-300 bg-red-500/18 hover:bg-red-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
+                         disabled={cancelingId === selectedRequest.id}
+                         className="inline-flex items-center gap-1.5 text-red-300 bg-red-500/18 hover:bg-red-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                        >
-                         Cancel Request
+                         {cancelingId === selectedRequest.id ? (
+                           <>
+                             <span className="h-3.5 w-3.5 rounded-full border-2 border-red-300/40 border-t-red-300 animate-spin" />
+                             Canceling
+                           </>
+                         ) : (
+                           "Cancel Request"
+                         )}
                        </button>
                    )}
                </div>
