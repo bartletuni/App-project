@@ -27,3 +27,8 @@
 **Vulnerability:** The `GET` handler in `/api/admin/materials/route.ts` lacked an authentication/authorization check, exposing administrative data to unauthenticated users.
 **Learning:** Even if `POST`, `PATCH`, and `DELETE` handlers in an admin route are properly secured, the `GET` handler might be overlooked, leading to an Information Disclosure vulnerability.
 **Prevention:** Always verify that *every* exported HTTP method handler in administrative or sensitive routes implements the required `getServerSession` and authorization checks before executing any database operations or returning data.
+
+## 2026-07-28 - Fix Client-Side DoS via Math.max with Large Arrays
+**Vulnerability:** Calculating the maximum value of potentially large arrays using the spread operator (`Math.max(...array)`) risks exceeding the maximum call stack size, leading to a client-side Denial of Service (DoS) or crash.
+**Learning:** Using `Math.max(...materials.map(m => m.tensileStrength))` on large datasets like the `materials` array causes the browser or Node.js runtime to expand the array into individual arguments, which can overflow the stack limits.
+**Prevention:** Always use safe, single-pass iteration techniques like `.reduce()` or explicit loops instead of the spread operator for operations like minimum/maximum calculation on unbounded or potentially large arrays.

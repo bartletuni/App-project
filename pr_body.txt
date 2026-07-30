@@ -1,0 +1,5 @@
+🚨 Severity: HIGH
+💡 Vulnerability: Client-side Denial of Service (DoS) via `Math.max()` with array spread operator on large arrays.
+🎯 Impact: If the number of materials is large, expanding the array using the spread operator causes the engine to exceed its maximum call stack size, resulting in a browser crash / unhandled exception.
+🔧 Fix: Replaced `Math.max(...materials.map(m => m.val))` with a single `materials.reduce(...)` loop.
+✅ Verification: Ensure the app builds (`pnpm build`), lints successfully (`pnpm lint`), and tests pass (`npx jest`). Run the frontend and verify the stock control table loads correctly.
