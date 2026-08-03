@@ -1,5 +1,3 @@
-🚨 Severity: HIGH
-💡 Vulnerability: Client-side Denial of Service (DoS) via `Math.max()` with array spread operator on large arrays.
-🎯 Impact: If the number of materials is large, expanding the array using the spread operator causes the engine to exceed its maximum call stack size, resulting in a browser crash / unhandled exception.
-🔧 Fix: Replaced `Math.max(...materials.map(m => m.val))` with a single `materials.reduce(...)` loop.
-✅ Verification: Ensure the app builds (`pnpm build`), lints successfully (`pnpm lint`), and tests pass (`npx jest`). Run the frontend and verify the stock control table loads correctly.
+💡 **What**: Added visual feedback to the submit button when it is disabled due to missing file, and added `aria-hidden="true"` to decorative icons across forms for better screen reader accessibility.
+🎯 **Why**: The submit button allows clicking when missing a file which gives an abrupt error instead of preventing the click altogether. A tooltip guides the user to the correct action. Also, the decorative icons lacked proper aria tags.
+♿ **Accessibility**: Enhanced the UX by preventing invalid submission attempts, explicitly guiding users to required fields, and silencing screen readers on purely visual icons (`ArrowUp`, `Plus`).
