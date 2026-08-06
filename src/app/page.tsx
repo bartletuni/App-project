@@ -62,9 +62,8 @@ const specSheet = [
 const differentiators: {
   title: string;
   body: string;
-  note?: boolean;
 }[] = [
-  { title: "ISO 9001:2015-aligned", body: "Our workflow follows ISO 9001:2015 quality-management standards for consistent, traceable, repeatable parts.", note: true },
+  { title: "Rigorous quality control", body: "Documented, tightly controlled processes at every stage — from material handling to final inspection — for consistent, traceable, repeatable parts." },
   { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
   { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
   { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
@@ -280,10 +279,7 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-clay-500/15">
             {differentiators.map((d) => (
               <div key={d.title} className="bg-espresso-900 p-6">
-                <h3 className="font-display text-xl text-clay-300 mb-2">
-                  {d.title}
-                  {d.note && <sup className="ml-0.5 align-super font-mono text-[10px] text-clay-400">1</sup>}
-                </h3>
+                <h3 className="font-display text-xl text-clay-300 mb-2">{d.title}</h3>
                 <p className="text-cream-400 leading-relaxed text-sm">{d.body}</p>
               </div>
             ))}
@@ -348,10 +344,11 @@ export default function LandingPage() {
           </div>
 
           <p className="mt-6 max-w-3xl font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-600">
-            ¹ TakomoCo operates in accordance with ISO 9001:2015
-            quality-management standards but is not ISO-certified, nor endorsed
-            by or affiliated with the International Organization for
-            Standardization.
+            Every TakomoCo part is produced under strict internal quality
+            control standards — controlled material handling and drying,
+            calibrated and regularly maintained equipment, documented print
+            parameters, and in-process checks with a final inspection before
+            anything leaves the shop.
           </p>
         </div>
       </footer>
