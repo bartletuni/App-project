@@ -71,7 +71,7 @@ const differentiators: {
 ];
 
 const marqueeItems = [
-  "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF",
+  "Fast · Fitted · Flawless", "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF",
   "PPS-CF/GF", "PEBA", "Reverse Engineering", "3D Scanning", "1:1 Reproduction",
   "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials",
 ];
@@ -99,10 +99,12 @@ export default function LandingPage() {
             {/* Headline column */}
             <div className="lg:col-span-12">
               <Reveal direction="up">
-                <div className="flex items-center gap-3 mb-7">
+                <div className="flex flex-wrap items-center gap-3 mb-7">
                   <span className="eyebrow">EST. UTAH</span>
                   <span className="h-px w-10 bg-clay-500/40" />
                   <span className="eyebrow">ADDITIVE MANUFACTURING</span>
+                  <span className="h-px w-10 bg-clay-500/40" />
+                  <span className="eyebrow text-clay-300">FAST · FITTED · FLAWLESS</span>
                 </div>
               </Reveal>
 
@@ -118,8 +120,15 @@ export default function LandingPage() {
                 </Reveal>
               </h1>
 
-              <Reveal direction="up" delay={0.28}>
-                <p className="mt-8 max-w-xl text-lg leading-relaxed text-cream-400">
+              <Reveal direction="up" delay={0.25}>
+                <div className="mt-5 inline-flex items-center gap-2.5 border border-clay-500/25 bg-espresso-900/60 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.22em] text-clay-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-clay-400" />
+                  <span>Fast · Fitted · Flawless</span>
+                </div>
+              </Reveal>
+
+              <Reveal direction="up" delay={0.32}>
+                <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
                   A specialized additive manufacturing and rapid prototyping
                   studio — high-precision 3D printing and scanning for
                   engineering and reproduction work.
@@ -335,7 +344,11 @@ export default function LandingPage() {
           </Reveal>
 
           <div className="mt-16 pt-8 border-t border-clay-500/12 flex flex-col sm:flex-row justify-between gap-6 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-600">
-            <span className="text-cream-300">TAKOMO<span className="text-clay-400">⁄</span>CO</span>
+            <span className="text-cream-300 flex items-center gap-2">
+              TAKOMO<span className="text-clay-400">⁄</span>CO
+              <span className="text-clay-500/50">|</span>
+              <span className="text-clay-300 font-normal tracking-[0.2em]">FAST, FITTED, FLAWLESS</span>
+            </span>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
               <span>☎ 385-695-4178</span>
               <span>NAICS 333248 · 541330 · 541420</span>
