@@ -99,12 +99,10 @@ export default function LandingPage() {
             {/* Headline column */}
             <div className="lg:col-span-12">
               <Reveal direction="up">
-                <div className="flex flex-wrap items-center gap-3 mb-7">
+                <div className="flex items-center gap-3 mb-7">
                   <span className="eyebrow">EST. UTAH</span>
                   <span className="h-px w-10 bg-clay-500/40" />
                   <span className="eyebrow">ADDITIVE MANUFACTURING</span>
-                  <span className="h-px w-10 bg-clay-500/40" />
-                  <span className="eyebrow text-clay-300">FAST · FITTED · FLAWLESS</span>
                 </div>
               </Reveal>
 
