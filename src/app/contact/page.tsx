@@ -7,7 +7,7 @@ import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
 
 const coordinates = [
-  { icon: Mail, k: "EMAIL", v: "takomocompany@gmail.com" },
+  { icon: Mail, k: "EMAIL", v: "info@takomoco.com" },
   { icon: Phone, k: "VOICE", v: "385-695-4178" },
   { icon: Clock, k: "HOURS", v: "Mon–Fri · 9am – 5pm EST" },
 ];
@@ -36,12 +36,12 @@ export default function ContactPage() {
 
             <Magnetic strength={0.25} className="w-full">
               <a
-                href="mailto:takomocompany@gmail.com"
+                href="mailto:info@takomoco.com"
                 className="group flex items-center justify-between gap-3 bg-clay-600 px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow active:scale-[0.99]"
               >
                 <span className="flex items-center gap-3">
                   <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
-                  <span className="truncate normal-case tracking-normal text-sm">takomocompany@gmail.com</span>
+                  <span className="truncate normal-case tracking-normal text-sm">info@takomoco.com</span>
                 </span>
               </a>
             </Magnetic>

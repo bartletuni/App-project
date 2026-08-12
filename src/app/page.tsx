@@ -333,8 +333,8 @@ export default function LandingPage() {
                   View rate sheet
                   <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                 </Link>
-                <a href="mailto:takomocompany@gmail.com" className="group flex items-center justify-between gap-2 border border-clay-500/30 px-6 py-4 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors">
-                  takomocompany@gmail.com
+                <a href="mailto:info@takomoco.com" className="group flex items-center justify-between gap-2 border border-clay-500/30 px-6 py-4 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors">
+                  info@takomoco.com
                   <ArrowUpRight className="h-4 w-4 text-clay-300" aria-hidden="true" />
                 </a>
               </div>

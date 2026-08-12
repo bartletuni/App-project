@@ -76,8 +76,8 @@ export const DEFAULT_PRICING: PricingContent = {
     advantageBody:
       "24-Hour Express Turnaround available for urgent local engineering deadlines.",
     contactPhone: "(385) 695-4178",
-    contactEmail: "takomocompany@gmail.com",
-    contactWeb: "takomo.vercel.app",
+    contactEmail: "info@takomoco.com",
+    contactWeb: "takomoco.com",
     footerNote:
       "All rates in USD. Material cost is quoted per material at time of order and is additional to the service fees listed above. Large or complex work is quoted individually.",
   },
@@ -187,7 +187,7 @@ export const DEFAULT_PRICING: PricingContent = {
         {
           label: "Web Upload",
           detail:
-            "Submit CAD files (.STEP, .STL, .IGES) directly at takomo.vercel.app.",
+            "Submit CAD files (.STEP, .STL, .IGES) directly at takomoco.com.",
           price: "",
           note: "",
         },

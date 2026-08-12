@@ -103,7 +103,6 @@ export default function SiteHeader() {
                 ) : (
                   <Menu className="h-5 w-5" aria-hidden="true" />
                 )}
-              </button>
               <Magnetic strength={0.5}>
                 <Link
                   href="/login"
@@ -190,7 +189,6 @@ export default function SiteHeader() {
                         </Link>
                       </li>
                     );
-                  })}
                   <li>
                     <Link
                       href="/login"
@@ -215,10 +213,10 @@ export default function SiteHeader() {
 
                 <div className="mt-5 flex flex-col gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500">
                   <a
-                    href="mailto:takomocompany@gmail.com"
+                    href="mailto:info@takomoco.com"
                     className="normal-case tracking-[0.08em] hover:text-cream-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                   >
-                    takomocompany@gmail.com
+                    info@takomoco.com
                   </a>
                   <a
                     href="tel:+13856954178"
