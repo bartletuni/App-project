@@ -103,6 +103,7 @@ export default function SiteHeader() {
                 ) : (
                   <Menu className="h-5 w-5" aria-hidden="true" />
                 )}
+              </button>
               <Magnetic strength={0.5}>
                 <Link
                   href="/login"
@@ -189,6 +190,7 @@ export default function SiteHeader() {
                         </Link>
                       </li>
                     );
+                  })}
                   <li>
                     <Link
                       href="/login"
