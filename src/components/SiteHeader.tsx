@@ -12,6 +12,7 @@ const nav = [
   { href: "/", n: "01", label: "Index", blurb: "Studio overview & capabilities" },
   { href: "/materials", n: "02", label: "Materials", blurb: "Filament & composite stock" },
   { href: "/pricing", n: "03", label: "Pricing", blurb: "Service rate sheet" },
+  { href: "/contact", n: "04", label: "Contact", blurb: "Reach the shop directly" },
 ];
 
 /**
@@ -196,7 +197,7 @@ export default function SiteHeader() {
                       href="/login"
                       className="flex items-center gap-4 border-b border-clay-500/15 py-4 transition-colors active:bg-espresso-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                     >
-                      <span className="font-mono text-sm text-clay-500">04</span>
+                      <span className="font-mono text-sm text-clay-500">05</span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-display text-xl text-cream-100">
                           Client Desk
