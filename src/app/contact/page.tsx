@@ -2,6 +2,7 @@
 
 import { Mail, Phone, Clock, Send } from "lucide-react";
 import AppShell from "@/components/AppShell";
+import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
@@ -60,6 +61,8 @@ export default function ContactPage() {
           </Panel>
         </Reveal>
       </div>
+
+      <SiteFooter />
     </AppShell>
   );
 }

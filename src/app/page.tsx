@@ -12,6 +12,7 @@ import {
 import { motion, useScroll, useTransform } from "framer-motion";
 
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import BuildPlate from "@/components/BuildPlate";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
@@ -108,13 +109,13 @@ export default function LandingPage() {
 
               <h1 className="font-display font-semibold tracking-tight text-cream-100 text-[2.7rem] leading-[1.02] sm:text-6xl lg:text-7xl">
                 <Reveal direction="up" delay={0.05}>
-                  <span className="block">Forging digital</span>
+                  <span className="block">Domestic 3D printing —</span>
                 </Reveal>
                 <Reveal direction="up" delay={0.12}>
-                  <span className="block">geometry into</span>
+                  <span className="block">forging digital geometry</span>
                 </Reveal>
                 <Reveal direction="up" delay={0.19}>
-                  <span className="block italic text-clay-300">physical parts.</span>
+                  <span className="block italic text-clay-300">into physical parts.</span>
                 </Reveal>
               </h1>
 
@@ -127,9 +128,9 @@ export default function LandingPage() {
 
               <Reveal direction="up" delay={0.32}>
                 <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
-                  A specialized additive manufacturing and rapid prototyping
-                  studio — high-precision 3D printing and scanning for
-                  engineering and reproduction work.
+                  A US-based additive manufacturing and rapid prototyping
+                  studio in Utah — high-precision 3D printing and scanning for
+                  engineering and reproduction work, made domestically.
                 </p>
               </Reveal>
 
@@ -308,8 +309,8 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      {/* CTA + footer */}
-      <footer className="border-t border-clay-500/15">
+      {/* Closing CTA. The site-wide colophon lives in <SiteFooter /> below. */}
+      <section className="border-t border-clay-500/15">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-20">
           <Reveal>
             <div className="grid lg:grid-cols-12 gap-10 items-center">
@@ -341,20 +342,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <div className="mt-16 pt-8 border-t border-clay-500/12 flex flex-col sm:flex-row justify-between gap-6 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-600">
-            <span className="text-cream-300 flex items-center gap-2">
-              TAKOMO<span className="text-clay-400">⁄</span>CO
-              <span className="text-clay-500/50">|</span>
-              <span className="text-clay-300 font-normal tracking-[0.2em]">FAST, FITTED, FLAWLESS</span>
-            </span>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
-              <span>☎ 385-695-4178</span>
-              <span>NAICS 333248 · 541330 · 541420</span>
-              <span>© {new Date().getFullYear()}</span>
-            </div>
-          </div>
-
-          <p className="mt-6 max-w-3xl font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-600">
+          <p className="mt-16 max-w-3xl border-t border-clay-500/12 pt-8 font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-600">
             Every TakomoCo part is produced under strict internal quality
             control standards — controlled material handling and drying,
             calibrated and regularly maintained equipment, documented print
@@ -362,7 +350,9 @@ export default function LandingPage() {
             anything leaves the shop.
           </p>
         </div>
-      </footer>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }

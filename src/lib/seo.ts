@@ -22,11 +22,15 @@ export const SITE_URL = (
 
 export const SITE_NAME = "TakomoCo";
 
-export const SITE_TAGLINE = "Additive Manufacturing & Rapid Prototyping";
+export const SITE_TAGLINE = "Domestic 3D Printing & Additive Manufacturing";
 
-/** Used as the default meta description and the Organization description. */
+/**
+ * Used as the default meta description and the Organization description.
+ * Kept near 160 characters so Google shows it without truncating, with the
+ * terms that matter most placed first.
+ */
 export const SITE_DESCRIPTION =
-  "TakomoCo is a Utah additive manufacturing studio offering high-precision FDM 3D printing, 0.02mm 3D scanning, reverse engineering, and rapid prototyping in carbon-fiber and engineering-grade composites.";
+  "Domestic additive manufacturing in Utah — high-precision FDM 3D printing, 0.02mm 3D scanning, reverse engineering, and rapid prototyping in carbon-fiber composites.";
 
 export const BUSINESS = {
   telephone: "+1-385-695-4178",

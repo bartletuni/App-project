@@ -38,6 +38,9 @@ export const metadata: Metadata = {
   keywords: [
     "additive manufacturing",
     "3D printing service",
+    "domestic 3D printing",
+    "US-based additive manufacturing",
+    "American made 3D printed parts",
     "Utah 3D printing",
     "carbon fiber 3D printing",
     "3D scanning",

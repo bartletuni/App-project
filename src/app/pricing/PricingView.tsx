@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, Phone, Globe, Zap } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import { type PricingContent } from "@/lib/pricing";
@@ -182,6 +183,8 @@ export default function PricingView({ content }: { content: PricingContent }) {
           </Panel>
         </Reveal>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

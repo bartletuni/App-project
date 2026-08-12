@@ -5,6 +5,7 @@ import { Beaker, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 
@@ -151,6 +152,8 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
           </motion.div>
         )}
       </main>
+
+      <SiteFooter />
     </div>
   );
 }
