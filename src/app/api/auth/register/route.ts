@@ -80,6 +80,7 @@ export async function POST(req: NextRequest) {
       const resendApiKey = process.env.RESEND_API_KEY;
       if (resendApiKey) {
         const resend = new Resend(resendApiKey);
+        const from = process.env.EMAIL_FROM || 'TakomoCo <onboarding@resend.dev>';
 
         // Sanitize to prevent Email Header (CRLF) Injection
         const safeUserName = user.name ? user.name.replace(/[\r\n]/g, '') : "User";
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
         const adminEmail = process.env.ADMIN_EMAIL;
         if (adminEmail) {
           await resend.emails.send({
-            from: 'TakomoCo <onboarding@resend.dev>',
+            from,
             to: adminEmail,
             subject: `New User Registered: ${safeUserName}`,
             html: NewUserAdminNotificationEmailHTML({
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
 
         // 2. Send welcome email to the user
         await resend.emails.send({
-          from: 'TakomoCo <onboarding@resend.dev>',
+          from,
           to: user.email,
           subject: 'Welcome to TakomoCo!',
           html: WelcomeUserEmailHTML({
