@@ -1,3 +1,8 @@
-💡 **What**: Added visual feedback to the submit button when it is disabled due to missing file, and added `aria-hidden="true"` to decorative icons across forms for better screen reader accessibility.
-🎯 **Why**: The submit button allows clicking when missing a file which gives an abrupt error instead of preventing the click altogether. A tooltip guides the user to the correct action. Also, the decorative icons lacked proper aria tags.
-♿ **Accessibility**: Enhanced the UX by preventing invalid submission attempts, explicitly guiding users to required fields, and silencing screen readers on purely visual icons (`ArrowUp`, `Plus`).
+💡 What:
+Added `aria-hidden="true"` to the decorative `<Eye>` and `<EyeOff>` icons inside the password visibility toggle buttons in both `src/app/login/page.tsx` and `src/app/settings/page.tsx`.
+
+🎯 Why:
+The parent `<button>` element already handles accessibility by providing an explicit `aria-label` ("Show password" or "Hide password"). Leaving the child SVG icons visible to the accessibility tree causes screen readers to redundantly announce the icon's generic name in addition to the button's label, creating a confusing and noisy experience.
+
+♿ Accessibility:
+Improved screen reader clarity by explicitly hiding purely decorative icons when the parent interactive element already provides an accessible name.

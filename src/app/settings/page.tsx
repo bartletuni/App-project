@@ -212,7 +212,7 @@ export default function SettingsPage() {
                         autoComplete={f.ac}
                       />
                       <button type="button" onClick={() => f.setShow(!f.show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md" aria-label={f.show ? "Hide password" : "Show password"}>
-                        {f.show ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {f.show ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                       </button>
                     </div>
                   </div>

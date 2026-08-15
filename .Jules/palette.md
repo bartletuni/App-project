@@ -16,3 +16,7 @@
 ## 2024-07-28 - Avoid Dead-End Empty States
 **Learning:** Empty states without a clear call to action act as dead-ends, confusing users on how to proceed. Including a contextual CTA dramatically improves navigability.
 **Action:** Always provide a relevant Call-to-Action (like "Return Home" or "Create New") when rendering an empty state index or data view.
+
+## 2024-05-15 - ARIA Labels and Decorative Icons
+**Learning:** Adding `aria-hidden="true"` to child decorative icons inside buttons that already have `aria-label` prevents redundant or confusing screen reader announcements.
+**Action:** Always add `aria-hidden="true"` to decorative icons (e.g. `lucide-react` icons) when their parent interactive element provides its own accessible name.
