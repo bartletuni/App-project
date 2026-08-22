@@ -17,6 +17,7 @@ export const NewRequestEmailHTML = (data: {
   dateNeeded: string;
   notes?: string;
   printSettings?: string;
+  quoteRequested?: boolean;
 }) => `
 <!DOCTYPE html>
 <html>
@@ -32,6 +33,7 @@ export const NewRequestEmailHTML = (data: {
     .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
     .value { font-size: 16px; color: #1a202c; }
     .notes-box { background-color: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #4f46e5; margin-top: 20px; }
+    .quote-box { background-color: #fffaf0; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #dd6b20; margin-bottom: 20px; color: #7b341e; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -41,6 +43,10 @@ export const NewRequestEmailHTML = (data: {
     </div>
     <div class="content">
       <p>A new part request has been submitted to TakomoCo.</p>
+
+      ${data.quoteRequested ? `
+      <div class="quote-box">Quote requested — the customer wants a price before the build starts.</div>
+      ` : ''}
       
       <div class="field">
         <div class="label">Customer</div>
