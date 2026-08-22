@@ -193,10 +193,17 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
       <div className="mb-6 flex gap-3 border-l-2 border-yellow-500/50 bg-yellow-500/10 px-4 py-3" role="alert">
         <AlertTriangle className="h-4 w-4 text-yellow-300 mt-0.5 shrink-0" aria-hidden="true" />
-        <p className="text-xs text-yellow-200/90 leading-relaxed">
-          <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Policy ·</span>{" "}
-          Orders can be cancelled within <strong>30 minutes</strong> of submission.
-        </p>
+        <div className="space-y-1.5 text-xs text-yellow-200/90 leading-relaxed">
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Policy ·</span>{" "}
+            Orders can be cancelled within <strong>30 minutes</strong> of submission.
+          </p>
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Payment ·</span>{" "}
+            Your invoice is sent promptly after this request is submitted, and
+            manufacturing starts once it is <strong>paid in full</strong>.
+          </p>
+        </div>
       </div>
 
       {error && (
@@ -337,7 +344,8 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
               Quote
             </span>
             <span className="mt-1 block text-xs leading-relaxed text-cream-500">
-              Send a price quote for this part before the build starts.
+              Price this part first. We send a quote for your approval before
+              the invoice — manufacturing still starts once that invoice is paid.
             </span>
           </span>
         </label>

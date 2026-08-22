@@ -45,7 +45,7 @@ export const NewRequestEmailHTML = (data: {
       <p>A new part request has been submitted to TakomoCo.</p>
 
       ${data.quoteRequested ? `
-      <div class="quote-box">Quote requested — the customer wants a price before the build starts.</div>
+      <div class="quote-box">Quote requested — send a price for approval before invoicing.</div>
       ` : ''}
       
       <div class="field">
