@@ -1,6 +1,7 @@
 import { POST } from "../route";
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { prisma } from "@/lib/prisma";
 
 jest.mock("next-auth/next", () => ({
   getServerSession: jest.fn(),
@@ -31,9 +32,10 @@ jest.mock("resend", () => {
 describe("POST /api/requests", () => {
   beforeEach(() => {
     (getServerSession as jest.Mock).mockResolvedValue({ user: { id: "user-1", email: "test@example.com", name: "Test" } });
+    (prisma.partRequest.create as jest.Mock).mockClear();
   });
 
-  const createRequest = (filename: string, fileContent: Buffer) => {
+  const createRequest = (filename: string, fileContent: Buffer, quoteRequested?: string) => {
     const formData = new FormData();
     const file = new File([fileContent], filename, { type: "application/octet-stream" });
     formData.append("file", file);
@@ -41,12 +43,16 @@ describe("POST /api/requests", () => {
     formData.append("material", "PLA");
     formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()); // 5 days from now
     formData.append("phoneNumber", "1234567890");
+    if (quoteRequested !== undefined) formData.append("quoteRequested", quoteRequested);
 
     return new NextRequest("http://localhost/api/requests", {
       method: "POST",
       body: formData,
     });
   };
+
+  const createdRequestData = () =>
+    (prisma.partRequest.create as jest.Mock).mock.calls[0][0].data;
 
   it("should accept valid ZIP files", async () => {
     const req = createRequest("test.zip", Buffer.from([0x50, 0x4B, 0x03, 0x04]));
@@ -98,5 +104,26 @@ describe("POST /api/requests", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe("File content does not match its extension");
+  });
+
+  it("stores the quote flag when the composer's checkbox is ticked", async () => {
+    const req = createRequest("test.zip", Buffer.from([0x50, 0x4B, 0x03, 0x04]), "true");
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect(createdRequestData().quoteRequested).toBe(true);
+  });
+
+  it("stores no quote flag when the checkbox is left off", async () => {
+    const req = createRequest("test.zip", Buffer.from([0x50, 0x4B, 0x03, 0x04]), "false");
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect(createdRequestData().quoteRequested).toBe(false);
+  });
+
+  it("defaults the quote flag to false when the field is absent", async () => {
+    const req = createRequest("test.zip", Buffer.from([0x50, 0x4B, 0x03, 0x04]));
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect(createdRequestData().quoteRequested).toBe(false);
   });
 });

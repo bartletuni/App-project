@@ -9,6 +9,7 @@ import StlViewer from "@/components/StlViewer";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 import { isStlFileName } from "@/lib/stl";
+import { QUOTE_PARAM, isQuoteRequested } from "@/lib/quote";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-2.5 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
@@ -29,6 +30,9 @@ function isAcceptedFile(f: File): boolean {
 }
 
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
+  const searchParams = useSearchParams();
+  const initialMaterial = searchParams.get("material");
+
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [notes, setNotes] = useState("");
@@ -44,11 +48,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     mode: "AUTO",
     custom: { ...DEFAULT_CUSTOM_SETTINGS },
   });
+  // Off unless the visitor arrived through a "Request a quote" button, and
+  // only for that visit — the initialiser runs once, and submitting clears it.
+  const [quoteRequested, setQuoteRequested] = useState(() =>
+    isQuoteRequested(searchParams.get(QUOTE_PARAM))
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const searchParams = useSearchParams();
-  const initialMaterial = searchParams.get("material");
 
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
@@ -147,6 +153,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
+    formData.append("quoteRequested", quoteRequested ? "true" : "false");
     if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
@@ -168,6 +175,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       setNewPhoneNumber("");
       setIsAddingPhone(false);
       setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
+      setQuoteRequested(false);
       onFormSubmit();
     } catch (err: any) {
       setError(err.message);
@@ -185,10 +193,17 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
       <div className="mb-6 flex gap-3 border-l-2 border-yellow-500/50 bg-yellow-500/10 px-4 py-3" role="alert">
         <AlertTriangle className="h-4 w-4 text-yellow-300 mt-0.5 shrink-0" aria-hidden="true" />
-        <p className="text-xs text-yellow-200/90 leading-relaxed">
-          <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Policy ·</span>{" "}
-          Orders can be cancelled within <strong>30 minutes</strong> of submission.
-        </p>
+        <div className="space-y-1.5 text-xs text-yellow-200/90 leading-relaxed">
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Policy ·</span>{" "}
+            Orders can be cancelled within <strong>30 minutes</strong> of submission.
+          </p>
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Payment ·</span>{" "}
+            Your invoice is sent promptly after this request is submitted, and
+            manufacturing starts once it is <strong>paid in full</strong>.
+          </p>
+        </div>
       </div>
 
       {error && (
@@ -311,6 +326,29 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           <label htmlFor="notes" className={labelCls}>Notes <span className="text-cream-600 normal-case tracking-normal">(color, etc. — optional)</span></label>
           <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={`${field} resize-none`} placeholder="Any special instructions?" />
         </div>
+
+        <label
+          htmlFor="quoteRequested"
+          className="flex cursor-pointer items-start gap-3 rounded-md border border-clay-500/25 px-4 py-3 transition-colors hover:border-clay-400 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay-500"
+        >
+          <input
+            id="quoteRequested"
+            name="quoteRequested"
+            type="checkbox"
+            checked={quoteRequested}
+            onChange={(e) => setQuoteRequested(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 outline-none"
+          />
+          <span className="min-w-0">
+            <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-300">
+              Quote
+            </span>
+            <span className="mt-1 block text-xs leading-relaxed text-cream-500">
+              Price this part first. We send a quote for your approval before
+              the invoice — manufacturing still starts once that invoice is paid.
+            </span>
+          </span>
+        </label>
 
         <button
           type="submit"

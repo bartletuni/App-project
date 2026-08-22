@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import RequestQuoteButton from "@/components/RequestQuoteButton";
 
 /**
  * Public masthead's counterpart: the site index at the bottom of every
@@ -56,6 +57,7 @@ export default function SiteFooter() {
               3D printing, scanning, and reverse engineering for engineering and
               reproduction work.
             </p>
+            <RequestQuoteButton size="sm" className="mt-5 w-full sm:w-auto rounded-sm" />
           </div>
 
           {/* Site index */}

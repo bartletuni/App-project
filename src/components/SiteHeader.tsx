@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Magnetic from "@/components/ui/Magnetic";
+import RequestQuoteButton from "@/components/RequestQuoteButton";
 
 const nav = [
   { href: "/", n: "01", label: "Index", blurb: "Studio overview & capabilities" },
@@ -91,6 +92,12 @@ export default function SiteHeader() {
                   />
                 </Link>
               ))}
+              <RequestQuoteButton
+                variant="solid"
+                size="sm"
+                label="Quote"
+                className="hidden sm:inline-flex rounded-sm"
+              />
               <button
                 type="button"
                 onClick={() => setDirectoryOpen((open) => !open)}
@@ -213,6 +220,12 @@ export default function SiteHeader() {
                     </Link>
                   </li>
                 </ul>
+
+                <RequestQuoteButton
+                  variant="solid"
+                  size="sm"
+                  className="mt-5 w-full rounded-sm"
+                />
 
                 <div className="mt-5 flex flex-col gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500">
                   <a

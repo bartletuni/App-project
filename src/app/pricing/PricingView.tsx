@@ -7,6 +7,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
+import RequestQuoteButton from "@/components/RequestQuoteButton";
 import { type PricingContent } from "@/lib/pricing";
 
 /** "A", "B", "C" … the section index used on the printed catalog. */
@@ -43,6 +44,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
                 {settings.heroIntro}
               </p>
             )}
+            <RequestQuoteButton className="mt-7" />
           </div>
         </Reveal>
 
@@ -169,16 +171,19 @@ export default function PricingView({ content }: { content: PricingContent }) {
                   </p>
                 )}
               </div>
-              <Link
-                href="/login"
-                className="group inline-flex shrink-0 items-center justify-center gap-2 bg-clay-600 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow"
-              >
-                Start a build
-                <ArrowRight
-                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
-              </Link>
+              <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                <RequestQuoteButton />
+                <Link
+                  href="/login"
+                  className="group inline-flex shrink-0 items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
+                >
+                  Start a build
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
             </div>
           </Panel>
         </Reveal>

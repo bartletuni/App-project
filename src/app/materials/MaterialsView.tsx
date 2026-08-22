@@ -8,6 +8,8 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
+import RequestQuoteButton from "@/components/RequestQuoteButton";
+import { quoteHrefForMaterial } from "@/lib/quote";
 
 /** The subset of the Material record this view renders. */
 export interface MaterialSummary {
@@ -85,9 +87,12 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
                 resistant, and impact-resistant applications.
               </p>
             </div>
-            <span className="hidden sm:block font-mono text-xs text-cream-600 whitespace-nowrap">
-              [ {String(materials.length).padStart(2, "0")} ON FILE ]
-            </span>
+            <div className="flex shrink-0 flex-col items-end gap-4">
+              <span className="hidden sm:block font-mono text-xs text-cream-600 whitespace-nowrap">
+                [ {String(materials.length).padStart(2, "0")} ON FILE ]
+              </span>
+              <RequestQuoteButton size="sm" className="whitespace-nowrap" />
+            </div>
           </div>
         </Reveal>
 
@@ -145,6 +150,13 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
                       Build with this
                       <ArrowRight className="h-4 w-4 text-clay-300 transition-transform group-hover/cta:translate-x-1" aria-hidden="true" />
                     </Link>
+                    <RequestQuoteButton
+                      variant="outline"
+                      size="sm"
+                      label="Quote this material"
+                      href={quoteHrefForMaterial(m.name)}
+                      className="mt-2 w-full justify-between px-4 py-3 tracking-[0.18em] text-[10px]"
+                    />
                   </div>
                 </Panel>
               </motion.div>

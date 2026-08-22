@@ -46,3 +46,15 @@ this change.
 
 Per-gram material rates are intentionally not on this sheet — material cost is carried by each
 material record in the stock index (`/admin/materials`).
+
+## Requesting a Quote
+
+"Request a quote" buttons on the public site (masthead, hero, workflow, rate sheet,
+stock index, contact, footer) all point at the composer with `?quote=1`. The composer's
+"Quote" checkbox is off by default, and only that link pre-ticks it, for that visit —
+submitting clears it again. Signing in on the way keeps the destination, so a visitor who
+clicks a quote button while logged out still lands on a pre-ticked form.
+
+The flag is stored on each request as `PartRequest.quoteRequested`, shown as a badge in the
+build ledger and the admin console, and called out in the new-request email. Run
+`npx prisma db push` after deploying this change so the column exists.

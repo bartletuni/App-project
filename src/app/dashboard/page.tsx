@@ -62,7 +62,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login");
+      // Keep the destination (a "Request a quote" link, for instance) so the
+      // composer opens as asked once they are signed in.
+      const here = `${window.location.pathname}${window.location.search}`;
+      router.push(`/login?next=${encodeURIComponent(here)}`);
     } else if (status === "authenticated") {
       if (isAdmin) {
         router.push("/admin");
@@ -184,6 +187,11 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <FileText className="h-3.5 w-3.5 text-clay-400 shrink-0" aria-hidden="true" />
                             <h3 className="font-display text-lg text-cream-100 truncate">{req.fileName}</h3>
+                            {req.quoteRequested && (
+                              <span className="shrink-0 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200">
+                                Quote
+                              </span>
+                            )}
                           </div>
                           <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.1em] text-cream-500">
                             <span>QTY <span className="text-cream-200">{req.quantity}</span></span>
@@ -283,6 +291,12 @@ export default function DashboardPage() {
                 <div>
                   <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Invoice</div>
                   <div className="text-sm text-clay-300">{selectedRequest.invoiceNumber || "Pending"}</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Quote</div>
+                  <div className={`text-sm ${selectedRequest.quoteRequested ? "text-amber-200" : "text-cream-200"}`}>
+                    {selectedRequest.quoteRequested ? "Requested" : "—"}
+                  </div>
                 </div>
                 <div className="col-span-1 sm:col-span-3">
                   <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Tracking</div>
