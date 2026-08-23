@@ -44,8 +44,23 @@ export const metadata: Metadata = {
 export default async function PricingPage() {
   const content = await getPricingContent();
 
+  const { diag } = content;
+
   return (
     <>
+      {/*
+        Provenance of this render, for diagnosing the customer page and the API
+        disagreeing about the sheet. Hidden from readers and from assistive
+        tech; readable with:
+          curl -s https://<host>/pricing | grep -o 'data-pricing-diag="[^"]*"'
+        Compare against the `diag` block in /api/pricing. Remove once the
+        discrepancy is understood.
+      */}
+      <div
+        hidden
+        aria-hidden="true"
+        data-pricing-diag={`source=${diag.source} newest=${diag.newestUpdatedAt} sections=${diag.sectionCount} readAt=${diag.readAt} isDefault=${content.isDefault}`}
+      />
       <JsonLd
         id="ld-breadcrumb-pricing"
         data={breadcrumbSchema([{ name: "Pricing", path: "/pricing" }])}
