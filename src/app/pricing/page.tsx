@@ -8,7 +8,16 @@ import PricingView from "./PricingView";
 
 // Rendered per request so admin edits to the rate sheet appear immediately,
 // matching the no-store behaviour this page had when it fetched on the client.
+//
+// All three are load-bearing. The libSQL client reaches Turso over HTTP with
+// fetch(), and Next patches fetch in the App Router and caches it in the Data
+// Cache. force-dynamic on its own does not reliably reach a library's fetches:
+// with only that export this page served an eleven-day-old copy of the sheet
+// while /api/pricing — which carries all three — returned current data from the
+// same database in the same second.
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 const title = "Pricing — 3D Printing & Scanning Rate Sheet";
 const description =

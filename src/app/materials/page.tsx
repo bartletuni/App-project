@@ -8,7 +8,14 @@ import MaterialsView, { type MaterialSummary } from "./MaterialsView";
 
 // Rendered per request so admin edits to the stock index appear immediately,
 // matching the no-store behaviour this page had when it fetched on the client.
+//
+// fetchCache and revalidate are as load-bearing as dynamic here — see the note
+// on the pricing page. Without them this page served a stale snapshot of the
+// material rows, so images added since that snapshot still read imageId: null
+// and MaterialsView rendered no <img> for them at all.
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 const title = "Materials — Engineering-Grade Filament Stock";
 const description =
