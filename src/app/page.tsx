@@ -19,6 +19,7 @@ import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
 import Marquee from "@/components/ui/Marquee";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import RequestQuoteButton from "@/components/RequestQuoteButton";
 
 const capabilities = [
   {
@@ -146,6 +147,11 @@ export default function LandingPage() {
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                       </Link>
                     </Magnetic>
+                    <Magnetic strength={0.4}>
+                      <RequestQuoteButton variant="ghost" />
+                    </Magnetic>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Magnetic strength={0.3}>
                       <Link
                         href="/materials"
@@ -155,16 +161,16 @@ export default function LandingPage() {
                         <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                       </Link>
                     </Magnetic>
+                    <Magnetic strength={0.3}>
+                      <Link
+                        href="/pricing"
+                        className="group inline-flex items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
+                      >
+                        View pricing
+                        <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                      </Link>
+                    </Magnetic>
                   </div>
-                  <Magnetic strength={0.3}>
-                    <Link
-                      href="/pricing"
-                      className="group inline-flex items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
-                    >
-                      View pricing
-                      <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
-                    </Link>
-                  </Magnetic>
                 </div>
               </Reveal>
             </div>
@@ -190,6 +196,12 @@ export default function LandingPage() {
                 </tbody>
               </table>
             </Panel>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <RequestQuoteButton size="sm" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
+                Priced per part · no obligation
+              </span>
+            </div>
           </Reveal>
           <Reveal direction="left" delay={0.15} className="lg:col-span-7">
             <Panel className="p-3 sm:p-4">
@@ -274,6 +286,15 @@ export default function LandingPage() {
               </Reveal>
             ))}
           </div>
+          <Reveal delay={0.15}>
+            <div className="mt-10 flex flex-col items-start gap-4 border-t border-clay-500/15 pt-8 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-xl text-cream-400">
+                Have a part in mind? Send us the file and we will come back with
+                a price and a lead time.
+              </p>
+              <RequestQuoteButton className="shrink-0" />
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -329,6 +350,12 @@ export default function LandingPage() {
                     Submit a request
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                   </Link>
+                </Magnetic>
+                <Magnetic strength={0.3}>
+                  <RequestQuoteButton
+                    variant="ghost"
+                    className="w-full justify-between px-6 py-4 text-[11px] tracking-[0.15em]"
+                  />
                 </Magnetic>
                 <Link href="/pricing" className="group flex items-center justify-between gap-2 border border-clay-500/30 px-6 py-4 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors">
                   View rate sheet

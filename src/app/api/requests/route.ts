@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
     let phoneNumberString = formData.get("phoneNumber") as string | null;
     const requestedUserId = formData.get("userId") as string | null;
     const printSettingsRaw = formData.get("printSettings") as string | null;
+    const quoteRequestedRaw = formData.get("quoteRequested") as string | null;
 
     if (
       (quantityStr !== null && typeof quantityStr !== "string") ||
@@ -34,10 +35,16 @@ export async function POST(req: NextRequest) {
       (dateNeededStr !== null && typeof dateNeededStr !== "string") ||
       (phoneNumberString !== null && typeof phoneNumberString !== "string") ||
       (requestedUserId !== null && typeof requestedUserId !== "string") ||
-      (printSettingsRaw !== null && typeof printSettingsRaw !== "string")
+      (printSettingsRaw !== null && typeof printSettingsRaw !== "string") ||
+      (quoteRequestedRaw !== null && typeof quoteRequestedRaw !== "string")
     ) {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
+
+    // The composer's "Quote" checkbox. Absent or anything falsy means a normal
+    // build request.
+    const quoteRequested =
+      quoteRequestedRaw === "true" || quoteRequestedRaw === "1" || quoteRequestedRaw === "on";
 
     // Optional custom slicer settings; absent/empty means AUTO.
     let customSettings: CustomPrintSettings | null = null;
@@ -205,6 +212,7 @@ export async function POST(req: NextRequest) {
         material,
         notes,
         printSettings: customSettings ? JSON.stringify(customSettings) : null,
+        quoteRequested,
         dateNeeded,
       },
     });
@@ -229,6 +237,7 @@ export async function POST(req: NextRequest) {
             dateNeeded: format(dateNeeded, "PPP"),
             notes: notes || undefined,
             printSettings: summarizeSettings(customSettings),
+            quoteRequested,
           }),
         });
       }

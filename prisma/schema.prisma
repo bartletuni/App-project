@@ -87,6 +87,7 @@ model PartRequest {
   material       String?
   notes          String?
   printSettings  String? // JSON CustomPrintSettings; null = auto (shop chooses)
+  quoteRequested Boolean     @default(false) // customer asked for a price quote first
   dateNeeded     DateTime
   status         String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
   invoiceNumber  String?

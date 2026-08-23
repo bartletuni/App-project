@@ -330,6 +330,7 @@ function AdminDashboardContent() {
                           <div className="text-[10px] font-bold text-clay-300 uppercase tracking-tight">Customer</div>
                           <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
                           <div className="text-xs text-cream-500">{req.user?.email || "N/A"}</div>
+                          {req.quoteRequested && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer asked for a price quote before the build starts">Quote</span></div>}
                         </div>
                         <select
                           value={req.status}
@@ -432,6 +433,7 @@ function AdminDashboardContent() {
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-cream-200">{req.fileName}</div>
                               <div className="flex gap-2 mt-1">
+                                  {req.quoteRequested && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer asked for a price quote before the build starts">Quote</span>}
                                   {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
                                   {req.printSettings && <span className="text-[10px] font-bold bg-teal-500/15 text-teal-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer supplied custom slicer settings">Custom settings</span>}
                                   {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
@@ -558,6 +560,12 @@ function AdminDashboardContent() {
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Material</dt>
                         <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.material || "N/A"}</dd>
+                    </div>
+                    <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-cream-500">Quote Requested</dt>
+                        <dd className={`mt-1 text-sm font-semibold ${selectedRequest.quoteRequested ? "text-amber-200" : "text-cream-200"}`}>
+                          {selectedRequest.quoteRequested ? "Yes — price before build" : "No"}
+                        </dd>
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Date Needed</dt>

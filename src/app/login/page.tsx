@@ -1,20 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { safeNextPath } from "@/lib/quote";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-3 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
 const label =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
-export default function Home() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  // Where the visitor was headed before sign-in got in the way — a quote
+  // button, say. Admins always land on the console instead.
+  const nextPath = safeNextPath(searchParams.get("next"));
+  const afterSignIn = nextPath || "/dashboard";
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -43,10 +49,10 @@ export default function Home() {
       if (isAdmin) {
         router.push("/admin");
       } else {
-        router.push("/dashboard");
+        router.push(afterSignIn);
       }
     }
-  }, [status, session, router]);
+  }, [status, session, router, afterSignIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +70,7 @@ export default function Home() {
         if (result?.error) {
           setError("Invalid email or password.");
         } else {
-          router.push("/dashboard");
+          router.push(afterSignIn);
         }
       } else {
         const finalShippingAddress = `${shippingStreet}${shippingApt ? `, ${shippingApt}` : ""}, ${shippingCity}, ${shippingState} ${shippingZip}`;
@@ -103,7 +109,7 @@ export default function Home() {
         if (result?.error) {
           setError("Account created, but failed to automatically sign in.");
         } else {
-          router.push("/dashboard");
+          router.push(afterSignIn);
         }
       }
     } catch (err) {
@@ -319,5 +325,20 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex flex-col justify-center items-center bg-transparent">
+          <span className="h-8 w-8 rounded-full border-2 border-clay-500/30 border-t-clay-400 animate-spin mb-4" />
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500">Checking credentials…</p>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
