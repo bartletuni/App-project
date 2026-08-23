@@ -6,6 +6,14 @@ import { prisma } from "@/lib/prisma";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+// The libSQL client reaches Turso over HTTP with fetch(), which Next caches in
+// the Data Cache unless a route opts out. Without these, this route served a
+// database read cached from before a schema change — reporting a column as
+// missing long after it had been added.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { fileId: string } }

@@ -9,6 +9,8 @@ import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
  
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export async function POST(req: NextRequest) {
   try {
