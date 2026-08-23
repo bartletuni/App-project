@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+// See the note in api/download/[fileId]: the libSQL client reaches Turso over
+// HTTP with fetch(), which Next caches unless the route opts out.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export async function GET() {
   const session = await getServerSession(authOptions);
 
