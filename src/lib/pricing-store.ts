@@ -6,40 +6,9 @@ import {
   type PricingSettingsData,
 } from "@/lib/pricing";
 
-/**
- * Provenance for one read of the sheet.
- *
- * The page and the API call the same reader, so these fields should always
- * agree between them. When they don't, this says why: a different `source`
- * means the two are on different databases, while a matching `source` with an
- * older `newestUpdatedAt` means one of them is seeing a stale snapshot.
- */
-export interface PricingDiagnostics {
-  /** Database host this read used, with any credentials stripped. */
-  source: string;
-  /** Newest section `updatedAt` this read saw; null when nothing was read. */
-  newestUpdatedAt: string | null;
-  sectionCount: number;
-  /** When this read ran — proves whether the render is actually re-executing. */
-  readAt: string;
-}
-
 export interface PricingContentResult extends PricingContent {
   /** True when nothing has been saved yet (or the tables aren't reachable). */
   isDefault: boolean;
-  diag: PricingDiagnostics;
-}
-
-/** The database being read, without exposing credentials. */
-function pricingSource(): string {
-  const url =
-    process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || "file:./prisma/dev.db";
-  try {
-    const parsed = new URL(url);
-    return `${parsed.protocol}//${parsed.host}`;
-  } catch {
-    return url.split("?")[0];
-  }
 }
 
 /**
@@ -48,9 +17,6 @@ function pricingSource(): string {
  * edit, and even before `prisma db push` has created the tables.
  */
 export async function getPricingContent(): Promise<PricingContentResult> {
-  const readAt = new Date().toISOString();
-  const source = pricingSource();
-
   try {
     const [sections, settingRows] = await Promise.all([
       prisma.pricingSection.findMany({
@@ -61,18 +27,8 @@ export async function getPricingContent(): Promise<PricingContentResult> {
     ]);
 
     if (sections.length === 0 && settingRows.length === 0) {
-      return {
-        ...DEFAULT_PRICING,
-        isDefault: true,
-        diag: { source, newestUpdatedAt: null, sectionCount: 0, readAt },
-      };
+      return { ...DEFAULT_PRICING, isDefault: true };
     }
-
-    const newestUpdatedAt = sections.reduce<string | null>((newest, s) => {
-      const stamp = s.updatedAt?.toISOString() ?? null;
-      if (!stamp) return newest;
-      return !newest || stamp > newest ? stamp : newest;
-    }, null);
 
     const settings = { ...DEFAULT_PRICING.settings };
     for (const row of settingRows) {
@@ -83,7 +39,6 @@ export async function getPricingContent(): Promise<PricingContentResult> {
 
     return {
       isDefault: false,
-      diag: { source, newestUpdatedAt, sectionCount: sections.length, readAt },
       settings,
       sections: sections.map((s) => ({
         title: s.title,
@@ -98,11 +53,7 @@ export async function getPricingContent(): Promise<PricingContentResult> {
     };
   } catch (error) {
     console.error("Failed to load pricing content, serving defaults:", error);
-    return {
-      ...DEFAULT_PRICING,
-      isDefault: true,
-      diag: { source, newestUpdatedAt: null, sectionCount: 0, readAt },
-    };
+    return { ...DEFAULT_PRICING, isDefault: true };
   }
 }
 
