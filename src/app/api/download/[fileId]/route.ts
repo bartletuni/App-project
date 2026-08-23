@@ -10,6 +10,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { fileId: string } }
 ) {
+  // Tracks how far the request got, so a ?diag=1 failure says which step threw.
+  let stage = "start";
+
   try {
     const { fileId } = params;
 
@@ -21,6 +24,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid file ID" }, { status: 400 });
     }
 
+    stage = "partRequestLookup";
     const partRequest = await prisma.partRequest.findFirst({
       where: { fileId },
     });
@@ -36,6 +40,7 @@ export async function GET(
       }
     } else {
       // If it's not a part request, check if it's a public material image
+      stage = "materialLookup";
       const material = await prisma.material.findFirst({
         where: { imageId: fileId },
       });
@@ -59,6 +64,7 @@ export async function GET(
       return NextResponse.json({ error: "Configuration error" }, { status: 500 });
     }
 
+    stage = "buildCommand";
     const command = new GetObjectCommand({
       Bucket: bucketName,
       Key: fileId,
@@ -82,11 +88,39 @@ export async function GET(
     }
 
     // Generate a presigned URL valid for 1 hour (3600 seconds)
+    stage = "presign";
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
+    stage = "redirect";
     return NextResponse.redirect(presignedUrl);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to generate download link:", error);
+
+    // Temporary: ?diag=1 names the failure so it can be identified without
+    // dashboard log access. Reports the shape of the R2 configuration — never
+    // its values — alongside the exception. Remove once this is resolved.
+    if (req.nextUrl.searchParams.get("diag") === "1") {
+      const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || "";
+      return NextResponse.json(
+        {
+          error: "Failed to generate download link",
+          stage,
+          name: error?.name ?? null,
+          message: error?.message ?? null,
+          r2: {
+            accountIdLength: accountId.length,
+            // R2 account ids are 32 hex characters; a pasted endpoint or a
+            // stray scheme fails this without revealing the value.
+            accountIdIsHex32: /^[0-9a-f]{32}$/i.test(accountId),
+            accessKeyIdLength: (process.env.R2_ACCESS_KEY_ID || "").length,
+            secretKeyLength: (process.env.R2_SECRET_ACCESS_KEY || "").length,
+            bucketNameLength: (process.env.R2_BUCKET_NAME || "").length,
+          },
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ error: "Failed to generate download link" }, { status: 500 });
   }
 }
