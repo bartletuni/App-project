@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
         // Sanitize to prevent Email Header (CRLF) Injection
         const safeFileName = file.name.replace(/[\r\n]/g, '');
         await resend.emails.send({
-          from: 'TakomoCo <onboarding@resend.dev>',
+          from: process.env.EMAIL_FROM || 'TakomoCo <onboarding@resend.dev>',
           to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
           subject: `New Request: ${safeFileName}`,
           html: NewRequestEmailHTML({
