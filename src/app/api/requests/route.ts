@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
 import { addDays, format } from "date-fns";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
  
@@ -219,30 +219,27 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send Email Notification
+    // Send Email Notification. sendEmail reads Resend's reply and logs any
+    // rejection; a failure here never blocks the request that was just created.
     try {
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey) {
-        const resend = new Resend(resendApiKey);
-        // Sanitize to prevent Email Header (CRLF) Injection
-        const safeFileName = file.name.replace(/[\r\n]/g, '');
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'TakomoCo <onboarding@resend.dev>',
-          to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-          subject: `New Request: ${safeFileName}`,
-          html: NewRequestEmailHTML({
-            customerName: targetUserName,
-            customerEmail: targetUserEmail,
-            fileName: file.name,
-            quantity,
-            material: material || "Not specified",
-            dateNeeded: format(dateNeeded, "PPP"),
-            notes: notes || undefined,
-            printSettings: summarizeSettings(customSettings),
-            quoteRequested,
-          }),
-        });
-      }
+      // Sanitize to prevent Email Header (CRLF) Injection
+      const safeFileName = file.name.replace(/[\r\n]/g, '');
+      await sendEmail({
+        to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
+        subject: `New Request: ${safeFileName}`,
+        html: NewRequestEmailHTML({
+          customerName: targetUserName,
+          customerEmail: targetUserEmail,
+          fileName: file.name,
+          quantity,
+          material: material || "Not specified",
+          dateNeeded: format(dateNeeded, "PPP"),
+          notes: notes || undefined,
+          printSettings: summarizeSettings(customSettings),
+          quoteRequested,
+        }),
+        label: "new-request admin notification",
+      });
     } catch (emailError) {
       console.error("Failed to send email notification:", emailError);
       // We don't return an error here because the request was successfully created in the DB
