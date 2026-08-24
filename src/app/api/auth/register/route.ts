@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
 
 export async function POST(req: NextRequest) {
@@ -75,47 +75,40 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send Email Notification
+    // Send Email Notification. sendEmail reads Resend's reply and logs any
+    // rejection; a failure here never blocks the registration.
     try {
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey) {
-        const resend = new Resend(resendApiKey);
-        const from = process.env.EMAIL_FROM || 'TakomoCo <onboarding@resend.dev>';
+      // Sanitize to prevent Email Header (CRLF) Injection
+      const safeUserName = user.name ? user.name.replace(/[\r\n]/g, '') : "User";
 
-        // Sanitize to prevent Email Header (CRLF) Injection
-        const safeUserName = user.name ? user.name.replace(/[\r\n]/g, '') : "User";
+      const details = {
+        name: user.name,
+        email: user.email,
+        phone: phone,
+        shippingAddress: user.shippingAddress || "N/A",
+        billingAddress: user.billingAddress || "N/A",
+      };
 
-        // 1. Send notification to Admin
-        const adminEmail = process.env.ADMIN_EMAIL;
-        if (adminEmail) {
-          await resend.emails.send({
-            from,
-            to: adminEmail,
-            subject: `New User Registered: ${safeUserName}`,
-            html: NewUserAdminNotificationEmailHTML({
-              name: user.name,
-              email: user.email,
-              phone: phone,
-              shippingAddress: user.shippingAddress || "N/A",
-              billingAddress: user.billingAddress || "N/A",
-            }),
-          });
-        }
-
-        // 2. Send welcome email to the user
-        await resend.emails.send({
-          from,
-          to: user.email,
-          subject: 'Welcome to TakomoCo!',
-          html: WelcomeUserEmailHTML({
-            name: user.name,
-            email: user.email,
-            phone: phone,
-            shippingAddress: user.shippingAddress || "N/A",
-            billingAddress: user.billingAddress || "N/A",
-          }),
+      // 1. Send notification to Admin
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        await sendEmail({
+          to: adminEmail,
+          subject: `New User Registered: ${safeUserName}`,
+          html: NewUserAdminNotificationEmailHTML(details),
+          label: "new-user admin notification",
         });
+      } else {
+        console.warn("[email] ADMIN_EMAIL is not set; skipping new-user admin notification");
       }
+
+      // 2. Send welcome email to the user
+      await sendEmail({
+        to: user.email,
+        subject: 'Welcome to TakomoCo!',
+        html: WelcomeUserEmailHTML(details),
+        label: "new-user welcome",
+      });
     } catch (emailError) {
       console.error("Failed to send registration email notifications:", emailError);
     }
