@@ -1,3 +1,14 @@
+import { absoluteUrl } from "@/lib/seo";
+
+/**
+ * Links point at the canonical site origin, not NEXTAUTH_URL. That variable
+ * describes wherever auth callbacks are served — on Vercel it is often pinned
+ * to one immutable deployment URL, which stops resolving once that deployment
+ * is superseded, so emails sent earlier lead to a Vercel 404. absoluteUrl
+ * falls back to the production domain, so a link is still correct when
+ * NEXT_PUBLIC_SITE_URL is unset.
+ */
+
 // Helper to prevent HTML injection in emails
 function escapeHtml(unsafe: string): string {
   return unsafe
@@ -88,7 +99,7 @@ export const NewRequestEmailHTML = (data: {
       ` : ''}
 
       <div style="margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL}/admin" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+        <a href="${absoluteUrl("/admin")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
           View Request in Admin Console
         </a>
       </div>
@@ -143,7 +154,7 @@ export const InvoiceSentEmailHTML = (data: {
       <p>Please review and complete the payment at your earliest convenience.</p>
 
       <div style="margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
           View Dashboard
         </a>
       </div>
@@ -200,7 +211,7 @@ export const StatusUpdateEmailHTML = (data: {
       ` : ''}
 
       <div style="margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
           View Dashboard
         </a>
       </div>
@@ -270,7 +281,7 @@ export const NewUserAdminNotificationEmailHTML = (data: {
       </div>
 
       <div style="margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL}/admin/users" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+        <a href="${absoluteUrl("/admin/users")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
           Manage Users in Admin Console
         </a>
       </div>
@@ -343,7 +354,7 @@ export const WelcomeUserEmailHTML = (data: {
       <p>You can now sign in to your dashboard to submit part requests, track your existing orders, and manage invoices.</p>
 
       <div style="margin-top: 30px;">
-        <a href="${process.env.NEXTAUTH_URL}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
           Go to Dashboard
         </a>
       </div>
