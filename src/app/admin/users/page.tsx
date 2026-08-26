@@ -115,10 +115,32 @@ export default function AdminUsersPage() {
                         <div className="text-sm font-bold text-cream-200">{user.name}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-cream-200">{user.email}</div>
+                        <div className="text-sm font-medium text-cream-200">
+                          {user.email ? (
+                            <a
+                              href={`mailto:${user.email}`}
+                              className="text-clay-300 hover:text-clay-200 underline underline-offset-2 decoration-clay-500/40 hover:decoration-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded"
+                            >
+                              {user.email}
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-cream-500">{user.phone}</div>
+                        <div className="text-sm text-cream-500">
+                          {user.phone ? (
+                            <a
+                              href={`tel:${String(user.phone).replace(/[^\d+]/g, "")}`}
+                              className="text-clay-300 hover:text-clay-200 underline underline-offset-2 decoration-clay-500/40 hover:decoration-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded"
+                            >
+                              {user.phone}
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.isAdmin ? 'bg-clay-500/12 text-clay-300 border border-clay-500/30' : 'bg-espresso-700 text-cream-300 border border-espresso-600'}`}>
@@ -208,11 +230,33 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                         <dt className="text-sm font-medium text-cream-500">Email Address</dt>
-                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedUser.email}</dd>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">
+                            {selectedUser.email ? (
+                              <a
+                                href={`mailto:${selectedUser.email}`}
+                                className="text-clay-300 hover:text-clay-200 underline underline-offset-2 decoration-clay-500/40 hover:decoration-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded"
+                              >
+                                {selectedUser.email}
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
+                        </dd>
                     </div>
                     <div>
                         <dt className="text-sm font-medium text-cream-500">Phone Number</dt>
-                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedUser.phone || "N/A"}</dd>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">
+                            {selectedUser.phone ? (
+                              <a
+                                href={`tel:${String(selectedUser.phone).replace(/[^\d+]/g, "")}`}
+                                className="text-clay-300 hover:text-clay-200 underline underline-offset-2 decoration-clay-500/40 hover:decoration-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded"
+                              >
+                                {selectedUser.phone}
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
+                        </dd>
                     </div>
                     <div>
                         <dt className="text-sm font-medium text-cream-500">Shipping Address</dt>
