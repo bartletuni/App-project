@@ -13,7 +13,7 @@ jest.mock("@/lib/prisma", () => ({
       findFirst: jest.fn().mockResolvedValue({ id: "phone-1" }),
       create: jest.fn().mockResolvedValue({ id: "phone-1" })
     },
-    partRequest: { create: jest.fn().mockResolvedValue({ id: "req-1" }) },
+    partRequest: { create: jest.fn().mockResolvedValue({ id: "req-1", attachments: [] }) },
   }
 }));
 
@@ -104,6 +104,116 @@ describe("POST /api/requests", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe("File content does not match its extension");
+  });
+
+  // A submission with no 3D model: the customer describes the part instead.
+  const createDescriptionRequest = (
+    overrides: {
+      partName?: string;
+      partDescription?: string;
+      dimensions?: string;
+      references?: { name: string; content: Buffer }[];
+      quoteRequested?: string;
+    } = {}
+  ) => {
+    const formData = new FormData();
+    formData.append("submissionType", "DESCRIPTION");
+    formData.append("partName", overrides.partName ?? "Dryer door catch");
+    formData.append(
+      "partDescription",
+      overrides.partDescription ??
+        "A small nylon catch that holds the dryer door shut. The tab snapped off."
+    );
+    if (overrides.dimensions !== undefined) formData.append("dimensions", overrides.dimensions);
+    for (const reference of overrides.references ?? []) {
+      formData.append(
+        "references",
+        new File([new Uint8Array(reference.content)], reference.name, { type: "application/octet-stream" })
+      );
+    }
+    formData.append("quantity", "1");
+    formData.append("material", "PLA");
+    formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString());
+    formData.append("phoneNumber", "1234567890");
+    if (overrides.quoteRequested !== undefined) {
+      formData.append("quoteRequested", overrides.quoteRequested);
+    }
+
+    return new NextRequest("http://localhost/api/requests", { method: "POST", body: formData });
+  };
+
+  const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]);
+
+  it("accepts a request with no model file when the part is described", async () => {
+    const res = await POST(createDescriptionRequest());
+    expect(res.status).toBe(201);
+
+    const data = createdRequestData();
+    expect(data.submissionType).toBe("DESCRIPTION");
+    expect(data.fileId).toBeNull();
+    expect(data.fileName).toBeNull();
+    expect(data.partName).toBe("Dryer door catch");
+    expect(data.partDescription).toContain("nylon catch");
+  });
+
+  it("still requires a file when no description is offered", async () => {
+    const formData = new FormData();
+    formData.append("quantity", "1");
+    formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString());
+    formData.append("phoneNumber", "1234567890");
+    const res = await POST(
+      new NextRequest("http://localhost/api/requests", { method: "POST", body: formData })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("STL or ZIP file is required");
+  });
+
+  it("rejects a described part with no name", async () => {
+    const res = await POST(createDescriptionRequest({ partName: "" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Part name is required");
+  });
+
+  it("rejects a described part whose description is too thin", async () => {
+    const res = await POST(createDescriptionRequest({ partDescription: "broken" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/at least 20 characters/);
+  });
+
+  it("always quotes a described part, even when the flag says otherwise", async () => {
+    const res = await POST(createDescriptionRequest({ quoteRequested: "false" }));
+    expect(res.status).toBe(201);
+    expect(createdRequestData().quoteRequested).toBe(true);
+  });
+
+  it("stores reference photos attached to a described part", async () => {
+    const res = await POST(
+      createDescriptionRequest({ references: [{ name: "catch.png", content: PNG }] })
+    );
+    expect(res.status).toBe(201);
+
+    const data = createdRequestData();
+    expect(data.attachments.create).toEqual([
+      expect.objectContaining({ fileName: "catch.png", mimeType: "image/png", fileId: "test-file-id" }),
+    ]);
+  });
+
+  it("rejects a reference file whose bytes do not match its extension", async () => {
+    const res = await POST(
+      createDescriptionRequest({ references: [{ name: "catch.png", content: Buffer.from("not a png") }] })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Reference file content does not match its extension");
+  });
+
+  it("rejects an unsupported reference file type", async () => {
+    const res = await POST(
+      createDescriptionRequest({ references: [{ name: "catch.exe", content: PNG }] })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(
+      "Reference files must be JPG, PNG, WEBP, GIF, HEIC, or PDF"
+    );
   });
 
   it("stores the quote flag when the composer's checkbox is ticked", async () => {

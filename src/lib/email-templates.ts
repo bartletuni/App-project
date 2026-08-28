@@ -22,7 +22,13 @@ function escapeHtml(unsafe: string): string {
 export const NewRequestEmailHTML = (data: {
   customerName: string;
   customerEmail: string;
+  /** The uploaded file's name, or the customer's name for a described part. */
   fileName: string;
+  /** "MODEL" (a file was uploaded) or "DESCRIPTION" (no file — we draw it). */
+  submissionType?: string;
+  partDescription?: string;
+  dimensions?: string;
+  referenceCount?: number;
   quantity: number;
   material: string;
   dateNeeded: string;
@@ -45,6 +51,8 @@ export const NewRequestEmailHTML = (data: {
     .value { font-size: 16px; color: #1a202c; }
     .notes-box { background-color: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #4f46e5; margin-top: 20px; }
     .quote-box { background-color: #fffaf0; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #dd6b20; margin-bottom: 20px; color: #7b341e; font-weight: bold; }
+    .model-box { background-color: #ebf8ff; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #3182ce; margin-bottom: 20px; color: #2a4365; font-weight: bold; }
+    .desc-box { background-color: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3182ce; margin-bottom: 20px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -54,6 +62,10 @@ export const NewRequestEmailHTML = (data: {
     </div>
     <div class="content">
       <p>A new part request has been submitted to TakomoCo.</p>
+
+      ${data.submissionType === "DESCRIPTION" ? `
+      <div class="model-box">No 3D file — the customer described this part${data.referenceCount ? ` and attached ${data.referenceCount} reference file${data.referenceCount === 1 ? '' : 's'}` : ''}. Model it, then quote.</div>
+      ` : ''}
 
       ${data.quoteRequested ? `
       <div class="quote-box">Quote requested — send a price for approval before invoicing.</div>
@@ -65,9 +77,23 @@ export const NewRequestEmailHTML = (data: {
       </div>
 
       <div class="field">
-        <div class="label">File Name</div>
+        <div class="label">${data.submissionType === "DESCRIPTION" ? 'Part' : 'File Name'}</div>
         <div class="value">${escapeHtml(data.fileName)}</div>
       </div>
+
+      ${data.partDescription ? `
+      <div class="field">
+        <div class="label">Description</div>
+        <div class="desc-box">${escapeHtml(data.partDescription)}</div>
+      </div>
+      ` : ''}
+
+      ${data.dimensions ? `
+      <div class="field">
+        <div class="label">Approximate Size</div>
+        <div class="value">${escapeHtml(data.dimensions)}</div>
+      </div>
+      ` : ''}
 
       <div class="field">
         <div class="label">Material</div>

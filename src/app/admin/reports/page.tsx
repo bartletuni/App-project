@@ -7,6 +7,7 @@ import AppShell from "@/components/AppShell";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { requestTitle } from "@/lib/part-source";
 
 export default function GenerateReportsPage() {
   const { data: session, status } = useSession();
@@ -75,7 +76,7 @@ export default function GenerateReportsPage() {
           req.user?.name || "N/A",
           req.user?.email || "N/A",
           req.phoneNumber?.number || "N/A",
-          req.fileName,
+          requestTitle(req),
           req.material || "N/A",
           req.quantity.toString(),
           req.status,

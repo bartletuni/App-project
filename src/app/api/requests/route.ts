@@ -7,6 +7,19 @@ import { addDays, format } from "date-fns";
 import { sendEmail } from "@/lib/email";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
+import { modelMimeType, referenceMimeType } from "@/lib/file-signatures";
+import {
+  MAX_DESCRIPTION_CHARS,
+  MAX_DIMENSIONS_CHARS,
+  MAX_MODEL_BYTES,
+  MAX_PART_NAME_CHARS,
+  MAX_REFERENCE_BYTES,
+  MAX_REFERENCE_FILES,
+  MIN_DESCRIPTION_CHARS,
+  SUBMISSION_DESCRIPTION,
+  isReferenceFileName,
+  parseSubmissionType,
+} from "@/lib/part-source";
  
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -21,6 +34,15 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    const submissionType = parseSubmissionType(formData.get("submissionType") as string | null);
+    const isDescriptionRequest = submissionType === SUBMISSION_DESCRIPTION;
+    const partNameRaw = formData.get("partName") as string | null;
+    const partDescriptionRaw = formData.get("partDescription") as string | null;
+    const dimensionsRaw = formData.get("dimensions") as string | null;
+    // Reference photos/sketches/drawings — only meaningful without a model.
+    const referenceFiles = isDescriptionRequest
+      ? (formData.getAll("references").filter((v) => typeof v !== "string") as File[])
+      : [];
     const quantityStr = formData.get("quantity") as string | null;
     const notes = formData.get("notes") as string | null;
     const material = formData.get("material") as string | null;
@@ -38,15 +60,23 @@ export async function POST(req: NextRequest) {
       (phoneNumberString !== null && typeof phoneNumberString !== "string") ||
       (requestedUserId !== null && typeof requestedUserId !== "string") ||
       (printSettingsRaw !== null && typeof printSettingsRaw !== "string") ||
-      (quoteRequestedRaw !== null && typeof quoteRequestedRaw !== "string")
+      (quoteRequestedRaw !== null && typeof quoteRequestedRaw !== "string") ||
+      (partNameRaw !== null && typeof partNameRaw !== "string") ||
+      (partDescriptionRaw !== null && typeof partDescriptionRaw !== "string") ||
+      (dimensionsRaw !== null && typeof dimensionsRaw !== "string")
     ) {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
 
     // The composer's "Quote" checkbox. Absent or anything falsy means a normal
-    // build request.
+    // build request. A described part has nothing to price until we have drawn
+    // it, so those are always quoted first no matter what the client sent — the
+    // composer ticks and locks the box to match.
     const quoteRequested =
-      quoteRequestedRaw === "true" || quoteRequestedRaw === "1" || quoteRequestedRaw === "on";
+      isDescriptionRequest ||
+      quoteRequestedRaw === "true" ||
+      quoteRequestedRaw === "1" ||
+      quoteRequestedRaw === "on";
 
     // Optional custom slicer settings; absent/empty means AUTO.
     let customSettings: CustomPrintSettings | null = null;
@@ -81,47 +111,120 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Material name exceeds maximum allowed length" }, { status: 400 });
     }
 
-    if (!file) {
-      return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
-    }
+    // ---- What is being made -------------------------------------------------
+    // Either an uploaded model (the original path) or, for a customer with no
+    // 3D file, a written description plus optional reference photos. Both are
+    // validated here; nothing is uploaded until every check has passed.
 
-    if (typeof file === "string" || !file.name) {
-      return NextResponse.json({ error: "Invalid file uploaded" }, { status: 400 });
-    }
+    // MODEL: the .stl/.zip and its validated bytes.
+    let modelBuffer: Buffer | null = null;
+    let modelMime: string | null = null;
 
-    if (file.name.length > 255) {
-      return NextResponse.json({ error: "File name exceeds maximum allowed length" }, { status: 400 });
-    }
+    // DESCRIPTION: the written submission and its reference files.
+    let partName: string | null = null;
+    let partDescription: string | null = null;
+    let dimensions: string | null = null;
+    const referenceUploads: { fileName: string; mimeType: string; buffer: Buffer }[] = [];
 
-    if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
-      return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
-    }
+    if (!isDescriptionRequest) {
+      if (!file) {
+        return NextResponse.json({ error: "STL or ZIP file is required" }, { status: 400 });
+      }
 
-    if (file.size > 20 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds the 20MB limit" }, { status: 400 });
-    }
+      if (typeof file === "string" || !file.name) {
+        return NextResponse.json({ error: "Invalid file uploaded" }, { status: 400 });
+      }
 
-    // Convert file to Buffer early for magic number validation
-    const buffer = Buffer.from(await file.arrayBuffer());
+      if (file.name.length > 255) {
+        return NextResponse.json({ error: "File name exceeds maximum allowed length" }, { status: 400 });
+      }
 
-    // Magic number validation for ZIP, ASCII STL, and Binary STL
-    const isZip = buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4B;
-    const isAsciiStl = buffer.length >= 5 && buffer.subarray(0, 5).toString("ascii").toLowerCase() === "solid";
-    let isBinaryStl = false;
-    if (buffer.length >= 84) {
-      const triangleCount = buffer.readUInt32LE(80);
-      const expectedSize = 84 + (triangleCount * 50);
-      isBinaryStl = buffer.length === expectedSize;
-    }
+      if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
+        return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
+      }
 
-    const ext = file.name.toLowerCase().split('.').pop();
-    if (ext === "zip" && !isZip) {
-      return NextResponse.json({ error: "File content does not match its extension" }, { status: 400 });
-    } else if (ext === "stl" && !isAsciiStl && !isBinaryStl) {
-      return NextResponse.json({ error: "File content does not match its extension" }, { status: 400 });
-    } else if (ext !== "zip" && ext !== "stl") {
-      // Just in case it bypassed the first check (shouldn't happen)
-      return NextResponse.json({ error: "Only .STL and .ZIP files are allowed" }, { status: 400 });
+      if (file.size > MAX_MODEL_BYTES) {
+        return NextResponse.json({ error: "File size exceeds the 20MB limit" }, { status: 400 });
+      }
+
+      // The extension is only a claim; the leading bytes have to back it up.
+      modelBuffer = Buffer.from(await file.arrayBuffer());
+      modelMime = modelMimeType(file.name, modelBuffer);
+      if (!modelMime) {
+        return NextResponse.json({ error: "File content does not match its extension" }, { status: 400 });
+      }
+    } else {
+      partName = (partNameRaw || "").trim();
+      partDescription = (partDescriptionRaw || "").trim();
+      dimensions = (dimensionsRaw || "").trim() || null;
+
+      if (!partName) {
+        return NextResponse.json({ error: "Part name is required" }, { status: 400 });
+      }
+      if (partName.length > MAX_PART_NAME_CHARS) {
+        return NextResponse.json(
+          { error: `Part name must be ${MAX_PART_NAME_CHARS} characters or fewer` },
+          { status: 400 }
+        );
+      }
+      if (partDescription.length < MIN_DESCRIPTION_CHARS) {
+        return NextResponse.json(
+          { error: `Part description must be at least ${MIN_DESCRIPTION_CHARS} characters` },
+          { status: 400 }
+        );
+      }
+      if (partDescription.length > MAX_DESCRIPTION_CHARS) {
+        return NextResponse.json(
+          { error: `Part description must be ${MAX_DESCRIPTION_CHARS} characters or fewer` },
+          { status: 400 }
+        );
+      }
+      if (dimensions && dimensions.length > MAX_DIMENSIONS_CHARS) {
+        return NextResponse.json(
+          { error: `Approximate size must be ${MAX_DIMENSIONS_CHARS} characters or fewer` },
+          { status: 400 }
+        );
+      }
+
+      if (referenceFiles.length > MAX_REFERENCE_FILES) {
+        return NextResponse.json(
+          { error: `Attach at most ${MAX_REFERENCE_FILES} reference files` },
+          { status: 400 }
+        );
+      }
+
+      for (const reference of referenceFiles) {
+        if (!reference.name) {
+          return NextResponse.json({ error: "Invalid reference file uploaded" }, { status: 400 });
+        }
+        if (reference.name.length > 255) {
+          return NextResponse.json(
+            { error: "Reference file name exceeds maximum allowed length" },
+            { status: 400 }
+          );
+        }
+        if (!isReferenceFileName(reference.name)) {
+          return NextResponse.json(
+            { error: "Reference files must be JPG, PNG, WEBP, GIF, HEIC, or PDF" },
+            { status: 400 }
+          );
+        }
+        if (reference.size > MAX_REFERENCE_BYTES) {
+          return NextResponse.json(
+            { error: "Reference file size exceeds the 10MB limit" },
+            { status: 400 }
+          );
+        }
+        const referenceBuffer = Buffer.from(await reference.arrayBuffer());
+        const mimeType = referenceMimeType(reference.name, referenceBuffer);
+        if (!mimeType) {
+          return NextResponse.json(
+            { error: "Reference file content does not match its extension" },
+            { status: 400 }
+          );
+        }
+        referenceUploads.push({ fileName: reference.name, mimeType, buffer: referenceBuffer });
+      }
     }
 
     if (!dateNeededStr) {
@@ -183,24 +286,32 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    let fileId: string | undefined;
+    let fileId: string | null = null;
+    const storedReferences: { fileId: string; fileName: string; mimeType: string; size: number }[] = [];
 
     try {
-      let mimeType = "application/octet-stream";
-      if (file.name.toLowerCase().endsWith(".zip")) {
-        mimeType = "application/zip";
-      } else if (file.name.toLowerCase().endsWith(".stl")) {
-        mimeType = "application/sla";
+      if (modelBuffer && modelMime && file) {
+        fileId = (await uploadToR2(file.name, modelMime, modelBuffer)) || null;
+        if (!fileId) {
+          return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
+        }
       }
-      const fileIdRes = await uploadToR2(file.name, mimeType, buffer);
-      fileId = fileIdRes || undefined;
+
+      for (const reference of referenceUploads) {
+        const referenceId = await uploadToR2(reference.fileName, reference.mimeType, reference.buffer);
+        if (!referenceId) {
+          return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
+        }
+        storedReferences.push({
+          fileId: referenceId,
+          fileName: reference.fileName,
+          mimeType: reference.mimeType,
+          size: reference.buffer.length,
+        });
+      }
     } catch (e) {
       console.error(e);
       return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
-    }
-
-    if (!fileId) {
-      return NextResponse.json({ error: "Error uploading to Cloudflare R2" }, { status: 500 });
     }
 
     // Create Part Request
@@ -208,29 +319,42 @@ export async function POST(req: NextRequest) {
       data: {
         userId: targetUserId,
         phoneNumberId: phoneNumberRecord.id,
+        submissionType,
         fileId,
-        fileName: file.name,
+        fileName: file && !isDescriptionRequest ? file.name : null,
+        partName,
+        partDescription,
+        dimensions,
         quantity,
         material,
         notes,
         printSettings: customSettings ? JSON.stringify(customSettings) : null,
         quoteRequested,
         dateNeeded,
+        ...(storedReferences.length > 0 ? { attachments: { create: storedReferences } } : {}),
       },
+      include: { attachments: true },
     });
 
     // Send Email Notification. sendEmail reads Resend's reply and logs any
     // rejection; a failure here never blocks the request that was just created.
     try {
+      const title = (file && !isDescriptionRequest ? file.name : partName) || "Untitled part";
       // Sanitize to prevent Email Header (CRLF) Injection
-      const safeFileName = file.name.replace(/[\r\n]/g, '');
+      const safeTitle = title.replace(/[\r\n]/g, '');
       await sendEmail({
         to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
-        subject: `New Request: ${safeFileName}`,
+        subject: isDescriptionRequest
+          ? `New Request (no model): ${safeTitle}`
+          : `New Request: ${safeTitle}`,
         html: NewRequestEmailHTML({
           customerName: targetUserName,
           customerEmail: targetUserEmail,
-          fileName: file.name,
+          fileName: title,
+          submissionType,
+          partDescription: partDescription || undefined,
+          dimensions: dimensions || undefined,
+          referenceCount: storedReferences.length,
           quantity,
           material: material || "Not specified",
           dateNeeded: format(dateNeeded, "PPP"),
@@ -309,6 +433,7 @@ export async function GET(req: NextRequest) {
             }
           },
           phoneNumber: true,
+          attachments: true,
         },
         orderBy: { createdAt: 'desc' }
       });
@@ -329,6 +454,7 @@ export async function GET(req: NextRequest) {
             }
           },
           phoneNumber: true,
+          attachments: true,
         },
         orderBy: { createdAt: 'desc' }
       });

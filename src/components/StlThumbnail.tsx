@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FileArchive, Box } from "lucide-react";
+import { FileArchive, Box, Wand2 } from "lucide-react";
 import { isStlFileName, thumbnailForFile, thumbnailForFileId } from "@/lib/stl";
 
 interface StlThumbnailProps {
   fileId?: string | null;
   /** Locally-selected file — takes precedence over fileId. */
   file?: File | null;
-  fileName: string;
+  /** Null on a described part, which has no model file to preview. */
+  fileName?: string | null;
   /** Rendered box size in px. */
   size?: number;
   className?: string;
@@ -17,7 +18,8 @@ interface StlThumbnailProps {
 /**
  * Small static image preview of an STL part. Renders lazily (only when
  * scrolled into view) and shares the geometry/thumbnail cache with StlViewer.
- * Non-STL files (ZIP) get an archive glyph instead.
+ * Non-STL files (ZIP) get an archive glyph instead, and a described part —
+ * submitted with no model at all — gets the modelling glyph.
  */
 export default function StlThumbnail({
   fileId,
@@ -72,6 +74,14 @@ export default function StlThumbnail({
 
   const box = `shrink-0 flex items-center justify-center overflow-hidden rounded-md border border-clay-500/20 bg-espresso-900/70 ${className}`;
   const style = { width: size, height: size };
+
+  if (!fileName && !fileId && !file) {
+    return (
+      <div className={box} style={style} title="Described part — no model file yet">
+        <Wand2 className="h-1/2 w-1/2 text-clay-400/60" aria-hidden="true" />
+      </div>
+    );
+  }
 
   if (!isStl) {
     return (

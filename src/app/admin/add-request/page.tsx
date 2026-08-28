@@ -5,9 +5,22 @@ import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 import AppShell from "@/components/AppShell";
-import StlViewer from "@/components/StlViewer";
+import PartSourceFields from "@/components/PartSourceFields";
+import { useFormAlert } from "@/components/ui/useFormAlert";
+import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
+import {
+  PartSourceState,
+  appendPartSource,
+  emptyPartSource,
+  quoteIsForced,
+  validatePartSource,
+} from "@/lib/part-source";
+
+const adminField =
+  "block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800";
+const adminLabel = "block text-sm font-semibold text-cream-300 mb-1.5";
 
 function AdminAddRequestContent() {
   const { data: session, status } = useSession();
@@ -16,7 +29,7 @@ function AdminAddRequestContent() {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  const [file, setFile] = useState<File | null>(null);
+  const [partSource, setPartSource] = useState<PartSourceState>(emptyPartSource);
   const [notes, setNotes] = useState("");
   const [material, setMaterial] = useState("");
   const [availableMaterials, setAvailableMaterials] = useState<{ id: string; name: string }[]>([]);
@@ -31,8 +44,12 @@ function AdminAddRequestContent() {
     custom: { ...DEFAULT_CUSTOM_SETTINGS },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  // Both banners sit above a long form, so they scroll themselves into view
+  // rather than reporting the outcome somewhere off-screen.
+  const errorAlert = useFormAlert<HTMLDivElement>();
+  const successAlert = useFormAlert<HTMLDivElement>();
+  const error = errorAlert.message;
+  const setError = errorAlert.show;
 
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
@@ -95,8 +112,8 @@ function AdminAddRequestContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setSuccess(false);
+    errorAlert.clear();
+    successAlert.clear();
 
     if (!selectedUserId) {
         setError("Please select a customer.");
@@ -104,14 +121,9 @@ function AdminAddRequestContent() {
         return;
     }
 
-    if (!file) {
-      setError("Please select an STL or ZIP file.");
-      setLoading(false);
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      setError("File size exceeds the 20MB limit.");
+    const sourceError = validatePartSource(partSource);
+    if (sourceError) {
+      setError(sourceError);
       setLoading(false);
       return;
     }
@@ -136,7 +148,7 @@ function AdminAddRequestContent() {
 
     const formData = new FormData();
     formData.append("userId", selectedUserId);
-    formData.append("file", file);
+    appendPartSource(formData, partSource);
     formData.append("quantity", quantity);
     formData.append("material", material);
     formData.append("notes", notes);
@@ -151,12 +163,11 @@ function AdminAddRequestContent() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit request.");
+        throw new Error(await readSubmitError(res));
       }
 
-      setSuccess(true);
-      setFile(null);
+      successAlert.show("Request successfully submitted.");
+      setPartSource(emptyPartSource());
       setNotes("");
       if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
       setQuantity("1");
@@ -176,8 +187,8 @@ function AdminAddRequestContent() {
                     }
                 }
             });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(describeSubmitException(err));
     } finally {
       setLoading(false);
     }
@@ -199,16 +210,29 @@ function AdminAddRequestContent() {
         <div className="max-w-2xl panel rounded-md p-6 sm:p-8">
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-center" role="alert">
-              <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {error}
+            <div
+              ref={errorAlert.ref}
+              tabIndex={-1}
+              className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-start outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              role="alert"
+            >
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>
+                <strong className="block font-semibold">Request not submitted</strong>
+                {error}
+              </span>
             </div>
           )}
 
-          {success && (
-            <div className="mb-6 p-4 bg-green-500/15 border border-green-500/30 text-green-300 rounded-xl text-sm flex gap-2 items-center" role="status">
+          {successAlert.message && (
+            <div
+              ref={successAlert.ref}
+              tabIndex={-1}
+              className="mb-6 p-4 bg-green-500/15 border border-green-500/30 text-green-300 rounded-xl text-sm flex gap-2 items-center outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+              role="status"
+            >
               <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Request successfully submitted.
+              {successAlert.message}
             </div>
           )}
 
@@ -234,25 +258,21 @@ function AdminAddRequestContent() {
               </select>
             </div>
 
-            <div>
-              <label htmlFor="fileUpload" className="block text-sm font-semibold text-cream-300 mb-1.5">
-                .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Max 20MB)</span>
-              </label>
-              <input
-                id="fileUpload"
-                type="file"
-                accept=".stl,.zip"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-cream-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-clay-500/12 file:text-clay-300 hover:file:bg-clay-500/15 transition-colors file:cursor-pointer cursor-pointer border border-espresso-600 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
-                required
-              />
-              {file && (
-                <div className="mt-3">
-                  <div className="text-xs text-cream-500 mb-2">3D preview — verify the part before submitting</div>
-                  <StlViewer file={file} fileName={file.name} className="h-64 w-full" />
-                </div>
-              )}
-            </div>
+            <PartSourceFields
+              value={partSource}
+              onChange={setPartSource}
+              idPrefix="admin-source"
+              fieldClassName={adminField}
+              labelClassName={adminLabel}
+              onLocalError={setError}
+            />
+
+            {quoteIsForced(partSource.mode) && (
+              <p className="text-xs text-clay-300 bg-clay-500/10 border border-clay-500/25 rounded-lg px-3 py-2">
+                A described part is filed as a quote request — there is nothing to
+                price until it has been modelled.
+              </p>
+            )}
 
             <div>
               <label htmlFor="quantity" className="block text-sm font-semibold text-cream-300 mb-1.5">
@@ -364,7 +384,8 @@ function AdminAddRequestContent() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !!validatePartSource(partSource)}
+              title={validatePartSource(partSource) || undefined}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-clay-600 hover:bg-clay-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
             >
               {loading ? (
@@ -377,6 +398,16 @@ function AdminAddRequestContent() {
                  </span>
               ) : "Submit Request"}
             </button>
+
+            {/* Repeats the banner beside the button that was just pressed, so
+                the outcome is visible without scrolling back up. The banner
+                above is the one announced; this copy is decorative. */}
+            {error && (
+              <p className="text-sm text-red-300 flex gap-2 items-start" aria-hidden="true">
+                <span aria-hidden="true">⚠</span>
+                <span>{error}</span>
+              </p>
+            )}
           </form>
         </div>
       </div>
