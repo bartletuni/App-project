@@ -1,6 +1,28 @@
-import { absoluteUrl } from "@/lib/seo";
+import { BUSINESS, absoluteUrl } from "@/lib/seo";
 
 /**
+ * Transactional email, in the same voice as the site.
+ *
+ * The site is a warm dark "spec sheet": espresso grounds, clay accents, cream
+ * text, a display serif for headings and a letterspaced monospace for index
+ * labels. These templates carry that across, and reuse the product's own
+ * vocabulary — your desk, the composer, the build ledger — so an email reads
+ * like it came from the same place as the page it links to.
+ *
+ * Everything is built from the small kit below rather than copy-pasted per
+ * template, so the five emails cannot drift apart.
+ *
+ * Email HTML is not web HTML. The rules followed here:
+ *   - Tables for layout; `role="presentation"` so screen readers skip them.
+ *   - Styles inline. Gmail strips <style> for some account types, so nothing
+ *     load-bearing lives in the one <style> block (media queries only).
+ *   - `bgcolor` beside every background-color: Outlook's Word engine ignores
+ *     the CSS but honours the attribute, which matters when the design is dark.
+ *   - No box-shadow, no background images, no web fonts — none survive Outlook.
+ *     The display face degrades through Palatino to Georgia, which is everywhere.
+ *   - The design is already dark, so it declares `color-scheme: dark` and asks
+ *     clients not to "helpfully" invert it.
+ *
  * Links point at the canonical site origin, not NEXTAUTH_URL. That variable
  * describes wherever auth callbacks are served — on Vercel it is often pinned
  * to one immutable deployment URL, which stops resolving once that deployment
@@ -9,7 +31,32 @@ import { absoluteUrl } from "@/lib/seo";
  * NEXT_PUBLIC_SITE_URL is unset.
  */
 
-// Helper to prevent HTML injection in emails
+// ---------------------------------------------------------------------------
+// Palette and type — the tailwind.config.ts values, resolved to plain hex.
+// ---------------------------------------------------------------------------
+
+const C = {
+  page: "#15100c", // espresso-950
+  card: "#1c1611", // espresso-900
+  panel: "#241d17", // espresso-800
+  raised: "#2c241d", // espresso-700
+  rule: "#3a2c22", // hairline, clay at low opacity flattened onto espresso
+  clay: "#cf8f5f", // clay-400
+  clayDeep: "#a9663c", // clay-600
+  eyebrow: "#e0a877", // the site's .eyebrow colour
+  ember: "#e6a85f", // ember-400
+  cream: "#fbf6ee", // cream-100
+  creamSoft: "#f4ecdf", // cream-200
+  body: "#d2c4ab", // cream-400
+  muted: "#b6a589", // cream-500
+  faint: "#9a886c", // cream-600
+} as const;
+
+const DISPLAY = "'Iowan Old Style','Palatino Linotype',Palatino,Georgia,Cambria,serif";
+const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+const MONO = "'SFMono-Regular',SFMono,Consolas,'Liberation Mono',Menlo,monospace";
+
+/** Prevents HTML injection from any value that reaches a template. */
 function escapeHtml(unsafe: string): string {
   return unsafe
     .replace(/&/g, "&amp;")
@@ -18,6 +65,296 @@ function escapeHtml(unsafe: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+/**
+ * Escapes, then turns newlines into <br>. `white-space: pre-wrap` is the
+ * obvious alternative but several clients drop it, and a customer's part
+ * description is the one place line breaks carry meaning.
+ */
+function escapeMultiline(unsafe: string): string {
+  return escapeHtml(unsafe).replace(/\r?\n/g, "<br>");
+}
+
+// ---------------------------------------------------------------------------
+// Kit
+// ---------------------------------------------------------------------------
+
+/** The site's monospace index label — "NEW BUILD ⁄ COMPOSER". */
+function eyebrow(text: string): string {
+  return `<div style="font-family:${MONO};font-size:11px;line-height:1.4;letter-spacing:0.24em;text-transform:uppercase;color:${C.eyebrow};padding-bottom:14px;">${escapeHtml(text)}</div>`;
+}
+
+/** The warm rule that fades at the ends on the site; flat here, since gradients are unreliable. */
+function hairline(): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td height="1" bgcolor="${C.rule}" style="background-color:${C.rule};height:1px;line-height:1px;font-size:0;">&nbsp;</td></tr></table>`;
+}
+
+function heading(text: string): string {
+  return `<h1 style="margin:0 0 16px;font-family:${DISPLAY};font-size:30px;line-height:1.2;font-weight:400;color:${C.cream};">${text}</h1>`;
+}
+
+function lede(html: string): string {
+  return `<p style="margin:0 0 26px;font-family:${SANS};font-size:15px;line-height:1.7;color:${C.body};">${html}</p>`;
+}
+
+/** A spec-sheet block: monospace label above its value, hairline between rows. */
+function specSheet(rows: { label: string; value: string }[]): string {
+  const present = rows.filter((r) => r.value);
+  if (present.length === 0) return ""; // never an empty bordered box
+
+  const cells = present
+    .map(
+      (r, i) => `
+        <tr><td style="padding:${i === 0 ? "0" : "14px"} 0 0;">
+          ${i === 0 ? "" : hairline()}
+          <div style="padding:${i === 0 ? "0" : "14px"} 0 0;">
+            <div style="font-family:${MONO};font-size:10px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted};padding-bottom:5px;">${escapeHtml(r.label)}</div>
+            <div style="font-family:${SANS};font-size:15px;line-height:1.55;color:${C.creamSoft};">${r.value}</div>
+          </div>
+        </td></tr>`
+    )
+    .join("");
+
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${C.panel}" style="background-color:${C.panel};border:1px solid ${C.rule};border-radius:4px;margin:0 0 26px;">
+      <tr><td style="padding:20px 22px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${cells}</table>
+      </td></tr>
+    </table>`;
+}
+
+/** A flagged notice — the shop needs to see these before anything else. */
+function callout(text: string, accent: string = C.ember): string {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${C.raised}" style="background-color:${C.raised};border-left:3px solid ${accent};border-radius:0 4px 4px 0;margin:0 0 20px;">
+      <tr><td style="padding:14px 18px;font-family:${SANS};font-size:14px;line-height:1.6;color:${C.creamSoft};">${text}</td></tr>
+    </table>`;
+}
+
+/** Free-form prose from a customer — notes, a part description. */
+function proseBlock(label: string, text: string): string {
+  return `
+    <div style="font-family:${MONO};font-size:10px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted};padding-bottom:8px;">${escapeHtml(label)}</div>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${C.panel}" style="background-color:${C.panel};border:1px solid ${C.rule};border-radius:4px;margin:0 0 26px;">
+      <tr><td style="padding:16px 18px;font-family:${SANS};font-size:15px;line-height:1.7;color:${C.creamSoft};">${escapeMultiline(text)}</td></tr>
+    </table>`;
+}
+
+/** Bulletproof CTA — a table so Outlook renders the fill, padding on the anchor. */
+function button(href: string, label: string): string {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px;">
+      <tr><td bgcolor="${C.clayDeep}" style="background-color:${C.clayDeep};border-radius:4px;">
+        <a href="${href}" style="display:inline-block;padding:15px 30px;font-family:${MONO};font-size:12px;line-height:1;letter-spacing:0.18em;text-transform:uppercase;color:${C.cream};text-decoration:none;font-weight:600;">${escapeHtml(label)} &rarr;</a>
+      </td></tr>
+    </table>`;
+}
+
+/** Status pill, mirroring the colours the build ledger uses on screen. */
+function statusChip(status: string): string {
+  const tones: Record<string, string> = {
+    PENDING: "#f0c08a",
+    ACTIVE: C.ember,
+    COMPLETED: "#8fbf7f",
+    "NEEDS REVIEW": "#e3be9a",
+    CANCELLED: "#d98a7a",
+    SHIPPED: "#7fbfb5",
+    "INVOICE SENT": "#e7dccb",
+  };
+  const tone = tones[status.toUpperCase()] || C.clay;
+  return `<span style="display:inline-block;padding:6px 12px;border:1px solid ${tone};border-radius:2px;font-family:${MONO};font-size:10px;line-height:1;letter-spacing:0.16em;text-transform:uppercase;color:${tone};">${escapeHtml(status)}</span>`;
+}
+
+/** The site's numbered index, used to walk someone through what happens next. */
+function steps(items: { title: string; detail: string }[]): string {
+  const rows = items
+    .map(
+      (item, i) => `
+      <tr>
+        <td width="42" valign="top" style="padding:0 0 18px;font-family:${MONO};font-size:12px;line-height:1.5;letter-spacing:0.1em;color:${C.clay};">${String(i + 1).padStart(2, "0")}</td>
+        <td valign="top" style="padding:0 0 18px;">
+          <div style="font-family:${SANS};font-size:15px;line-height:1.5;font-weight:600;color:${C.creamSoft};">${escapeHtml(item.title)}</div>
+          <div style="font-family:${SANS};font-size:14px;line-height:1.6;color:${C.muted};padding-top:3px;">${escapeHtml(item.detail)}</div>
+        </td>
+      </tr>`
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 12px;">${rows}</table>`;
+}
+
+/**
+ * The document every template is poured into: masthead, content, footer.
+ *
+ * `audience` decides the footer only — a customer gets the shop's contact
+ * details, the console gets a plain automated-notice line.
+ */
+function shell(opts: {
+  preheader: string;
+  eyebrow: string;
+  title: string;
+  content: string;
+  audience: "customer" | "console";
+}): string {
+  const footer =
+    opts.audience === "customer"
+      ? `
+        <div style="font-family:${SANS};font-size:13px;line-height:1.7;color:${C.muted};">
+          Questions about this? Reply to this email, or reach us at
+          <a href="mailto:${BUSINESS.email}" style="color:${C.clay};text-decoration:none;">${BUSINESS.email}</a>
+          &nbsp;·&nbsp;
+          <a href="tel:${BUSINESS.telephone}" style="color:${C.clay};text-decoration:none;">${BUSINESS.telephone.replace(/^\+1-/, "")}</a>
+        </div>
+        <div style="font-family:${MONO};font-size:10px;line-height:1.6;letter-spacing:0.1em;color:${C.faint};padding-top:14px;">
+          Sent by <a href="${absoluteUrl("/")}" style="color:${C.faint};text-decoration:none;">TakomoCo</a> because you have an account with us.
+        </div>`
+      : `
+        <div style="font-family:${MONO};font-size:10px;line-height:1.6;letter-spacing:0.1em;color:${C.faint};">
+          Automated notification &middot; <a href="${absoluteUrl("/admin")}" style="color:${C.faint};text-decoration:none;">TakomoCo console</a>
+        </div>`;
+
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>${escapeHtml(opts.title.replace(/<[^>]+>/g, ""))}</title>
+  <style>
+    :root { color-scheme: dark; supported-color-schemes: dark; }
+    a { text-decoration: none; }
+    @media only screen and (max-width:620px) {
+      .frame { width:100% !important; }
+      .pad { padding-left:22px !important; padding-right:22px !important; }
+      .title { font-size:25px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:${C.page};" bgcolor="${C.page}">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${C.page};opacity:0;">${escapeHtml(opts.preheader)}</div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${C.page}" style="background-color:${C.page};">
+    <tr><td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="frame" bgcolor="${C.card}" style="width:600px;max-width:600px;background-color:${C.card};border:1px solid ${C.rule};border-radius:6px;">
+
+        <!-- Masthead -->
+        <tr><td class="pad" style="padding:26px 34px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td align="left" style="font-family:${MONO};font-size:15px;line-height:1;letter-spacing:0.22em;color:${C.cream};font-weight:600;">TAKOMO<span style="color:${C.clay};">&#8260;</span>CO</td>
+              <td align="right" style="font-family:${MONO};font-size:9px;line-height:1;letter-spacing:0.18em;text-transform:uppercase;color:${C.faint};">Additive Mfg &middot; Utah</td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td>${hairline()}</td></tr>
+
+        <!-- Content -->
+        <tr><td class="pad" style="padding:34px;">
+          ${eyebrow(opts.eyebrow)}
+          ${opts.content}
+        </td></tr>
+
+        <tr><td>${hairline()}</td></tr>
+        <tr><td class="pad" style="padding:22px 34px 26px;">${footer}</td></tr>
+      </table>
+
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ---------------------------------------------------------------------------
+// Templates
+// ---------------------------------------------------------------------------
+
+export const WelcomeUserEmailHTML = (data: {
+  name: string;
+  email: string;
+  phone: string;
+  shippingAddress: string;
+  billingAddress: string;
+}) =>
+  shell({
+    audience: "customer",
+    preheader: "Your TakomoCo account is open — here's how to get a part made.",
+    eyebrow: "Welcome ⁄ Account opened",
+    title: `Welcome, ${data.name}`,
+    content: `
+      ${heading(`Welcome, <span style="font-style:italic;color:${C.clay};">${escapeHtml(data.name)}</span>`)}
+      ${lede(
+        "Your account is open. Your desk is where everything happens from here — submit a part, watch it move through the shop, and keep every build on one ledger."
+      )}
+
+      <div style="font-family:${MONO};font-size:10px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted};padding:0 0 16px;">How a part gets made</div>
+      ${steps([
+        {
+          title: "Send us the part",
+          detail:
+            "Upload an STL or ZIP if you have one. No model? Describe the part and send photos — we draw it for you.",
+        },
+        {
+          title: "We price it",
+          detail:
+            "You get an invoice, or a quote first if you asked for one. Nothing is built until it is paid in full.",
+        },
+        {
+          title: "We build and ship it",
+          detail:
+            "Track status and tracking numbers from your desk the whole way through.",
+        },
+      ])}
+
+      <div style="padding:6px 0 30px;">${button(absoluteUrl("/dashboard"), "Open your desk")}</div>
+
+      ${specSheet([
+        { label: "Name", value: escapeHtml(data.name) },
+        { label: "Email", value: escapeHtml(data.email) },
+        { label: "Phone", value: escapeHtml(data.phone) },
+        { label: "Shipping address", value: escapeMultiline(data.shippingAddress) },
+        { label: "Billing address", value: escapeMultiline(data.billingAddress) },
+      ])}
+
+      <p style="margin:0;font-family:${SANS};font-size:13px;line-height:1.7;color:${C.muted};">
+        Anything wrong above? Correct it any time in
+        <a href="${absoluteUrl("/settings")}" style="color:${C.clay};text-decoration:none;">your account settings</a>.
+      </p>`,
+  });
+
+export const NewUserAdminNotificationEmailHTML = (data: {
+  name: string;
+  email: string;
+  phone: string;
+  shippingAddress: string;
+  billingAddress: string;
+}) =>
+  shell({
+    audience: "console",
+    preheader: `${data.name} (${data.email}) just registered.`,
+    eyebrow: "Console ⁄ New client",
+    title: "New client registered",
+    content: `
+      ${heading("New client registered")}
+      ${lede("An account was just created on the TakomoCo platform.")}
+
+      ${specSheet([
+        { label: "Name", value: escapeHtml(data.name) },
+        {
+          label: "Email",
+          value: `<a href="mailto:${escapeHtml(data.email)}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.email)}</a>`,
+        },
+        {
+          label: "Phone",
+          value: `<a href="tel:${escapeHtml(data.phone)}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.phone)}</a>`,
+        },
+        { label: "Shipping address", value: escapeMultiline(data.shippingAddress) },
+        { label: "Billing address", value: escapeMultiline(data.billingAddress) },
+      ])}
+
+      ${button(absoluteUrl("/admin/users"), "Open client list")}`,
+  });
 
 export const NewRequestEmailHTML = (data: {
   customerName: string;
@@ -35,163 +372,84 @@ export const NewRequestEmailHTML = (data: {
   notes?: string;
   printSettings?: string;
   quoteRequested?: boolean;
-}) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
-    .content { padding: 20px; }
-    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
-    .field { margin-bottom: 15px; }
-    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
-    .value { font-size: 16px; color: #1a202c; }
-    .notes-box { background-color: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #4f46e5; margin-top: 20px; }
-    .quote-box { background-color: #fffaf0; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #dd6b20; margin-bottom: 20px; color: #7b341e; font-weight: bold; }
-    .model-box { background-color: #ebf8ff; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #3182ce; margin-bottom: 20px; color: #2a4365; font-weight: bold; }
-    .desc-box { background-color: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3182ce; margin-bottom: 20px; white-space: pre-wrap; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>New Part Request</h1>
-    </div>
-    <div class="content">
-      <p>A new part request has been submitted to TakomoCo.</p>
+}) => {
+  const described = data.submissionType === "DESCRIPTION";
+  const references = data.referenceCount
+    ? ` and attached ${data.referenceCount} reference file${data.referenceCount === 1 ? "" : "s"}`
+    : "";
 
-      ${data.submissionType === "DESCRIPTION" ? `
-      <div class="model-box">No 3D file — the customer described this part${data.referenceCount ? ` and attached ${data.referenceCount} reference file${data.referenceCount === 1 ? '' : 's'}` : ''}. Model it, then quote.</div>
-      ` : ''}
+  return shell({
+    audience: "console",
+    preheader: `${data.customerName} — ${data.fileName}, ${data.quantity} off, needed ${data.dateNeeded}.`,
+    eyebrow: "Console ⁄ New build",
+    title: "New part request",
+    content: `
+      ${heading("New part request")}
+      ${lede(`A new request came in from <span style="color:${C.creamSoft};">${escapeHtml(data.customerName)}</span>.`)}
 
-      ${data.quoteRequested ? `
-      <div class="quote-box">Quote requested — send a price for approval before invoicing.</div>
-      ` : ''}
-      
-      <div class="field">
-        <div class="label">Customer</div>
-        <div class="value">${escapeHtml(data.customerName)} (${escapeHtml(data.customerEmail)})</div>
-      </div>
+      ${
+        described
+          ? callout(
+              `<strong style="color:${C.clay};">No 3D file.</strong> The customer described this part${references}. Model it first, then quote.`,
+              C.clay
+            )
+          : ""
+      }
+      ${
+        data.quoteRequested
+          ? callout(
+              `<strong style="color:${C.ember};">Quote requested.</strong> Send a price for approval before invoicing.`,
+              C.ember
+            )
+          : ""
+      }
 
-      <div class="field">
-        <div class="label">${data.submissionType === "DESCRIPTION" ? 'Part' : 'File Name'}</div>
-        <div class="value">${escapeHtml(data.fileName)}</div>
-      </div>
+      ${specSheet([
+        {
+          label: "Customer",
+          value: `${escapeHtml(data.customerName)}<br><a href="mailto:${escapeHtml(data.customerEmail)}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.customerEmail)}</a>`,
+        },
+        { label: described ? "Part" : "File name", value: escapeHtml(data.fileName) },
+        { label: "Approximate size", value: data.dimensions ? escapeHtml(data.dimensions) : "" },
+        { label: "Material", value: escapeHtml(data.material) },
+        { label: "Quantity", value: String(data.quantity) },
+        { label: "Date needed", value: escapeHtml(data.dateNeeded) },
+        { label: "Print settings", value: data.printSettings ? escapeHtml(data.printSettings) : "" },
+      ])}
 
-      ${data.partDescription ? `
-      <div class="field">
-        <div class="label">Description</div>
-        <div class="desc-box">${escapeHtml(data.partDescription)}</div>
-      </div>
-      ` : ''}
+      ${data.partDescription ? proseBlock("Part description", data.partDescription) : ""}
+      ${data.notes ? proseBlock("Customer notes", data.notes) : ""}
 
-      ${data.dimensions ? `
-      <div class="field">
-        <div class="label">Approximate Size</div>
-        <div class="value">${escapeHtml(data.dimensions)}</div>
-      </div>
-      ` : ''}
-
-      <div class="field">
-        <div class="label">Material</div>
-        <div class="value">${escapeHtml(data.material)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Quantity</div>
-        <div class="value">${data.quantity}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Date Needed</div>
-        <div class="value">${escapeHtml(data.dateNeeded)}</div>
-      </div>
-
-      ${data.printSettings ? `
-      <div class="field">
-        <div class="label">Print Settings</div>
-        <div class="value">${escapeHtml(data.printSettings)}</div>
-      </div>
-      ` : ''}
-
-      ${data.notes ? `
-      <div class="notes-box">
-        <div class="label">Notes</div>
-        <div class="value">${escapeHtml(data.notes)}</div>
-      </div>
-      ` : ''}
-
-      <div style="margin-top: 30px;">
-        <a href="${absoluteUrl("/admin")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-          View Request in Admin Console
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      This is an automated notification from your TakomoCo application.
-    </div>
-  </div>
-</body>
-</html>
-`;
+      ${button(absoluteUrl("/admin"), "Open in console")}`,
+  });
+};
 
 export const InvoiceSentEmailHTML = (data: {
   customerName: string;
   fileName: string;
   invoiceNumber: string;
-}) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
-    .content { padding: 20px; }
-    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
-    .field { margin-bottom: 15px; }
-    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
-    .value { font-size: 16px; color: #1a202c; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Invoice Sent</h1>
-    </div>
-    <div class="content">
-      <p>Hello ${escapeHtml(data.customerName)},</p>
-      <p>Your invoice for the requested part has been sent.</p>
-      
-      <div class="field">
-        <div class="label">File Name</div>
-        <div class="value">${escapeHtml(data.fileName)}</div>
-      </div>
+}) =>
+  shell({
+    audience: "customer",
+    preheader: `Invoice ${data.invoiceNumber} for ${data.fileName} is ready.`,
+    eyebrow: "Invoice ⁄ Sent",
+    title: "Your invoice is ready",
+    content: `
+      ${heading("Your invoice is ready")}
+      ${lede(
+        `Hello ${escapeHtml(data.customerName)} — the invoice for your part has been sent. Manufacturing starts once it is paid in full.`
+      )}
 
-      <div class="field">
-        <div class="label">Invoice Number</div>
-        <div class="value">${escapeHtml(data.invoiceNumber)}</div>
-      </div>
+      ${specSheet([
+        { label: "Part", value: escapeHtml(data.fileName) },
+        {
+          label: "Invoice number",
+          value: `<span style="font-family:${MONO};font-size:15px;letter-spacing:0.06em;color:${C.clay};">${escapeHtml(data.invoiceNumber)}</span>`,
+        },
+      ])}
 
-      <p>Please review and complete the payment at your earliest convenience.</p>
-
-      <div style="margin-top: 30px;">
-        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-          View Dashboard
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      This is an automated notification from your TakomoCo application.
-    </div>
-  </div>
-</body>
-</html>
-`;
+      ${button(absoluteUrl("/dashboard"), "View on your desk")}`,
+  });
 
 export const StatusUpdateEmailHTML = (data: {
   customerName: string;
@@ -199,196 +457,25 @@ export const StatusUpdateEmailHTML = (data: {
   status: string;
   message: string;
   trackingNumber?: string | null;
-}) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
-    .content { padding: 20px; }
-    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
-    .field { margin-bottom: 15px; }
-    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
-    .value { font-size: 16px; color: #1a202c; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Status Update: ${escapeHtml(data.status)}</h1>
-    </div>
-    <div class="content">
-      <p>Hello ${escapeHtml(data.customerName)},</p>
-      <p>${escapeHtml(data.message)}</p>
-      
-      <div class="field">
-        <div class="label">File Name</div>
-        <div class="value">${escapeHtml(data.fileName)}</div>
-      </div>
+}) =>
+  shell({
+    audience: "customer",
+    preheader: `${data.fileName} — ${data.status}. ${data.message}`,
+    eyebrow: "Build ⁄ Status update",
+    title: `Status update: ${data.status}`,
+    content: `
+      <div style="padding:0 0 16px;">${statusChip(data.status)}</div>
+      ${heading(escapeHtml(data.fileName))}
+      ${lede(`Hello ${escapeHtml(data.customerName)} — ${escapeHtml(data.message)}`)}
 
-      ${data.trackingNumber ? `
-      <div class="field">
-        <div class="label">Tracking Number</div>
-        <div class="value">${escapeHtml(data.trackingNumber)}</div>
-      </div>
-      ` : ''}
+      ${specSheet([
+        {
+          label: "USPS tracking",
+          value: data.trackingNumber
+            ? `<span style="font-family:${MONO};font-size:15px;letter-spacing:0.06em;color:#7fbfb5;">${escapeHtml(data.trackingNumber)}</span>`
+            : "",
+        },
+      ])}
 
-      <div style="margin-top: 30px;">
-        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-          View Dashboard
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      This is an automated notification from your TakomoCo application.
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-export const NewUserAdminNotificationEmailHTML = (data: {
-  name: string;
-  email: string;
-  phone: string;
-  shippingAddress: string;
-  billingAddress: string;
-}) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
-    .content { padding: 20px; }
-    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
-    .field { margin-bottom: 15px; }
-    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
-    .value { font-size: 16px; color: #1a202c; }
-    .address-box { background-color: #f7fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>New User Registered</h1>
-    </div>
-    <div class="content">
-      <p>A new user account has been registered on the TakomoCo platform.</p>
-      
-      <div class="field">
-        <div class="label">Full Name</div>
-        <div class="value">${escapeHtml(data.name)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Email Address</div>
-        <div class="value">${escapeHtml(data.email)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Phone Number</div>
-        <div class="value">${escapeHtml(data.phone)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Shipping Address</div>
-        <div class="address-box">${escapeHtml(data.shippingAddress)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Billing Address</div>
-        <div class="address-box">${escapeHtml(data.billingAddress)}</div>
-      </div>
-
-      <div style="margin-top: 30px;">
-        <a href="${absoluteUrl("/admin/users")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-          Manage Users in Admin Console
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      This is an automated notification from your TakomoCo application.
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-export const WelcomeUserEmailHTML = (data: {
-  name: string;
-  email: string;
-  phone: string;
-  shippingAddress: string;
-  billingAddress: string;
-}) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .header { background-color: #4f46e5; color: white; padding: 20px; border-radius: 6px 6px 0 0; text-align: center; }
-    .content { padding: 20px; }
-    .footer { font-size: 12px; color: #718096; text-align: center; padding: 20px; }
-    .field { margin-bottom: 15px; }
-    .label { font-weight: bold; color: #4a5568; font-size: 12px; text-transform: uppercase; }
-    .value { font-size: 16px; color: #1a202c; }
-    .address-box { background-color: #f7fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Welcome to TakomoCo!</h1>
-    </div>
-    <div class="content">
-      <p>Hello ${escapeHtml(data.name)},</p>
-      <p>Your account has been successfully created. Here is a summary of the registration information you provided:</p>
-      
-      <div class="field">
-        <div class="label">Full Name</div>
-        <div class="value">${escapeHtml(data.name)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Email Address</div>
-        <div class="value">${escapeHtml(data.email)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Phone Number</div>
-        <div class="value">${escapeHtml(data.phone)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Shipping Address</div>
-        <div class="address-box">${escapeHtml(data.shippingAddress)}</div>
-      </div>
-
-      <div class="field">
-        <div class="label">Billing Address</div>
-        <div class="address-box">${escapeHtml(data.billingAddress)}</div>
-      </div>
-
-      <p>You can now sign in to your dashboard to submit part requests, track your existing orders, and manage invoices.</p>
-
-      <div style="margin-top: 30px;">
-        <a href="${absoluteUrl("/dashboard")}" style="background-color: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-          Go to Dashboard
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      This is an automated notification from your TakomoCo application.
-    </div>
-  </div>
-</body>
-</html>
-`;
+      ${button(absoluteUrl("/dashboard"), "View on your desk")}`,
+  });
