@@ -91,8 +91,9 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const quoteLocked = quoteIsForced(partSource.mode);
   const quoteChecked = quoteLocked || quoteRequested;
 
-  // Kept off the submit button as a tooltip too, so a disabled button always
-  // says which piece is still missing rather than sitting there inert.
+  // What is still missing, if anything. Shown under the submit button rather
+  // than used to disable it: a disabled control cannot be focused or hovered
+  // reliably, so anything it knows is invisible to the person stuck on it.
   const submitBlocker = validatePartSource(partSource);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -297,8 +298,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         <button
           type="submit"
-          disabled={loading || !!submitBlocker}
-          title={submitBlocker || undefined}
+          disabled={loading}
           className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
         >
           {loading ? (
@@ -314,14 +314,19 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           )}
         </button>
 
-        {/* Repeats the banner beside the button that was just pressed. The
-            banner above is the one announced; this copy is decorative. */}
-        {error && (
+        {/* What is still missing, before they press anything — and, once they
+            have, the failure itself. The banner above is the announced one;
+            this copy is decorative. */}
+        {error ? (
           <p className="flex gap-2 items-start text-sm text-red-300" aria-hidden="true">
             <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
             <span>{error}</span>
           </p>
-        )}
+        ) : submitBlocker ? (
+          <p className="text-xs leading-relaxed text-cream-500" aria-hidden="true">
+            {submitBlocker}
+          </p>
+        ) : null}
       </form>
     </Panel>
   );

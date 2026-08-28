@@ -53,6 +53,11 @@ function AdminAddRequestContent() {
 
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
+  // What is still missing, if anything. Shown under the submit button rather
+  // than used to disable it — a disabled control cannot be focused or hovered
+  // reliably, so anything it knows is invisible to the person stuck on it.
+  const submitBlocker = validatePartSource(partSource);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -384,8 +389,7 @@ function AdminAddRequestContent() {
 
             <button
               type="submit"
-              disabled={loading || !!validatePartSource(partSource)}
-              title={validatePartSource(partSource) || undefined}
+              disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-clay-600 hover:bg-clay-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
             >
               {loading ? (
@@ -399,15 +403,18 @@ function AdminAddRequestContent() {
               ) : "Submit Request"}
             </button>
 
-            {/* Repeats the banner beside the button that was just pressed, so
-                the outcome is visible without scrolling back up. The banner
-                above is the one announced; this copy is decorative. */}
-            {error && (
+            {/* What is still missing, before anything is pressed — and, once it
+                has been, the failure itself, so the outcome is visible without
+                scrolling back up. The banner above is the one announced; this
+                copy is decorative. */}
+            {error ? (
               <p className="text-sm text-red-300 flex gap-2 items-start" aria-hidden="true">
                 <span aria-hidden="true">⚠</span>
                 <span>{error}</span>
               </p>
-            )}
+            ) : submitBlocker ? (
+              <p className="text-sm text-cream-500" aria-hidden="true">{submitBlocker}</p>
+            ) : null}
           </form>
         </div>
       </div>

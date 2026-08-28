@@ -6,7 +6,9 @@ import StlViewer from "@/components/StlViewer";
 import { isStlFileName } from "@/lib/stl";
 import {
   MAX_DESCRIPTION_CHARS,
+  MAX_DIMENSIONS_CHARS,
   MAX_MODEL_BYTES,
+  MAX_PART_NAME_CHARS,
   MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
   MIN_DESCRIPTION_CHARS,
@@ -245,7 +247,12 @@ export default function PartSourceFields({
               onChange={(e) => onChange({ ...value, partName: e.target.value })}
               className={fieldClassName}
               placeholder="e.g. Dryer door catch, Bosch WTG86"
-              maxLength={120}
+              maxLength={MAX_PART_NAME_CHARS}
+              // The rest of both forms uses native validation, so these do too:
+              // the browser points at the offending field, which is what someone
+              // stuck on "why won't this submit" needs. validatePartSource still
+              // has the final say on submit.
+              required
             />
           </div>
 
@@ -260,6 +267,8 @@ export default function PartSourceFields({
               rows={5}
               className={`${fieldClassName} resize-none`}
               maxLength={MAX_DESCRIPTION_CHARS}
+              minLength={MIN_DESCRIPTION_CHARS}
+              required
               placeholder={
                 "What is it and what does it do?\n" +
                 "What does it attach to or fit inside?\n" +
@@ -290,7 +299,7 @@ export default function PartSourceFields({
               onChange={(e) => onChange({ ...value, dimensions: e.target.value })}
               className={fieldClassName}
               placeholder="e.g. 80 × 40 × 12 mm, 6 mm bore"
-              maxLength={300}
+              maxLength={MAX_DIMENSIONS_CHARS}
             />
           </div>
 
