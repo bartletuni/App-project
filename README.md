@@ -116,8 +116,45 @@ to the part name when there is no file name (`requestTitle` in
 `New Request (no model): …` and leads with the description, the size, and the
 reference count.
 
-Run `npx prisma db push` after deploying this change so the new columns and the
-`RequestAttachment` table exist.
+Run the migration below so the new columns and the `RequestAttachment` table
+exist.
+
+### Applying this to Turso
+
+The change is additive and backward-compatible — the current code never reads
+the new columns, and every one of them is nullable or defaulted — so it is safe
+to migrate **before** deploying the new code, and safe to run against live data.
+
+Prisma reads Turso from the environment, so pointing `db push` at production is
+a matter of setting two variables:
+
+```bash
+TURSO_DATABASE_URL="libsql://<your-db>.turso.io" \
+TURSO_AUTH_TOKEN="<your-token>" \
+npx prisma db push
+```
+
+`node migrate-turso.mjs` does the same thing and prompts for both values.
+
+To apply it by hand in the Turso shell instead, the equivalent SQL is committed
+at `prisma/migrations/2026-add-description-requests.sql`:
+
+```bash
+turso db shell <your-db> < prisma/migrations/2026-add-description-requests.sql
+```
+
+SQLite cannot relax a `NOT NULL` constraint in place, so `PartRequest` is
+rebuilt — new table, copy rows, drop, rename. Existing rows are preserved and
+backfilled to `submissionType = 'MODEL'`. Take a backup first
+(`turso db shell <your-db> .dump > backup.sql`) and run the file in one go: an
+interruption between the `DROP` and the `RENAME` would leave the table missing.
+
+Verify afterwards:
+
+```bash
+turso db shell <your-db> "SELECT COUNT(*) FROM RequestAttachment;"
+turso db shell <your-db> "SELECT submissionType, COUNT(*) FROM PartRequest GROUP BY submissionType;"
+```
 
 ### Validation
 
