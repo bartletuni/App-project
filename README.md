@@ -121,39 +121,58 @@ exist.
 
 ### Applying this to Turso
 
-The change is additive and backward-compatible — the current code never reads
-the new columns, and every one of them is nullable or defaulted — so it is safe
-to migrate **before** deploying the new code, and safe to run against live data.
+The change is additive and backward-compatible — the currently deployed code
+never reads the new columns, and every one is nullable or defaulted — so it is
+safe to migrate **before** deploying the new code, and safe to run against live
+data.
 
-Prisma reads Turso from the environment, so pointing `db push` at production is
-a matter of setting two variables:
-
-```bash
-TURSO_DATABASE_URL="libsql://<your-db>.turso.io" \
-TURSO_AUTH_TOKEN="<your-token>" \
-npx prisma db push
-```
-
-`node migrate-turso.mjs` does the same thing and prompts for both values.
-
-To apply it by hand in the Turso shell instead, the equivalent SQL is committed
-at `prisma/migrations/2026-add-description-requests.sql`:
+Back up first:
 
 ```bash
-turso db shell <your-db> < prisma/migrations/2026-add-description-requests.sql
+turso db shell YOUR_DB .dump > backup.sql
 ```
+
+Then apply the migration:
+
+```bash
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-description-requests.sql
+```
+
+`node migrate-turso.mjs` prompts for both values and does the same thing. The
+script reports the tables it created and the row counts afterwards, so a silent
+no-op is obvious. Running it twice is safe: it fails on its first statement,
+before `PartRequest` is touched, and says the migration is already applied.
+
+**`npx prisma db push` does not work against Turso here.** The Prisma CLI
+validates the datasource URL against the schema's provider, and
+`provider = "sqlite"` only accepts a `file:` URL — a `libsql://` host is
+rejected with `P1013: The scheme is not recognized in database URL` before
+anything runs. Prisma 7.8's config has no driver-adapter hook for migrate/push,
+so the CLI cannot reach Turso at all. This does not affect the application,
+which goes through `PrismaLibSql` at runtime; `scripts/migrate-turso.mjs` uses
+that same client. Use `prisma db push` only against a local `file:` database.
 
 SQLite cannot relax a `NOT NULL` constraint in place, so `PartRequest` is
 rebuilt — new table, copy rows, drop, rename. Existing rows are preserved and
-backfilled to `submissionType = 'MODEL'`. Take a backup first
-(`turso db shell <your-db> .dump > backup.sql`) and run the file in one go: an
-interruption between the `DROP` and the `RENAME` would leave the table missing.
+backfilled to `submissionType = 'MODEL'`. The statements must run in order on
+one connection, which is why the file is applied whole rather than pasted in
+piecemeal.
+
+To apply it by hand instead, the SQL is committed at
+`prisma/migrations/2026-add-description-requests.sql` and can be fed to the
+Turso shell in one go:
+
+```bash
+turso db shell YOUR_DB < prisma/migrations/2026-add-description-requests.sql
+```
 
 Verify afterwards:
 
 ```bash
-turso db shell <your-db> "SELECT COUNT(*) FROM RequestAttachment;"
-turso db shell <your-db> "SELECT submissionType, COUNT(*) FROM PartRequest GROUP BY submissionType;"
+turso db shell YOUR_DB "SELECT submissionType, COUNT(*) FROM PartRequest GROUP BY submissionType;"
+turso db shell YOUR_DB "SELECT COUNT(*) FROM RequestAttachment;"
 ```
 
 ### Validation

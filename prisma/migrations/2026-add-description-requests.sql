@@ -4,8 +4,10 @@
 --   npx prisma migrate diff --from-schema <previous schema> \
 --                           --to-schema prisma/schema.prisma --script
 --
--- Prefer `prisma db push` (see README → "Applying this to Turso"). This file is
--- for applying the same change by hand in the Turso shell.
+-- Apply with `node scripts/migrate-turso.mjs <this file>` (see README →
+-- "Applying this to Turso"), or feed it to `turso db shell` in one go.
+-- `prisma db push` cannot reach Turso — the CLI rejects a libsql:// URL against
+-- the sqlite provider with P1013.
 --
 -- What it does:
 --   * creates RequestAttachment (reference photos/drawings, cascade-deleted
@@ -17,8 +19,8 @@
 -- a new table is created, rows are copied, the old table is dropped, and the new
 -- one is renamed. Existing rows are preserved and backfilled to
 -- submissionType='MODEL'. Take a backup first (`turso db shell <db> .dump`) and
--- run the whole file in one go — an interruption between the DROP and the
--- RENAME would leave the table missing.
+-- run the whole file in one go, on one connection — an interruption between the
+-- DROP and the RENAME would leave the table missing.
 --
 -- Safe to run before deploying the new code: the current code never reads the
 -- new columns, and every one of them is nullable or defaulted.
