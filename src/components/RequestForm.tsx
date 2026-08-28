@@ -1,40 +1,32 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
-import { AlertTriangle, UploadCloud, Plus, ArrowRight, X } from "lucide-react";
+import { AlertTriangle, Plus, ArrowRight } from "lucide-react";
 import Panel from "@/components/ui/Panel";
-import StlViewer from "@/components/StlViewer";
+import PartSourceFields from "@/components/PartSourceFields";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
-import { isStlFileName } from "@/lib/stl";
 import { QUOTE_PARAM, isQuoteRequested } from "@/lib/quote";
+import {
+  PartSourceState,
+  appendPartSource,
+  emptyPartSource,
+  quoteIsForced,
+  validatePartSource,
+} from "@/lib/part-source";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-2.5 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
 const labelCls =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function isAcceptedFile(f: File): boolean {
-  const name = f.name.toLowerCase();
-  return name.endsWith(".stl") || name.endsWith(".zip");
-}
-
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
 
-  const [file, setFile] = useState<File | null>(null);
-  const [dragging, setDragging] = useState(false);
+  const [partSource, setPartSource] = useState<PartSourceState>(emptyPartSource);
   const [notes, setNotes] = useState("");
   const [material, setMaterial] = useState("");
   const [availableMaterials, setAvailableMaterials] = useState<{ id: string; name: string }[]>([]);
@@ -88,42 +80,23 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       });
   }, [initialMaterial]);
 
-  const acceptFile = useCallback((f: File | null) => {
-    setError("");
-    if (!f) {
-      setFile(null);
-      return;
-    }
-    if (!isAcceptedFile(f)) {
-      setError("Only .STL and .ZIP files are accepted.");
-      return;
-    }
-    if (f.size > MAX_FILE_BYTES) {
-      setError("File size exceeds the 20MB limit.");
-      return;
-    }
-    setFile(f);
-  }, []);
+  // A described part cannot be priced until we have modelled it, so the quote
+  // box ticks itself and locks for that lane; the API enforces the same rule.
+  const quoteLocked = quoteIsForced(partSource.mode);
+  const quoteChecked = quoteLocked || quoteRequested;
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
-    acceptFile(e.dataTransfer.files?.[0] || null);
-  };
+  // Kept off the submit button as a tooltip too, so a disabled button always
+  // says which piece is still missing rather than sitting there inert.
+  const submitBlocker = validatePartSource(partSource);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    if (!file) {
-      setError("Please select an STL or ZIP file.");
-      setLoading(false);
-      return;
-    }
-
-    if (file.size > MAX_FILE_BYTES) {
-      setError("File size exceeds the 20MB limit.");
+    const sourceError = validatePartSource(partSource);
+    if (sourceError) {
+      setError(sourceError);
       setLoading(false);
       return;
     }
@@ -147,13 +120,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    appendPartSource(formData, partSource);
     formData.append("quantity", quantity);
     formData.append("material", material);
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
-    formData.append("quoteRequested", quoteRequested ? "true" : "false");
+    formData.append("quoteRequested", quoteChecked ? "true" : "false");
     if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
@@ -167,7 +140,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         throw new Error(data.error || "Failed to submit request.");
       }
 
-      setFile(null);
+      setPartSource(emptyPartSource());
       setNotes("");
       if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
       setQuantity("1");
@@ -213,64 +186,14 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label htmlFor="fileUpload" className={labelCls}>
-            STL / ZIP file <span className="text-clay-400">*</span> <span className="text-cream-600 normal-case tracking-normal">(max 20MB)</span>
-          </label>
-          <input
-            id="fileUpload"
-            type="file"
-            accept=".stl,.zip"
-            onChange={(e) => {
-              acceptFile(e.target.files?.[0] || null);
-              e.target.value = ""; // allow re-selecting the same file after removal
-            }}
-            className="sr-only peer"
-          />
-          <label
-            htmlFor="fileUpload"
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className={`flex cursor-pointer flex-col items-center gap-2 border border-dashed px-4 py-6 rounded-md transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500 ${
-              dragging
-                ? "border-clay-400 bg-clay-500/10"
-                : "border-clay-500/30 hover:border-clay-400 hover:bg-clay-500/5"
-            }`}
-          >
-            <UploadCloud className="h-6 w-6 text-clay-400 shrink-0" aria-hidden="true" />
-            {file ? (
-              <span className="flex items-center gap-2 max-w-full">
-                <span className="truncate text-sm text-cream-200">{file.name}</span>
-                <span className="shrink-0 font-mono text-[10px] text-cream-600">{formatBytes(file.size)}</span>
-              </span>
-            ) : (
-              <span className="text-center text-sm text-cream-300">
-                Drag &amp; drop your file here, or <span className="text-clay-300 underline underline-offset-2">browse</span>
-              </span>
-            )}
-          </label>
-          {file && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cream-500">
-                  {isStlFileName(file.name) ? "3D preview — check your part before submitting" : "Preview"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => acceptFile(null)}
-                  className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-500 hover:text-red-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-sm"
-                >
-                  <X className="h-3 w-3" aria-hidden="true" /> Remove file
-                </button>
-              </div>
-              <StlViewer file={file} fileName={file.name} className="h-64 w-full" />
-            </div>
-          )}
-        </div>
+        <PartSourceFields
+          value={partSource}
+          onChange={setPartSource}
+          idPrefix="composer"
+          fieldClassName={field}
+          labelClassName={labelCls}
+          onLocalError={setError}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -329,31 +252,35 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         <label
           htmlFor="quoteRequested"
-          className="flex cursor-pointer items-start gap-3 rounded-md border border-clay-500/25 px-4 py-3 transition-colors hover:border-clay-400 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay-500"
+          className={`flex items-start gap-3 rounded-md border border-clay-500/25 px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay-500 ${
+            quoteLocked ? "cursor-default bg-clay-500/5" : "cursor-pointer hover:border-clay-400"
+          }`}
         >
           <input
             id="quoteRequested"
             name="quoteRequested"
             type="checkbox"
-            checked={quoteRequested}
+            checked={quoteChecked}
+            disabled={quoteLocked}
             onChange={(e) => setQuoteRequested(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 outline-none"
+            className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 outline-none disabled:opacity-80"
           />
           <span className="min-w-0">
             <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-300">
-              Quote
+              Quote {quoteLocked && <span className="text-clay-300">· always, on a described part</span>}
             </span>
             <span className="mt-1 block text-xs leading-relaxed text-cream-500">
-              Price this part first. We send a quote for your approval before
-              the invoice — manufacturing still starts once that invoice is paid.
+              {quoteLocked
+                ? "There is nothing to price until we have modelled your part, so this one is quoted first. You approve the price before we build anything."
+                : "Price this part first. We send a quote for your approval before the invoice — manufacturing still starts once that invoice is paid."}
             </span>
           </span>
         </label>
 
         <button
           type="submit"
-          disabled={loading || !file}
-          title={!file ? "Please select an STL or ZIP file to submit" : undefined}
+          disabled={loading || !!submitBlocker}
+          title={submitBlocker || undefined}
           className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
         >
           {loading ? (

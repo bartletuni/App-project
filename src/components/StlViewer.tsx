@@ -19,7 +19,7 @@ interface StlViewerProps {
   /** Uploaded file id — loaded via the authenticated download proxy. */
   fileId?: string | null;
   /** Original file name, used to detect non-STL (e.g. ZIP) uploads. */
-  fileName?: string;
+  fileName?: string | null;
   className?: string;
 }
 

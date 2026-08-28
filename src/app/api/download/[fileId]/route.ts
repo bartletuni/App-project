@@ -37,13 +37,25 @@ export async function GET(
       where: { fileId },
     });
 
-    if (partRequest) {
-      // For part requests, require authentication and authorization
+    // Reference photos, sketches, and drawings on a described part live in
+    // their own table, but belong to the requesting customer just the same.
+    stage = "attachmentLookup";
+    const attachment = partRequest
+      ? null
+      : await prisma.requestAttachment.findFirst({
+          where: { fileId },
+          select: { request: { select: { userId: true } } },
+        });
+
+    const ownerId = partRequest?.userId ?? attachment?.request.userId ?? null;
+
+    if (ownerId) {
+      // For part requests and their attachments, require authentication and authorization
       const session = await getServerSession(authOptions);
       if (!session || !session.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      if (partRequest.userId !== (session.user as any).id && !(session.user as any).isAdmin) {
+      if (ownerId !== (session.user as any).id && !(session.user as any).isAdmin) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     } else {

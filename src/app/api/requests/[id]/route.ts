@@ -31,6 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                     }
                 },
                 phoneNumber: true,
+                attachments: true,
             }
         });
 

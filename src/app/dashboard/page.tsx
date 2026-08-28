@@ -13,8 +13,10 @@ import Panel from "@/components/ui/Panel";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import StlThumbnail from "@/components/StlThumbnail";
 import StlViewer from "@/components/StlViewer";
+import PartSourceSummary from "@/components/PartSourceSummary";
 import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
 import { parseStoredSettings } from "@/lib/print-settings";
+import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
 
 const statusStyle: Record<string, string> = {
   PENDING: "text-yellow-300 border-yellow-500/30 bg-yellow-500/10",
@@ -186,7 +188,15 @@ export default function DashboardPage() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <FileText className="h-3.5 w-3.5 text-clay-400 shrink-0" aria-hidden="true" />
-                            <h3 className="font-display text-lg text-cream-100 truncate">{req.fileName}</h3>
+                            <h3 className="font-display text-lg text-cream-100 truncate">{requestTitle(req)}</h3>
+                            {isDescriptionRequest(req) && (
+                              <span
+                                className="shrink-0 border border-clay-500/30 bg-clay-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-clay-200"
+                                title="Submitted without a 3D file — TakomoCo models this part"
+                              >
+                                We model it
+                              </span>
+                            )}
                             {req.quoteRequested && (
                               <span className="shrink-0 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200">
                                 Quote
@@ -249,7 +259,7 @@ export default function DashboardPage() {
               <div className="min-w-0">
                 <span className="eyebrow">SUBMISSION ⁄ REVIEW</span>
                 <h3 id="review-modal-title" className="mt-1 font-display text-xl text-cream-100 truncate">
-                  {selectedRequest.fileName}
+                  {requestTitle(selectedRequest)}
                 </h3>
               </div>
               <div className="flex items-center gap-3 shrink-0">
@@ -265,11 +275,15 @@ export default function DashboardPage() {
             </div>
 
             <div className="p-5 sm:p-6 space-y-6">
-              <StlViewer
-                fileId={selectedRequest.fileId}
-                fileName={selectedRequest.fileName}
-                className="h-72 sm:h-80 w-full"
-              />
+              {isDescriptionRequest(selectedRequest) ? (
+                <PartSourceSummary request={selectedRequest} />
+              ) : (
+                <StlViewer
+                  fileId={selectedRequest.fileId}
+                  fileName={selectedRequest.fileName}
+                  className="h-72 sm:h-80 w-full"
+                />
+              )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3">
                 <div>
@@ -323,14 +337,20 @@ export default function DashboardPage() {
               )}
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-clay-500/15">
-                <a
-                  href={`/api/download/${selectedRequest.fileId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
-                >
-                  <Download className="h-3.5 w-3.5" aria-hidden="true" /> Download file
-                </a>
+                {selectedRequest.fileId ? (
+                  <a
+                    href={`/api/download/${selectedRequest.fileId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border border-clay-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-200 hover:bg-clay-500/15 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                  >
+                    <Download className="h-3.5 w-3.5" aria-hidden="true" /> Download file
+                  </a>
+                ) : (
+                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600">
+                    No model file — modelled by TakomoCo
+                  </span>
+                )}
                 {selectedRequest.status === "PENDING" && isCancelable(selectedRequest.createdAt) && (
                   <button
                     onClick={() => handleCancel(selectedRequest.id)}

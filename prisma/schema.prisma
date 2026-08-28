@@ -76,22 +76,47 @@ model PricingSetting {
 }
 
 model PartRequest {
-  id             String      @id @default(cuid())
-  userId         String
-  user           User        @relation(fields: [userId], references: [id])
-  phoneNumberId  String
-  phoneNumber    PhoneNumber @relation(fields: [phoneNumberId], references: [id])
-  fileId         String // Cloudflare R2 file ID
-  fileName       String // Original uploaded file name
-  quantity       Int         @default(1)
-  material       String?
-  notes          String?
-  printSettings  String? // JSON CustomPrintSettings; null = auto (shop chooses)
-  quoteRequested Boolean     @default(false) // customer asked for a price quote first
-  dateNeeded     DateTime
-  status         String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
-  invoiceNumber  String?
-  trackingNumber String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  phoneNumberId   String
+  phoneNumber     PhoneNumber @relation(fields: [phoneNumberId], references: [id])
+  /// How the part arrived: MODEL (an .stl/.zip was uploaded) or DESCRIPTION
+  /// (no model yet — the customer described the part for us to draw).
+  submissionType  String      @default("MODEL")
+  fileId          String? // Cloudflare R2 file ID; null on DESCRIPTION requests
+  fileName        String? // Original uploaded file name; null on DESCRIPTION requests
+  /// What the customer calls the part. Stands in for fileName on DESCRIPTION
+  /// requests, which have no file to name them.
+  partName        String?
+  /// The customer's account of the part on a DESCRIPTION request.
+  partDescription String?
+  /// Free-form size notes on a DESCRIPTION request, e.g. "80 x 40 x 12 mm".
+  dimensions      String?
+  quantity        Int         @default(1)
+  material        String?
+  notes           String?
+  printSettings   String? // JSON CustomPrintSettings; null = auto (shop chooses)
+  quoteRequested  Boolean     @default(false) // customer asked for a price quote first
+  dateNeeded      DateTime
+  status          String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
+  invoiceNumber   String?
+  trackingNumber  String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  attachments RequestAttachment[]
+}
+
+/// A reference photo, sketch, or drawing attached to a request. These are how a
+/// customer without a 3D model shows us the part.
+model RequestAttachment {
+  id        String      @id @default(cuid())
+  requestId String
+  request   PartRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fileId    String      @unique // Cloudflare R2 object key
+  fileName  String
+  mimeType  String
+  size      Int
+  createdAt DateTime    @default(now())
 }

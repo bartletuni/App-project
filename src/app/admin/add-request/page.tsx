@@ -5,9 +5,20 @@ import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 import AppShell from "@/components/AppShell";
-import StlViewer from "@/components/StlViewer";
+import PartSourceFields from "@/components/PartSourceFields";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
+import {
+  PartSourceState,
+  appendPartSource,
+  emptyPartSource,
+  quoteIsForced,
+  validatePartSource,
+} from "@/lib/part-source";
+
+const adminField =
+  "block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800";
+const adminLabel = "block text-sm font-semibold text-cream-300 mb-1.5";
 
 function AdminAddRequestContent() {
   const { data: session, status } = useSession();
@@ -16,7 +27,7 @@ function AdminAddRequestContent() {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  const [file, setFile] = useState<File | null>(null);
+  const [partSource, setPartSource] = useState<PartSourceState>(emptyPartSource);
   const [notes, setNotes] = useState("");
   const [material, setMaterial] = useState("");
   const [availableMaterials, setAvailableMaterials] = useState<{ id: string; name: string }[]>([]);
@@ -104,14 +115,9 @@ function AdminAddRequestContent() {
         return;
     }
 
-    if (!file) {
-      setError("Please select an STL or ZIP file.");
-      setLoading(false);
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      setError("File size exceeds the 20MB limit.");
+    const sourceError = validatePartSource(partSource);
+    if (sourceError) {
+      setError(sourceError);
       setLoading(false);
       return;
     }
@@ -136,7 +142,7 @@ function AdminAddRequestContent() {
 
     const formData = new FormData();
     formData.append("userId", selectedUserId);
-    formData.append("file", file);
+    appendPartSource(formData, partSource);
     formData.append("quantity", quantity);
     formData.append("material", material);
     formData.append("notes", notes);
@@ -156,7 +162,7 @@ function AdminAddRequestContent() {
       }
 
       setSuccess(true);
-      setFile(null);
+      setPartSource(emptyPartSource());
       setNotes("");
       if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
       setQuantity("1");
@@ -234,25 +240,21 @@ function AdminAddRequestContent() {
               </select>
             </div>
 
-            <div>
-              <label htmlFor="fileUpload" className="block text-sm font-semibold text-cream-300 mb-1.5">
-                .STL or .ZIP File <span className="text-red-500" aria-hidden="true">*</span> <span className="text-cream-500 font-normal ml-1">(Max 20MB)</span>
-              </label>
-              <input
-                id="fileUpload"
-                type="file"
-                accept=".stl,.zip"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-cream-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-clay-500/12 file:text-clay-300 hover:file:bg-clay-500/15 transition-colors file:cursor-pointer cursor-pointer border border-espresso-600 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500"
-                required
-              />
-              {file && (
-                <div className="mt-3">
-                  <div className="text-xs text-cream-500 mb-2">3D preview — verify the part before submitting</div>
-                  <StlViewer file={file} fileName={file.name} className="h-64 w-full" />
-                </div>
-              )}
-            </div>
+            <PartSourceFields
+              value={partSource}
+              onChange={setPartSource}
+              idPrefix="admin-source"
+              fieldClassName={adminField}
+              labelClassName={adminLabel}
+              onLocalError={setError}
+            />
+
+            {quoteIsForced(partSource.mode) && (
+              <p className="text-xs text-clay-300 bg-clay-500/10 border border-clay-500/25 rounded-lg px-3 py-2">
+                A described part is filed as a quote request — there is nothing to
+                price until it has been modelled.
+              </p>
+            )}
 
             <div>
               <label htmlFor="quantity" className="block text-sm font-semibold text-cream-300 mb-1.5">
@@ -364,7 +366,8 @@ function AdminAddRequestContent() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !!validatePartSource(partSource)}
+              title={validatePartSource(partSource) || undefined}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-clay-600 hover:bg-clay-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clay-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
             >
               {loading ? (

@@ -78,3 +78,50 @@ clicks a quote button while logged out still lands on a pre-ticked form.
 The flag is stored on each request as `PartRequest.quoteRequested`, shown as a badge in the
 build ledger and the admin console, and called out in the new-request email. Run
 `npx prisma db push` after deploying this change so the column exists.
+
+## Submitting a Part Without an STL or ZIP
+
+The composer opens on **"What are we making?"** with two lanes:
+
+- **I have a 3D file** — the original path, unchanged. Upload an `.stl` or `.zip`
+  (20MB), get the 3D preview, submit.
+- **No file yet** — for a customer who has a broken part but no model. They name
+  the part, describe it, optionally give rough dimensions, and attach up to 5
+  reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 10MB each). HEIC
+  is accepted because it is what an iPhone hands over; it uploads fine but shows
+  a glyph rather than an inline preview, since browsers will not draw it.
+
+Switching lanes keeps whatever has already been entered, so looking at the other
+one never costs a customer their work.
+
+A described part is **always quoted first** — there is nothing to price until the
+model exists. The composer ticks and locks its Quote checkbox and says why, and
+`POST /api/requests` forces the same flag regardless of what the client sends.
+
+The same two lanes are on the admin console's "Add part request" form, so the
+shop can file a phoned-in or walked-in job the same way.
+
+### How it is stored
+
+`PartRequest.submissionType` is `MODEL` or `DESCRIPTION`. `fileId` and `fileName`
+are now nullable and are null on a described part; `partName`, `partDescription`,
+and `dimensions` carry it instead. Reference files live in the new
+`RequestAttachment` table (cascade-deleted with their request) and are served
+through `/api/download/[fileId]`, which authorizes them against the owning
+request just as it does the model file.
+
+Lists, the review modals, the report PDF, and the new-request email all fall back
+to the part name when there is no file name (`requestTitle` in
+`src/lib/part-source.ts`). The admin email for a described part is subject-lined
+`New Request (no model): …` and leads with the description, the size, and the
+reference count.
+
+Run `npx prisma db push` after deploying this change so the new columns and the
+`RequestAttachment` table exist.
+
+### Validation
+
+Limits and messages live in `src/lib/part-source.ts` and are shared by both forms
+and the API, so the client and the server never disagree. Uploads are content-
+sniffed in `src/lib/file-signatures.ts` — an extension is only a claim, and a
+file whose leading bytes contradict its name is rejected before it reaches R2.
