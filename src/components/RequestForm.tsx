@@ -6,6 +6,8 @@ import { format, addDays } from "date-fns";
 import { AlertTriangle, Plus, ArrowRight } from "lucide-react";
 import Panel from "@/components/ui/Panel";
 import PartSourceFields from "@/components/PartSourceFields";
+import { useFormAlert } from "@/components/ui/useFormAlert";
+import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 import { QUOTE_PARAM, isQuoteRequested } from "@/lib/quote";
@@ -46,7 +48,11 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     isQuoteRequested(searchParams.get(QUOTE_PARAM))
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // The banner sits at the top of the panel, well above the submit button, so
+  // it scrolls itself into view rather than failing somewhere off-screen.
+  const errorAlert = useFormAlert<HTMLDivElement>();
+  const error = errorAlert.message;
+  const setError = errorAlert.show;
 
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
@@ -92,7 +98,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    errorAlert.clear();
 
     const sourceError = validatePartSource(partSource);
     if (sourceError) {
@@ -136,8 +142,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit request.");
+        throw new Error(await readSubmitError(res));
       }
 
       setPartSource(emptyPartSource());
@@ -150,8 +155,8 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
       setQuoteRequested(false);
       onFormSubmit();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(describeSubmitException(err));
     } finally {
       setLoading(false);
     }
@@ -164,7 +169,9 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <span className="hairline flex-1" />
       </div>
 
-      <div className="mb-6 flex gap-3 border-l-2 border-yellow-500/50 bg-yellow-500/10 px-4 py-3" role="alert">
+      {/* Standing advice, not a live alert — role="alert" here announced it on
+          load and competed with the submission error below. */}
+      <div className="mb-6 flex gap-3 border-l-2 border-yellow-500/50 bg-yellow-500/10 px-4 py-3" role="note">
         <AlertTriangle className="h-4 w-4 text-yellow-300 mt-0.5 shrink-0" aria-hidden="true" />
         <div className="space-y-1.5 text-xs text-yellow-200/90 leading-relaxed">
           <p>
@@ -180,8 +187,19 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       </div>
 
       {error && (
-        <div className="mb-6 border-l-2 border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">
-          {error}
+        <div
+          ref={errorAlert.ref}
+          tabIndex={-1}
+          className="mb-6 flex gap-3 border-l-2 border-red-500 bg-red-500/10 px-4 py-3 text-sm text-red-300 outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          role="alert"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+          <span>
+            <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-red-200">
+              Request not submitted
+            </span>
+            <span className="mt-1 block leading-relaxed">{error}</span>
+          </span>
         </div>
       )}
 
@@ -295,6 +313,15 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             </>
           )}
         </button>
+
+        {/* Repeats the banner beside the button that was just pressed. The
+            banner above is the one announced; this copy is decorative. */}
+        {error && (
+          <p className="flex gap-2 items-start text-sm text-red-300" aria-hidden="true">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <span>{error}</span>
+          </p>
+        )}
       </form>
     </Panel>
   );

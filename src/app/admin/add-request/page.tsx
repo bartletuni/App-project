@@ -6,6 +6,8 @@ import { format, addDays } from "date-fns";
 import { useSession } from "next-auth/react";
 import AppShell from "@/components/AppShell";
 import PartSourceFields from "@/components/PartSourceFields";
+import { useFormAlert } from "@/components/ui/useFormAlert";
+import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 import {
@@ -42,8 +44,12 @@ function AdminAddRequestContent() {
     custom: { ...DEFAULT_CUSTOM_SETTINGS },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  // Both banners sit above a long form, so they scroll themselves into view
+  // rather than reporting the outcome somewhere off-screen.
+  const errorAlert = useFormAlert<HTMLDivElement>();
+  const successAlert = useFormAlert<HTMLDivElement>();
+  const error = errorAlert.message;
+  const setError = errorAlert.show;
 
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
@@ -106,8 +112,8 @@ function AdminAddRequestContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setSuccess(false);
+    errorAlert.clear();
+    successAlert.clear();
 
     if (!selectedUserId) {
         setError("Please select a customer.");
@@ -157,11 +163,10 @@ function AdminAddRequestContent() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit request.");
+        throw new Error(await readSubmitError(res));
       }
 
-      setSuccess(true);
+      successAlert.show("Request successfully submitted.");
       setPartSource(emptyPartSource());
       setNotes("");
       if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
@@ -182,8 +187,8 @@ function AdminAddRequestContent() {
                     }
                 }
             });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(describeSubmitException(err));
     } finally {
       setLoading(false);
     }
@@ -205,16 +210,29 @@ function AdminAddRequestContent() {
         <div className="max-w-2xl panel rounded-md p-6 sm:p-8">
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-center" role="alert">
-              <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {error}
+            <div
+              ref={errorAlert.ref}
+              tabIndex={-1}
+              className="mb-6 p-4 bg-red-500/15 border border-red-500/30 text-red-300 rounded-xl text-sm flex gap-2 items-start outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              role="alert"
+            >
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>
+                <strong className="block font-semibold">Request not submitted</strong>
+                {error}
+              </span>
             </div>
           )}
 
-          {success && (
-            <div className="mb-6 p-4 bg-green-500/15 border border-green-500/30 text-green-300 rounded-xl text-sm flex gap-2 items-center" role="status">
+          {successAlert.message && (
+            <div
+              ref={successAlert.ref}
+              tabIndex={-1}
+              className="mb-6 p-4 bg-green-500/15 border border-green-500/30 text-green-300 rounded-xl text-sm flex gap-2 items-center outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+              role="status"
+            >
               <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Request successfully submitted.
+              {successAlert.message}
             </div>
           )}
 
@@ -380,6 +398,16 @@ function AdminAddRequestContent() {
                  </span>
               ) : "Submit Request"}
             </button>
+
+            {/* Repeats the banner beside the button that was just pressed, so
+                the outcome is visible without scrolling back up. The banner
+                above is the one announced; this copy is decorative. */}
+            {error && (
+              <p className="text-sm text-red-300 flex gap-2 items-start" aria-hidden="true">
+                <span aria-hidden="true">⚠</span>
+                <span>{error}</span>
+              </p>
+            )}
           </form>
         </div>
       </div>

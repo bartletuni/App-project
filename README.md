@@ -125,3 +125,28 @@ Limits and messages live in `src/lib/part-source.ts` and are shared by both form
 and the API, so the client and the server never disagree. Uploads are content-
 sniffed in `src/lib/file-signatures.ts` — an extension is only a claim, and a
 file whose leading bytes contradict its name is rejected before it reaches R2.
+
+## Submission Failures
+
+Both request forms report every failed submission. The banner sits at the top of
+a long form, so `useFormAlert` (`src/components/ui/useFormAlert.ts`) scrolls it
+into view and moves focus to it on every raise — including the same error twice
+in a row — and the message is repeated beside the submit button that was just
+pressed. Before this, a failure rendered off-screen and looked like nothing had
+happened.
+
+`readSubmitError` (`src/lib/submit-error.ts`) turns any failed response into
+something actionable. It prefers the API's own `{ error }` body and falls back
+to the status when there is no JSON to read at all:
+
+- **413** — the host rejected the upload before the route ran. Note that Vercel
+  caps a serverless function's request body at roughly 4.5MB, below the 20MB the
+  upload field advertises, so a large STL fails here rather than in our code.
+- **401 / 403** — expired session, or no permission.
+- **408 / 504** — the server took too long.
+- **5xx / 4xx with no JSON** — named by status, and clear that nothing was saved.
+
+`describeSubmitException` covers a `fetch` that never returned at all (offline,
+dropped connection), replacing browser jargon like "Failed to fetch". Every
+message either function produces is non-empty, so a failure can never render as
+a blank banner.
