@@ -98,8 +98,19 @@ model PartRequest {
   notes           String?
   printSettings   String? // JSON CustomPrintSettings; null = auto (shop chooses)
   quoteRequested  Boolean     @default(false) // customer asked for a price quote first
+  /// Which track this row is on, and therefore which set of statuses it uses:
+  /// QUOTE (being priced, nothing built yet) or REQUEST (a live build). An
+  /// admin moves a quote across with POST /api/requests/[id]/convert.
+  /// See src/lib/request-status.ts.
+  kind            String      @default("REQUEST")
+  /// What the shop quoted, free-form so it can carry a currency or a range
+  /// ("$142.50", "$120–$160 pending material"). Survives conversion.
+  quotedPrice     String?
+  /// When a quote became a build request; null on anything never quoted.
+  convertedAt     DateTime?
   dateNeeded      DateTime
-  status          String      @default("PENDING") // PENDING, CANCELLED, FULFILLED
+  /// A value from QUOTE_STATUSES or REQUEST_STATUSES depending on `kind`.
+  status          String      @default("PENDING")
   invoiceNumber   String?
   trackingNumber  String?
   createdAt       DateTime    @default(now())

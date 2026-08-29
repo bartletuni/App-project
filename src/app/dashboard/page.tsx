@@ -17,21 +17,30 @@ import PartSourceSummary from "@/components/PartSourceSummary";
 import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
 import { parseStoredSettings } from "@/lib/print-settings";
 import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
+import { isQuote, isUntouched, statusHint, statusTone } from "@/lib/request-status";
 
-const statusStyle: Record<string, string> = {
-  PENDING: "text-yellow-300 border-yellow-500/30 bg-yellow-500/10",
-  ACTIVE: "text-ember-300 border-clay-500/30 bg-clay-500/10",
-  COMPLETED: "text-green-300 border-green-500/30 bg-green-500/10",
-  "NEEDS REVIEW": "text-clay-200 border-clay-500/40 bg-clay-500/15",
-  CANCELLED: "text-red-300 border-red-500/30 bg-red-500/10",
-  SHIPPED: "text-teal-300 border-teal-500/30 bg-teal-500/10",
-  "INVOICE SENT": "text-cream-300 border-cream-500/30 bg-cream-500/10",
+/**
+ * One colour per tone rather than per status, so the quote statuses added
+ * alongside the build ones are styled without a second list to keep in step.
+ */
+const toneStyle: Record<string, string> = {
+  wait: "text-yellow-300 border-yellow-500/30 bg-yellow-500/10",
+  review: "text-clay-200 border-clay-500/40 bg-clay-500/15",
+  sent: "text-cream-300 border-cream-500/30 bg-cream-500/10",
+  active: "text-ember-300 border-clay-500/30 bg-clay-500/10",
+  done: "text-green-300 border-green-500/30 bg-green-500/10",
+  ship: "text-teal-300 border-teal-500/30 bg-teal-500/10",
+  bad: "text-red-300 border-red-500/30 bg-red-500/10",
+  muted: "text-cream-400 border-clay-500/20 bg-espresso-700/60",
 };
 
 function StatusChip({ status }: { status: string }) {
-  const cls = statusStyle[status] || "text-cream-400 border-clay-500/20 bg-espresso-700/60";
+  const cls = toneStyle[statusTone(status)] || toneStyle.muted;
   return (
-    <span className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] ${cls}`}
+      title={statusHint(status)}
+    >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {status}
     </span>
@@ -113,8 +122,14 @@ export default function DashboardPage() {
 
   const stats = [
     { label: "Total", value: requests.length, icon: FileStack },
-    { label: "Pending", value: requests.filter((r) => r.status === "PENDING").length, icon: Clock },
-    { label: "Active", value: requests.filter((r) => r.status === "ACTIVE").length, icon: Loader2 },
+    { label: "Quotes", value: requests.filter((r) => isQuote(r)).length, icon: Clock },
+    {
+      label: "In build",
+      value: requests.filter(
+        (r) => !isQuote(r) && ["PENDING", "ACTIVE", "NEEDS REVIEW", "INVOICE SENT"].includes(r.status)
+      ).length,
+      icon: Loader2,
+    },
     { label: "Done", value: requests.filter((r) => ["COMPLETED", "SHIPPED"].includes(r.status)).length, icon: CheckCircle2 },
   ];
 
@@ -197,15 +212,27 @@ export default function DashboardPage() {
                                 We model it
                               </span>
                             )}
-                            {req.quoteRequested && (
-                              <span className="shrink-0 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200">
+                            {isQuote(req) && (
+                              <span
+                                className="shrink-0 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200"
+                                title="We are pricing this — nothing is built until you approve it"
+                              >
                                 Quote
+                              </span>
+                            )}
+                            {!isQuote(req) && req.convertedAt && (
+                              <span
+                                className="shrink-0 border border-clay-500/30 bg-clay-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-clay-200"
+                                title="This quote was approved and is now a build"
+                              >
+                                From quote
                               </span>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.1em] text-cream-500">
                             <span>QTY <span className="text-cream-200">{req.quantity}</span></span>
                             <span>INV <span className="text-clay-300">{req.invoiceNumber || "—"}</span></span>
+                            {req.quotedPrice && <span>QUOTED <span className="text-green-300">{req.quotedPrice}</span></span>}
                             <span>NEED <span className="text-cream-200">{format(new Date(req.dateNeeded), "MMM d")}</span></span>
                             {req.trackingNumber && <span>USPS <span className="text-teal-300">{req.trackingNumber}</span></span>}
                           </div>
@@ -213,7 +240,7 @@ export default function DashboardPage() {
                       </button>
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <StatusChip status={req.status} />
-                        {req.status === "PENDING" && isCancelable(req.createdAt) && (
+                        {isUntouched(req) && isCancelable(req.createdAt) && (
                           <button
                             onClick={() => handleCancel(req.id)}
                             disabled={cancelingId === req.id}
@@ -229,7 +256,7 @@ export default function DashboardPage() {
                             )}
                           </button>
                         )}
-                        {req.status === "PENDING" && !isCancelable(req.createdAt) && (
+                        {isUntouched(req) && !isCancelable(req.createdAt) && (
                           <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-cream-600" title="Cancellation window expired">Locked</span>
                         )}
                       </div>
@@ -308,8 +335,14 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Quote</div>
-                  <div className={`text-sm ${selectedRequest.quoteRequested ? "text-amber-200" : "text-cream-200"}`}>
-                    {selectedRequest.quoteRequested ? "Requested" : "—"}
+                  <div className={`text-sm ${isQuote(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
+                    {selectedRequest.quotedPrice
+                      ? selectedRequest.quotedPrice
+                      : isQuote(selectedRequest)
+                        ? "Being priced"
+                        : selectedRequest.quoteRequested
+                          ? "Requested"
+                          : "—"}
                   </div>
                 </div>
                 <div className="col-span-1 sm:col-span-3">
@@ -351,7 +384,7 @@ export default function DashboardPage() {
                     No model file — modelled by TakomoCo
                   </span>
                 )}
-                {selectedRequest.status === "PENDING" && isCancelable(selectedRequest.createdAt) && (
+                {isUntouched(selectedRequest) && isCancelable(selectedRequest.createdAt) && (
                   <button
                     onClick={() => handleCancel(selectedRequest.id)}
                     disabled={cancelingId === selectedRequest.id}
