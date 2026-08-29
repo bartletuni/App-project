@@ -77,7 +77,9 @@ clicks a quote button while logged out still lands on a pre-ticked form.
 
 The flag is stored on each request as `PartRequest.quoteRequested`, shown as a badge in the
 build ledger and the admin console, and called out in the new-request email. Run
-`npx prisma db push` after deploying this change so the column exists.
+`npx prisma db push` against a local `file:` database after deploying this change so the
+column exists; on Turso, see "Quotes and Requests" below, which also covers what happens
+to the request once it is quoted.
 
 ## Submitting a Part Without an STL or ZIP
 
@@ -181,6 +183,122 @@ Limits and messages live in `src/lib/part-source.ts` and are shared by both form
 and the API, so the client and the server never disagree. Uploads are content-
 sniffed in `src/lib/file-signatures.ts` — an extension is only a claim, and a
 file whose leading bytes contradict its name is rejected before it reaches R2.
+
+## Quotes and Requests
+
+A submission is on one of two tracks, and `PartRequest.kind` says which:
+
+- **QUOTE** — the customer wants a price first. Nothing is manufactured while a
+  row sits here.
+- **REQUEST** — a live build. This is the original track with the original
+  statuses.
+
+They used to share one set of statuses, so a quote sat in `PENDING` and then
+`ACTIVE` exactly like a build, which said nothing about whether a price had been
+sent or accepted. Each track now has its own vocabulary:
+
+| Quote | Request |
+| --- | --- |
+| `QUOTE REQUESTED` — came in, not priced yet | `PENDING` — queued, not started |
+| `QUOTE IN REVIEW` — being modelled and/or priced | `ACTIVE` — on the machines |
+| `QUOTE SENT` — price is with the customer | `NEEDS REVIEW` — blocked, needs a decision |
+| `QUOTE ACCEPTED` — approved, ready to convert | `INVOICE SENT` — waiting on payment |
+| `QUOTE DECLINED` — customer turned the price down | `COMPLETED` — built |
+| `QUOTE EXPIRED` — no answer before it went stale | `SHIPPED` — in the post |
+| `CANCELLED` | `CANCELLED` |
+
+`CANCELLED` is the only status both share. The lists, the tone each status is
+drawn in, and the rules about which one may be set live in
+`src/lib/request-status.ts`, so the console, the customer ledger, the report PDF,
+and the email templates never disagree. `PATCH /api/requests/[id]/status`
+validates against the row's own track and rejects a build status on a quote (and
+the reverse) with a 400.
+
+### Converting a quote into a request
+
+An admin converts a quote from the console — the **Convert** button on any quote
+row, or **Convert to request** in the quote's detail modal. Either one:
+
+- flips `kind` to `REQUEST`,
+- restarts the status at `PENDING`, at the front of the build queue,
+- stamps `convertedAt`,
+- and saves whatever is in the modal's **Quoted Price** field, so pricing a job
+  and starting it is one action rather than two.
+
+`quoteRequested` deliberately stays `true` — it is the record that this job was
+priced before it was built, and both the console and the customer's ledger badge
+it "From quote" afterwards. A cancelled quote cannot be converted; it has to be
+re-filed. A declined or expired one can be, since customers change their minds —
+the console asks for confirmation first.
+
+The price is free text (`quotedPrice`), like the invoice and tracking numbers
+beside it, so it can carry a currency, a range, or a caveat. It can also be saved
+on its own with `PATCH /api/requests/[id]/quote` before anyone decides whether to
+convert.
+
+Statuses are assigned at submission: a quoted submission is filed as
+`QUOTE`/`QUOTE REQUESTED`, everything else as `REQUEST`/`PENDING`. Because a
+described part is always quoted first, it always starts on the quote track.
+
+### Applying this to Turso
+
+Additive and backward-compatible — no table is rebuilt, nothing is dropped, and
+every new column is nullable or defaulted — so it is safe to run against live
+data and safe to run **before** deploying the new code.
+
+Back up first:
+
+```bash
+turso db shell YOUR_DB .dump > backup.sql
+```
+
+**From the Turso web SQL console** (app.turso.tech → your database → SQL): the
+console runs one statement at a time, so open
+`prisma/migrations/2026-add-quote-conversion.sql` and paste its four numbered
+statements one by one, in order, pressing Run after each:
+
+```sql
+ALTER TABLE "PartRequest" ADD COLUMN "kind" TEXT NOT NULL DEFAULT 'REQUEST';
+ALTER TABLE "PartRequest" ADD COLUMN "quotedPrice" TEXT;
+ALTER TABLE "PartRequest" ADD COLUMN "convertedAt" DATETIME;
+UPDATE "PartRequest"
+   SET "kind" = 'QUOTE', "status" = 'QUOTE REQUESTED'
+ WHERE "quoteRequested" <> 0 AND "status" = 'PENDING';
+```
+
+**Or apply the whole file at once:**
+
+```bash
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-quote-conversion.sql
+```
+
+`node migrate-turso.mjs` prompts for both values and applies this same migration
+by default. Afterwards it prints the row count for every `kind`/`status` pair, so
+a silent no-op is obvious.
+
+The backfill (statement 4) moves only quotes that are still sitting where they
+were filed. A quote that had already gone `ACTIVE`, `INVOICE SENT`, `SHIPPED`,
+`COMPLETED`, `NEEDS REVIEW`, or `CANCELLED` was in practice already being worked
+as a build, so it stays a `REQUEST` and keeps its status — converting it now
+would rewind it. Re-running statement 1 fails with `duplicate column name: kind`
+and changes nothing; that is the signal it is already applied.
+
+Verify afterwards:
+
+```bash
+turso db shell YOUR_DB "SELECT kind, status, COUNT(*) FROM PartRequest GROUP BY kind, status;"
+```
+
+**Run the SQL before deploying the code, not after.** The migration is safe
+against the currently deployed code, which never reads the new columns — but
+Prisma selects every column it knows about, so the *new* code cannot read a
+database that is missing them. Migrate, then deploy.
+
+`requestKind()` still falls back to `quoteRequested` when a row carries no
+`kind`, which keeps anything the migration deliberately left alone reading
+sensibly.
 
 ## Submission Failures
 

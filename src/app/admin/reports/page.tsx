@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { requestTitle } from "@/lib/part-source";
+import { isQuote } from "@/lib/request-status";
 
 export default function GenerateReportsPage() {
   const { data: session, status } = useSession();
@@ -67,7 +68,7 @@ export default function GenerateReportsPage() {
       doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
       doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
 
-      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Material", "Quantity", "Status", "Invoice #", "Date Needed"];
+      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Material", "Quantity", "Type", "Status", "Quoted", "Invoice #", "Date Needed"];
       const tableRows: any[] = [];
 
       filteredRequests.forEach((req: any) => {
@@ -79,7 +80,9 @@ export default function GenerateReportsPage() {
           requestTitle(req),
           req.material || "N/A",
           req.quantity.toString(),
+          isQuote(req) ? "Quote" : "Request",
           req.status,
+          req.quotedPrice || "N/A",
           req.invoiceNumber || "N/A",
           format(new Date(req.dateNeeded), "MM/dd/yyyy")
         ];

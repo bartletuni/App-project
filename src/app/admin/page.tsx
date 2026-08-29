@@ -11,6 +11,50 @@ import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
 import PartSourceSummary from "@/components/PartSourceSummary";
 import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
 import { parseStoredSettings } from "@/lib/print-settings";
+import {
+  CANCELLED_STATUS,
+  KIND_QUOTE,
+  KIND_REQUEST,
+  canConvert,
+  convertability,
+  isQuote,
+  requestKind,
+  statusHint,
+  statusTone,
+  statusesFor,
+} from "@/lib/request-status";
+
+/**
+ * Console colours for a status, keyed by the tone the shared status table
+ * gives it, so a new status never has to be added here as well.
+ */
+const TONE_CLASSES: Record<string, string> = {
+  wait: "bg-yellow-500/15 text-yellow-200 border-yellow-500/30",
+  review: "bg-clay-700/12 text-clay-200 border-clay-600/30",
+  sent: "bg-cream-500/12 text-cream-200 border-cream-500/30",
+  active: "bg-ember-400/12 text-ember-300 border-ember-400/30",
+  done: "bg-green-500/15 text-green-200 border-green-500/30",
+  ship: "bg-teal-500/15 text-teal-200 border-teal-500/30",
+  bad: "bg-red-500/15 text-red-200 border-red-500/30",
+  muted: "bg-espresso-700 text-cream-300 border-espresso-600",
+};
+
+function statusClasses(status: string): string {
+  return TONE_CLASSES[statusTone(status)] || TONE_CLASSES.muted;
+}
+
+/** The status menu for one row — a quote and a build request differ. */
+function StatusOptions({ request }: { request: any }) {
+  return (
+    <>
+      {statusesFor(requestKind(request)).map((option) => (
+        <option key={option} value={option} title={statusHint(option)}>
+          {option}
+        </option>
+      ))}
+    </>
+  );
+}
 
 function AdminDashboardContent() {
   const { data: session, status } = useSession();
@@ -23,6 +67,7 @@ function AdminDashboardContent() {
   const [filterInvoice, setFilterInvoice] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [filterDate, setFilterDate] = useState("");
+  const [filterKind, setFilterKind] = useState("ALL");
 
   // Modal state
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
@@ -33,6 +78,9 @@ function AdminDashboardContent() {
   const [savingTracking, setSavingTracking] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [quotedPriceInput, setQuotedPriceInput] = useState("");
+  const [savingQuotedPrice, setSavingQuotedPrice] = useState(false);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
 
   const fetchRequests = () => {
     fetch("/api/requests")
@@ -188,10 +236,85 @@ function AdminDashboardContent() {
     }
   };
 
+  const handleSaveQuotedPrice = async (id: string) => {
+    setSavingQuotedPrice(true);
+    try {
+      const res = await fetch(`/api/requests/${id}/quote`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quotedPrice: quotedPriceInput }),
+      });
+      if (res.ok) {
+        fetchRequests();
+        if (selectedRequest && selectedRequest.id === id) {
+          setSelectedRequest({
+            ...selectedRequest,
+            quotedPrice: quotedPriceInput === "" ? null : quotedPriceInput,
+          });
+        }
+        alert("Quoted price saved successfully");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save quoted price");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving quoted price");
+    } finally {
+      setSavingQuotedPrice(false);
+    }
+  };
+
+  /**
+   * Moves a quote onto the build queue. The price in the modal rides along, so
+   * pricing it and starting it is one action. Anything already accepted is
+   * converted without ceremony; a declined or expired quote asks first, since
+   * that is reviving something the customer turned down.
+   */
+  const handleConvert = async (req: any) => {
+    const blocked = convertability(req);
+    if (!blocked.ok) {
+      alert(blocked.reason);
+      return;
+    }
+
+    const unusual = req.status === "QUOTE DECLINED" || req.status === "QUOTE EXPIRED";
+    const confirmation = unusual
+      ? `This quote is ${req.status}. Convert it into a build request anyway? It joins the queue as PENDING.`
+      : "Convert this quote into a build request? It leaves the quote track and joins the build queue as PENDING.";
+    if (!confirm(confirmation)) return;
+
+    setConvertingId(req.id);
+    try {
+      const res = await fetch(`/api/requests/${req.id}/convert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quotedPrice: quotedPriceInput }),
+      });
+      if (res.ok) {
+        const converted = await res.json();
+        fetchRequests();
+        if (selectedRequest && selectedRequest.id === req.id) {
+          setSelectedRequest(converted);
+          setQuotedPriceInput(converted.quotedPrice || "");
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to convert quote");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error converting quote");
+    } finally {
+      setConvertingId(null);
+    }
+  };
+
   const openModal = (req: any) => {
     setSelectedRequest(req);
     setInvoiceInput(req.invoiceNumber || "");
     setTrackingInput(req.trackingNumber || "");
+    setQuotedPriceInput(req.quotedPrice || "");
     setIsModalOpen(true);
   };
 
@@ -200,6 +323,7 @@ function AdminDashboardContent() {
     setSelectedRequest(null);
     setInvoiceInput("");
     setTrackingInput("");
+    setQuotedPriceInput("");
   };
 
   const filteredRequests = requests.filter((req) => {
@@ -217,10 +341,12 @@ function AdminDashboardContent() {
       (req.invoiceNumber && req.invoiceNumber.toLowerCase().includes(filterInvoice.toLowerCase()));
     
     const matchesStatus = filterStatus === "ALL" || req.status === filterStatus;
-    
+
+    const matchesKind = filterKind === "ALL" || requestKind(req) === filterKind;
+
     const matchesDate = !filterDate || format(new Date(req.createdAt), "yyyy-MM-dd") === filterDate;
 
-    return matchesUser && matchesInvoice && matchesStatus && matchesDate;
+    return matchesUser && matchesInvoice && matchesStatus && matchesKind && matchesDate;
   });
 
   if (status === "loading" || loading) {
@@ -239,7 +365,7 @@ function AdminDashboardContent() {
         </div>
 
         {/* Filters */}
-        <div className="bg-espresso-800/72 backdrop-blur-md rounded-2xl shadow-sm border border-clay-500/18 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="bg-espresso-800/72 backdrop-blur-md rounded-2xl shadow-sm border border-clay-500/18 p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div>
                 <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Filter by User</label>
                 <input
@@ -261,6 +387,18 @@ function AdminDashboardContent() {
                 />
             </div>
             <div>
+                <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Type</label>
+                <select
+                    value={filterKind}
+                    onChange={(e) => setFilterKind(e.target.value)}
+                    className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
+                >
+                    <option value="ALL">Quotes &amp; requests</option>
+                    <option value={KIND_QUOTE}>Quotes only</option>
+                    <option value={KIND_REQUEST}>Requests only</option>
+                </select>
+            </div>
+            <div>
                 <label className="block text-xs font-bold text-cream-500 uppercase tracking-wider mb-2">Status</label>
                 <select
                     value={filterStatus}
@@ -268,13 +406,17 @@ function AdminDashboardContent() {
                     className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 >
                     <option value="ALL">All Statuses</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                    <option value="COMPLETED">COMPLETED</option>
-                    <option value="CANCELLED">CANCELLED</option>
-                    <option value="INVOICE SENT">INVOICE SENT</option>
-                    <option value="SHIPPED">SHIPPED</option>
+                    <optgroup label="Quotes">
+                      {statusesFor(KIND_QUOTE).filter((o) => o !== CANCELLED_STATUS).map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Requests">
+                      {statusesFor(KIND_REQUEST).filter((o) => o !== CANCELLED_STATUS).map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </optgroup>
+                    <option value={CANCELLED_STATUS}>{CANCELLED_STATUS}</option>
                 </select>
             </div>
             <div>
@@ -306,12 +448,13 @@ function AdminDashboardContent() {
                 </div>
                 <h3 className="text-lg font-bold text-cream-200">No requests match filters</h3>
                 <p className="text-cream-500">Try adjusting your filters to find what you're looking for.</p>
-                {(filterUser || filterInvoice || filterStatus !== "ALL" || filterDate) && (
+                {(filterUser || filterInvoice || filterStatus !== "ALL" || filterKind !== "ALL" || filterDate) && (
                     <button 
                         onClick={() => {
                             setFilterUser("");
                             setFilterInvoice("");
                             setFilterStatus("ALL");
+                            setFilterKind("ALL");
                             setFilterDate("");
                         }}
                         className="mt-4 text-clay-300 font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-lg px-2 py-1"
@@ -332,28 +475,16 @@ function AdminDashboardContent() {
                           <div className="text-[10px] font-bold text-clay-300 uppercase tracking-tight">Customer</div>
                           <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
                           <div className="text-xs text-cream-500">{req.user?.email || "N/A"}</div>
-                          {req.quoteRequested && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer asked for a price quote before the build starts">Quote</span></div>}
+                          {isQuote(req) && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span></div>}
+                          {!isQuote(req) && req.convertedAt && <div className="mt-1.5"><span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span></div>}
                         </div>
                         <select
                           value={req.status}
                           onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-clay-500 border ${
-                            req.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-200 border-yellow-500/30' :
-                            req.status === 'ACTIVE' ? 'bg-ember-400/12 text-ember-300 border-ember-400/30' :
-                            req.status === 'COMPLETED' ? 'bg-green-500/15 text-green-200 border-green-500/30' :
-                            req.status === 'NEEDS REVIEW' ? 'bg-clay-700/12 text-clay-200 border-clay-600/30' :
-                            req.status === 'CANCELLED' ? 'bg-red-500/15 text-red-200 border-red-500/30' :
-                            req.status === 'SHIPPED' ? 'bg-teal-500/15 text-teal-200 border-teal-500/30' :
-                            'bg-espresso-700 text-cream-300 border-espresso-600'
-                          }`}
+                          title={statusHint(req.status)}
+                          className={`text-[10px] font-bold rounded-full px-2 py-1 focus:outline-none focus:ring-1 focus:ring-clay-500 border ${statusClasses(req.status)}`}
                         >
-                          <option value="PENDING">PENDING</option>
-                          <option value="ACTIVE">ACTIVE</option>
-                          <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                          <option value="COMPLETED">COMPLETED</option>
-                          <option value="CANCELLED">CANCELLED</option>
-                          <option value="INVOICE SENT">INVOICE SENT</option>
-                          <option value="SHIPPED">SHIPPED</option>
+                          <StatusOptions request={req} />
                         </select>
                       </div>
 
@@ -386,6 +517,15 @@ function AdminDashboardContent() {
                           >
                             View
                           </button>
+                          {canConvert(req) && (
+                            <button
+                              onClick={() => { setQuotedPriceInput(req.quotedPrice || ""); handleConvert(req); }}
+                              disabled={convertingId === req.id}
+                              className="text-green-200 hover:text-green-100 bg-green-500/15 hover:bg-green-500/25 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                            >
+                              {convertingId === req.id ? "Converting" : "To request"}
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDelete(req.id)}
                             disabled={deletingId === req.id}
@@ -438,7 +578,9 @@ function AdminDashboardContent() {
                               <div className="text-sm font-bold text-cream-200">{requestTitle(req)}</div>
                               <div className="flex gap-2 mt-1">
                                   {isDescriptionRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="No 3D file — model this part from the customer's description and references">Model it</span>}
-                                  {req.quoteRequested && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer asked for a price quote before the build starts">Quote</span>}
+                                  {isQuote(req) && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span>}
+                                  {!isQuote(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span>}
+                                  {req.quotedPrice && <span className="text-[10px] font-bold bg-green-500/12 text-green-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Price quoted to the customer">{req.quotedPrice}</span>}
                                   {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
                                   {req.printSettings && <span className="text-[10px] font-bold bg-teal-500/15 text-teal-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer supplied custom slicer settings">Custom settings</span>}
                                   {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
@@ -466,23 +608,10 @@ function AdminDashboardContent() {
                           <select
                               value={req.status}
                               onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500 cursor-pointer border ${
-                                req.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-200 border-yellow-500/30' :
-                                req.status === 'ACTIVE' ? 'bg-ember-400/12 text-ember-300 border-ember-400/30' :
-                                req.status === 'COMPLETED' ? 'bg-green-500/15 text-green-200 border-green-500/30' :
-                                req.status === 'NEEDS REVIEW' ? 'bg-clay-700/12 text-clay-200 border-clay-600/30' :
-                                req.status === 'CANCELLED' ? 'bg-red-500/15 text-red-200 border-red-500/30' :
-                                req.status === 'SHIPPED' ? 'bg-teal-500/15 text-teal-200 border-teal-500/30' :
-                                'bg-espresso-700 text-cream-300 border-espresso-600'
-                              }`}
+                              title={statusHint(req.status)}
+                              className={`text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-clay-500 cursor-pointer border ${statusClasses(req.status)}`}
                           >
-                              <option value="PENDING">PENDING</option>
-                              <option value="ACTIVE">ACTIVE</option>
-                              <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                              <option value="COMPLETED">COMPLETED</option>
-                              <option value="CANCELLED">CANCELLED</option>
-                              <option value="INVOICE SENT">INVOICE SENT</option>
-                              <option value="SHIPPED">SHIPPED</option>
+                              <StatusOptions request={req} />
                           </select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-3 items-center">
@@ -491,8 +620,25 @@ function AdminDashboardContent() {
                                 className="inline-flex items-center gap-1.5 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                View Order
+                                {isQuote(req) ? "View Quote" : "View Order"}
                             </button>
+                            {canConvert(req) && (
+                              <button
+                                onClick={() => { setQuotedPriceInput(req.quotedPrice || ""); handleConvert(req); }}
+                                disabled={convertingId === req.id}
+                                title="Move this quote onto the build queue"
+                                className="inline-flex items-center gap-1.5 text-green-200 hover:text-green-100 bg-green-500/15 hover:bg-green-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                              >
+                                {convertingId === req.id ? (
+                                  <>
+                                    <span className="h-3.5 w-3.5 rounded-full border-2 border-green-200/40 border-t-green-200 animate-spin" />
+                                    Converting
+                                  </>
+                                ) : (
+                                  "Convert"
+                                )}
+                              </button>
+                            )}
                             <button
                               onClick={() => handleDelete(req.id)}
                               disabled={deletingId === req.id}
@@ -524,7 +670,7 @@ function AdminDashboardContent() {
           <div className="bg-espresso-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-clay-500/20 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45 flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modal-title" className="text-xl leading-6 font-bold text-cream-200">
-                  Ticket Details
+                  {isQuote(selectedRequest) ? "Quote Details" : "Ticket Details"}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -576,9 +722,15 @@ function AdminDashboardContent() {
                         <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.material || "N/A"}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-cream-500">Quote Requested</dt>
-                        <dd className={`mt-1 text-sm font-semibold ${selectedRequest.quoteRequested ? "text-amber-200" : "text-cream-200"}`}>
-                          {selectedRequest.quoteRequested ? "Yes — price before build" : "No"}
+                        <dt className="text-sm font-medium text-cream-500">Type</dt>
+                        <dd className={`mt-1 text-sm font-semibold ${isQuote(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
+                          {isQuote(selectedRequest)
+                            ? "Quote — price before build"
+                            : selectedRequest.convertedAt
+                              ? `Request — converted from a quote ${format(new Date(selectedRequest.convertedAt), "MMM d, yyyy")}`
+                              : selectedRequest.quoteRequested
+                                ? "Request — a quote was asked for"
+                                : "Request"}
                         </dd>
                     </div>
                     <div className="sm:col-span-1">
@@ -621,6 +773,28 @@ function AdminDashboardContent() {
                           <dd className="mt-1 text-sm text-cream-200 bg-espresso-700 p-4 rounded-lg border border-espresso-700">{selectedRequest.notes}</dd>
                       </div>
                     )}
+                    <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-cream-500">Quoted Price</dt>
+                        <dd className="mt-1 flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={quotedPriceInput}
+                              onChange={(e) => setQuotedPriceInput(e.target.value)}
+                              placeholder="e.g. $142.50"
+                              className="border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 w-48 bg-espresso-800 text-black"
+                            />
+                            <button
+                              onClick={() => handleSaveQuotedPrice(selectedRequest.id)}
+                              disabled={savingQuotedPrice || quotedPriceInput === (selectedRequest.quotedPrice || "")}
+                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {savingQuotedPrice ? "Saving..." : "Save Price"}
+                            </button>
+                        </dd>
+                        <dd className="mt-1 text-xs text-cream-500">
+                          What was quoted to the customer. Kept on the record after conversion.
+                        </dd>
+                    </div>
                     <div className="sm:col-span-2">
                         <dt className="text-sm font-medium text-cream-500">Invoice Number</dt>
                         <dd className="mt-1 flex items-center gap-2">
@@ -671,17 +845,29 @@ function AdminDashboardContent() {
                             id="status-select"
                             value={selectedRequest.status}
                             onChange={(e) => handleStatusChange(selectedRequest.id, e.target.value)}
+                            title={statusHint(selectedRequest.status)}
                             className="text-sm font-bold rounded-lg px-3 py-2 bg-espresso-800 border border-espresso-500 focus:outline-none focus:ring-2 focus:ring-clay-500 cursor-pointer text-black"
                          >
-                            <option value="PENDING">PENDING</option>
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="NEEDS REVIEW">NEEDS REVIEW</option>
-                            <option value="COMPLETED">COMPLETED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                            <option value="INVOICE SENT">INVOICE SENT</option>
-                            <option value="SHIPPED">SHIPPED</option>
+                            <StatusOptions request={selectedRequest} />
                        </select>
                    </div>
+                   {canConvert(selectedRequest) && (
+                       <button
+                         onClick={() => handleConvert(selectedRequest)}
+                         disabled={convertingId === selectedRequest.id}
+                         title="Move this quote onto the build queue as PENDING"
+                         className="inline-flex items-center gap-1.5 text-green-200 bg-green-500/18 hover:bg-green-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                       >
+                         {convertingId === selectedRequest.id ? (
+                           <>
+                             <span className="h-3.5 w-3.5 rounded-full border-2 border-green-200/40 border-t-green-200 animate-spin" />
+                             Converting
+                           </>
+                         ) : (
+                           "Convert to request"
+                         )}
+                       </button>
+                   )}
                    {selectedRequest.status !== 'CANCELLED' && (
                        <button
                          onClick={() => handleCancel(selectedRequest.id)}
@@ -694,7 +880,7 @@ function AdminDashboardContent() {
                              Canceling
                            </>
                          ) : (
-                           "Cancel Request"
+                           isQuote(selectedRequest) ? "Cancel Quote" : "Cancel Request"
                          )}
                        </button>
                    )}

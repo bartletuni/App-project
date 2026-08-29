@@ -1,4 +1,5 @@
 import { BUSINESS, absoluteUrl } from "@/lib/seo";
+import { StatusTone, statusTone } from "@/lib/request-status";
 
 /**
  * Transactional email, in the same voice as the site.
@@ -150,18 +151,24 @@ function button(href: string, label: string): string {
     </table>`;
 }
 
-/** Status pill, mirroring the colours the build ledger uses on screen. */
+/**
+ * Status pill, mirroring the colours the build ledger uses on screen. The
+ * status-to-tone mapping is shared with the app (src/lib/request-status.ts) so
+ * a quote status renders here without a second list to keep in step; only the
+ * hex per tone lives in this file, since email cannot use the site's classes.
+ */
 function statusChip(status: string): string {
-  const tones: Record<string, string> = {
-    PENDING: "#f0c08a",
-    ACTIVE: C.ember,
-    COMPLETED: "#8fbf7f",
-    "NEEDS REVIEW": "#e3be9a",
-    CANCELLED: "#d98a7a",
-    SHIPPED: "#7fbfb5",
-    "INVOICE SENT": "#e7dccb",
+  const tones: Record<StatusTone, string> = {
+    wait: "#f0c08a",
+    review: "#e3be9a",
+    sent: "#e7dccb",
+    active: C.ember,
+    done: "#8fbf7f",
+    ship: "#7fbfb5",
+    bad: "#d98a7a",
+    muted: C.clay,
   };
-  const tone = tones[status.toUpperCase()] || C.clay;
+  const tone = tones[statusTone(status)] || C.clay;
   return `<span style="display:inline-block;padding:6px 12px;border:1px solid ${tone};border-radius:2px;font-family:${MONO};font-size:10px;line-height:1;letter-spacing:0.16em;text-transform:uppercase;color:${tone};">${escapeHtml(status)}</span>`;
 }
 

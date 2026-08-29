@@ -20,6 +20,12 @@ import {
   isReferenceFileName,
   parseSubmissionType,
 } from "@/lib/part-source";
+import {
+  DEFAULT_QUOTE_STATUS,
+  DEFAULT_REQUEST_STATUS,
+  KIND_QUOTE,
+  KIND_REQUEST,
+} from "@/lib/request-status";
  
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -314,6 +320,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Error uploading to Cloudflare R2. Ensure the Admin has setup credentials properly." }, { status: 500 });
     }
 
+    // A quote goes onto the quote track and starts at "QUOTE REQUESTED"; a
+    // plain build request keeps the original queue and starts at "PENDING".
+    // The two vocabularies never mix — see src/lib/request-status.ts.
+    const kind = quoteRequested ? KIND_QUOTE : KIND_REQUEST;
+    const initialStatus = quoteRequested ? DEFAULT_QUOTE_STATUS : DEFAULT_REQUEST_STATUS;
+
     // Create Part Request
     const partRequest = await prisma.partRequest.create({
       data: {
@@ -330,6 +342,8 @@ export async function POST(req: NextRequest) {
         notes,
         printSettings: customSettings ? JSON.stringify(customSettings) : null,
         quoteRequested,
+        kind,
+        status: initialStatus,
         dateNeeded,
         ...(storedReferences.length > 0 ? { attachments: { create: storedReferences } } : {}),
       },

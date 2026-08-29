@@ -186,6 +186,33 @@ describe("POST /api/requests", () => {
     expect(createdRequestData().quoteRequested).toBe(true);
   });
 
+  it("files a described part on the quote track", async () => {
+    const res = await POST(createDescriptionRequest());
+    expect(res.status).toBe(201);
+
+    const data = createdRequestData();
+    expect(data.kind).toBe("QUOTE");
+    expect(data.status).toBe("QUOTE REQUESTED");
+  });
+
+  it("files a quoted upload on the quote track", async () => {
+    const res = await POST(createRequest("test.stl", Buffer.from("solid test"), "true"));
+    expect(res.status).toBe(201);
+
+    const data = createdRequestData();
+    expect(data.kind).toBe("QUOTE");
+    expect(data.status).toBe("QUOTE REQUESTED");
+  });
+
+  it("files an ordinary upload straight onto the build queue", async () => {
+    const res = await POST(createRequest("test.stl", Buffer.from("solid test")));
+    expect(res.status).toBe(201);
+
+    const data = createdRequestData();
+    expect(data.kind).toBe("REQUEST");
+    expect(data.status).toBe("PENDING");
+  });
+
   it("stores reference photos attached to a described part", async () => {
     const res = await POST(
       createDescriptionRequest({ references: [{ name: "catch.png", content: PNG }] })

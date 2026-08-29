@@ -1,7 +1,7 @@
 /**
  * Applies a SQL migration to a Turso (libSQL) database.
  *
- *   node scripts/migrate-turso.mjs prisma/migrations/2026-add-description-requests.sql
+ *   node scripts/migrate-turso.mjs prisma/migrations/2026-add-quote-conversion.sql
  *
  * Credentials come from the environment, the same two variables the app itself
  * reads, so this works with whatever is already in your shell or .env:
@@ -72,6 +72,14 @@ try {
       `SELECT submissionType, COUNT(*) AS n FROM "PartRequest" GROUP BY submissionType`
     );
     for (const row of rows) console.log(`   submissionType ${row.submissionType}: ${row.n}`);
+
+    // Only present once the quote-conversion migration has run.
+    if (await hasColumn(client, "PartRequest", "kind")) {
+      const { rows: byKind } = await client.execute(
+        `SELECT kind, status, COUNT(*) AS n FROM "PartRequest" GROUP BY kind, status ORDER BY kind, status`
+      );
+      for (const row of byKind) console.log(`   ${row.kind} / ${row.status}: ${row.n}`);
+    }
   }
 } catch (err) {
   const message = err?.message || String(err);
@@ -89,6 +97,11 @@ try {
   process.exitCode = 1;
 } finally {
   client.close();
+}
+
+async function hasColumn(client, table, column) {
+  const { rows } = await client.execute(`PRAGMA table_info("${table}")`);
+  return rows.some((r) => r.name === column);
 }
 
 async function tableNames(client) {
