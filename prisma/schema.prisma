@@ -98,6 +98,11 @@ model PartRequest {
   notes           String?
   printSettings   String? // JSON CustomPrintSettings; null = auto (shop chooses)
   quoteRequested  Boolean     @default(false) // customer asked for a price quote first
+  /// True on the one free PLA 2.0 sample a first-time customer may request.
+  /// Eligibility is meant to be "no existing row with this flag set for the
+  /// user", not "no requests at all" — so someone who ordered before the
+  /// sample program existed can still claim one.
+  isFreeSample    Boolean     @default(false)
   /// Which track this row is on, and therefore which set of statuses it uses:
   /// QUOTE (being priced, nothing built yet) or REQUEST (a live build). An
   /// admin moves a quote across with POST /api/requests/[id]/convert.

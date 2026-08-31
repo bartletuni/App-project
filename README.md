@@ -300,6 +300,37 @@ database that is missing them. Migrate, then deploy.
 `kind`, which keeps anything the migration deliberately left alone reading
 sensibly.
 
+### Free PLA 2.0 sample
+
+`PartRequest.isFreeSample` marks the one free PLA 2.0 sample a first-time
+customer may claim. It defaults to `false`, so every row written before this
+column existed reads as "not a sample" with no backfill needed. Eligibility is
+meant to be checked as "does this user have any row with `isFreeSample = true`
+already", not "has this user ever placed a request" — so someone who ordered
+before the sample program existed can still claim one.
+
+**Applying this to Turso** — additive and backward-compatible, one `ALTER
+TABLE` statement, safe to run against live data and before deploying the new
+code:
+
+```bash
+turso db shell YOUR_DB .dump > backup.sql   # back up first
+
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-free-sample.sql
+```
+
+Or paste the single statement into the Turso web SQL console
+(app.turso.tech → your database → SQL):
+
+```sql
+ALTER TABLE "PartRequest" ADD COLUMN "isFreeSample" BOOLEAN NOT NULL DEFAULT false;
+```
+
+Re-running it fails with `duplicate column name: isFreeSample` and changes
+nothing — that's the signal it's already applied, not damage.
+
 ## Submission Failures
 
 Both request forms report every failed submission. The banner sits at the top of
