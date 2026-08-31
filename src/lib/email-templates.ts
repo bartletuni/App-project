@@ -379,6 +379,7 @@ export const NewRequestEmailHTML = (data: {
   notes?: string;
   printSettings?: string;
   quoteRequested?: boolean;
+  isFreeSample?: boolean;
 }) => {
   const described = data.submissionType === "DESCRIPTION";
   const references = data.referenceCount
@@ -394,6 +395,14 @@ export const NewRequestEmailHTML = (data: {
       ${heading("New part request")}
       ${lede(`A new request came in from <span style="color:${C.creamSoft};">${escapeHtml(data.customerName)}</span>.`)}
 
+      ${
+        data.isFreeSample
+          ? callout(
+              `<strong style="color:#8fbf7f;">Free sample.</strong> First-time customer's free PLA 2.0 sample — no invoice.`,
+              "#8fbf7f"
+            )
+          : ""
+      }
       ${
         described
           ? callout(

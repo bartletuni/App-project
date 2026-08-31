@@ -26,7 +26,13 @@ import {
   KIND_QUOTE,
   KIND_REQUEST,
 } from "@/lib/request-status";
- 
+import {
+  FREE_SAMPLE_MATERIAL,
+  FREE_SAMPLE_PRICE_LABEL,
+  FREE_SAMPLE_QUANTITY,
+  isFreeSampleRequested,
+} from "@/lib/free-sample";
+
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
@@ -57,6 +63,7 @@ export async function POST(req: NextRequest) {
     const requestedUserId = formData.get("userId") as string | null;
     const printSettingsRaw = formData.get("printSettings") as string | null;
     const quoteRequestedRaw = formData.get("quoteRequested") as string | null;
+    const isFreeSampleRaw = formData.get("isFreeSample") as string | null;
 
     if (
       (quantityStr !== null && typeof quantityStr !== "string") ||
@@ -67,6 +74,7 @@ export async function POST(req: NextRequest) {
       (requestedUserId !== null && typeof requestedUserId !== "string") ||
       (printSettingsRaw !== null && typeof printSettingsRaw !== "string") ||
       (quoteRequestedRaw !== null && typeof quoteRequestedRaw !== "string") ||
+      (isFreeSampleRaw !== null && typeof isFreeSampleRaw !== "string") ||
       (partNameRaw !== null && typeof partNameRaw !== "string") ||
       (partDescriptionRaw !== null && typeof partDescriptionRaw !== "string") ||
       (dimensionsRaw !== null && typeof dimensionsRaw !== "string")
@@ -74,15 +82,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
 
+    // The composer's "Make this my free sample" checkbox. Eligibility is
+    // enforced further down, once we know which account this request belongs
+    // to — this only reads what the client asked for.
+    const isFreeSample = isFreeSampleRequested(isFreeSampleRaw);
+
     // The composer's "Quote" checkbox. Absent or anything falsy means a normal
     // build request. A described part has nothing to price until we have drawn
     // it, so those are always quoted first no matter what the client sent — the
-    // composer ticks and locks the box to match.
+    // composer ticks and locks the box to match. A free sample skips quoting
+    // too, since there is nothing to price, but a described free sample still
+    // needs modelling first, so that rule wins over the sample.
     const quoteRequested =
       isDescriptionRequest ||
-      quoteRequestedRaw === "true" ||
-      quoteRequestedRaw === "1" ||
-      quoteRequestedRaw === "on";
+      (!isFreeSample &&
+        (quoteRequestedRaw === "true" || quoteRequestedRaw === "1" || quoteRequestedRaw === "on"));
 
     // Optional custom slicer settings; absent/empty means AUTO.
     let customSettings: CustomPrintSettings | null = null;
@@ -105,7 +119,10 @@ export async function POST(req: NextRequest) {
 
     const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
 
-    if (isNaN(quantity) || quantity < 1 || quantity > 10000) {
+    // A free sample overrides quantity and material outright (below), so
+    // whatever the client sent for either is moot — validating it here would
+    // only reject a stale value the composer never meant to submit.
+    if (!isFreeSample && (isNaN(quantity) || quantity < 1 || quantity > 10000)) {
       return NextResponse.json({ error: "Invalid quantity provided" }, { status: 400 });
     }
 
@@ -113,7 +130,7 @@ export async function POST(req: NextRequest) {
        return NextResponse.json({ error: "Notes exceed maximum allowed length" }, { status: 400 });
     }
 
-    if (material && material.length > 100) {
+    if (!isFreeSample && material && material.length > 100) {
       return NextResponse.json({ error: "Material name exceeds maximum allowed length" }, { status: 400 });
     }
 
@@ -278,6 +295,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // A first-time customer gets exactly one free PLA 2.0 sample. The client
+    // hides the option once it has been used; this is what actually enforces
+    // it. "Already claimed" is checked per account, not "has ever ordered" —
+    // so someone who ordered before this program existed can still claim one.
+    if (isFreeSample) {
+      const priorSample = await prisma.partRequest.count({
+        where: { userId: targetUserId, isFreeSample: true },
+      });
+      if (priorSample > 0) {
+        return NextResponse.json(
+          { error: "You've already claimed your free PLA 2.0 sample." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // What actually gets stored and billed. A free sample overrides whatever
+    // the client sent for material and quantity.
+    const finalMaterial = isFreeSample ? FREE_SAMPLE_MATERIAL : material;
+    const finalQuantity = isFreeSample ? FREE_SAMPLE_QUANTITY : quantity;
+
     // Handle Phone Number
     let phoneNumberRecord = await prisma.phoneNumber.findFirst({
       where: { userId: targetUserId, number: phoneNumberString }
@@ -337,11 +375,13 @@ export async function POST(req: NextRequest) {
         partName,
         partDescription,
         dimensions,
-        quantity,
-        material,
+        quantity: finalQuantity,
+        material: finalMaterial,
         notes,
         printSettings: customSettings ? JSON.stringify(customSettings) : null,
         quoteRequested,
+        isFreeSample,
+        quotedPrice: isFreeSample ? FREE_SAMPLE_PRICE_LABEL : undefined,
         kind,
         status: initialStatus,
         dateNeeded,
@@ -356,11 +396,12 @@ export async function POST(req: NextRequest) {
       const title = (file && !isDescriptionRequest ? file.name : partName) || "Untitled part";
       // Sanitize to prevent Email Header (CRLF) Injection
       const safeTitle = title.replace(/[\r\n]/g, '');
+      const subjectPrefix = isFreeSample ? "[Free sample] " : "";
       await sendEmail({
         to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
         subject: isDescriptionRequest
-          ? `New Request (no model): ${safeTitle}`
-          : `New Request: ${safeTitle}`,
+          ? `${subjectPrefix}New Request (no model): ${safeTitle}`
+          : `${subjectPrefix}New Request: ${safeTitle}`,
         html: NewRequestEmailHTML({
           customerName: targetUserName,
           customerEmail: targetUserEmail,
@@ -369,12 +410,13 @@ export async function POST(req: NextRequest) {
           partDescription: partDescription || undefined,
           dimensions: dimensions || undefined,
           referenceCount: storedReferences.length,
-          quantity,
-          material: material || "Not specified",
+          quantity: finalQuantity,
+          material: finalMaterial || "Not specified",
           dateNeeded: format(dateNeeded, "PPP"),
           notes: notes || undefined,
           printSettings: summarizeSettings(customSettings),
           quoteRequested,
+          isFreeSample,
         }),
         label: "new-request admin notification",
       });
