@@ -286,13 +286,18 @@ export const WelcomeUserEmailHTML = (data: {
 }) =>
   shell({
     audience: "customer",
-    preheader: "Your TakomoCo account is open — here's how to get a part made.",
+    preheader: "Your TakomoCo account is open — and your first PLA 2.0 part is free.",
     eyebrow: "Welcome ⁄ Account opened",
     title: `Welcome, ${data.name}`,
     content: `
       ${heading(`Welcome, <span style="font-style:italic;color:${C.clay};">${escapeHtml(data.name)}</span>`)}
       ${lede(
         "Your account is open. Your desk is where everything happens from here — submit a part, watch it move through the shop, and keep every build on one ledger."
+      )}
+
+      ${callout(
+        `<strong style="color:#8fbf7f;">First order's on us.</strong> As a new customer, you get one part printed free in PLA 2.0 — no invoice. Check "First order? Get a free sample" when you submit it.`,
+        "#8fbf7f"
       )}
 
       <div style="font-family:${MONO};font-size:10px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted};padding:0 0 16px;">How a part gets made</div>
@@ -379,6 +384,7 @@ export const NewRequestEmailHTML = (data: {
   notes?: string;
   printSettings?: string;
   quoteRequested?: boolean;
+  isFreeSample?: boolean;
 }) => {
   const described = data.submissionType === "DESCRIPTION";
   const references = data.referenceCount
@@ -394,6 +400,14 @@ export const NewRequestEmailHTML = (data: {
       ${heading("New part request")}
       ${lede(`A new request came in from <span style="color:${C.creamSoft};">${escapeHtml(data.customerName)}</span>.`)}
 
+      ${
+        data.isFreeSample
+          ? callout(
+              `<strong style="color:#8fbf7f;">Free sample.</strong> First-time customer's free PLA 2.0 sample — no invoice.`,
+              "#8fbf7f"
+            )
+          : ""
+      }
       ${
         described
           ? callout(

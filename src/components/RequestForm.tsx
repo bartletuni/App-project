@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
-import { AlertTriangle, Plus, ArrowRight } from "lucide-react";
+import { AlertTriangle, Plus, ArrowRight, Gift } from "lucide-react";
 import Panel from "@/components/ui/Panel";
 import PartSourceFields from "@/components/PartSourceFields";
 import { useFormAlert } from "@/components/ui/useFormAlert";
@@ -11,6 +11,7 @@ import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 import { QUOTE_PARAM, isQuoteRequested } from "@/lib/quote";
+import { FREE_SAMPLE_MATERIAL } from "@/lib/free-sample";
 import {
   PartSourceState,
   appendPartSource,
@@ -47,6 +48,10 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [quoteRequested, setQuoteRequested] = useState(() =>
     isQuoteRequested(searchParams.get(QUOTE_PARAM))
   );
+  // null while we don't yet know; the offer stays hidden until we do, so it
+  // never flashes on for someone who has already claimed theirs.
+  const [freeSampleEligible, setFreeSampleEligible] = useState<boolean | null>(null);
+  const [freeSample, setFreeSample] = useState(false);
   const [loading, setLoading] = useState(false);
   // The banner sits at the top of the panel, well above the submit button, so
   // it scrolls itself into view rather than failing somewhere off-screen.
@@ -84,6 +89,11 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           }
         }
       });
+
+    fetch("/api/requests/free-sample")
+      .then((res) => (res.ok ? res.json() : { eligible: false }))
+      .then((data) => setFreeSampleEligible(Boolean(data?.eligible)))
+      .catch(() => setFreeSampleEligible(false));
   }, [initialMaterial]);
 
   // A described part cannot be priced until we have modelled it, so the quote
@@ -128,12 +138,13 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
     const formData = new FormData();
     appendPartSource(formData, partSource);
-    formData.append("quantity", quantity);
-    formData.append("material", material);
+    formData.append("quantity", freeSample ? "1" : quantity);
+    formData.append("material", freeSample ? FREE_SAMPLE_MATERIAL : material);
     formData.append("notes", notes);
     formData.append("dateNeeded", dateNeeded);
     formData.append("phoneNumber", finalPhone);
     formData.append("quoteRequested", quoteChecked ? "true" : "false");
+    if (freeSample) formData.append("isFreeSample", "true");
     if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
@@ -155,6 +166,12 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       setIsAddingPhone(false);
       setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
       setQuoteRequested(false);
+      if (freeSample) {
+        // Claimed — the offer will not come back for this account, so hide it
+        // immediately rather than waiting on a re-fetch.
+        setFreeSample(false);
+        setFreeSampleEligible(false);
+      }
       onFormSubmit();
     } catch (err: unknown) {
       setError(describeSubmitException(err));
@@ -170,6 +187,46 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <span className="hairline flex-1" />
       </div>
 
+      {/* First-time offer. Hidden until we know the account qualifies, and
+          gone for good the moment it renders a request — never shown to
+          someone who cannot actually use it. */}
+      {freeSampleEligible && (
+        <label
+          htmlFor="freeSample"
+          className={`mb-6 flex items-start gap-3 rounded-md border px-4 py-3.5 transition-colors cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500 ${
+            freeSample
+              ? "border-emerald-500/50 bg-emerald-500/10"
+              : "border-emerald-500/25 bg-emerald-500/5 hover:border-emerald-400/60"
+          }`}
+        >
+          <input
+            id="freeSample"
+            type="checkbox"
+            checked={freeSample}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setFreeSample(checked);
+              if (checked) {
+                setQuantity("1");
+                setQuoteRequested(false);
+              }
+            }}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-500 outline-none"
+          />
+          <span className="min-w-0">
+            <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-300">
+              <Gift className="h-3.5 w-3.5" aria-hidden="true" />
+              First order? Get a free sample
+            </span>
+            <span className="mt-1 block text-xs leading-relaxed text-cream-400">
+              {freeSample
+                ? "This request is your free sample: 1x, printed in PLA 2.0, on the house — no invoice. One per account."
+                : "New customers get one part printed free in PLA 2.0, no cost. Check the box to make this request that sample."}
+            </span>
+          </span>
+        </label>
+      )}
+
       {/* Standing advice, not a live alert — role="alert" here announced it on
           load and competed with the submission error below. */}
       <div className="mb-6 flex gap-3 border-l-2 border-yellow-500/50 bg-yellow-500/10 px-4 py-3" role="note">
@@ -181,8 +238,9 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           </p>
           <p>
             <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Payment ·</span>{" "}
-            Your invoice is sent promptly after this request is submitted, and
-            manufacturing starts once it is <strong>paid in full</strong>.
+            {freeSample
+              ? "This one's free — no invoice."
+              : <>Your invoice is sent promptly after this request is submitted, and manufacturing starts once it is <strong>paid in full</strong>.</>}
           </p>
         </div>
       </div>
@@ -216,8 +274,20 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="quantity" className={labelCls}>Quantity <span className="text-clay-400">*</span></label>
-            <input id="quantity" type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} className={field} required />
+            <label htmlFor="quantity" className={labelCls}>
+              Quantity <span className="text-clay-400">*</span>
+              {freeSample && <span className="text-emerald-400 normal-case tracking-normal"> · locked at 1 for the sample</span>}
+            </label>
+            <input
+              id="quantity"
+              type="number"
+              min="1"
+              value={freeSample ? "1" : quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              className={`${field} ${freeSample ? "opacity-70 cursor-not-allowed" : ""}`}
+              required
+              disabled={freeSample}
+            />
           </div>
           <div>
             <label htmlFor="dateNeeded" className={labelCls}>Date needed <span className="text-clay-400">*</span></label>
@@ -252,14 +322,28 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         </div>
 
         <div>
-          <label htmlFor="material" className={labelCls}>Material <span className="text-clay-400">*</span></label>
-          <select id="material" value={material} onChange={(e) => setMaterial(e.target.value)} className={field} required>
-            {availableMaterials.length === 0 ? (
-              <option value="">No materials available</option>
-            ) : (
-              availableMaterials.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)
-            )}
-          </select>
+          <label htmlFor="material" className={labelCls}>
+            Material <span className="text-clay-400">*</span>
+            {freeSample && <span className="text-emerald-400 normal-case tracking-normal"> · locked for the sample</span>}
+          </label>
+          {freeSample ? (
+            <input
+              id="material"
+              type="text"
+              value={FREE_SAMPLE_MATERIAL}
+              disabled
+              readOnly
+              className={`${field} opacity-70 cursor-not-allowed`}
+            />
+          ) : (
+            <select id="material" value={material} onChange={(e) => setMaterial(e.target.value)} className={field} required>
+              {availableMaterials.length === 0 ? (
+                <option value="">No materials available</option>
+              ) : (
+                availableMaterials.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)
+              )}
+            </select>
+          )}
         </div>
 
         <PrintSettingsFields value={printSettings} onChange={setPrintSettings} idPrefix="user-ps" />
@@ -269,42 +353,55 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={`${field} resize-none`} placeholder="Any special instructions?" />
         </div>
 
-        <label
-          htmlFor="quoteRequested"
-          className={`flex items-start gap-3 rounded-md border border-clay-500/25 px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay-500 ${
-            quoteLocked ? "cursor-default bg-clay-500/5" : "cursor-pointer hover:border-clay-400"
-          }`}
-        >
-          <input
-            id="quoteRequested"
-            name="quoteRequested"
-            type="checkbox"
-            checked={quoteChecked}
-            disabled={quoteLocked}
-            onChange={(e) => setQuoteRequested(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 outline-none disabled:opacity-80"
-          />
-          <span className="min-w-0">
-            <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-300">
-              Quote {quoteLocked && <span className="text-clay-300">· always, on a described part</span>}
+        {/* A free sample has nothing to price, so the quote step only still
+            applies when the part also has to be modelled first. */}
+        {(!freeSample || quoteLocked) && (
+          <label
+            htmlFor="quoteRequested"
+            className={`flex items-start gap-3 rounded-md border border-clay-500/25 px-4 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay-500 ${
+              quoteLocked ? "cursor-default bg-clay-500/5" : "cursor-pointer hover:border-clay-400"
+            }`}
+          >
+            <input
+              id="quoteRequested"
+              name="quoteRequested"
+              type="checkbox"
+              checked={quoteChecked}
+              disabled={quoteLocked}
+              onChange={(e) => setQuoteRequested(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 outline-none disabled:opacity-80"
+            />
+            <span className="min-w-0">
+              <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-300">
+                Quote {quoteLocked && <span className="text-clay-300">· always, on a described part</span>}
+              </span>
+              <span className="mt-1 block text-xs leading-relaxed text-cream-500">
+                {quoteLocked
+                  ? "There is nothing to price until we have modelled your part, so this one is quoted first. You approve the price before we build anything."
+                  : "Price this part first. We send a quote for your approval before the invoice — manufacturing still starts once that invoice is paid."}
+              </span>
             </span>
-            <span className="mt-1 block text-xs leading-relaxed text-cream-500">
-              {quoteLocked
-                ? "There is nothing to price until we have modelled your part, so this one is quoted first. You approve the price before we build anything."
-                : "Price this part first. We send a quote for your approval before the invoice — manufacturing still starts once that invoice is paid."}
-            </span>
-          </span>
-        </label>
+          </label>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
+          className={`group w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 rounded-md ${
+            freeSample
+              ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
+              : "bg-clay-600 hover:bg-clay-700 focus-visible:ring-clay-500"
+          }`}
         >
           {loading ? (
             <>
               <span className="h-4 w-4 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" />
               Submitting…
+            </>
+          ) : freeSample ? (
+            <>
+              Claim free sample
+              <Gift className="h-4 w-4" aria-hidden="true" />
             </>
           ) : (
             <>

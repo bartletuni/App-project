@@ -13,7 +13,10 @@ jest.mock("@/lib/prisma", () => ({
       findFirst: jest.fn().mockResolvedValue({ id: "phone-1" }),
       create: jest.fn().mockResolvedValue({ id: "phone-1" })
     },
-    partRequest: { create: jest.fn().mockResolvedValue({ id: "req-1", attachments: [] }) },
+    partRequest: {
+      create: jest.fn().mockResolvedValue({ id: "req-1", attachments: [] }),
+      count: jest.fn().mockResolvedValue(0),
+    },
   }
 }));
 
@@ -33,17 +36,24 @@ describe("POST /api/requests", () => {
   beforeEach(() => {
     (getServerSession as jest.Mock).mockResolvedValue({ user: { id: "user-1", email: "test@example.com", name: "Test" } });
     (prisma.partRequest.create as jest.Mock).mockClear();
+    (prisma.partRequest.count as jest.Mock).mockReset().mockResolvedValue(0);
   });
 
-  const createRequest = (filename: string, fileContent: Buffer, quoteRequested?: string) => {
+  const createRequest = (
+    filename: string,
+    fileContent: Buffer,
+    quoteRequested?: string,
+    extra?: { quantity?: string; material?: string; isFreeSample?: string }
+  ) => {
     const formData = new FormData();
     const file = new File([fileContent], filename, { type: "application/octet-stream" });
     formData.append("file", file);
-    formData.append("quantity", "1");
-    formData.append("material", "PLA");
+    formData.append("quantity", extra?.quantity ?? "1");
+    formData.append("material", extra?.material ?? "PLA");
     formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()); // 5 days from now
     formData.append("phoneNumber", "1234567890");
     if (quoteRequested !== undefined) formData.append("quoteRequested", quoteRequested);
+    if (extra?.isFreeSample !== undefined) formData.append("isFreeSample", extra.isFreeSample);
 
     return new NextRequest("http://localhost/api/requests", {
       method: "POST",
@@ -114,6 +124,7 @@ describe("POST /api/requests", () => {
       dimensions?: string;
       references?: { name: string; content: Buffer }[];
       quoteRequested?: string;
+      isFreeSample?: string;
     } = {}
   ) => {
     const formData = new FormData();
@@ -135,6 +146,7 @@ describe("POST /api/requests", () => {
     formData.append("material", "PLA");
     formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString());
     formData.append("phoneNumber", "1234567890");
+    if (overrides.isFreeSample !== undefined) formData.append("isFreeSample", overrides.isFreeSample);
     if (overrides.quoteRequested !== undefined) {
       formData.append("quoteRequested", overrides.quoteRequested);
     }
@@ -262,5 +274,71 @@ describe("POST /api/requests", () => {
     const res = await POST(req);
     expect(res.status).toBe(201);
     expect(createdRequestData().quoteRequested).toBe(false);
+  });
+
+  describe("free PLA 2.0 sample", () => {
+    it("pins material and quantity, waives the quote, and marks the row when eligible", async () => {
+      (prisma.partRequest.count as jest.Mock).mockResolvedValue(0);
+      const req = createRequest(
+        "test.stl",
+        Buffer.from("solid test"),
+        "true", // even a ticked quote box is overridden — nothing to price
+        { quantity: "5", material: "Carbon Fiber PLA", isFreeSample: "true" }
+      );
+      const res = await POST(req);
+      expect(res.status).toBe(201);
+
+      const data = createdRequestData();
+      expect(data.isFreeSample).toBe(true);
+      expect(data.material).toBe("PLA 2.0");
+      expect(data.quantity).toBe(1);
+      expect(data.quoteRequested).toBe(false);
+      expect(data.kind).toBe("REQUEST");
+      expect(data.status).toBe("PENDING");
+      expect(data.quotedPrice).toBe("$0.00 — Free sample");
+    });
+
+    it("rejects a second free sample from the same account", async () => {
+      (prisma.partRequest.count as jest.Mock).mockResolvedValue(1);
+      const req = createRequest("test.stl", Buffer.from("solid test"), undefined, {
+        isFreeSample: "true",
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe("You've already claimed your free PLA 2.0 sample.");
+      expect(prisma.partRequest.create).not.toHaveBeenCalled();
+    });
+
+    it("still quotes a described free sample, since it still needs modelling", async () => {
+      (prisma.partRequest.count as jest.Mock).mockResolvedValue(0);
+      const res = await POST(
+        createDescriptionRequest({ quoteRequested: "false", isFreeSample: "true" })
+      );
+      expect(res.status).toBe(201);
+
+      const data = createdRequestData();
+      expect(data.isFreeSample).toBe(true);
+      expect(data.material).toBe("PLA 2.0");
+      expect(data.quantity).toBe(1);
+      expect(data.quoteRequested).toBe(true);
+      expect(data.kind).toBe("QUOTE");
+    });
+
+    it("does not enforce eligibility, pin material/quantity, or waive quoting when the flag is absent", async () => {
+      const req = createRequest("test.stl", Buffer.from("solid test"), "true", {
+        quantity: "3",
+        material: "PETG",
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(201);
+      expect(prisma.partRequest.count).not.toHaveBeenCalled();
+
+      const data = createdRequestData();
+      expect(data.isFreeSample).toBe(false);
+      expect(data.material).toBe("PETG");
+      expect(data.quantity).toBe(3);
+      expect(data.quoteRequested).toBe(true);
+      expect(data.quotedPrice).toBeUndefined();
+    });
   });
 });

@@ -475,6 +475,7 @@ function AdminDashboardContent() {
                           <div className="text-[10px] font-bold text-clay-300 uppercase tracking-tight">Customer</div>
                           <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
                           <div className="text-xs text-cream-500">{req.user?.email || "N/A"}</div>
+                          {req.isFreeSample && <div className="mt-1.5"><span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span></div>}
                           {isQuote(req) && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span></div>}
                           {!isQuote(req) && req.convertedAt && <div className="mt-1.5"><span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span></div>}
                         </div>
@@ -577,6 +578,7 @@ function AdminDashboardContent() {
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-cream-200">{requestTitle(req)}</div>
                               <div className="flex gap-2 mt-1">
+                                  {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
                                   {isDescriptionRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="No 3D file — model this part from the customer's description and references">Model it</span>}
                                   {isQuote(req) && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span>}
                                   {!isQuote(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span>}
