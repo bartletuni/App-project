@@ -458,7 +458,7 @@ export const InvoiceSentEmailHTML = (data: {
     content: `
       ${heading("Your invoice is ready")}
       ${lede(
-        `Hello ${escapeHtml(data.customerName)} — the invoice for your part has been sent. Manufacturing starts once it is paid in full.`
+        `Hello ${escapeHtml(data.customerName)} — the invoice for your part has been issued through Square and will arrive from them in a separate email. Manufacturing starts once it is paid in full.`
       )}
 
       ${specSheet([

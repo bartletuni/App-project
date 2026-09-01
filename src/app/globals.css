@@ -85,6 +85,68 @@ select option {
     background-color: rgba(36, 29, 23, 0.55);
     border: 1px solid rgba(193, 122, 75, 0.14);
   }
+
+  /* Long-form body copy for the legal documents. The typography plugin is
+     not installed, and pulling it in for three pages would be heavier than
+     the rules it replaces, so the handful of elements those pages actually
+     use are styled here. */
+  .legal-prose {
+    color: #d2c4ab;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+  }
+  .legal-prose > * + * {
+    margin-top: 1rem;
+  }
+  .legal-prose strong {
+    color: #f4ecdf;
+    font-weight: 600;
+  }
+  .legal-prose em {
+    color: #e3be9a;
+  }
+  .legal-prose a {
+    color: #d9a87f;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(193, 122, 75, 0.45);
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+  .legal-prose a:hover {
+    color: #f4ecdf;
+    text-decoration-color: #cf8f5f;
+  }
+  /* Sub-heading inside a numbered section */
+  .legal-prose h3 {
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #e0a877;
+    margin-top: 1.75rem;
+  }
+  .legal-prose ul {
+    display: grid;
+    gap: 0.625rem;
+  }
+  .legal-prose li {
+    position: relative;
+    padding-left: 1.375rem;
+  }
+  /* Draughtsman's tick rather than a bullet — the same hairline motif the
+     panels and dividers use. */
+  .legal-prose li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.8em;
+    width: 0.625rem;
+    height: 1px;
+    background: #c17a4b;
+  }
+  .legal-prose-tight {
+    font-size: 0.875rem;
+  }
 }
 
 @layer utilities {

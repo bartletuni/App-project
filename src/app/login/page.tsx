@@ -291,6 +291,29 @@ function LoginContent() {
                 </>
               )}
 
+              {/* Sign-in-wrap notice. Shown only on the register side, and
+                  placed directly above the button that accepts it, so the
+                  agreement is on screen at the moment it is made. */}
+              {!isLogin && (
+                <p className="border-l-2 border-clay-500/40 pl-4 text-xs leading-relaxed text-cream-500">
+                  By creating an account you agree to the{" "}
+                  <Link
+                    href="/terms"
+                    className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and confirm you have read the{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                  >
+                    Privacy Policy
+                  </Link>
+                  . We only email you about your own orders.
+                </p>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}

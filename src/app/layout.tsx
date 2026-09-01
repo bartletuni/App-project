@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import InteractiveBackground from "@/components/InteractiveBackground";
 import ScrollProgress from "@/components/ui/ScrollProgress";
 import JsonLd from "@/components/JsonLd";
+import CookieNotice from "@/components/CookieNotice";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import {
   OG_IMAGE,
@@ -112,6 +113,11 @@ export default function RootLayout({
         <Providers>
           <ScrollProgress />
           <InteractiveBackground />
+          {/* Disclosure only — see the component for why this is not a
+              consent gate. It is `position: fixed`, so sitting ahead of
+              <main> here costs nothing visually and puts it near the front of
+              the tab order instead of behind an entire page of links. */}
+          <CookieNotice />
           <main id="main-content" className="relative z-0">
             {children}
           </main>

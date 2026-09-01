@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo";
+import { LEGAL_ROUTES } from "@/lib/legal";
 
 /**
  * Served at /sitemap.xml. Public, indexable routes only — the authenticated
@@ -34,5 +35,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.7,
     },
+    // The legal documents. Low priority but genuinely public: people do look
+    // for a shop's terms before sending it a file.
+    ...LEGAL_ROUTES.map((r) => ({
+      url: absoluteUrl(r.href),
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    })),
   ];
 }
