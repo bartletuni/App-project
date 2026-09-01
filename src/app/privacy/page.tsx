@@ -4,7 +4,11 @@ import JsonLd from "@/components/JsonLd";
 import LegalDocument, { LegalSection } from "@/components/legal/LegalDocument";
 import { breadcrumbSchema } from "@/lib/structured-data";
 import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
-import { LEGAL_CONTACT, LEGAL_LAST_UPDATED } from "@/lib/legal";
+import {
+  LEGAL_CONTACT,
+  LEGAL_LAST_UPDATED,
+  SQUARE_PRIVACY_URL,
+} from "@/lib/legal";
 
 const title = "Privacy Policy";
 const description =
@@ -193,8 +197,15 @@ const sections: LegalSection[] = [
             and the description and amount of the work. It also collects the
             card details we never see, and for those it answers to you directly
             rather than through us: what Square collects when you pay is
-            governed by Square&apos;s own privacy notice, published on
-            squareup.com.
+            governed by{" "}
+            <a
+              href={SQUARE_PRIVACY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Square&apos;s own privacy notice
+            </a>{" "}
+            on squareup.com.
           </li>
           <li>
             <strong>Our database and application hosting providers</strong> —

@@ -4,7 +4,12 @@ import JsonLd from "@/components/JsonLd";
 import LegalDocument, { LegalSection } from "@/components/legal/LegalDocument";
 import { breadcrumbSchema } from "@/lib/structured-data";
 import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
-import { GOVERNING_LAW, LEGAL_CONTACT, LEGAL_LAST_UPDATED } from "@/lib/legal";
+import {
+  GOVERNING_LAW,
+  LEGAL_CONTACT,
+  LEGAL_LAST_UPDATED,
+  SQUARE_PRIVACY_URL,
+} from "@/lib/legal";
 import {
   FREE_SAMPLE_MATERIAL,
   FREE_SAMPLE_QUANTITY,
@@ -114,7 +119,11 @@ const sections: LegalSection[] = [
         <p>
           Invoices are issued and collected through <strong>Square</strong>. The
           invoice reaches you from Square and is paid there, under Square&apos;s
-          own terms and privacy notice — we never see or hold your card details.
+          own terms and{" "}
+          <a href={SQUARE_PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+            privacy notice
+          </a>{" "}
+          — we never see or hold your card details.
           Refunds are returned through Square to the method you paid with, and a
           payment dispute or chargeback is handled through Square as well. If
           something looks wrong on an invoice, tell us first: it is faster than

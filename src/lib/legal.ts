@@ -24,6 +24,18 @@ export const LEGAL_CONTACT = {
   postal: `${SITE_NAME}, Utah, United States`,
 } as const;
 
+/**
+ * Square's privacy notice, cited by both the privacy policy and the terms.
+ *
+ * Kept here rather than inline so the two documents cannot drift apart, and
+ * so there is a single line to correct if Square moves the page. Square
+ * publishes this at squareup.com/us/en/legal/general/privacy; the URL could
+ * not be reached from the build environment to confirm it, so treat it as
+ * needing a click-through before release.
+ */
+export const SQUARE_PRIVACY_URL =
+  "https://squareup.com/us/en/legal/general/privacy";
+
 /** Governing law for the Terms, and the venue named in them. */
 export const GOVERNING_LAW = "the State of Utah, United States";
 
