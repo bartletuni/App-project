@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import RequestQuoteButton from "@/components/RequestQuoteButton";
+import { LEGAL_ROUTES } from "@/lib/legal";
 
 /**
  * Public masthead's counterpart: the site index at the bottom of every
@@ -136,20 +137,38 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-clay-500/15 pt-6 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600 sm:flex-row sm:items-center sm:justify-between">
-          <span className="flex items-center gap-2 text-cream-300">
-            TAKOMO<span className="text-clay-400">⁄</span>CO
-            <span className="text-clay-500/50">|</span>
-            <span className="font-normal tracking-[0.2em] text-clay-300">
-              FAST, FITTED, FLAWLESS
+        <div className="mt-12 border-t border-clay-500/15 pt-6">
+          <div className="flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600 sm:flex-row sm:items-center sm:justify-between">
+            <span className="flex items-center gap-2 text-cream-300">
+              TAKOMO<span className="text-clay-400">⁄</span>CO
+              <span className="text-clay-500/50">|</span>
+              <span className="font-normal tracking-[0.2em] text-clay-300">
+                FAST, FITTED, FLAWLESS
+              </span>
             </span>
-          </span>
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-8">
-            {/* Kept site-wide: these codes are how government and prime
-                contractors search for suppliers. */}
-            <span>NAICS 333248 · 541330 · 541420</span>
-            <span>© {year} TakomoCo</span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-8">
+              {/* Kept site-wide: these codes are how government and prime
+                  contractors search for suppliers. */}
+              <span>NAICS 333248 · 541330 · 541420</span>
+              <span>© {year} TakomoCo</span>
+            </div>
           </div>
+
+          {/* The legal documents. Reachable from every page of the site, which
+              is both the convention people look for and what the disclosure
+              rules assume. */}
+          <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.15em]">
+            {LEGAL_ROUTES.map((r) => (
+              <li key={r.href}>
+                <Link
+                  href={r.href}
+                  className="text-cream-600 transition-colors hover:text-clay-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                >
+                  {r.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </footer>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { format, addDays } from "date-fns";
 import { AlertTriangle, Plus, ArrowRight, Gift } from "lucide-react";
 import Panel from "@/components/ui/Panel";
@@ -241,6 +242,30 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             {freeSample
               ? "This one's free — no invoice."
               : <>Your invoice is sent promptly after this request is submitted, and manufacturing starts once it is <strong>paid in full</strong>.</>}
+          </p>
+          {/* The two warranties that have to be made at the moment a part is
+              submitted rather than buried in the Terms: that the customer may
+              lawfully have this part reproduced, and that what comes back is
+              not qualified for safety-critical use. */}
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Rights ·</span>{" "}
+            By submitting, you confirm you own this part or otherwise have the
+            right to have it reproduced, and that printing it infringes no one
+            else&apos;s design.
+          </p>
+          <p>
+            <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Use ·</span>{" "}
+            Printed parts are <strong>not qualified for safety-critical
+            use</strong> — medical, aerospace, vehicle safety, lifting, or
+            load-bearing — without a separate written agreement. Full detail in
+            the{" "}
+            <Link
+              href="/terms"
+              className="underline decoration-yellow-400/40 underline-offset-2 transition-colors hover:text-yellow-100 hover:decoration-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded-sm"
+            >
+              Terms of Service
+            </Link>
+            .
           </p>
         </div>
       </div>
