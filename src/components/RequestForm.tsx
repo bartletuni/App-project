@@ -241,7 +241,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             <span className="font-mono uppercase tracking-[0.1em] text-yellow-300">Payment ·</span>{" "}
             {freeSample
               ? "This one's free — no invoice."
-              : <>Your invoice is sent promptly after this request is submitted, and manufacturing starts once it is <strong>paid in full</strong>.</>}
+              : <>Your invoice is issued through <strong>Square</strong> promptly after this request is submitted, and manufacturing starts once it is <strong>paid in full</strong>.</>}
           </p>
           {/* The two warranties that have to be made at the moment a part is
               submitted rather than buried in the Terms: that the customer may

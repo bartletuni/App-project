@@ -122,6 +122,12 @@ const sections: LegalSection[] = [
           your browsing is sold or shared.
         </p>
         <p>
+          One boundary worth naming: paying an invoice happens on Square, not
+          here. Square runs its own site with its own cookies, and this policy
+          does not reach them — Square&apos;s does. The same goes for any link
+          in an email that takes you somewhere other than takomoco.com.
+        </p>
+        <p>
           Because every cookie we set is strictly necessary to deliver a service
           you asked for, we are not required to ask your permission before
           setting them — that exemption is written into the ePrivacy rules and

@@ -110,6 +110,16 @@ const sections: LegalSection[] = [
           We may decline any request, and if we decline one you have paid for,
           you get a full refund.
         </p>
+        <h3>Paying</h3>
+        <p>
+          Invoices are issued and collected through <strong>Square</strong>. The
+          invoice reaches you from Square and is paid there, under Square&apos;s
+          own terms and privacy notice — we never see or hold your card details.
+          Refunds are returned through Square to the method you paid with, and a
+          payment dispute or chargeback is handled through Square as well. If
+          something looks wrong on an invoice, tell us first: it is faster than
+          a dispute, and we would rather fix our own mistake.
+        </p>
         <h3>Cancelling</h3>
         <p>
           You may cancel a request yourself from your dashboard within{" "}
@@ -404,6 +414,10 @@ export default function TermsPage() {
               <li>
                 You can cancel yourself within 30 minutes. After production
                 starts, a custom part cannot be refunded.
+              </li>
+              <li>
+                Invoices are issued and paid through Square, and refunds go back
+                the same way.
               </li>
               <li>
                 Your models stay yours — but you are confirming you have the

@@ -87,11 +87,20 @@ const sections: LegalSection[] = [
           address, browser user-agent, and the time and path of the request —
           which exist to keep the service running and to investigate abuse.
         </p>
+        <h3>Billing information</h3>
         <p>
-          We do not ask for and do not want government identifiers, health
-          information, or biometric data. Payment card numbers never touch this
-          site: invoices are settled outside the application, so we hold no card
-          details.
+          Invoices are issued and paid through <strong>Square</strong>, not on
+          this site. To raise one, we enter your name, email address, billing
+          address, and a description of the work into Square; Square sends you
+          the invoice and collects the payment. We record the Square invoice
+          number against your order so both sides can refer to it, and the
+          notice you get from us that an invoice is ready carries that number.
+        </p>
+        <p>
+          <strong>Your card details never reach us.</strong> You enter them with
+          Square, on Square&apos;s own pages, and no card number is ever seen or
+          stored by this site. We also do not ask for and do not want government
+          identifiers, health information, or biometric data.
         </p>
       </>
     ),
@@ -114,8 +123,13 @@ const sections: LegalSection[] = [
             use your phone number if an order needs a conversation.
           </li>
           <li>
+            <strong>To invoice you and take payment.</strong> Your name, email
+            address, and billing address go to Square, which issues the invoice
+            and collects on it.
+          </li>
+          <li>
             <strong>To ship it.</strong> Your shipping address goes to the
-            carrier, and your billing address is used for invoicing.
+            carrier.
           </li>
           <li>
             <strong>To keep your account working and secure.</strong> Signing
@@ -172,6 +186,15 @@ const sections: LegalSection[] = [
           <li>
             <strong>Resend</strong> — delivers transactional email such as
             quotes, invoices, and status updates.
+          </li>
+          <li>
+            <strong>Square</strong> — issues your invoice and processes the
+            payment. Square receives your name, email address, billing address,
+            and the description and amount of the work. It also collects the
+            card details we never see, and for those it answers to you directly
+            rather than through us: what Square collects when you pay is
+            governed by Square&apos;s own privacy notice, published on
+            squareup.com.
           </li>
           <li>
             <strong>Our database and application hosting providers</strong> —
@@ -232,6 +255,11 @@ const sections: LegalSection[] = [
             live and for a reasonable window afterwards so a part can be
             reprinted or a revision quoted. Ask us and we will delete a file
             sooner.
+          </li>
+          <li>
+            <strong>Payment records</strong> — the invoice number and amount
+            stay with the order record above. Square keeps its own record of the
+            transaction under its own retention policy, which we do not control.
           </li>
           <li>
             <strong>Server logs</strong> — short-lived, per our providers&apos;
@@ -371,6 +399,10 @@ export default function PrivacyPage() {
               <li>
                 We have never sold or shared your information, and your model
                 files are treated as confidential.
+              </li>
+              <li>
+                Invoices are issued through Square, so your card details never
+                reach us.
               </li>
               <li>
                 Your uploads and account details are yours — ask and we will
