@@ -120,18 +120,36 @@ export default function LandingPage() {
                 </Reveal>
               </h1>
 
+              {/* The lead promise, for the visitor whose machine is down right
+                  now: the number at a size that survives a glance, directly
+                  under the headline. "Fast · Fitted · Flawless" keeps its place
+                  beside it rather than being replaced by it — a specific claim
+                  and a brand line do different jobs. */}
               <Reveal direction="up" delay={0.25}>
-                <div className="mt-5 inline-flex items-center gap-2.5 border border-clay-500/25 bg-espresso-900/60 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.22em] text-clay-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-clay-400" />
-                  <span>Fast · Fitted · Flawless</span>
+                <div className="mt-6 inline-flex flex-wrap items-center gap-x-4 gap-y-2 border border-clay-500/40 bg-clay-500/10 px-5 py-3 shadow-glow">
+                  <span className="flex items-center gap-2.5">
+                    <Zap className="h-5 w-5 shrink-0 text-clay-300" aria-hidden="true" />
+                    <span className="font-display text-2xl leading-none text-cream-100">
+                      72<span className="text-clay-300">h</span>
+                    </span>
+                    <span className="font-mono text-xs uppercase tracking-[0.2em] text-cream-200">
+                      Typical turnaround
+                    </span>
+                  </span>
+                  <span className="hidden h-4 w-px bg-clay-500/40 sm:block" aria-hidden="true" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay-300">
+                    Fast · Fitted · Flawless
+                  </span>
                 </div>
               </Reveal>
 
               <Reveal direction="up" delay={0.32}>
                 <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
-                  A US-based additive manufacturing and rapid prototyping
-                  studio in Utah — high-precision 3D printing and scanning for
-                  engineering and reproduction work, made domestically.
+                  Machine down, part discontinued, deadline this week? A US-based
+                  additive manufacturing and rapid prototyping studio in Utah —
+                  high-precision 3D printing and scanning for engineering and
+                  reproduction work, made domestically, with most jobs back in
+                  about 72 hours.
                 </p>
               </Reveal>
 
@@ -139,16 +157,16 @@ export default function LandingPage() {
                 <div className="mt-10 flex flex-col items-stretch sm:items-start gap-3">
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Magnetic strength={0.4}>
+                      <RequestQuoteButton />
+                    </Magnetic>
+                    <Magnetic strength={0.4}>
                       <Link
                         href="/login"
-                        className="group inline-flex items-center justify-center gap-2 bg-clay-600 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow"
+                        className="group inline-flex items-center justify-center gap-2 border border-clay-500/40 bg-clay-500/5 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors"
                       >
                         Start a build
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                       </Link>
-                    </Magnetic>
-                    <Magnetic strength={0.4}>
-                      <RequestQuoteButton variant="ghost" />
                     </Magnetic>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -171,6 +189,15 @@ export default function LandingPage() {
                       </Link>
                     </Magnetic>
                   </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
+                    On a deadline?{" "}
+                    <a
+                      href="tel:+13856954178"
+                      className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                    >
+                      Call the shop · 385-695-4178
+                    </a>
+                  </p>
                 </div>
               </Reveal>
             </div>
@@ -340,8 +367,9 @@ export default function LandingPage() {
                   Ready to start <span className="italic text-clay-300">building?</span>
                 </h2>
                 <p className="mt-5 max-w-lg text-cream-400">
-                  Submit a request or reach out directly. We specialize in
-                  high-strength, chemically and impact-resistant composites.
+                  Submit a request or reach out directly — most jobs are back in
+                  about 72 hours. We specialize in high-strength, chemically and
+                  impact-resistant composites.
                 </p>
               </div>
               <div className="lg:col-span-4 flex flex-col gap-3">

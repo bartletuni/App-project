@@ -526,8 +526,7 @@ export const QuoteReceivedEmailHTML = (data: {
         },
         {
           title: "You decide",
-          detail:
-            "Nothing is built and nothing is invoiced until you say yes to the price. Printing runs on a 72-hour typical turnaround from there.",
+          detail: "Nothing is built and nothing is invoiced until you say yes to the price.",
         },
       ])}
 

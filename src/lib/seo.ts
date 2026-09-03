@@ -38,10 +38,13 @@ export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturi
 /**
  * Used as the default meta description and the Organization description.
  * Kept near 160 characters so Google shows it without truncating, with the
- * terms that matter most placed first.
+ * terms that matter most placed first — which now includes the turnaround,
+ * since the snippet under the title is what earns the click from someone
+ * whose machine is already down. "Rapid prototyping" was the one phrase
+ * traded out to make room; it still leads the homepage's own copy.
  */
 export const SITE_DESCRIPTION =
-  "Domestic additive manufacturing in Utah — high-precision FDM 3D printing, 0.02mm 3D scanning, reverse engineering, and rapid prototyping in carbon-fiber composites.";
+  "Domestic additive manufacturing in Utah on a 72-hour turnaround — high-precision FDM 3D printing, 0.02mm 3D scanning, and reverse engineering in carbon-fiber.";
 
 export const BUSINESS = {
   telephone: "+1-385-695-4178",

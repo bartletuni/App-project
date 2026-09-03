@@ -15,7 +15,6 @@ import {
   Loader2,
   Phone,
   ShieldCheck,
-  Zap,
 } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
@@ -203,16 +202,11 @@ function QuoteContent() {
         </h1>
         <p className="mt-5 text-cream-400 leading-relaxed">
           No sign-up, no password. A photo and a sentence is enough to start — we
-          answer within one business day, print on a{" "}
-          <strong className="font-semibold text-cream-200">72-hour typical
-          turnaround</strong>, and nothing gets built or invoiced until you
-          approve the price.
+          answer within one business day, and nothing gets built or invoiced
+          until you approve the price.
         </p>
 
         <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.16em] text-cream-500">
-          <li className="flex items-center gap-2">
-            <Zap className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" /> 72h typical turnaround
-          </li>
           <li className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" /> Answer in 1 business day
           </li>
@@ -528,7 +522,7 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
             {[
               ["01", "A person reads it", "Not a calculator — within one business day."],
               ["02", "We come back with a price", "By email or phone, with anything we still need to ask."],
-              ["03", "You decide", "Nothing is built and nothing is invoiced until you approve it. Printing runs on a 72-hour typical turnaround from there."],
+              ["03", "You decide", "Nothing is built and nothing is invoiced until you approve it."],
             ].map(([n, title, detail]) => (
               <li key={n} className="flex gap-4">
                 <span className="font-mono text-xs text-clay-400 pt-0.5">{n}</span>

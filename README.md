@@ -99,22 +99,38 @@ build ledger and the admin console, and called out in the new-request email. Run
 column exists; on Turso, see "Quotes and Requests" below, which also covers what happens
 to the request once it is quoted.
 
-## Turnaround in the Title
+## The 72-Hour Turnaround
 
-The homepage title is `TakomoCo — 72-Hour Domestic 3D Printing & Additive Manufacturing`,
-built from `SITE_TAGLINE` in `src/lib/seo.ts` — which also feeds the homepage's Open
-Graph and Twitter titles, so all three stay in step from one constant. The turnaround
-leads the tagline because that is the search someone with a broken part actually makes,
-and because it has to survive the ~60-character truncation in a result listing. Nothing
-was dropped for it: "Domestic", "3D Printing" and "Additive Manufacturing" all remain.
+The shop's standing lead time is the homepage's lead selling point, aimed squarely at
+the visitor whose machine is down today. It appears in four places, in the order that
+visitor meets them:
 
-The homepage already backs the claim on the page itself — the spec sheet's
-"Lead time · 72 hours" row and the 72h counter — which is what keeps it an honest title
-rather than a bare meta claim.
+1. **The result listing.** `SITE_TAGLINE` makes the homepage title
+   `TakomoCo — 72-Hour Domestic 3D Printing & Additive Manufacturing`, and
+   `SITE_DESCRIPTION` opens the snippet under it with the same figure. Both live in
+   `src/lib/seo.ts`, and the tagline also feeds the homepage's Open Graph and Twitter
+   titles, so all of them stay in step from one constant. The figure leads because it
+   has to survive the ~60-character truncation in a listing. Nothing was dropped from
+   the title for it; the description traded out "rapid prototyping", which still leads
+   the homepage's own copy.
+2. **The hero.** A bordered badge directly under the H1 — `72h · Typical turnaround` —
+   replacing a chip that read "Fast · Fitted · Flawless" and promised nothing checkable.
+   The brand line keeps its place beside the number rather than being replaced by it: a
+   specific claim and a brand line do different jobs. The lede opens on the problem
+   ("Machine down, part discontinued, deadline this week?") and closes on the figure.
+3. **The hero's buttons.** "Request a quote" takes the primary weight and "Start a
+   build" — which goes to sign-in — steps back to a secondary, because a visitor in a
+   hurry should not meet a login wall first. Under them, a phone link for anyone who
+   cannot wait even for a form.
+4. **The page itself,** where it always was: the spec sheet's "Lead time · 72 hours" row,
+   the 72h counter, and the closing call to action. This is what keeps the title honest
+   rather than a bare meta claim.
 
-Two figures on this site are easy to confuse, and are deliberately worded apart wherever
-they appear together: a **quote** comes back within one business day; the **part** runs
-on the 72-hour typical turnaround once the price is approved. `/quote` says both.
+**It is deliberately absent from `/quote`.** A visitor who has reached the form is
+already sold and is there to send a part; that page makes the one timing promise it can
+actually keep — a price back within one business day — and nothing more. The two figures
+are different promises and must not be blurred into one: a **quote** comes back within a
+business day, the **part** runs on the 72-hour turnaround once the price is approved.
 
 ## Quotes Without an Account
 
