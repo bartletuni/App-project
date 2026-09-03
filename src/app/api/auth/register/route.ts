@@ -48,58 +48,32 @@ export async function POST(req: NextRequest) {
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, isGuest: true },
     });
 
-    // An unclaimed row is one this address opened by asking for a quote without
-    // signing up (see POST /api/requests/guest). Registering the same address
-    // claims it in place rather than colliding with it, so the quotes already
-    // sent under it are on the new account's desk from the first sign-in. A
-    // claimed account is still a collision, and still says so.
-    if (existingUser && !existingUser.isGuest) {
+    if (existingUser) {
       return NextResponse.json({ error: "User with this email already exists" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = existingUser
-      ? await prisma.user.update({
-          where: { id: existingUser.id },
-          data: {
-            name,
-            password: hashedPassword,
-            shippingAddress,
-            billingAddress,
-            phone,
-            isGuest: false,
-          },
-        })
-      : await prisma.user.create({
-          data: {
-            name,
-            email,
-            password: hashedPassword,
-            shippingAddress,
-            billingAddress,
-            phone,
-          },
-        });
-
-    // The phone number they registered with, as a reusable entry on the
-    // composer. A claimed account may already have this exact number from the
-    // quote it came in on, so it is only added when it is new.
-    const existingPhone = await prisma.phoneNumber.findFirst({
-      where: { userId: user.id, number: phone },
-      select: { id: true },
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        shippingAddress,
+        billingAddress,
+        phone,
+      },
     });
-    if (!existingPhone) {
-      await prisma.phoneNumber.create({
-        data: {
-          number: phone,
-          userId: user.id,
-        },
-      });
-    }
+
+    // Automatically create a default PhoneNumber record for the user based on the one they registered with
+    await prisma.phoneNumber.create({
+      data: {
+        number: phone,
+        userId: user.id,
+      },
+    });
 
     // Send Email Notification. sendEmail reads Resend's reply and logs any
     // rejection; a failure here never blocks the registration.

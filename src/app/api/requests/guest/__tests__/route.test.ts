@@ -2,7 +2,12 @@ import { NextRequest } from "next/server";
 import { POST } from "../route";
 import { prisma } from "@/lib/prisma";
 import { issueFormToken } from "@/lib/form-token";
-import { GUEST_QUOTE_TOKEN_SCOPE, HONEYPOT_FIELD, FORM_TOKEN_FIELD } from "@/lib/guest-quote";
+import {
+  GUEST_OWNER_EMAIL,
+  GUEST_QUOTE_TOKEN_SCOPE,
+  HONEYPOT_FIELD,
+  FORM_TOKEN_FIELD,
+} from "@/lib/guest-quote";
 import { MIN_FILL_MS } from "@/lib/form-token";
 
 jest.mock("@/lib/prisma", () => ({
@@ -10,6 +15,7 @@ jest.mock("@/lib/prisma", () => ({
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     phoneNumber: {
       findFirst: jest.fn(),
@@ -49,13 +55,9 @@ describe("POST /api/requests/guest", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // No system owner row yet, so the first quote creates one.
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-    (prisma.user.create as jest.Mock).mockResolvedValue({
-      id: "guest-1",
-      name: "Alex Rivera",
-      email: "alex@example.com",
-      isGuest: true,
-    });
+    (prisma.user.create as jest.Mock).mockResolvedValue({ id: "guest-owner" });
     (prisma.phoneNumber.findFirst as jest.Mock).mockResolvedValue(null);
     (prisma.phoneNumber.create as jest.Mock).mockResolvedValue({ id: "phone-1" });
     (prisma.partRequest.create as jest.Mock).mockResolvedValue({
@@ -101,20 +103,37 @@ describe("POST /api/requests/guest", () => {
     expect(body.reference).toBe("Q-ABCDEF");
 
     const row = createdRow();
-    expect(row.userId).toBe("guest-1");
-    expect(row.guestSubmitted).toBe(true);
+    expect(row.userId).toBe("guest-owner");
     expect(row.quoteRequested).toBe(true);
     expect(row.kind).toBe("QUOTE");
     expect(row.status).toBe("QUOTE REQUESTED");
   });
 
-  it("opens an unclaimed account that cannot be signed into", async () => {
+  it("stores the contact on the request, since it belongs to no account", async () => {
+    await POST(buildForm());
+
+    const row = createdRow();
+    expect(row.guestName).toBe("Alex Rivera");
+    expect(row.guestEmail).toBe("alex@example.com"); // normalized
+    expect(row.guestPhone).toBe("(385) 695-4178");
+  });
+
+  it("files it under a system row that is not a person and cannot be signed into", async () => {
     await POST(buildForm());
 
     const created = (prisma.user.create as jest.Mock).mock.calls[0][0].data;
-    expect(created.email).toBe("alex@example.com"); // normalized
+    expect(created.email).toBe(GUEST_OWNER_EMAIL);
     expect(created.isGuest).toBe(true);
     expect(created.password).toMatch(/^\$2[aby]\$/); // a hash of a secret nobody holds
+  });
+
+  it("reuses the system row once it exists", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-owner" });
+
+    await POST(buildForm());
+
+    expect(prisma.user.create).not.toHaveBeenCalled();
+    expect(createdRow().userId).toBe("guest-owner");
   });
 
   it("books a default date rather than demanding one", async () => {
@@ -122,19 +141,37 @@ describe("POST /api/requests/guest", () => {
     expect(createdRow().dateNeeded).toBeInstanceOf(Date);
   });
 
-  it("keeps a known address on the account it already has, and changes nothing on it", async () => {
-    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
-      id: "real-user",
-      name: "Alexandra Rivera",
-      email: "alex@example.com",
-      isGuest: false,
-    });
+  // The security property this lane turns on: anyone can type anyone's address
+  // into a public form, so a submission must never reach the account that owns
+  // that address — not to file against it, and not to reveal it exists.
+  it("never looks the submitted address up against the accounts table", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-owner" });
 
-    const res = await POST(buildForm());
+    await POST(buildForm({ email: "someone.elses@example.com" }));
+
+    for (const call of (prisma.user.findUnique as jest.Mock).mock.calls) {
+      expect(call[0].where.email).toBe(GUEST_OWNER_EMAIL);
+    }
+  });
+
+  it("files a quote for a registered address under the system row, not that account", async () => {
+    // Whatever this address belongs to, the quote is not going near it.
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-owner" });
+
+    const res = await POST(buildForm({ email: "owner@takomoco.com" }));
 
     expect(res.status).toBe(201);
-    expect(prisma.user.create).not.toHaveBeenCalled();
-    expect(createdRow().userId).toBe("real-user");
+    const row = createdRow();
+    expect(row.userId).toBe("guest-owner");
+    expect(row.guestEmail).toBe("owner@takomoco.com");
+  });
+
+  it("never updates an existing account from a public form", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-owner" });
+
+    await POST(buildForm());
+
+    expect(prisma.user.update).not.toHaveBeenCalled();
   });
 
   it("keeps the company with the request, without losing the customer's own words", async () => {

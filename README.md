@@ -101,36 +101,55 @@ to the request once it is quoted.
 
 ## Quotes Without an Account
 
-`/quote` is the public quote form. No sign-up, no password: what the part is, a name,
+`/quote` is the public quote form, titled for the search it is meant to catch —
+"Request a Quote — 72-Hour Turnaround, No Account Needed", with the shop's standing
+72-hour lead time repeated on the page so the claim in the title is backed by the copy
+under it. Note the two figures are different promises and are worded as such: the
+**quote** comes back within one business day; the **part** runs on the 72-hour typical
+turnaround once the price is approved.
+
+No sign-up, no password: what the part is, a name,
 an email, and a phone number. That is the whole required set — quantity, material, the
 date, notes, and company are folded behind one optional disclosure, because the shop
 can ask any of them on the callback and every extra required field is another reason to
 abandon the form standing next to a broken machine.
 
 The customer gets a reference (`Q-4F2A9C`, derived from the row's id), a confirmation
-email, and an offer — never a gate — to open an account that would keep it on a desk.
+email, and an offer — never a gate — to open an account for future work.
 
 ### It is not a second kind of record
 
-A guest quote is an **ordinary `PartRequest` on the QUOTE track**, owned by a `User` row
-that has been opened but never claimed. The admin console, pricing a quote, converting it
-to a build, invoicing, status emails, and the reports PDF all already handle that shape,
-so none of them changed. Two flags carry what is genuinely new:
+A guest quote is an **ordinary `PartRequest` on the QUOTE track**, so the admin console,
+pricing a quote, converting it to a build, invoicing, status emails and the reports PDF
+all handle it with no changes at all. What is new is only where the contact details live
+and who the row belongs to.
 
-- `User.isGuest` — this account exists only because someone asked for a price. Its
-  password is a random secret nobody holds, so it cannot be signed into. **Registering
-  the same email address claims the row in place** (`POST /api/auth/register`), clears
-  the flag, and the quotes already sent under it are waiting on the new account's desk.
-  It answers "can this still be claimed?", and stops being true once it is.
-- `PartRequest.guestSubmitted` — permanent provenance: this request came in through
-  `/quote`. It stays true after the customer opens an account, and it is what puts the
-  **No account** badge in the console and the "answer by phone or email" line on the
-  admin notification.
+### It belongs to no account, on purpose
 
-An email address the shop already knows keeps its existing account, guest or claimed, so
-a customer's quotes stay in one place. Nothing on an existing row is ever overwritten
-from a public form — the name and phone on a claimed account belong to the person who
-signed up; the submitted ones reach the shop through the notification instead.
+**A guest quote is never attached to a customer's account — not even one whose email
+address matches it.** Anyone can type anyone's address into a public form, so matching
+one would let a stranger drop rows onto someone else's desk, and would leak whether a
+given address is registered here. The submitted address is therefore never looked up
+against the accounts table at all.
+
+- `PartRequest.guestName` / `guestEmail` / `guestPhone` carry who to answer.
+  **`guestEmail` being set is what marks a row as a no-account quote** — there is no
+  separate flag, because a flag saying "guest" without saying who would be no use.
+- `User.isGuest` marks the **single system row** every guest quote is filed under
+  (`no-account@quotes.invalid`). Not a customer and never one: `.invalid` is reserved by
+  RFC 2606 so the address can never be registered or receive mail, the password is
+  random and held by nobody, and the Clients list filters the row out.
+
+Filing them under *something* rather than nothing is load-bearing:
+`/api/download/[fileId]` treats a file whose request has no owning customer as a public
+asset, so an unowned guest quote would publish its own uploads. Owned by the system row,
+a guest's files stay behind the admin check.
+
+The console, its search box, and the report PDF read the contact off the request
+(`requestContact` in `src/lib/guest-quote.ts`) rather than off the owning row, so the
+shop sees the person who wrote in. Opening an account later does **not** inherit an
+earlier guest quote — that is the point — and both the confirmation email and the
+success panel say so.
 
 ### Keeping bots out without slowing customers down
 
@@ -168,14 +187,14 @@ anything that does.
 |---|---|
 | Page | `/quote` (public, indexed, in the sitemap) |
 | Endpoints | `POST /api/requests/guest`, `GET /api/requests/guest/token` |
-| Row | `PartRequest` · `kind: QUOTE` · `status: QUOTE REQUESTED` · `quoteRequested: true` · `guestSubmitted: true` |
-| Owner | `User` with `isGuest: true`, or the existing account for a known address |
+| Row | `PartRequest` · `kind: QUOTE` · `status: QUOTE REQUESTED` · `quoteRequested: true` · `guestEmail` set |
+| Owner | The one system `User` (`isGuest: true`) — never a customer account |
 | Console | Listed with every other quote, badged **No account** |
 | Emails | `[No account] Quote request Q-…` to `ADMIN_EMAIL`; a confirmation to the customer |
 
 ### Applying this to Turso
 
-Two columns and one table, all additive:
+Four columns and one table, all additive:
 
 ```
 TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \

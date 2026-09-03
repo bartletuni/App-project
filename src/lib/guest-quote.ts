@@ -9,12 +9,22 @@
  *
  * The deliberate design decision behind all of it: a guest quote is NOT a
  * second kind of record. It is an ordinary `PartRequest` on the QUOTE track,
- * owned by a `User` row that has been opened but never claimed
- * (`User.isGuest`). Everything downstream — the admin console, pricing a
- * quote, converting it to a build, invoicing, status emails, the reports PDF —
- * already knows how to handle exactly that shape, so none of it needed a
- * second code path. What is genuinely new here is only the front door and the
- * checks that keep bots out of it.
+ * so the admin console, pricing a quote, converting it to a build, invoicing,
+ * status emails and the reports PDF all already know how to handle it and
+ * needed no second code path. What is genuinely new is the front door, the
+ * checks that keep bots out of it, and who the row belongs to.
+ *
+ * It belongs to nobody. A quote sent from a public form is never attached to
+ * an account, not even one whose email address matches it: anyone can type
+ * anyone's address into a public form, and a stranger must not be able to put
+ * a row on a customer's desk or see anything of theirs. The contact details a
+ * guest gives ride on the request itself and the shop answers those.
+ *
+ * The row is owned by a single system `User` (`User.isGuest`, address on the
+ * reserved `.invalid` domain, random password nobody holds, filtered out of
+ * the Clients list). Owning them there rather than leaving them unowned is
+ * load-bearing: `/api/download/[fileId]` treats a file with no owning customer
+ * as public, so an unowned guest quote would publish its own uploads.
  *
  * Required, and nothing else: what the part is (a file or a description), a
  * name, an email, and a phone number. Material, quantity, the date, and notes
@@ -26,6 +36,18 @@ import { addDays } from "date-fns";
 
 /** Where a logged-out visitor's "Request a quote" button goes. */
 export const GUEST_QUOTE_HREF = "/quote";
+
+/**
+ * The system account every no-account quote is filed under.
+ *
+ * `.invalid` is reserved by RFC 2606 and can never resolve, so this address
+ * cannot be registered, cannot receive mail, and cannot collide with a real
+ * customer's. Nobody signs in as this row — its password is random — and the
+ * Clients list filters it out. It exists so a guest quote has an owner without
+ * that owner ever being a person.
+ */
+export const GUEST_OWNER_EMAIL = "no-account@quotes.invalid";
+export const GUEST_OWNER_NAME = "No-account quotes";
 
 export const MAX_CONTACT_NAME_CHARS = 100;
 export const MAX_EMAIL_CHARS = 100;
@@ -183,4 +205,44 @@ export function validateGuestNotes(notes: string): string | null {
     return `Notes must be ${MAX_NOTES_CHARS} characters or fewer.`;
   }
   return null;
+}
+
+/** The contact block as it is stored on a request. */
+export interface GuestContactRecord {
+  guestName?: string | null;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
+}
+
+/**
+ * True when a request came in through the public form. `guestEmail` is the
+ * discriminator rather than a flag of its own: it is set only there, it is set
+ * on every one of them, and it is the thing the shop actually needs — a flag
+ * saying "guest" without saying who would be no use to anybody.
+ */
+export function isGuestRequest(request: GuestContactRecord | null | undefined): boolean {
+  return Boolean(request?.guestEmail);
+}
+
+/**
+ * Who to show as the customer. A guest quote has an owner that is a system row
+ * rather than a person, so anywhere a name or address is displayed reads the
+ * contact off the request first and only falls back to the account.
+ */
+export function requestContact(
+  request:
+    | (GuestContactRecord & {
+        user?: { name?: string | null; email?: string | null } | null;
+        phoneNumber?: { number?: string | null } | null;
+      })
+    | null
+    | undefined
+): { name: string; email: string; phone: string; isGuest: boolean } {
+  const guest = isGuestRequest(request);
+  return {
+    name: (guest ? request?.guestName : request?.user?.name) || "N/A",
+    email: (guest ? request?.guestEmail : request?.user?.email) || "N/A",
+    phone: (guest ? request?.guestPhone : null) || request?.phoneNumber?.number || "N/A",
+    isGuest: guest,
+  };
 }

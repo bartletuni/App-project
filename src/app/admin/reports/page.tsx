@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { requestTitle } from "@/lib/part-source";
 import { isQuote } from "@/lib/request-status";
+import { requestContact } from "@/lib/guest-quote";
 
 export default function GenerateReportsPage() {
   const { data: session, status } = useSession();
@@ -74,9 +75,11 @@ export default function GenerateReportsPage() {
       filteredRequests.forEach((req: any) => {
         const rowData = [
           format(new Date(req.createdAt), "MM/dd/yyyy"),
-          req.user?.name || "N/A",
-          req.user?.email || "N/A",
-          req.phoneNumber?.number || "N/A",
+          // A no-account quote is filed under a system row, so the report
+          // reads the contact the sender actually gave.
+          requestContact(req).name,
+          requestContact(req).email,
+          requestContact(req).phone,
           requestTitle(req),
           req.material || "N/A",
           req.quantity.toString(),

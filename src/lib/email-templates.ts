@@ -417,7 +417,7 @@ export const NewRequestEmailHTML = (data: {
       ${
         data.guestSubmitted
           ? callout(
-              `<strong style="color:${C.clay};">No account.</strong> This came in through the public quote form, so there is no desk for them to watch — reply by phone or email. They were told to expect an answer within one business day.`,
+              `<strong style="color:${C.clay};">No account.</strong> Came in through the public quote form and is attached to no account — the email and phone below are the only way to reach them. They were told to expect an answer within one business day.`,
               C.clay
             )
           : ""
@@ -483,8 +483,9 @@ export const NewRequestEmailHTML = (data: {
  * They have no desk to watch and no password to remember, so this email is the
  * whole of their side of the transaction: proof it arrived, the reference the
  * shop will use on the phone, what we understood them to be asking for, and
- * when to expect an answer. The account offer sits at the bottom, as an offer —
- * the quote is already moving whether or not they take it.
+ * when to expect an answer. The account offer sits at the bottom, as an offer
+ * for future work only — a no-account quote is deliberately attached to no
+ * account, so opening one does not and must not inherit it.
  */
 export const QuoteReceivedEmailHTML = (data: {
   customerName: string;
@@ -525,12 +526,13 @@ export const QuoteReceivedEmailHTML = (data: {
         },
         {
           title: "You decide",
-          detail: "Nothing is built and nothing is invoiced until you say yes to the price.",
+          detail:
+            "Nothing is built and nothing is invoiced until you say yes to the price. Printing runs on a 72-hour typical turnaround from there.",
         },
       ])}
 
       ${callout(
-        `Want to watch it move and keep every future job in one place? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a> with this same email address and this quote will be waiting on your desk. Entirely optional — your quote is already moving.`,
+        `Want your <em>next</em> job on a desk you can watch? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a>. This quote stays where it is — we keep no-account quotes off accounts on purpose, so nobody can attach anything to yours by typing your address into a form. We answer this one by email either way.`,
         C.clay
       )}
 

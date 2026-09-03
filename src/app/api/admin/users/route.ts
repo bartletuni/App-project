@@ -28,8 +28,13 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
+    // The system row that owns no-account quotes is not a client and must not
+    // be listed as one — see User.isGuest.
+    const realClients = { isGuest: false };
+
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
+        where: realClients,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -49,7 +54,7 @@ export async function GET(req: NextRequest) {
             createdAt: true,
         }
       }),
-      prisma.user.count()
+      prisma.user.count({ where: realClients })
     ]);
 
     // Map to include the first phone number as a top-level property

@@ -20,6 +20,8 @@ import {
 } from "@/lib/rate-limit";
 import {
   FORM_TOKEN_FIELD,
+  GUEST_OWNER_EMAIL,
+  GUEST_OWNER_NAME,
   GUEST_QUOTE_TOKEN_SCOPE,
   HONEYPOT_FIELD,
   MAX_COMPANY_CHARS,
@@ -36,11 +38,19 @@ import {
  * POST /api/requests/guest — a quote request from someone with no account.
  *
  * The whole point of this route is that it creates nothing new. A guest quote
- * is an ordinary `PartRequest` on the QUOTE track, owned by a `User` row that
- * has been opened but never claimed (`User.isGuest`). The admin console, the
- * pricing and conversion flow, invoicing, the reports PDF — all of it already
- * handles that shape, so none of it needed changing. `PartRequest.guestSubmitted`
- * records how the request arrived; that is the only thing that distinguishes it.
+ * is an ordinary `PartRequest` on the QUOTE track, so the admin console, the
+ * pricing and conversion flow, invoicing and the reports PDF all handle it
+ * with no changes at all.
+ *
+ * What it never does is attach that request to a customer's account. Anyone
+ * can type anyone's email into a public form, so matching a submitted address
+ * against a registered one would let a stranger drop rows onto someone else's
+ * desk. Every guest quote is filed under one system account instead
+ * (`GUEST_OWNER_EMAIL` — reserved domain, random password, nobody signs into
+ * it), with the contact details the sender gave stored on the request. Owning
+ * them somewhere rather than nowhere is deliberate too: a request with no
+ * owning customer would make its own uploads public through
+ * `/api/download/[fileId]`.
  *
  * Being the one endpoint on this site that anyone on the internet may POST to,
  * it is defended in layers, cheapest first, none of which asks the customer
@@ -71,6 +81,34 @@ const GUEST_QUOTE_LIMITS = {
 
 const TOO_MANY =
   "That's a lot of quote requests from one place in a short time. Give it a little while, or call the shop and we'll take the details directly.";
+
+/**
+ * The system account every no-account quote is filed under, created the first
+ * time one arrives.
+ *
+ * Not a customer and never one: the address is on the reserved `.invalid`
+ * domain so it can never be registered or receive mail, the password is random
+ * and held by nobody, and the Clients list filters the row out. It exists so a
+ * guest quote has an owner — which is what keeps its uploads behind the admin
+ * check in /api/download/[fileId] — without that owner being a person.
+ */
+async function guestOwner(): Promise<{ id: string }> {
+  const existing = await prisma.user.findUnique({
+    where: { email: GUEST_OWNER_EMAIL },
+    select: { id: true },
+  });
+  if (existing) return existing;
+
+  return prisma.user.create({
+    data: {
+      name: GUEST_OWNER_NAME,
+      email: GUEST_OWNER_EMAIL,
+      password: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
+      isGuest: true,
+    },
+    select: { id: true },
+  });
+}
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -220,41 +258,15 @@ export async function POST(req: NextRequest) {
       .slice(0, MAX_NOTES_CHARS);
 
     // --- 8. Who this belongs to ------------------------------------------
-    // An address we already know keeps its account, guest or not, so a
-    // customer's quotes stay in one place and are waiting for them the first
-    // time they sign in. An address we do not know gets an unclaimed account.
-    //
-    // Nothing on an existing row is ever overwritten from a public form: the
-    // name and phone on a claimed account belong to the person who signed up,
-    // and the submitted ones reach the shop through the notification instead.
-    let user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true, name: true, email: true, isGuest: true },
-    });
+    // Nobody. The submitted address is never looked up against the accounts
+    // table, so a quote can neither land on a stranger's desk nor reveal that
+    // an address is registered here. It is filed under the one system row
+    // instead, and the contact block is stored on the request.
+    const owner = await guestOwner();
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name: contact.name,
-          email,
-          // Unguessable and held by nobody: this account cannot be signed into
-          // until someone registers the address and sets a real password.
-          password: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
-          phone: contact.phone,
-          isGuest: true,
-        },
-        select: { id: true, name: true, email: true, isGuest: true },
-      });
-    }
-
-    let phoneNumberRecord = await prisma.phoneNumber.findFirst({
-      where: { userId: user.id, number: contact.phone },
+    const phoneNumberRecord = await prisma.phoneNumber.create({
+      data: { userId: owner.id, number: contact.phone },
     });
-    if (!phoneNumberRecord) {
-      phoneNumberRecord = await prisma.phoneNumber.create({
-        data: { userId: user.id, number: contact.phone },
-      });
-    }
 
     // --- 9. Store the files, then the request -----------------------------
     const storedSource = await storePartSourceFiles(source);
@@ -264,8 +276,13 @@ export async function POST(req: NextRequest) {
 
     const partRequest = await prisma.partRequest.create({
       data: {
-        userId: user.id,
+        userId: owner.id,
         phoneNumberId: phoneNumberRecord.id,
+        // Who to answer. Stored on the request precisely because it is not an
+        // account: this is the only record of who sent it.
+        guestName: contact.name,
+        guestEmail: email,
+        guestPhone: contact.phone,
         submissionType: source.submissionType,
         fileId: storedSource.stored.fileId,
         fileName: source.model ? source.model.file.name : null,
@@ -277,7 +294,6 @@ export async function POST(req: NextRequest) {
         notes: notes || null,
         // Nothing is built off this form. It is a price request, always.
         quoteRequested: true,
-        guestSubmitted: true,
         kind: KIND_QUOTE,
         status: DEFAULT_QUOTE_STATUS,
         dateNeeded: resolvedDate.date,
