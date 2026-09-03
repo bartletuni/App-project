@@ -21,9 +21,13 @@ function LoginContent() {
   // button, say. Admins always land on the console instead.
   const nextPath = safeNextPath(searchParams.get("next"));
   const afterSignIn = nextPath || "/dashboard";
-  const [isLogin, setIsLogin] = useState(true);
+  // Sign-in unless the visitor was sent here to open an account — the offer
+  // after a no-account quote is the one that does that, and it brings the
+  // address they just used along so they do not retype it. Read once, on
+  // mount, exactly as the composer reads its quote flag.
+  const [isLogin, setIsLogin] = useState(() => searchParams.get("register") !== "1");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => searchParams.get("email")?.slice(0, 100) || "");
   const [password, setPassword] = useState("");
   const [shippingStreet, setShippingStreet] = useState("");
   const [shippingApt, setShippingApt] = useState("");

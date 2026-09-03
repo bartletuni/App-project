@@ -8,8 +8,10 @@ jest.mock("@/lib/prisma", () => ({
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     phoneNumber: {
+      findFirst: jest.fn(),
       create: jest.fn(),
     },
   },
@@ -67,6 +69,7 @@ describe("POST /api/auth/register", () => {
     // Mock user creation successful
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: "1", email: "test@example.com" });
+    (prisma.phoneNumber.findFirst as jest.Mock).mockResolvedValue(null);
 
     const validPasswords = [
       "Password123!",
@@ -79,5 +82,52 @@ describe("POST /api/auth/register", () => {
       const res = await POST(req);
       expect(res.status).toBe(201);
     }
+  });
+
+  // Someone who asked for a quote without signing up already has a row: an
+  // unclaimed account opened by POST /api/requests/guest. Registering the same
+  // address has to claim it, not collide with it, or the quotes they already
+  // sent are stranded on an account they can never sign into.
+  describe("claiming a no-account quote", () => {
+    it("upgrades the unclaimed row in place instead of rejecting the address", async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-1", isGuest: true });
+      (prisma.user.update as jest.Mock).mockResolvedValue({
+        id: "guest-1",
+        email: "test@example.com",
+        name: "Test User",
+      });
+      (prisma.phoneNumber.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const res = await POST(createRequest(validBody));
+
+      expect(res.status).toBe(201);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      const update = (prisma.user.update as jest.Mock).mock.calls[0][0];
+      expect(update.where).toEqual({ id: "guest-1" });
+      expect(update.data.isGuest).toBe(false);
+      expect(update.data.password).not.toBe(validBody.password);
+    });
+
+    it("does not duplicate a phone number the quote already recorded", async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-1", isGuest: true });
+      (prisma.user.update as jest.Mock).mockResolvedValue({ id: "guest-1", email: "test@example.com" });
+      (prisma.phoneNumber.findFirst as jest.Mock).mockResolvedValue({ id: "phone-1" });
+
+      const res = await POST(createRequest(validBody));
+
+      expect(res.status).toBe(201);
+      expect(prisma.phoneNumber.create).not.toHaveBeenCalled();
+    });
+
+    it("still rejects an address that belongs to a real account", async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "user-1", isGuest: false });
+
+      const res = await POST(createRequest(validBody));
+
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe("User with this email already exists");
+      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
   });
 });

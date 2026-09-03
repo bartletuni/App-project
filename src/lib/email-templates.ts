@@ -193,18 +193,18 @@ function steps(items: { title: string; detail: string }[]): string {
  * The document every template is poured into: masthead, content, footer.
  *
  * `audience` decides the footer only — a customer gets the shop's contact
- * details, the console gets a plain automated-notice line.
+ * details, the console gets a plain automated-notice line, and a guest gets
+ * the same contact details with the one line that differs: they have no
+ * account, so nothing may claim they do.
  */
 function shell(opts: {
   preheader: string;
   eyebrow: string;
   title: string;
   content: string;
-  audience: "customer" | "console";
+  audience: "customer" | "guest" | "console";
 }): string {
-  const footer =
-    opts.audience === "customer"
-      ? `
+  const contactFooter = (why: string) => `
         <div style="font-family:${SANS};font-size:13px;line-height:1.7;color:${C.muted};">
           Questions about this? Reply to this email, or reach us at
           <a href="mailto:${BUSINESS.email}" style="color:${C.clay};text-decoration:none;">${BUSINESS.email}</a>
@@ -212,8 +212,14 @@ function shell(opts: {
           <a href="tel:${BUSINESS.telephone}" style="color:${C.clay};text-decoration:none;">${BUSINESS.telephone.replace(/^\+1-/, "")}</a>
         </div>
         <div style="font-family:${MONO};font-size:10px;line-height:1.6;letter-spacing:0.1em;color:${C.faint};padding-top:14px;">
-          Sent by <a href="${absoluteUrl("/")}" style="color:${C.faint};text-decoration:none;">TakomoCo</a> because you have an account with us.
-        </div>`
+          Sent by <a href="${absoluteUrl("/")}" style="color:${C.faint};text-decoration:none;">TakomoCo</a> ${why}
+        </div>`;
+
+  const footer =
+    opts.audience === "guest"
+      ? contactFooter("because you asked us for a quote.")
+      : opts.audience === "customer"
+      ? contactFooter("because you have an account with us.")
       : `
         <div style="font-family:${MONO};font-size:10px;line-height:1.6;letter-spacing:0.1em;color:${C.faint};">
           Automated notification &middot; <a href="${absoluteUrl("/admin")}" style="color:${C.faint};text-decoration:none;">TakomoCo console</a>
@@ -371,6 +377,14 @@ export const NewUserAdminNotificationEmailHTML = (data: {
 export const NewRequestEmailHTML = (data: {
   customerName: string;
   customerEmail: string;
+  /** Present on a no-account quote, where a callback is how this gets answered. */
+  customerPhone?: string;
+  /** Optional, and only ever offered on the public quote form. */
+  company?: string;
+  /** True when this came through /quote — the customer has no desk to watch. */
+  guestSubmitted?: boolean;
+  /** The short code the customer was given on screen, e.g. "Q-4F2A9C". */
+  reference?: string;
   /** The uploaded file's name, or the customer's name for a described part. */
   fileName: string;
   /** "MODEL" (a file was uploaded) or "DESCRIPTION" (no file — we draw it). */
@@ -394,12 +408,20 @@ export const NewRequestEmailHTML = (data: {
   return shell({
     audience: "console",
     preheader: `${data.customerName} — ${data.fileName}, ${data.quantity} off, needed ${data.dateNeeded}.`,
-    eyebrow: "Console ⁄ New build",
+    eyebrow: data.guestSubmitted ? "Console ⁄ No-account quote" : "Console ⁄ New build",
     title: "New part request",
     content: `
       ${heading("New part request")}
       ${lede(`A new request came in from <span style="color:${C.creamSoft};">${escapeHtml(data.customerName)}</span>.`)}
 
+      ${
+        data.guestSubmitted
+          ? callout(
+              `<strong style="color:${C.clay};">No account.</strong> This came in through the public quote form, so there is no desk for them to watch — reply by phone or email. They were told to expect an answer within one business day.`,
+              C.clay
+            )
+          : ""
+      }
       ${
         data.isFreeSample
           ? callout(
@@ -426,9 +448,19 @@ export const NewRequestEmailHTML = (data: {
       }
 
       ${specSheet([
+        { label: "Reference", value: data.reference ? escapeHtml(data.reference) : "" },
         {
           label: "Customer",
-          value: `${escapeHtml(data.customerName)}<br><a href="mailto:${escapeHtml(data.customerEmail)}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.customerEmail)}</a>`,
+          value: [
+            escapeHtml(data.customerName),
+            data.company ? escapeHtml(data.company) : "",
+            `<a href="mailto:${escapeHtml(data.customerEmail)}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.customerEmail)}</a>`,
+            data.customerPhone
+              ? `<a href="tel:${escapeHtml(data.customerPhone.replace(/[^\d+]/g, ""))}" style="color:${C.clay};text-decoration:none;">${escapeHtml(data.customerPhone)}</a>`
+              : "",
+          ]
+            .filter(Boolean)
+            .join("<br>"),
         },
         { label: described ? "Part" : "File name", value: escapeHtml(data.fileName) },
         { label: "Approximate size", value: data.dimensions ? escapeHtml(data.dimensions) : "" },
@@ -444,6 +476,66 @@ export const NewRequestEmailHTML = (data: {
       ${button(absoluteUrl("/admin"), "Open in console")}`,
   });
 };
+
+/**
+ * The customer's receipt for a no-account quote request.
+ *
+ * They have no desk to watch and no password to remember, so this email is the
+ * whole of their side of the transaction: proof it arrived, the reference the
+ * shop will use on the phone, what we understood them to be asking for, and
+ * when to expect an answer. The account offer sits at the bottom, as an offer —
+ * the quote is already moving whether or not they take it.
+ */
+export const QuoteReceivedEmailHTML = (data: {
+  customerName: string;
+  /** The short code shown on screen when they submitted, e.g. "Q-4F2A9C". */
+  reference: string;
+  partTitle: string;
+  quantity: number;
+  material: string;
+  dateNeeded: string;
+}) =>
+  shell({
+    audience: "guest",
+    preheader: `Quote ${data.reference} is with the shop — we'll come back within one business day.`,
+    eyebrow: "Quote ⁄ Received",
+    title: `Quote ${data.reference} received`,
+    content: `
+      ${heading(`We've got it, <span style="font-style:italic;color:${C.clay};">${escapeHtml(data.customerName.split(" ")[0] || data.customerName)}</span>`)}
+      ${lede(
+        `Your quote request is with the shop. Quote your reference — <strong style="color:${C.creamSoft};">${escapeHtml(data.reference)}</strong> — if you call about it.`
+      )}
+
+      ${specSheet([
+        { label: "Reference", value: escapeHtml(data.reference) },
+        { label: "Part", value: escapeHtml(data.partTitle) },
+        { label: "Quantity", value: String(data.quantity) },
+        { label: "Material", value: escapeHtml(data.material) },
+        { label: "Needed by", value: escapeHtml(data.dateNeeded) },
+      ])}
+
+      ${steps([
+        {
+          title: "We read it",
+          detail: "A person looks at your part, not a calculator. Within one business day.",
+        },
+        {
+          title: "We come back with a price",
+          detail: "By email or phone, whichever reaches you — with anything we still need to ask.",
+        },
+        {
+          title: "You decide",
+          detail: "Nothing is built and nothing is invoiced until you say yes to the price.",
+        },
+      ])}
+
+      ${callout(
+        `Want to watch it move and keep every future job in one place? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a> with this same email address and this quote will be waiting on your desk. Entirely optional — your quote is already moving.`,
+        C.clay
+      )}
+
+      ${button(absoluteUrl("/quote"), "Send another part")}`,
+  });
 
 export const InvoiceSentEmailHTML = (data: {
   customerName: string;

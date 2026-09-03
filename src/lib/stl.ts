@@ -7,14 +7,16 @@
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
+// Re-exported so the viewer and the thumbnail — both of which need three.js
+// anyway — keep importing it from here. Its definition sits in part-source.ts
+// so that callers who only need the name check do not pull three in with it.
+export { isStlFileName } from "@/lib/part-source";
+
 export const CLAY = 0xc98a6b; // part color, matches the app's clay palette
 
 const geometryCache = new Map<string, Promise<THREE.BufferGeometry>>();
 const thumbnailCache = new Map<string, Promise<string>>();
 
-export function isStlFileName(name: string | null | undefined): boolean {
-  return !!name && name.toLowerCase().endsWith(".stl");
-}
 
 function parseStl(buffer: ArrayBuffer): THREE.BufferGeometry {
   const geometry = new STLLoader().parse(buffer);

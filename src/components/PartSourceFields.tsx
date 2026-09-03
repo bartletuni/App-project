@@ -1,9 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { UploadCloud, Wand2, X, FileText, AlertCircle } from "lucide-react";
-import StlViewer from "@/components/StlViewer";
-import { isStlFileName } from "@/lib/stl";
+// three.js is the heaviest thing either request form can pull in, and nothing
+// needs it until a model has actually been picked — which most visitors to the
+// public quote form never do, because they are photographing a broken part on
+// their phone. Loading it on demand keeps the first paint of that form small.
+const StlViewer = dynamic(() => import("@/components/StlViewer"), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse bg-espresso-800/60" />,
+});
 import {
   MAX_DESCRIPTION_CHARS,
   MAX_DIMENSIONS_CHARS,
@@ -22,6 +29,7 @@ import {
   isModelFileName,
   isPreviewableImage,
   isReferenceFileName,
+  isStlFileName,
 } from "@/lib/part-source";
 
 interface PartSourceFieldsProps {

@@ -19,6 +19,12 @@ NEXTAUTH_SECRET="your_secure_random_string_here" # Generate one using: openssl r
 RESEND_API_KEY="re_..."              # If unset, all notification emails are skipped
 ADMIN_EMAIL="info@takomoco.com"      # Receives new-user and new-request notifications
 EMAIL_FROM="TakomoCo <noreply@takomoco.com>" # Sender; must be on a domain verified in Resend
+
+# Cloudflare Turnstile (OPTIONAL) — the public quote form's bot check.
+# Leave both unset and the form still works, defended by the other layers.
+# Set BOTH to enforce it. See "Quotes Without an Account" below.
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAA..."   # widget key, public
+TURNSTILE_SECRET_KEY="0x4AAA..."             # verification key, server only
 ```
 
 ### Email notifications
@@ -69,8 +75,20 @@ material record in the stock index (`/admin/materials`).
 
 ## Requesting a Quote
 
-"Request a quote" buttons on the public site (masthead, hero, workflow, rate sheet,
-stock index, contact, footer) all point at the composer with `?quote=1`. The composer's
+There is one quote button on the site — `RequestQuoteButton`, placed in the masthead,
+hero, workflow, rate sheet, stock index, contact page, and footer — and it has two
+destinations, decided in `src/lib/quote.ts` by whether the visitor has a session:
+
+- **Signed in** → the composer on their desk, with `?quote=1`.
+- **Signed out** → `/quote`, the public form that needs no account at all. See
+  "Quotes Without an Account" below.
+
+No placement had to change to get this, and no page decides for itself which call to
+action a visitor deserves. The button renders pointing at `/quote` and re-points once
+the session resolves; a signed-in customer who taps early lands on `/quote` and is
+forwarded to their composer, which is the harmless direction to be wrong in.
+
+The signed-in half is unchanged: the composer's
 "Quote" checkbox is off by default, and only that link pre-ticks it, for that visit —
 submitting clears it again. Signing in on the way keeps the destination, so a visitor who
 clicks a quote button while logged out still lands on a pre-ticked form.
@@ -80,6 +98,95 @@ build ledger and the admin console, and called out in the new-request email. Run
 `npx prisma db push` against a local `file:` database after deploying this change so the
 column exists; on Turso, see "Quotes and Requests" below, which also covers what happens
 to the request once it is quoted.
+
+## Quotes Without an Account
+
+`/quote` is the public quote form. No sign-up, no password: what the part is, a name,
+an email, and a phone number. That is the whole required set — quantity, material, the
+date, notes, and company are folded behind one optional disclosure, because the shop
+can ask any of them on the callback and every extra required field is another reason to
+abandon the form standing next to a broken machine.
+
+The customer gets a reference (`Q-4F2A9C`, derived from the row's id), a confirmation
+email, and an offer — never a gate — to open an account that would keep it on a desk.
+
+### It is not a second kind of record
+
+A guest quote is an **ordinary `PartRequest` on the QUOTE track**, owned by a `User` row
+that has been opened but never claimed. The admin console, pricing a quote, converting it
+to a build, invoicing, status emails, and the reports PDF all already handle that shape,
+so none of them changed. Two flags carry what is genuinely new:
+
+- `User.isGuest` — this account exists only because someone asked for a price. Its
+  password is a random secret nobody holds, so it cannot be signed into. **Registering
+  the same email address claims the row in place** (`POST /api/auth/register`), clears
+  the flag, and the quotes already sent under it are waiting on the new account's desk.
+  It answers "can this still be claimed?", and stops being true once it is.
+- `PartRequest.guestSubmitted` — permanent provenance: this request came in through
+  `/quote`. It stays true after the customer opens an account, and it is what puts the
+  **No account** badge in the console and the "answer by phone or email" line on the
+  admin notification.
+
+An email address the shop already knows keeps its existing account, guest or claimed, so
+a customer's quotes stay in one place. Nothing on an existing row is ever overwritten
+from a public form — the name and phone on a claimed account belong to the person who
+signed up; the submitted ones reach the shop through the notification instead.
+
+### Keeping bots out without slowing customers down
+
+`POST /api/requests/guest` is the one endpoint on this site that anyone may post to. It is
+defended in layers, cheapest first, and **none of them asks the customer for anything**:
+
+1. **Honeypot** — a field hidden from people and out of the tab order. Anything in it is a
+   bot filling every input on the page. The response is an ordinary success, so the sender
+   learns nothing; the attempt is logged with the address it claimed, so a real submission
+   that somehow tripped it can still be recovered from the server log.
+2. **Signed form token** (`src/lib/form-token.ts`) — the page fetches one on mount and
+   hands it back on submit. A blind POST has none and cannot forge one; a token also
+   carries when it was issued, so a submission that arrives 200ms after the form loaded is
+   rejected, and one harvested last week has expired. Stateless: an HMAC over
+   `NEXTAUTH_SECRET`, no table, nothing to clean up, identical behaviour on a cold start.
+3. **Cloudflare Turnstile** — optional, off unless both keys are set. Managed mode is
+   invisible to almost every real visitor. Nothing is loaded in the browser when it is not
+   configured. A Cloudflare outage fails **open**; a response Cloudflare actively rejects
+   fails closed.
+4. **Rate limits** (`src/lib/rate-limit.ts`) — 5 per address per hour, 15 per address per
+   day, 5 per email address per day. Counters live in the database, because an in-process
+   counter resets on every serverless cold start and protects nothing. Addresses are stored
+   as an HMAC, never in the clear. If the database is unreachable this fails **open**: a
+   real customer's quote still goes through, with the other three layers still standing.
+5. **The same file validation the composer runs** — extension, size, and leading bytes,
+   through the shared reader in `src/lib/part-source-server.ts`. A guest cannot upload
+   anything a signed-in customer could not.
+
+Everything that can reject a request without touching the database or R2 happens before
+anything that does.
+
+### What lands where
+
+| | |
+|---|---|
+| Page | `/quote` (public, indexed, in the sitemap) |
+| Endpoints | `POST /api/requests/guest`, `GET /api/requests/guest/token` |
+| Row | `PartRequest` · `kind: QUOTE` · `status: QUOTE REQUESTED` · `quoteRequested: true` · `guestSubmitted: true` |
+| Owner | `User` with `isGuest: true`, or the existing account for a known address |
+| Console | Listed with every other quote, badged **No account** |
+| Emails | `[No account] Quote request Q-…` to `ADMIN_EMAIL`; a confirmation to the customer |
+
+### Applying this to Turso
+
+Two columns and one table, all additive:
+
+```
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-guest-quotes.sql
+```
+
+Safe to run before deploying the new code — the currently deployed code never reads any
+of it. Against a local `file:` database, `npx prisma db push` is enough. Re-running the
+migration fails with "duplicate column name: isGuest" and changes nothing; that is the
+signal it is already applied, not damage.
 
 ## Submitting a Part Without an STL or ZIP
 
