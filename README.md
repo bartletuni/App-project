@@ -99,16 +99,26 @@ build ledger and the admin console, and called out in the new-request email. Run
 column exists; on Turso, see "Quotes and Requests" below, which also covers what happens
 to the request once it is quoted.
 
+## Turnaround in the Title
+
+The homepage title is `TakomoCo — 72-Hour Domestic 3D Printing & Additive Manufacturing`,
+built from `SITE_TAGLINE` in `src/lib/seo.ts` — which also feeds the homepage's Open
+Graph and Twitter titles, so all three stay in step from one constant. The turnaround
+leads the tagline because that is the search someone with a broken part actually makes,
+and because it has to survive the ~60-character truncation in a result listing. Nothing
+was dropped for it: "Domestic", "3D Printing" and "Additive Manufacturing" all remain.
+
+The homepage already backs the claim on the page itself — the spec sheet's
+"Lead time · 72 hours" row and the 72h counter — which is what keeps it an honest title
+rather than a bare meta claim.
+
+Two figures on this site are easy to confuse, and are deliberately worded apart wherever
+they appear together: a **quote** comes back within one business day; the **part** runs
+on the 72-hour typical turnaround once the price is approved. `/quote` says both.
+
 ## Quotes Without an Account
 
-`/quote` is the public quote form, titled for the search it is meant to catch —
-"Request a Quote — 72-Hour Turnaround, No Account Needed", with the shop's standing
-72-hour lead time repeated on the page so the claim in the title is backed by the copy
-under it. Note the two figures are different promises and are worded as such: the
-**quote** comes back within one business day; the **part** runs on the 72-hour typical
-turnaround once the price is approved.
-
-No sign-up, no password: what the part is, a name,
+`/quote` is the public quote form. No sign-up, no password: what the part is, a name,
 an email, and a phone number. That is the whole required set — quantity, material, the
 date, notes, and company are folded behind one optional disclosure, because the shop
 can ask any of them on the callback and every extra required field is another reason to
