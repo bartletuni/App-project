@@ -4,12 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
-import { format } from "date-fns";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { requestTitle } from "@/lib/part-source";
-import { isQuote } from "@/lib/request-status";
-import { requestContact } from "@/lib/guest-quote";
+import { buildReportPdf, reportFileName } from "@/lib/report-pdf";
 
 export default function GenerateReportsPage() {
   const { data: session, status } = useSession();
@@ -54,54 +49,17 @@ export default function GenerateReportsPage() {
         return;
       }
 
-      // Generate PDF
       // Correct for timezone offset when parsing YYYY-MM-DD strings for formatting
       const startObj = new Date(`${startDate}T00:00:00`);
       const endObj = new Date(`${endDate}T23:59:59.999`);
 
-      // Generate PDF
-      const doc = new jsPDF("landscape");
-
-      doc.setFontSize(18);
-      doc.text("TakomoCo Request History Report", 14, 22);
-
-      doc.setFontSize(11);
-      doc.text(`Date Range: ${format(startObj, "MMM d, yyyy")} - ${format(endObj, "MMM d, yyyy")}`, 14, 30);
-      doc.text(`Generated On: ${format(new Date(), "MMM d, yyyy h:mm a")}`, 14, 36);
-
-      const tableColumn = ["Date Submitted", "Customer Name", "User Email", "Phone", "File Name", "Material", "Quantity", "Type", "Status", "Quoted", "Invoice #", "Date Needed"];
-      const tableRows: any[] = [];
-
-      filteredRequests.forEach((req: any) => {
-        const rowData = [
-          format(new Date(req.createdAt), "MM/dd/yyyy"),
-          // A no-account quote is filed under a system row, so the report
-          // reads the contact the sender actually gave.
-          requestContact(req).name,
-          requestContact(req).email,
-          requestContact(req).phone,
-          requestTitle(req),
-          req.material || "N/A",
-          req.quantity.toString(),
-          isQuote(req) ? "Quote" : "Request",
-          req.status,
-          req.quotedPrice || "N/A",
-          req.invoiceNumber || "N/A",
-          format(new Date(req.dateNeeded), "MM/dd/yyyy")
-        ];
-        tableRows.push(rowData);
+      const doc = buildReportPdf({
+        requests: filteredRequests,
+        start: startObj,
+        end: endObj,
       });
 
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 45,
-        theme: "striped",
-        headStyles: { fillColor: [79, 70, 229] }, // Indigo 600
-        styles: { fontSize: 9 }
-      });
-
-      doc.save(`TakomoCo_Report_${format(startObj, "yyyyMMdd")}_${format(endObj, "yyyyMMdd")}.pdf`);
+      doc.save(reportFileName(startObj, endObj));
 
     } catch (err) {
       console.error(err);

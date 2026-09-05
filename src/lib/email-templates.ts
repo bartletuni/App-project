@@ -1,5 +1,6 @@
 import { BUSINESS, absoluteUrl } from "@/lib/seo";
 import { StatusTone, statusTone } from "@/lib/request-status";
+import { CLAY, CREAM, DERIVED, EMBER, ESPRESSO, WORDMARK } from "@/lib/brand";
 
 /**
  * Transactional email, in the same voice as the site.
@@ -33,24 +34,30 @@ import { StatusTone, statusTone } from "@/lib/request-status";
  */
 
 // ---------------------------------------------------------------------------
-// Palette and type — the tailwind.config.ts values, resolved to plain hex.
+// Palette and type
 // ---------------------------------------------------------------------------
 
+/**
+ * What each shade does in an email. The values come from `brand.ts` so the
+ * email, the site and the report PDF cannot drift onto different browns; the
+ * mapping is local because it only describes a dark medium — the printed
+ * report reads the same scale in reverse.
+ */
 const C = {
-  page: "#15100c", // espresso-950
-  card: "#1c1611", // espresso-900
-  panel: "#241d17", // espresso-800
-  raised: "#2c241d", // espresso-700
-  rule: "#3a2c22", // hairline, clay at low opacity flattened onto espresso
-  clay: "#cf8f5f", // clay-400
-  clayDeep: "#a9663c", // clay-600
-  eyebrow: "#e0a877", // the site's .eyebrow colour
-  ember: "#e6a85f", // ember-400
-  cream: "#fbf6ee", // cream-100
-  creamSoft: "#f4ecdf", // cream-200
-  body: "#d2c4ab", // cream-400
-  muted: "#b6a589", // cream-500
-  faint: "#9a886c", // cream-600
+  page: ESPRESSO[950],
+  card: ESPRESSO[900],
+  panel: ESPRESSO[800],
+  raised: ESPRESSO[700],
+  rule: DERIVED.rule,
+  clay: CLAY[400],
+  clayDeep: CLAY[600],
+  eyebrow: DERIVED.eyebrow,
+  ember: EMBER[400],
+  cream: CREAM[100],
+  creamSoft: CREAM[200],
+  body: CREAM[400],
+  muted: CREAM[500],
+  faint: CREAM[600],
 } as const;
 
 const DISPLAY = "'Iowan Old Style','Palatino Linotype',Palatino,Georgia,Cambria,serif";
@@ -256,8 +263,8 @@ function shell(opts: {
         <tr><td class="pad" style="padding:26px 34px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
-              <td align="left" style="font-family:${MONO};font-size:15px;line-height:1;letter-spacing:0.22em;color:${C.cream};font-weight:600;">TAKOMO<span style="color:${C.clay};">&#8260;</span>CO</td>
-              <td align="right" style="font-family:${MONO};font-size:9px;line-height:1;letter-spacing:0.18em;text-transform:uppercase;color:${C.faint};">Additive Mfg &middot; Utah</td>
+              <td align="left" style="font-family:${MONO};font-size:15px;line-height:1;letter-spacing:0.22em;color:${C.cream};font-weight:600;">${WORDMARK.head}<span style="color:${C.clay};">&#8260;</span>${WORDMARK.tail}</td>
+              <td align="right" style="font-family:${MONO};font-size:9px;line-height:1;letter-spacing:0.18em;text-transform:uppercase;color:${C.faint};">${escapeHtml(WORDMARK.descriptor)}</td>
             </tr>
           </table>
         </td></tr>
