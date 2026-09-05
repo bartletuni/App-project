@@ -119,3 +119,51 @@ export const WORDMARK = {
   /** The line that sits opposite the wordmark on a masthead. */
   descriptor: "Additive Mfg · Utah",
 } as const;
+
+/**
+ * The logo mark as geometry rather than as a picture.
+ *
+ * `public/logo.png` is a 1024×1024 JPEG of a blue `T` built from stacked
+ * strata, on white, with a soft drop shadow and no alpha channel. None of
+ * that survives being dropped onto a cream sheet: the white ground would
+ * print as a box, and the shadow as a grey smear.
+ *
+ * Because the mark is nothing but axis-aligned bars, it does not need to be
+ * an image at all. Traced to nineteen rectangles it can be drawn at any size
+ * without resampling, recoloured to whatever ground it lands on, and it adds
+ * nothing to any bundle — where re-keying the bitmap per medium would mean
+ * shipping and decoding 45 kB to draw a shape describable in a few numbers.
+ *
+ * Coordinates are fractions of the mark's bounding box, so a caller picks a
+ * size and multiplies. `tone` is the stratum's darkness in the original,
+ * 0 at the palest top layer and 1 at the darkest foot. It is carried
+ * separately from colour because the light-to-dark fade *is* the mark — a
+ * flat silhouette of it is just a letter T — so a medium that renders it in
+ * one hue can still reproduce the gradient by varying weight.
+ */
+export const MARK = {
+  /** Bounding-box width ÷ height. */
+  aspect: 1.1289,
+  /** `[x, y, width, height, tone]`, each 0–1. */
+  strata: [
+    [0.0074, 0.0, 0.9801, 0.0308, 0.0],
+    [0.0, 0.0308, 0.9975, 0.0168, 0.0119],
+    [0.1166, 0.056, 0.8759, 0.0504, 0.1293],
+    [0.2407, 0.112, 0.7519, 0.0532, 0.2436],
+    [0.1117, 0.1737, 0.8883, 0.0448, 0.3485],
+    [0.2382, 0.2213, 0.6228, 0.056, 0.5252],
+    [0.4045, 0.2829, 0.2854, 0.0476, 0.4142],
+    [0.3995, 0.3389, 0.2953, 0.0476, 0.5003],
+    [0.3995, 0.395, 0.2903, 0.0504, 0.5875],
+    [0.4045, 0.451, 0.2854, 0.0504, 0.6537],
+    [0.3995, 0.507, 0.2903, 0.0504, 0.6948],
+    [0.3995, 0.563, 0.2878, 0.0504, 0.7415],
+    [0.3995, 0.619, 0.2903, 0.0504, 0.7525],
+    [0.4045, 0.6779, 0.2854, 0.0476, 0.7936],
+    [0.397, 0.7367, 0.2928, 0.0448, 0.8218],
+    [0.3995, 0.7899, 0.2878, 0.0476, 0.8602],
+    [0.397, 0.8515, 0.2928, 0.042, 0.908],
+    [0.3995, 0.9048, 0.2903, 0.0392, 0.9764],
+    [0.4814, 0.9664, 0.2084, 0.0336, 1.0],
+  ],
+} as const;
