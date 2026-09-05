@@ -1,7 +1,7 @@
-import jsPDF from "jspdf";
+import jsPDF, { GState } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { CLAY, CREAM, ESPRESSO, WORDMARK, rgb } from "@/lib/brand";
+import { CLAY, CREAM, ESPRESSO, MARK, WORDMARK, rgb } from "@/lib/brand";
 import { BUSINESS, SITE_URL } from "@/lib/seo";
 import { requestTitle } from "@/lib/part-source";
 import { isQuote } from "@/lib/request-status";
@@ -72,10 +72,23 @@ const MONO = "courier";
 const PAGE = { width: 297, height: 210 } as const;
 const MARGIN = 14;
 const BAND_HEIGHT = 20;
+/** Where the table starts on the first page, below the title block. */
+const TABLE_TOP = 68;
 /** Where the table may start on pages after the first, clear of the band. */
 const CONTINUATION_TOP = 28;
 /** Reserved at the foot of every page for the rule and the footer line. */
 const FOOTER_RESERVE = 18;
+
+/**
+ * The watermark: how tall the mark stands, and how strongly it prints.
+ *
+ * `MAX_OPACITY` applies to the darkest stratum and is the number to touch if
+ * it wants to be fainter or firmer. It is deliberately low — a watermark that
+ * competes with the data has stopped being stationery and started being
+ * noise — and a test holds the sheet to WCAG AA *with the mark laid over the
+ * text*, so this cannot be raised to the point of costing legibility.
+ */
+const WATERMARK = { height: 105, maxOpacity: 0.07, minOpacityFactor: 0.5 } as const;
 
 // ---------------------------------------------------------------------------
 // Data
@@ -201,6 +214,74 @@ function drawMasthead(doc: jsPDF): void {
   );
 }
 
+/**
+ * Where each stratum of the watermark lands on the page, and how strongly.
+ *
+ * Pure, and exported, so the placement can be checked without rendering:
+ * the mark has to clear the masthead band above it and the footer rule below
+ * it on every page, and it has to stay faint.
+ */
+export function watermarkStrata(): {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  opacity: number;
+}[] {
+  const height = WATERMARK.height;
+  const width = height * MARK.aspect;
+
+  // Centred on the table rather than on the paper. Sitting behind data is
+  // what makes it read as stationery; the same mark floating in the empty
+  // run above the table on page one reads as a printing artefact instead.
+  const bodyBottom = PAGE.height - FOOTER_RESERVE;
+  const left = (PAGE.width - width) / 2;
+  const top = TABLE_TOP + (bodyBottom - TABLE_TOP - height) / 2;
+
+  const { maxOpacity, minOpacityFactor } = WATERMARK;
+
+  return MARK.strata.map(([x, y, w, h, tone]) => ({
+    x: left + x * width,
+    y: top + y * height,
+    w: w * width,
+    h: h * height,
+    // The original's fade, carried across to a single hue as weight.
+    opacity: maxOpacity * (minOpacityFactor + (1 - minOpacityFactor) * tone),
+  }));
+}
+
+/**
+ * The mark, laid faintly across the page.
+ *
+ * Drawn after the table rather than under it: the table paints opaque cream
+ * and zebra fills, so anything beneath it would simply be covered. On top at
+ * these weights it tints the rows without touching their readability.
+ */
+function drawWatermark(doc: jsPDF): void {
+  doc.saveGraphicsState();
+  doc.setFillColor(...rgb(CLAY[700]));
+
+  // One graphics state per distinct weight, shared across the strata that
+  // use it, rather than nineteen near-identical ones per page. Rounded to
+  // the two decimals jsPDF writes `/ca` at, so the states we build and the
+  // ones that reach the file are the same set.
+  const states = new Map<number, GState>();
+
+  for (const stratum of watermarkStrata()) {
+    const key = Math.round(stratum.opacity * 100) / 100;
+    let state = states.get(key);
+    if (!state) {
+      state = new GState({ opacity: key });
+      states.set(key, state);
+    }
+    doc.setGState(state);
+    doc.rect(stratum.x, stratum.y, stratum.w, stratum.h, "F");
+  }
+
+  // Without this the masthead and footer would inherit the last weight.
+  doc.restoreGraphicsState();
+}
+
 /** A monospace index label — the site's `.eyebrow`. */
 function drawEyebrow(doc: jsPDF, text: string, x: number, y: number): void {
   doc.setFont(MONO, "normal");
@@ -223,6 +304,21 @@ function drawField(doc: jsPDF, label: string, value: string, x: number, y: numbe
   doc.setFontSize(10);
   doc.setTextColor(...rgb(INK.body));
   doc.text(value, x, y + 5.5);
+}
+
+/**
+ * The cream ground, edge to edge.
+ *
+ * Without this the sheet is whatever the PDF defaults to — white — and the
+ * table reads as a cream slab dropped onto a white page, with the seam
+ * visible at the title block. Cream is the paper here, so it is painted as
+ * the paper. The flood is a 4% tint rather than the console's near-black
+ * ground, which is the whole reason the palette was inverted for print: the
+ * ink argument that rules out espresso does not carry over to this.
+ */
+function drawGround(doc: jsPDF): void {
+  doc.setFillColor(...rgb(INK.paper));
+  doc.rect(0, 0, PAGE.width, PAGE.height, "F");
 }
 
 /** A hairline the width of the text column. */
@@ -317,6 +413,10 @@ export function buildReportPdf(opts: {
     creator: "TakomoCo console",
   });
 
+  // Page one's ground goes down before anything is drawn on it. Later pages
+  // do not exist yet, so they are handled by the table's own page hook.
+  drawGround(doc);
+
   drawTitleBlock(doc, {
     start: opts.start,
     end: opts.end,
@@ -329,7 +429,7 @@ export function buildReportPdf(opts: {
   autoTable(doc, {
     head: [REPORT_COLUMNS.map((c) => c.toUpperCase())],
     body: opts.requests.map(reportRow),
-    startY: 68,
+    startY: TABLE_TOP,
     margin: {
       top: CONTINUATION_TOP,
       bottom: FOOTER_RESERVE,
@@ -357,6 +457,11 @@ export function buildReportPdf(opts: {
       cellPadding: { top: 2.6, bottom: 2.6, left: 1.8, right: 1.8 },
     },
     alternateRowStyles: { fillColor: rgb(INK.paperAlt) },
+    // Fires as each continuation page is created, before its rows are drawn,
+    // which is the only point at which those pages can be grounded.
+    willDrawPage: (data) => {
+      if (data.pageNumber > 1) drawGround(doc);
+    },
     columnStyles: {
       // Dates, type and status echo the site's monospace index labels.
       0: { ...mono, cellWidth: 19 },
@@ -372,6 +477,7 @@ export function buildReportPdf(opts: {
   const pageCount = doc.getNumberOfPages();
   for (let page = 1; page <= pageCount; page += 1) {
     doc.setPage(page);
+    drawWatermark(doc);
     drawMasthead(doc);
     drawFooter(doc, page, pageCount);
   }
