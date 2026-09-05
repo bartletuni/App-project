@@ -1,22 +1,46 @@
 /**
  * "Request a quote" plumbing.
  *
- * Every quote button on the public site points at the same place — the request
- * composer on the client desk — with `?quote=1` attached. The composer reads
- * that flag once, when it mounts, to pre-tick its "Quote" checkbox. The
- * checkbox is off by default everywhere else, and arriving any other way
- * leaves it off.
+ * There is one quote button on this site — `RequestQuoteButton`, in the
+ * masthead, the hero, the workflow, the rate sheet, the stock index, contact,
+ * and the footer — and it has two destinations, decided by who is holding it:
+ *
+ *   Signed in  → the composer on their desk, with `?quote=1` attached. The
+ *                composer reads that flag once, when it mounts, to pre-tick its
+ *                "Quote" checkbox. It is off by default everywhere else, and
+ *                arriving any other way leaves it off.
+ *   Signed out → `/quote`, the public form, which needs no account at all.
+ *
+ * Resolving it here rather than adding a second button anywhere is the whole
+ * point: no placement had to change, and no page has to decide which call to
+ * action a visitor deserves.
  */
+
+import { GUEST_QUOTE_HREF } from "@/lib/guest-quote";
 
 export const QUOTE_PARAM = "quote";
 const QUOTE_VALUE = "1";
 
-/** Where every "Request a quote" button goes. */
-export const QUOTE_HREF = `/dashboard?${QUOTE_PARAM}=${QUOTE_VALUE}`;
+/** The signed-in destination: the composer, with the Quote box pre-ticked. */
+export const COMPOSER_QUOTE_HREF = `/dashboard?${QUOTE_PARAM}=${QUOTE_VALUE}`;
+
+/**
+ * Where a quote button goes. The public form is the default because it is what
+ * a visitor with no session gets, and it is the honest destination while the
+ * session is still loading — landing there signed in bounces straight to the
+ * composer, whereas the reverse would flash a login wall at someone who never
+ * needed one.
+ */
+export function quoteHref(isSignedIn: boolean): string {
+  return isSignedIn ? COMPOSER_QUOTE_HREF : GUEST_QUOTE_HREF;
+}
 
 /** The same destination, with a material from the stock index pre-selected. */
-export function quoteHrefForMaterial(material: string): string {
-  return `/dashboard?material=${encodeURIComponent(material)}&${QUOTE_PARAM}=${QUOTE_VALUE}`;
+export function quoteHrefForMaterial(material: string, isSignedIn = false): string {
+  const encoded = encodeURIComponent(material);
+  return isSignedIn
+    ? `/dashboard?material=${encoded}&${QUOTE_PARAM}=${QUOTE_VALUE}`
+    : `${GUEST_QUOTE_HREF}?material=${encoded}`;
 }
 
 /** True when the visitor arrived through a quote button. */

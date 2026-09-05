@@ -48,6 +48,16 @@ export const MIN_DESCRIPTION_CHARS = 20;
 export const MAX_DESCRIPTION_CHARS = 4000;
 export const MAX_DIMENSIONS_CHARS = 300;
 
+/**
+ * Lives here rather than beside the STL loader so that asking "is this an STL?"
+ * — a string comparison — does not drag three.js into a bundle that has no
+ * geometry to draw. The public quote form is the reason: most of its visitors
+ * are photographing a part on a phone and never pick a model at all.
+ */
+export function isStlFileName(name: string | null | undefined): boolean {
+  return !!name && name.toLowerCase().endsWith(".stl");
+}
+
 export function isModelFileName(name: string | null | undefined): boolean {
   const lower = (name || "").toLowerCase();
   return MODEL_EXTENSIONS.some((ext) => lower.endsWith(ext));

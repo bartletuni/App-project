@@ -12,6 +12,19 @@ model User {
   email           String   @unique
   password        String
   isAdmin         Boolean  @default(false)
+  /// Marks the single system row that owns every no-account quote — not a
+  /// customer, and never one. A quote sent from the public form is deliberately
+  /// NOT attached to whatever account happens to share its email address: a
+  /// stranger who knows someone's address must not be able to put anything on
+  /// their desk. The contact details a guest gives ride on the request instead
+  /// (PartRequest.guestEmail and friends), and the shop answers those.
+  ///
+  /// Its password is random and held by nobody, its address is on a reserved
+  /// domain that cannot receive mail, and the Clients list filters it out.
+  /// Owning guest quotes here rather than leaving them unowned is what keeps
+  /// their uploaded files behind the admin check in /api/download/[fileId],
+  /// which treats an unowned file as public.
+  isGuest         Boolean  @default(false)
   shippingAddress String?
   billingAddress  String?
   phone           String?
@@ -98,6 +111,14 @@ model PartRequest {
   notes           String?
   printSettings   String? // JSON CustomPrintSettings; null = auto (shop chooses)
   quoteRequested  Boolean     @default(false) // customer asked for a price quote first
+  /// Who to answer, on a quote that came in through the public form at /quote.
+  /// Set together and only there — `guestEmail` is what marks a row as a
+  /// no-account quote, and its presence is why the console shows these instead
+  /// of the system row that owns it. Null on everything submitted by a
+  /// signed-in customer, whose details are on their account.
+  guestName       String?
+  guestEmail      String?
+  guestPhone      String?
   /// True on the one free PLA 2.0 sample a first-time customer may request.
   /// Eligibility is meant to be "no existing row with this flag set for the
   /// user", not "no requests at all" — so someone who ordered before the
@@ -135,4 +156,18 @@ model RequestAttachment {
   mimeType  String
   size      Int
   createdAt DateTime    @default(now())
+}
+
+/// One fixed window of activity on a public, unauthenticated endpoint.
+///
+/// The no-account quote form is the first thing on this site that anyone can
+/// POST to, so it needs a ceiling that survives a serverless cold start — an
+/// in-process counter resets with every new lambda and protects nothing. The
+/// window is encoded in the key ("guest-quote:ip:<hash>:<window index>"), so a
+/// new window is simply a new row and a counter is one upsert. Keys are opaque:
+/// an address is stored as an HMAC, never in the clear. See src/lib/rate-limit.ts.
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
 }

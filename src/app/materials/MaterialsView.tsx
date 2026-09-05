@@ -9,7 +9,6 @@ import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import RequestQuoteButton from "@/components/RequestQuoteButton";
-import { quoteHrefForMaterial } from "@/lib/quote";
 
 /** The subset of the Material record this view renders. */
 export interface MaterialSummary {
@@ -154,7 +153,7 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
                       variant="outline"
                       size="sm"
                       label="Quote this material"
-                      href={quoteHrefForMaterial(m.name)}
+                      material={m.name}
                       className="mt-2 w-full justify-between px-4 py-3 tracking-[0.18em] text-[10px]"
                     />
                   </div>

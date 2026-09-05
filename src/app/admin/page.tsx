@@ -23,6 +23,7 @@ import {
   statusTone,
   statusesFor,
 } from "@/lib/request-status";
+import { isGuestRequest, requestContact } from "@/lib/guest-quote";
 
 /**
  * Console colours for a status, keyed by the tone the shared status table
@@ -327,8 +328,11 @@ function AdminDashboardContent() {
   };
 
   const filteredRequests = requests.filter((req) => {
-    const userName = req.user?.name || "";
-    const userEmail = req.user?.email || "";
+    // Searching by customer has to find a guest by the details they gave, not
+    // by the system row their quote is filed under.
+    const contact = requestContact(req);
+    const userName = contact.name;
+    const userEmail = contact.email;
     const searchTerm = filterUser.toLowerCase();
 
     const matchesUser = 
@@ -473,9 +477,14 @@ function AdminDashboardContent() {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="text-[10px] font-bold text-clay-300 uppercase tracking-tight">Customer</div>
-                          <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
-                          <div className="text-xs text-cream-500">{req.user?.email || "N/A"}</div>
-                          {req.isFreeSample && <div className="mt-1.5"><span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span></div>}
+                          <div className="text-sm font-bold text-cream-200">{requestContact(req).name}</div>
+                          <div className="text-xs text-cream-500">{requestContact(req).email}</div>
+                          {(req.isFreeSample || isGuestRequest(req)) && (
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
+                              {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public quote form. Not linked to any account — answer the email and phone shown here.">No account</span>}
+                            </div>
+                          )}
                           {isQuote(req) && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span></div>}
                           {!isQuote(req) && req.convertedAt && <div className="mt-1.5"><span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span></div>}
                         </div>
@@ -568,8 +577,8 @@ function AdminDashboardContent() {
                       <tr key={req.id} className="hover:bg-espresso-700/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="text-xs font-bold text-clay-300 uppercase tracking-tight mb-1">Customer</div>
-                          <div className="text-sm font-bold text-cream-200">{req.user?.name || "N/A"}</div>
-                          <div className="text-xs font-medium text-cream-500">{req.user?.email || "N/A"}</div>
+                          <div className="text-sm font-bold text-cream-200">{requestContact(req).name}</div>
+                          <div className="text-xs font-medium text-cream-500">{requestContact(req).email}</div>
                           <div className="text-xs font-medium text-cream-500">{req.phoneNumber?.number || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
@@ -579,6 +588,7 @@ function AdminDashboardContent() {
                               <div className="text-sm font-bold text-cream-200">{requestTitle(req)}</div>
                               <div className="flex gap-2 mt-1">
                                   {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
+                                  {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public quote form. Not linked to any account — answer the email and phone shown here.">No account</span>}
                                   {isDescriptionRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="No 3D file — model this part from the customer's description and references">Model it</span>}
                                   {isQuote(req) && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span>}
                                   {!isQuote(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span>}
@@ -705,15 +715,24 @@ function AdminDashboardContent() {
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Name (Company/Personal)</dt>
-                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.user?.name}</dd>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{requestContact(selectedRequest).name}</dd>
                     </div>
                     <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-cream-500">User Email</dt>
-                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.user?.email}</dd>
+                        <dt className="text-sm font-medium text-cream-500">
+                          {isGuestRequest(selectedRequest) ? "Reply to" : "User Email"}
+                        </dt>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{requestContact(selectedRequest).email}</dd>
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Phone Number</dt>
-                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{selectedRequest.phoneNumber?.number}</dd>
+                        <dd className="mt-1 text-sm text-cream-200 font-semibold">{requestContact(selectedRequest).phone}</dd>
+                        {/* A guest quote is attached to no account at all, so
+                            what is shown here is the only way to reach them. */}
+                        {isGuestRequest(selectedRequest) && (
+                          <dd className="mt-1 text-xs text-clay-300">
+                            No account — this email and phone are the only way to reach them.
+                          </dd>
+                        )}
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Quantity</dt>
