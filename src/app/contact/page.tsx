@@ -16,7 +16,9 @@ const coordinates = [
 
 export default function ContactPage() {
   return (
-    <AppShell variant="user">
+    // This page ends with the full marketing footer, so the shell's own
+    // one-line footer would only repeat it.
+    <AppShell variant="user" footer={false}>
       <div className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-16">
         <Reveal>
           <span className="eyebrow">SUPPORT ⁄ DESK</span>
