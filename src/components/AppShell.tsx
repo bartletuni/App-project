@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import LegalLinks from "@/components/LegalLinks";
 import {
   LayoutDashboard,
   Boxes,
@@ -47,9 +48,17 @@ const adminNav: NavItem[] = [
 export default function AppShell({
   children,
   variant = "user",
+  footer = true,
 }: {
   children: ReactNode;
   variant?: "user" | "admin";
+  /**
+   * Set false on a page that renders a footer of its own — /contact wraps
+   * the marketing one — so the two do not stack. Anything that opts out is
+   * responsible for still reaching the legal documents; the coverage test
+   * checks that rather than trusting it.
+   */
+  footer?: boolean;
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -151,10 +160,28 @@ export default function AppShell({
         </button>
       </div>
 
-      {/* Content */}
-      <main id="app-content" className="lg:pl-20 pb-24 lg:pb-0">
-        {children}
-      </main>
+      {/* Content. The bottom padding clears the mobile tab bar and belongs to
+          the column rather than to <main>, so the footer below sits above the
+          bar too instead of behind it. */}
+      <div className="lg:pl-20 pb-24 lg:pb-0">
+        <main id="app-content">{children}</main>
+
+        {/* The console has its own footer for one reason: the legal documents
+            have to be reachable from every page, and signing in used to swap
+            the marketing footer for nothing at all. Kept to a single rule and
+            a line of type — this is a working tool, not a place to repeat the
+            site index. */}
+        {footer && (
+          <footer className="border-t border-clay-500/12 px-5 sm:px-8 py-6">
+            <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600">
+                © {new Date().getFullYear()} TakomoCo
+              </span>
+              <LegalLinks tone="plain" />
+            </div>
+          </footer>
+        )}
+      </div>
 
       {/* Mobile bottom tab bar */}
       <nav

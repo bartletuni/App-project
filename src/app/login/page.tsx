@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { safeNextPath } from "@/lib/quote";
+import LegalLinks from "@/components/LegalLinks";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-3 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
@@ -347,6 +348,16 @@ function LoginContent() {
               <Link href="/materials" className="font-mono text-[11px] uppercase tracking-[0.15em] text-cream-500 hover:text-cream-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm">
                 Material index →
               </Link>
+            </div>
+
+            {/* This page carries neither footer, so the legal documents get
+                their own line here. It sits inside the form column rather
+                than under the full-height grid, which would have pushed a
+                scrollbar onto an otherwise single-screen page. The terms
+                notice above it is shown only when registering; these three
+                are always reachable. */}
+            <div className="mt-10 border-t border-clay-500/12 pt-5">
+              <LegalLinks tone="plain" />
             </div>
           </div>
         </div>

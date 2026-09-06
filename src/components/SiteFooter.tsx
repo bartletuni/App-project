@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import RequestQuoteButton from "@/components/RequestQuoteButton";
-import { LEGAL_ROUTES } from "@/lib/legal";
+import LegalLinks from "@/components/LegalLinks";
 
 /**
  * Public masthead's counterpart: the site index at the bottom of every
@@ -157,18 +157,7 @@ export default function SiteFooter() {
           {/* The legal documents. Reachable from every page of the site, which
               is both the convention people look for and what the disclosure
               rules assume. */}
-          <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.15em]">
-            {LEGAL_ROUTES.map((r) => (
-              <li key={r.href}>
-                <Link
-                  href={r.href}
-                  className="text-cream-600 transition-colors hover:text-clay-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
-                >
-                  {r.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <LegalLinks className="mt-4" />
         </div>
       </div>
     </footer>
