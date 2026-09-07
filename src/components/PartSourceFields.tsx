@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { UploadCloud, Wand2, X, FileText, AlertCircle } from "lucide-react";
 // three.js is the heaviest thing either request form can pull in, and nothing
 // needs it until a model has actually been picked — which most visitors to the
-// public quote form never do, because they are photographing a broken part on
+// public estimate form never do, because they are photographing a broken part on
 // their phone. Loading it on demand keeps the first paint of that form small.
 const StlViewer = dynamic(() => import("@/components/StlViewer"), {
   ssr: false,
@@ -238,9 +238,11 @@ export default function PartSourceFields({
             <p className="text-xs leading-relaxed text-cream-300">
               Tell us about the part and we&apos;ll draw the model for you. Photos of the
               original — or a sketch with a ruler or coin next to it — get us closest.
-              We price the modelling and the build together and send a{" "}
-              <strong className="text-clay-200">quote for your approval</strong> before
-              anything is made.
+              We price the modelling and the build together and send an{" "}
+              <strong className="text-clay-200">estimate for your approval</strong> before
+              anything is made. It is an indication rather than a guaranteed
+              price — there is no model to guarantee one against until we have
+              drawn it.
             </p>
           </div>
 

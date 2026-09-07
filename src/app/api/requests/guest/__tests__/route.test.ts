@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { issueFormToken } from "@/lib/form-token";
 import {
   GUEST_OWNER_EMAIL,
-  GUEST_QUOTE_TOKEN_SCOPE,
+  GUEST_ESTIMATE_TOKEN_SCOPE,
   HONEYPOT_FIELD,
   FORM_TOKEN_FIELD,
-} from "@/lib/guest-quote";
+} from "@/lib/guest-estimate";
 import { MIN_FILL_MS } from "@/lib/form-token";
 
 jest.mock("@/lib/prisma", () => ({
@@ -42,9 +42,9 @@ jest.mock("resend", () => ({
 }));
 
 /**
- * The public quote endpoint. Every test here is either "a real customer gets
- * through" or "a bot does not" — those are the only two things this route has
- * to get right.
+ * The public estimate endpoint. Every test here is either "a real customer
+ * gets through" or "a bot does not" — those are the only two things this route
+ * has to get right, beyond never calling what it files a quote.
  */
 describe("POST /api/requests/guest", () => {
   beforeAll(() => {
@@ -55,7 +55,7 @@ describe("POST /api/requests/guest", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // No system owner row yet, so the first quote creates one.
+    // No system owner row yet, so the first estimate creates one.
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: "guest-owner" });
     (prisma.phoneNumber.findFirst as jest.Mock).mockResolvedValue(null);
@@ -84,7 +84,7 @@ describe("POST /api/requests/guest", () => {
     formData.append("phone", "(385) 695-4178");
     formData.append(
       FORM_TOKEN_FIELD,
-      issueFormToken(GUEST_QUOTE_TOKEN_SCOPE, Date.now() - MIN_FILL_MS - 1_000)!
+      issueFormToken(GUEST_ESTIMATE_TOKEN_SCOPE, Date.now() - MIN_FILL_MS - 1_000)!
     );
     for (const [key, value] of Object.entries(overrides)) formData.set(key, value);
     return new NextRequest("http://localhost/api/requests/guest", {
@@ -95,18 +95,19 @@ describe("POST /api/requests/guest", () => {
 
   const createdRow = () => (prisma.partRequest.create as jest.Mock).mock.calls[0][0].data;
 
-  it("files a quote for someone with no account", async () => {
+  it("files an estimate for someone with no account", async () => {
     const res = await POST(buildForm());
     expect(res.status).toBe(201);
 
     const body = await res.json();
-    expect(body.reference).toBe("Q-ABCDEF");
+    expect(body.reference).toBe("E-ABCDEF");
 
     const row = createdRow();
     expect(row.userId).toBe("guest-owner");
     expect(row.quoteRequested).toBe(true);
-    expect(row.kind).toBe("QUOTE");
-    expect(row.status).toBe("QUOTE REQUESTED");
+    // Never a quote, whatever they sent: no account means no guaranteed price.
+    expect(row.kind).toBe("ESTIMATE");
+    expect(row.status).toBe("ESTIMATE REQUESTED");
   });
 
   it("stores the contact on the request, since it belongs to no account", async () => {
@@ -154,8 +155,8 @@ describe("POST /api/requests/guest", () => {
     }
   });
 
-  it("files a quote for a registered address under the system row, not that account", async () => {
-    // Whatever this address belongs to, the quote is not going near it.
+  it("files an estimate for a registered address under the system row, not that account", async () => {
+    // Whatever this address belongs to, the estimate is not going near it.
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: "guest-owner" });
 
     const res = await POST(buildForm({ email: "owner@takomoco.com" }));
@@ -204,7 +205,7 @@ describe("POST /api/requests/guest", () => {
 
   it("rejects a submission filled in faster than a person can type", async () => {
     const res = await POST(
-      buildForm({ [FORM_TOKEN_FIELD]: issueFormToken(GUEST_QUOTE_TOKEN_SCOPE, Date.now())! })
+      buildForm({ [FORM_TOKEN_FIELD]: issueFormToken(GUEST_ESTIMATE_TOKEN_SCOPE, Date.now())! })
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/faster than the form can be filled/i);
@@ -221,7 +222,7 @@ describe("POST /api/requests/guest", () => {
     expect(prisma.partRequest.create).not.toHaveBeenCalled();
   });
 
-  it("still takes the quote when the rate-limit table is unreachable", async () => {
+  it("still takes the estimate when the rate-limit table is unreachable", async () => {
     (prisma.rateLimit.upsert as jest.Mock).mockRejectedValue(new Error("db down"));
 
     const res = await POST(buildForm());
@@ -229,7 +230,7 @@ describe("POST /api/requests/guest", () => {
     expect(res.status).toBe(201);
   });
 
-  it("rejects a description too thin to quote from", async () => {
+  it("rejects a description too thin to price from", async () => {
     const res = await POST(buildForm({ partDescription: "broken" }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/at least 20 characters/);

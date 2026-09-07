@@ -19,7 +19,7 @@ import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
 import Marquee from "@/components/ui/Marquee";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
-import RequestQuoteButton from "@/components/RequestQuoteButton";
+import RequestEstimateButton from "@/components/RequestEstimateButton";
 
 const capabilities = [
   {
@@ -157,7 +157,7 @@ export default function LandingPage() {
                 <div className="mt-10 flex flex-col items-stretch sm:items-start gap-3">
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Magnetic strength={0.4}>
-                      <RequestQuoteButton />
+                      <RequestEstimateButton />
                     </Magnetic>
                     <Magnetic strength={0.4}>
                       <Link
@@ -224,7 +224,7 @@ export default function LandingPage() {
               </table>
             </Panel>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <RequestQuoteButton size="sm" />
+              <RequestEstimateButton size="sm" />
               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
                 Priced per part · no obligation
               </span>
@@ -319,7 +319,7 @@ export default function LandingPage() {
                 Have a part in mind? Send us the file and we will come back with
                 a price and a lead time.
               </p>
-              <RequestQuoteButton className="shrink-0" />
+              <RequestEstimateButton className="shrink-0" />
             </div>
           </Reveal>
         </div>
@@ -380,7 +380,7 @@ export default function LandingPage() {
                   </Link>
                 </Magnetic>
                 <Magnetic strength={0.3}>
-                  <RequestQuoteButton
+                  <RequestEstimateButton
                     variant="ghost"
                     className="w-full justify-between px-6 py-4 text-[11px] tracking-[0.15em]"
                   />

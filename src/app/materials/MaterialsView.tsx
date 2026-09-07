@@ -8,7 +8,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
-import RequestQuoteButton from "@/components/RequestQuoteButton";
+import RequestEstimateButton from "@/components/RequestEstimateButton";
 
 /** The subset of the Material record this view renders. */
 export interface MaterialSummary {
@@ -90,7 +90,7 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
               <span className="hidden sm:block font-mono text-xs text-cream-600 whitespace-nowrap">
                 [ {String(materials.length).padStart(2, "0")} ON FILE ]
               </span>
-              <RequestQuoteButton size="sm" className="whitespace-nowrap" />
+              <RequestEstimateButton size="sm" className="whitespace-nowrap" />
             </div>
           </div>
         </Reveal>
@@ -149,10 +149,10 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
                       Build with this
                       <ArrowRight className="h-4 w-4 text-clay-300 transition-transform group-hover/cta:translate-x-1" aria-hidden="true" />
                     </Link>
-                    <RequestQuoteButton
+                    <RequestEstimateButton
                       variant="outline"
                       size="sm"
-                      label="Quote this material"
+                      label="Estimate this material"
                       material={m.name}
                       className="mt-2 w-full justify-between px-4 py-3 tracking-[0.18em] text-[10px]"
                     />

@@ -5,9 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { MAX_QUOTED_PRICE_CHARS } from "@/lib/request-status";
 
 /**
- * Records what the shop quoted, so the price is on the row before anyone
+ * Records the price the shop worked out, so it is on the row before anyone
  * decides whether to convert it. Free text, like the invoice and tracking
  * numbers beside it — it may carry a currency, a range, or a caveat.
+ *
+ * The same field holds an estimate and a quote; the row's `kind` is what says
+ * whether the number is an indication or one the shop stands behind. The
+ * column is still called `quotedPrice`, which predates the split.
  */
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -50,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     return NextResponse.json(updatedRequest);
   } catch (error) {
-    console.error("Failed to update quoted price:", error);
-    return NextResponse.json({ error: "Failed to update quoted price" }, { status: 500 });
+    console.error("Failed to update the price:", error);
+    return NextResponse.json({ error: "Failed to update the price" }, { status: 500 });
   }
 }

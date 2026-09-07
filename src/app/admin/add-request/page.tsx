@@ -14,7 +14,7 @@ import {
   PartSourceState,
   appendPartSource,
   emptyPartSource,
-  quoteIsForced,
+  pricingIsForced,
   validatePartSource,
 } from "@/lib/part-source";
 
@@ -272,10 +272,11 @@ function AdminAddRequestContent() {
               onLocalError={setError}
             />
 
-            {quoteIsForced(partSource.mode) && (
+            {pricingIsForced(partSource.mode) && (
               <p className="text-xs text-clay-300 bg-clay-500/10 border border-clay-500/25 rounded-lg px-3 py-2">
-                A described part is filed as a quote request — there is nothing to
-                price until it has been modelled.
+                A described part is filed as an estimate — there is nothing to
+                price, and nothing to guarantee a price against, until it has
+                been modelled.
               </p>
             )}
 

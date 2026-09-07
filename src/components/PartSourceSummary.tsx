@@ -42,8 +42,9 @@ export default function PartSourceSummary({
         <Wand2 className="h-4 w-4 text-clay-300 mt-0.5 shrink-0" aria-hidden="true" />
         <p className="text-xs leading-relaxed text-cream-300">
           Submitted without a 3D file. TakomoCo models this part from the
-          description and references below, then sends a quote for approval
-          before anything is built.
+          description and references below, then sends an estimate for approval
+          before anything is built — with no model there is nothing to guarantee
+          a price against.
         </p>
       </div>
 

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { GUEST_QUOTE_TOKEN_SCOPE } from "@/lib/guest-quote";
+import { GUEST_ESTIMATE_TOKEN_SCOPE } from "@/lib/guest-estimate";
 import { issueFormToken } from "@/lib/form-token";
 
 /**
- * The public quote form asks for one of these when it mounts, and hands it
+ * The public estimate form asks for one of these when it mounts, and hands it
  * back when it submits. It is what tells the server the submission came from
  * a page that was actually loaded, and roughly when — see src/lib/form-token.ts.
  *
@@ -17,11 +17,11 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export async function GET() {
-  const token = issueFormToken(GUEST_QUOTE_TOKEN_SCOPE);
+  const token = issueFormToken(GUEST_ESTIMATE_TOKEN_SCOPE);
 
   if (!token) {
     return NextResponse.json(
-      { error: "The quote form is unavailable right now. Please call or email the shop." },
+      { error: "The estimate form is unavailable right now. Please call or email the shop." },
       { status: 503, headers: { "Cache-Control": "no-store" } }
     );
   }

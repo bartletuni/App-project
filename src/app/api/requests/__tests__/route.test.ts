@@ -192,22 +192,24 @@ describe("POST /api/requests", () => {
     expect((await res.json()).error).toMatch(/at least 20 characters/);
   });
 
-  it("always quotes a described part, even when the flag says otherwise", async () => {
+  it("always prices a described part, even when the flag says otherwise", async () => {
     const res = await POST(createDescriptionRequest({ quoteRequested: "false" }));
     expect(res.status).toBe(201);
     expect(createdRequestData().quoteRequested).toBe(true);
   });
 
-  it("files a described part on the quote track", async () => {
+  it("files a described part as an estimate — there is no model to guarantee against", async () => {
     const res = await POST(createDescriptionRequest());
     expect(res.status).toBe(201);
 
     const data = createdRequestData();
-    expect(data.kind).toBe("QUOTE");
-    expect(data.status).toBe("QUOTE REQUESTED");
+    expect(data.kind).toBe("ESTIMATE");
+    expect(data.status).toBe("ESTIMATE REQUESTED");
   });
 
-  it("files a quoted upload on the quote track", async () => {
+  it("files a signed-in customer's priced upload as a quote", async () => {
+    // The one submission that earns a guaranteed price: an account holder, and
+    // the part file we would actually print.
     const res = await POST(createRequest("test.stl", Buffer.from("solid test"), "true"));
     expect(res.status).toBe(201);
 
@@ -309,7 +311,7 @@ describe("POST /api/requests", () => {
       expect(prisma.partRequest.create).not.toHaveBeenCalled();
     });
 
-    it("still quotes a described free sample, since it still needs modelling", async () => {
+    it("still estimates a described free sample, since it still needs modelling", async () => {
       (prisma.partRequest.count as jest.Mock).mockResolvedValue(0);
       const res = await POST(
         createDescriptionRequest({ quoteRequested: "false", isFreeSample: "true" })
@@ -321,7 +323,7 @@ describe("POST /api/requests", () => {
       expect(data.material).toBe("PLA 2.0");
       expect(data.quantity).toBe(1);
       expect(data.quoteRequested).toBe(true);
-      expect(data.kind).toBe("QUOTE");
+      expect(data.kind).toBe("ESTIMATE");
     });
 
     it("does not enforce eligibility, pin material/quantity, or waive quoting when the flag is absent", async () => {

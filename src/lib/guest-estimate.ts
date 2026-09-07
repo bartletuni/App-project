@@ -1,21 +1,27 @@
 /**
- * The no-account quote lane.
+ * The no-account estimate lane.
  *
  * Someone standing next to a broken machine should be able to photograph the
  * part, say what it is, and get a price started — without inventing a password
- * first. `/quote` is that form, and this module is the vocabulary it shares
+ * first. `/estimate` is that form, and this module is the vocabulary it shares
  * with `POST /api/requests/guest`, so the page and the server agree on limits,
  * on wording, and on what is actually required.
  *
- * The deliberate design decision behind all of it: a guest quote is NOT a
- * second kind of record. It is an ordinary `PartRequest` on the QUOTE track,
- * so the admin console, pricing a quote, converting it to a build, invoicing,
- * status emails and the reports PDF all already know how to handle it and
- * needed no second code path. What is genuinely new is the front door, the
- * checks that keep bots out of it, and who the row belongs to.
+ * What comes back is always an ESTIMATE, never a quote, and every word on the
+ * form says so. A guaranteed price needs an account to hold the job against
+ * and the part file we would actually be printing; a submission through this
+ * form has neither, by definition. See `qualifiesForQuote` in
+ * src/lib/request-status.ts.
  *
- * It belongs to nobody. A quote sent from a public form is never attached to
- * an account, not even one whose email address matches it: anyone can type
+ * The deliberate design decision behind all of it: a guest estimate is NOT a
+ * second kind of record. It is an ordinary `PartRequest` on the ESTIMATE
+ * track, so the admin console, pricing it, converting it to a build,
+ * invoicing, status emails and the reports PDF all already know how to handle
+ * it and needed no second code path. What is genuinely new is the front door,
+ * the checks that keep bots out of it, and who the row belongs to.
+ *
+ * It belongs to nobody. An estimate sent from a public form is never attached
+ * to an account, not even one whose email address matches it: anyone can type
  * anyone's address into a public form, and a stranger must not be able to put
  * a row on a customer's desk or see anything of theirs. The contact details a
  * guest gives ride on the request itself and the shop answers those.
@@ -24,7 +30,7 @@
  * reserved `.invalid` domain, random password nobody holds, filtered out of
  * the Clients list). Owning them there rather than leaving them unowned is
  * load-bearing: `/api/download/[fileId]` treats a file with no owning customer
- * as public, so an unowned guest quote would publish its own uploads.
+ * as public, so an unowned guest estimate would publish its own uploads.
  *
  * Required, and nothing else: what the part is (a file or a description), a
  * name, an email, and a phone number. Material, quantity, the date, and notes
@@ -34,20 +40,28 @@
 
 import { addDays } from "date-fns";
 
-/** Where a logged-out visitor's "Request a quote" button goes. */
-export const GUEST_QUOTE_HREF = "/quote";
+/** Where a logged-out visitor's "Request an estimate" button goes. */
+export const GUEST_ESTIMATE_HREF = "/estimate";
+
+/** The path this form used to live at. Redirected, so old links still land. */
+export const LEGACY_GUEST_QUOTE_HREF = "/quote";
 
 /**
- * The system account every no-account quote is filed under.
+ * The system account every no-account estimate is filed under.
  *
  * `.invalid` is reserved by RFC 2606 and can never resolve, so this address
  * cannot be registered, cannot receive mail, and cannot collide with a real
  * customer's. Nobody signs in as this row — its password is random — and the
- * Clients list filters it out. It exists so a guest quote has an owner without
- * that owner ever being a person.
+ * Clients list filters it out. It exists so a guest estimate has an owner
+ * without that owner ever being a person.
+ *
+ * The address still says "quotes" and is deliberately left alone: it is the
+ * primary key this row is looked up by, so renaming it would orphan every
+ * existing no-account submission behind a second system account. It is never
+ * displayed to anyone.
  */
 export const GUEST_OWNER_EMAIL = "no-account@quotes.invalid";
-export const GUEST_OWNER_NAME = "No-account quotes";
+export const GUEST_OWNER_NAME = "No-account estimates";
 
 export const MAX_CONTACT_NAME_CHARS = 100;
 export const MAX_EMAIL_CHARS = 100;
@@ -60,7 +74,7 @@ export const MIN_LEAD_DAYS = 3;
 
 /**
  * What we assume when a guest leaves "needed by" blank. `PartRequest.dateNeeded`
- * is not nullable and quoting does not need a date, so rather than force a
+ * is not nullable and pricing does not need a date, so rather than force a
  * date-picker on someone in a hurry we book two weeks out and let the shop
  * agree a real one on the callback.
  */
@@ -90,8 +104,14 @@ export function turnstileSiteKey(): string | null {
   return process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || null;
 }
 
-/** Scope string tying a form token to this form and no other. */
-export const GUEST_QUOTE_TOKEN_SCOPE = "guest-quote";
+/**
+ * Scope string tying a form token to this form and no other.
+ *
+ * The value is unchanged across the estimate rename on purpose: a token is
+ * minted when the page loads and spent when it is submitted, so changing the
+ * string would have rejected every form loaded across the deploy.
+ */
+export const GUEST_ESTIMATE_TOKEN_SCOPE = "guest-quote";
 
 /** Everything the guest form collects that the composer gets from the account. */
 export interface GuestContactState {
@@ -136,20 +156,20 @@ export function isPhoneShaped(phone: string): boolean {
  */
 export function validateGuestContact(state: GuestContactState): string | null {
   const name = state.name.trim();
-  if (!name) return "Tell us who to send the quote to.";
+  if (!name) return "Tell us who to send the estimate to.";
   if (name.length > MAX_CONTACT_NAME_CHARS) {
     return `Name must be ${MAX_CONTACT_NAME_CHARS} characters or fewer.`;
   }
 
   const email = normalizeEmail(state.email);
-  if (!email) return "We need an email address to send the quote to.";
+  if (!email) return "We need an email address to send the estimate to.";
   if (email.length > MAX_EMAIL_CHARS) {
     return `Email must be ${MAX_EMAIL_CHARS} characters or fewer.`;
   }
   if (!isEmailShaped(email)) return "That email address doesn't look right.";
 
   const phone = state.phone.trim();
-  if (!phone) return "We need a phone number — most quotes start with a quick call.";
+  if (!phone) return "We need a phone number — most estimates start with a quick call.";
   if (phone.length > MAX_PHONE_CHARS) {
     return `Phone number must be ${MAX_PHONE_CHARS} characters or fewer.`;
   }
@@ -194,9 +214,14 @@ export function resolveDateNeeded(
  * They have no dashboard to look a request up on, so this is how they and the
  * shop name the same job on the phone. Derived from the row's id rather than
  * stored: nothing to keep unique, and it cannot drift from what it names.
+ *
+ * The prefix moved from Q- to E- with the rename. The six characters after it
+ * are the same six they have always been, so a customer reading an older
+ * "Q-4F2A9C" off an email and the console showing "E-4F2A9C" are still
+ * unambiguously naming one job.
  */
-export function quoteReference(requestId: string): string {
-  return `Q-${requestId.slice(-6).toUpperCase()}`;
+export function estimateReference(requestId: string): string {
+  return `E-${requestId.slice(-6).toUpperCase()}`;
 }
 
 /** Notes are the only free text a guest can send beyond the part description. */
@@ -219,15 +244,18 @@ export interface GuestContactRecord {
  * discriminator rather than a flag of its own: it is set only there, it is set
  * on every one of them, and it is the thing the shop actually needs — a flag
  * saying "guest" without saying who would be no use to anybody.
+ *
+ * It is also half of the quote qualification rule: no account, no guaranteed
+ * price. See `qualifiesForQuote` in src/lib/request-status.ts.
  */
 export function isGuestRequest(request: GuestContactRecord | null | undefined): boolean {
   return Boolean(request?.guestEmail);
 }
 
 /**
- * Who to show as the customer. A guest quote has an owner that is a system row
- * rather than a person, so anywhere a name or address is displayed reads the
- * contact off the request first and only falls back to the account.
+ * Who to show as the customer. A guest estimate has an owner that is a system
+ * row rather than a person, so anywhere a name or address is displayed reads
+ * the contact off the request first and only falls back to the account.
  */
 export function requestContact(
   request:

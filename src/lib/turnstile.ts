@@ -1,7 +1,7 @@
 /**
  * Cloudflare Turnstile — optional, and off until a deployment configures it.
  *
- * The other defences on the quote form (a signed form token, a honeypot, and
+ * The other defences on the estimate form (a signed form token, a honeypot, and
  * database-backed rate limits) cost the customer nothing and stop the traffic
  * that actually shows up: scripted posts and crude form-fillers. They will not
  * stop somebody who has decided to target this shop specifically. Turnstile
@@ -14,7 +14,7 @@
  * browser when it is not configured.
  *
  *   NEXT_PUBLIC_TURNSTILE_SITE_KEY — the widget's public key (browser). Read
- *                                    from src/lib/guest-quote.ts, which the
+ *                                    from src/lib/guest-estimate.ts, which the
  *                                    form imports; nothing in this file is
  *                                    meant to reach a browser bundle.
  *   TURNSTILE_SECRET_KEY           — verification key (server only, never sent).

@@ -20,9 +20,9 @@ RESEND_API_KEY="re_..."              # If unset, all notification emails are ski
 ADMIN_EMAIL="info@takomoco.com"      # Receives new-user and new-request notifications
 EMAIL_FROM="TakomoCo <noreply@takomoco.com>" # Sender; must be on a domain verified in Resend
 
-# Cloudflare Turnstile (OPTIONAL) — the public quote form's bot check.
+# Cloudflare Turnstile (OPTIONAL) — the public estimate form's bot check.
 # Leave both unset and the form still works, defended by the other layers.
-# Set BOTH to enforce it. See "Quotes Without an Account" below.
+# Set BOTH to enforce it. See "Estimates Without an Account" below.
 NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAA..."   # widget key, public
 TURNSTILE_SECRET_KEY="0x4AAA..."             # verification key, server only
 ```
@@ -73,31 +73,38 @@ this change.
 Per-gram material rates are intentionally not on this sheet — material cost is carried by each
 material record in the stock index (`/admin/materials`).
 
-## Requesting a Quote
+## Requesting an Estimate
 
-There is one quote button on the site — `RequestQuoteButton`, placed in the masthead,
+There is one pricing button on the site — `RequestEstimateButton`, placed in the masthead,
 hero, workflow, rate sheet, stock index, contact page, and footer — and it has two
-destinations, decided in `src/lib/quote.ts` by whether the visitor has a session:
+destinations, decided in `src/lib/estimate.ts` by whether the visitor has a session:
 
-- **Signed in** → the composer on their desk, with `?quote=1`.
-- **Signed out** → `/quote`, the public form that needs no account at all. See
-  "Quotes Without an Account" below.
+- **Signed in** → the composer on their desk, with `?estimate=1`.
+- **Signed out** → `/estimate`, the public form that needs no account at all. See
+  "Estimates Without an Account" below.
 
 No placement had to change to get this, and no page decides for itself which call to
-action a visitor deserves. The button renders pointing at `/quote` and re-points once
-the session resolves; a signed-in customer who taps early lands on `/quote` and is
+action a visitor deserves. The button renders pointing at `/estimate` and re-points once
+the session resolves; a signed-in customer who taps early lands on `/estimate` and is
 forwarded to their composer, which is the harmless direction to be wrong in.
 
-The signed-in half is unchanged: the composer's
-"Quote" checkbox is off by default, and only that link pre-ticks it, for that visit —
-submitting clears it again. Signing in on the way keeps the destination, so a visitor who
-clicks a quote button while logged out still lands on a pre-ticked form.
+**Every placement says "estimate", including for a signed-in customer.** That is the
+honest promise at that point in the journey: nothing in the masthead knows yet whether
+the visitor has an account or a part file to send, and those are the two things that
+decide whether a price can be guaranteed. Only the composer says "quote", and only when
+it applies — see "Estimates, Quotes and Requests" below.
+
+The signed-in half is otherwise unchanged: the composer's pricing checkbox is off by
+default, and only that link pre-ticks it, for that visit — submitting clears it again.
+Signing in on the way keeps the destination, so a visitor who clicks the button while
+logged out still lands on a pre-ticked form. `?quote=1`, the parameter this flag used to
+travel under, is still read so old links keep working.
 
 The flag is stored on each request as `PartRequest.quoteRequested`, shown as a badge in the
 build ledger and the admin console, and called out in the new-request email. Run
 `npx prisma db push` against a local `file:` database after deploying this change so the
-column exists; on Turso, see "Quotes and Requests" below, which also covers what happens
-to the request once it is quoted.
+column exists; on Turso, see "Estimates, Quotes and Requests" below, which also covers
+what happens to the request once it is priced.
 
 ## The 72-Hour Turnaround
 
@@ -118,7 +125,7 @@ visitor meets them:
    The brand line keeps its place beside the number rather than being replaced by it: a
    specific claim and a brand line do different jobs. The lede opens on the problem
    ("Machine down, part discontinued, deadline this week?") and closes on the figure.
-3. **The hero's buttons.** "Request a quote" takes the primary weight and "Start a
+3. **The hero's buttons.** "Request an estimate" takes the primary weight and "Start a
    build" — which goes to sign-in — steps back to a secondary, because a visitor in a
    hurry should not meet a login wall first. Under them, a phone link for anyone who
    cannot wait even for a form.
@@ -126,55 +133,69 @@ visitor meets them:
    the 72h counter, and the closing call to action. This is what keeps the title honest
    rather than a bare meta claim.
 
-**It is deliberately absent from `/quote`.** A visitor who has reached the form is
+**It is deliberately absent from `/estimate`.** A visitor who has reached the form is
 already sold and is there to send a part; that page makes the one timing promise it can
 actually keep — a price back within one business day — and nothing more. The two figures
-are different promises and must not be blurred into one: a **quote** comes back within a
-business day, the **part** runs on the 72-hour turnaround once the price is approved.
+are different promises and must not be blurred into one: an **estimate** comes back
+within a business day, the **part** runs on the 72-hour turnaround once the price is
+approved.
 
-## Quotes Without an Account
+## Estimates Without an Account
 
-`/quote` is the public quote form. No sign-up, no password: what the part is, a name,
+`/estimate` is the public estimate form. No sign-up, no password: what the part is, a name,
 an email, and a phone number. That is the whole required set — quantity, material, the
 date, notes, and company are folded behind one optional disclosure, because the shop
 can ask any of them on the callback and every extra required field is another reason to
 abandon the form standing next to a broken machine.
 
-The customer gets a reference (`Q-4F2A9C`, derived from the row's id), a confirmation
+The customer gets a reference (`E-4F2A9C`, derived from the row's id), a confirmation
 email, and an offer — never a gate — to open an account for future work.
+
+### What comes back is an estimate, never a quote
+
+Not a labelling choice: a guaranteed price needs an account to hold the job against and
+the part file we would print, and a submission through this form has neither. The form
+says so above the fields, the success panel repeats it, and so does the confirmation
+email. An admin can convert one onto the build queue at any time, but **promoting it to
+a quote is refused** while it is unattached to an account. See "Estimates, Quotes and
+Requests" below.
 
 ### It is not a second kind of record
 
-A guest quote is an **ordinary `PartRequest` on the QUOTE track**, so the admin console,
-pricing a quote, converting it to a build, invoicing, status emails and the reports PDF
-all handle it with no changes at all. What is new is only where the contact details live
-and who the row belongs to.
+A guest estimate is an **ordinary `PartRequest` on the ESTIMATE track**, so the admin
+console, pricing it, converting it to a build, invoicing, status emails and the reports
+PDF all handle it with no changes at all. What is new is only where the contact details
+live and who the row belongs to.
 
 ### It belongs to no account, on purpose
 
-**A guest quote is never attached to a customer's account — not even one whose email
+**A guest estimate is never attached to a customer's account — not even one whose email
 address matches it.** Anyone can type anyone's address into a public form, so matching
 one would let a stranger drop rows onto someone else's desk, and would leak whether a
 given address is registered here. The submitted address is therefore never looked up
 against the accounts table at all.
 
 - `PartRequest.guestName` / `guestEmail` / `guestPhone` carry who to answer.
-  **`guestEmail` being set is what marks a row as a no-account quote** — there is no
-  separate flag, because a flag saying "guest" without saying who would be no use.
-- `User.isGuest` marks the **single system row** every guest quote is filed under
+  **`guestEmail` being set is what marks a row as a no-account estimate** — there is no
+  separate flag, because a flag saying "guest" without saying who would be no use. It is
+  also half of the rule that decides whether a price may be called a quote at all.
+- `User.isGuest` marks the **single system row** every guest estimate is filed under
   (`no-account@quotes.invalid`). Not a customer and never one: `.invalid` is reserved by
   RFC 2606 so the address can never be registered or receive mail, the password is
-  random and held by nobody, and the Clients list filters the row out.
+  random and held by nobody, and the Clients list filters the row out. The address still
+  reads `quotes.invalid` after the estimate rename, deliberately: it is the key the row
+  is looked up by, so renaming it would orphan every existing no-account submission
+  behind a second system account. It is never displayed.
 
 Filing them under *something* rather than nothing is load-bearing:
 `/api/download/[fileId]` treats a file whose request has no owning customer as a public
-asset, so an unowned guest quote would publish its own uploads. Owned by the system row,
-a guest's files stay behind the admin check.
+asset, so an unowned guest estimate would publish its own uploads. Owned by the system
+row, a guest's files stay behind the admin check.
 
 The console, its search box, and the report PDF read the contact off the request
-(`requestContact` in `src/lib/guest-quote.ts`) rather than off the owning row, so the
+(`requestContact` in `src/lib/guest-estimate.ts`) rather than off the owning row, so the
 shop sees the person who wrote in. Opening an account later does **not** inherit an
-earlier guest quote — that is the point — and both the confirmation email and the
+earlier guest estimate — that is the point — and both the confirmation email and the
 success panel say so.
 
 ### Keeping bots out without slowing customers down
@@ -199,7 +220,10 @@ defended in layers, cheapest first, and **none of them asks the customer for any
    day, 5 per email address per day. Counters live in the database, because an in-process
    counter resets on every serverless cold start and protects nothing. Addresses are stored
    as an HMAC, never in the clear. If the database is unreachable this fails **open**: a
-   real customer's quote still goes through, with the other three layers still standing.
+   real customer's estimate still goes through, with the other three layers still
+   standing. The scope strings in the counter keys still read `guest-quote:…`: a scope is
+   half of the primary key each counter is stored under, so renaming one would hand every
+   caller a fresh, empty window.
 5. **The same file validation the composer runs** — extension, size, and leading bytes,
    through the shared reader in `src/lib/part-source-server.ts`. A guest cannot upload
    anything a signed-in customer could not.
@@ -211,12 +235,12 @@ anything that does.
 
 | | |
 |---|---|
-| Page | `/quote` (public, indexed, in the sitemap) |
+| Page | `/estimate` (public, indexed, in the sitemap; `/quote` permanently redirects to it) |
 | Endpoints | `POST /api/requests/guest`, `GET /api/requests/guest/token` |
-| Row | `PartRequest` · `kind: QUOTE` · `status: QUOTE REQUESTED` · `quoteRequested: true` · `guestEmail` set |
+| Row | `PartRequest` · `kind: ESTIMATE` · `status: ESTIMATE REQUESTED` · `quoteRequested: true` · `guestEmail` set |
 | Owner | The one system `User` (`isGuest: true`) — never a customer account |
-| Console | Listed with every other quote, badged **No account** |
-| Emails | `[No account] Quote request Q-…` to `ADMIN_EMAIL`; a confirmation to the customer |
+| Console | Listed with everything else, badged **Estimate** and **No account** |
+| Emails | `[No account] Estimate request E-…` to `ADMIN_EMAIL`; a confirmation to the customer |
 
 ### Applying this to Turso
 
@@ -248,9 +272,11 @@ The composer opens on **"What are we making?"** with two lanes:
 Switching lanes keeps whatever has already been entered, so looking at the other
 one never costs a customer their work.
 
-A described part is **always quoted first** — there is nothing to price until the
-model exists. The composer ticks and locks its Quote checkbox and says why, and
-`POST /api/requests` forces the same flag regardless of what the client sends.
+A described part is **always priced first, as an estimate** — there is nothing to price
+until the model exists, and nothing to guarantee a price against either. The composer
+ticks and locks its pricing checkbox, labels it **Estimate**, says why, and
+`POST /api/requests` forces the same flag and the same track regardless of what the
+client sends.
 
 The same two lanes are on the admin console's "Add part request" form, so the
 shop can file a phoned-in or walked-in job the same way.
@@ -336,61 +362,105 @@ and the API, so the client and the server never disagree. Uploads are content-
 sniffed in `src/lib/file-signatures.ts` — an extension is only a claim, and a
 file whose leading bytes contradict its name is rejected before it reaches R2.
 
-## Quotes and Requests
+## Estimates, Quotes and Requests
 
-A submission is on one of two tracks, and `PartRequest.kind` says which:
+A submission is on one of three tracks, and `PartRequest.kind` says which:
 
-- **QUOTE** — the customer wants a price first. Nothing is manufactured while a
-  row sits here.
+- **ESTIMATE** — the customer wants a price and an indication is all we can
+  honestly give. This is the default pricing track and where nearly everything
+  starts. An estimate is explicitly **not** a binding offer.
+- **QUOTE** — a price the shop stands behind. Reachable only when both of the
+  things that make a price guaranteeable are present.
 - **REQUEST** — a live build. This is the original track with the original
   statuses.
 
-They used to share one set of statuses, so a quote sat in `PENDING` and then
-`ACTIVE` exactly like a build, which said nothing about whether a price had been
-sent or accepted. Each track now has its own vocabulary:
+### Why an estimate is not a quote
 
-| Quote | Request |
-| --- | --- |
-| `QUOTE REQUESTED` — came in, not priced yet | `PENDING` — queued, not started |
-| `QUOTE IN REVIEW` — being modelled and/or priced | `ACTIVE` — on the machines |
-| `QUOTE SENT` — price is with the customer | `NEEDS REVIEW` — blocked, needs a decision |
-| `QUOTE ACCEPTED` — approved, ready to convert | `INVOICE SENT` — waiting on payment |
-| `QUOTE DECLINED` — customer turned the price down | `COMPLETED` — built |
-| `QUOTE EXPIRED` — no answer before it went stale | `SHIPPED` — in the post |
-| `CANCELLED` | `CANCELLED` |
+A quote is a number the shop is on the hook for, and we can only be on the hook
+for one when we know exactly what we would print and who we would print it for.
+That is two conditions, and `qualifiesForQuote` in `src/lib/request-status.ts`
+enforces both:
 
-`CANCELLED` is the only status both share. The lists, the tone each status is
+1. **An account** — `guestEmail` is null, so the row belongs to a real customer
+   rather than the no-account system row. A public-form submission is answered by
+   email to an address nobody has verified, against no customer record; there is
+   nothing to hold a firm price against.
+2. **The part file** — `fileId` is set. Without the model we would be pricing a
+   description and some photographs, and the real geometry routinely differs from
+   both.
+
+Anything missing either half is an estimate, is labelled "Estimate" everywhere it
+appears, and cannot be promoted to a quote until it qualifies. The two tracks run
+the same shape of lifecycle but **never share a status string**, so a row's status
+alone always says which kind of price is on the table:
+
+| Estimate | Quote | Request |
+| --- | --- | --- |
+| `ESTIMATE REQUESTED` — came in, not priced yet | `QUOTE REQUESTED` — qualifies, not priced yet | `PENDING` — queued, not started |
+| `ESTIMATE IN REVIEW` — being modelled and/or priced | `QUOTE IN REVIEW` — being priced as a firm number | `ACTIVE` — on the machines |
+| `ESTIMATE SENT` — ballpark is with the customer | `QUOTE SENT` — guaranteed price is with the customer | `NEEDS REVIEW` — blocked, needs a decision |
+| `ESTIMATE ACCEPTED` — wants to proceed | `QUOTE ACCEPTED` — approved, ready to convert | `INVOICE SENT` — waiting on payment |
+| `ESTIMATE DECLINED` | `QUOTE DECLINED` | `COMPLETED` — built |
+| `ESTIMATE EXPIRED` | `QUOTE EXPIRED` | `SHIPPED` — in the post |
+| `CANCELLED` | `CANCELLED` | `CANCELLED` |
+
+`CANCELLED` is the only status any two share. The lists, the tone each status is
 drawn in, and the rules about which one may be set live in
 `src/lib/request-status.ts`, so the console, the customer ledger, the report PDF,
 and the email templates never disagree. `PATCH /api/requests/[id]/status`
-validates against the row's own track and rejects a build status on a quote (and
-the reverse) with a 400.
+validates against the row's own track and rejects, with a 400, a build status on
+an estimate, a quote status on an estimate, and every other cross-track pairing.
 
-### Converting a quote into a request
+### Where "quote" is still the word
 
-An admin converts a quote from the console — the **Convert** button on any quote
-row, or **Convert to request** in the quote's detail modal. Either one:
+Exactly one surface: the **composer on `/dashboard`**, and only for the
+submission that earns it — a signed-in customer who has attached the part file we
+would print. There the pricing checkbox is labelled **Quote** and promises a price
+the shop stands behind. Switch to the "No file yet" lane and the same control
+relabels itself **Estimate** and says why. Everything else on the site — the
+masthead, the hero, the rate sheet, the stock index, contact, the footer, the
+public form, the customer's ledger — says "estimate", because at those points
+nothing knows yet whether the two conditions will be met.
 
-- flips `kind` to `REQUEST`,
-- restarts the status at `PENDING`, at the front of the build queue,
-- stamps `convertedAt`,
-- and saves whatever is in the modal's **Quoted Price** field, so pricing a job
-  and starting it is one action rather than two.
+### Working an estimate into a quote, or either into a request
 
-`quoteRequested` deliberately stays `true` — it is the record that this job was
-priced before it was built, and both the console and the customer's ledger badge
-it "From quote" afterwards. A cancelled quote cannot be converted; it has to be
-re-filed. A declined or expired one can be, since customers change their minds —
-the console asks for confirmation first.
+`POST /api/requests/[id]/convert` takes a `target`:
+
+- **`REQUEST`** (the default, and what the endpoint has always done) — flips
+  `kind` to `REQUEST`, restarts the status at `PENDING` at the front of the build
+  queue, and stamps `convertedAt`. Open to an estimate and a quote alike: plenty
+  of jobs are agreed off a ballpark and never need a firm number.
+- **`QUOTE`** — promotes an estimate to a guaranteed price, landing it on
+  `QUOTE IN REVIEW`. Refused with a 400, naming the missing half, unless the row
+  qualifies. `convertedAt` is not stamped: promoting is still pricing.
+
+Both save whatever is in the modal's price field along the way, so pricing a job
+and moving it is one action rather than two.
+
+In the console, any pricing row gets **Convert** / **Convert to request**, and a
+qualifying estimate additionally gets **Quote it** in the table and **Promote to
+quote** in its detail modal. An estimate that does *not* qualify shows the control
+disabled with the reason on it rather than hiding it — "why can't I quote this?"
+is the question the shop will actually have. A **no-account estimate can never be
+promoted**: there is no supported way to attach a public-form submission to an
+account, by design, so the path is for the customer to open an account and send
+the part file, or for the shop to convert the estimate straight to a build.
+
+`quoteRequested` deliberately stays `true` throughout — it is the record that this
+job was priced before it was built, and both the console and the customer's ledger
+badge it afterwards. A cancelled row cannot be converted; it has to be re-filed. A
+declined or expired one can be, since customers change their minds — the console
+asks for confirmation first.
 
 The price is free text (`quotedPrice`), like the invoice and tracking numbers
-beside it, so it can carry a currency, a range, or a caveat. It can also be saved
-on its own with `PATCH /api/requests/[id]/quote` before anyone decides whether to
-convert.
+beside it, so it can carry a currency, a range, or a caveat. The same column holds
+an estimate and a quote; `kind` is what says which. It can also be saved on its own
+with `PATCH /api/requests/[id]/price` before anyone decides whether to convert.
 
-Statuses are assigned at submission: a quoted submission is filed as
-`QUOTE`/`QUOTE REQUESTED`, everything else as `REQUEST`/`PENDING`. Because a
-described part is always quoted first, it always starts on the quote track.
+Tracks are assigned at submission by `pricingKindFor`: a signed-in customer's
+priced upload is filed as `QUOTE`/`QUOTE REQUESTED`, any other priced submission
+as `ESTIMATE`/`ESTIMATE REQUESTED`, and everything else as `REQUEST`/`PENDING`.
+Because a described part has no model, it always starts on the estimate track.
 
 ### Applying this to Turso
 
@@ -441,6 +511,41 @@ Verify afterwards:
 
 ```bash
 turso db shell YOUR_DB "SELECT kind, status, COUNT(*) FROM PartRequest GROUP BY kind, status;"
+```
+
+### Adding the estimate track to Turso
+
+`prisma/migrations/2026-add-estimate-track.sql` is **data-only** — no schema
+change at all, because `kind` is already free text and `ESTIMATE` is simply a
+third value it may hold. It moves every existing `QUOTE` row that could never
+have carried a guaranteed price — no account (`guestEmail` set) or no part file
+(`fileId` null) — onto the estimate track, translating its status to the matching
+estimate status so its place in the lifecycle is preserved. Genuine quotes and
+every `REQUEST` row are untouched.
+
+```bash
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-estimate-track.sql
+```
+
+`node migrate-turso.mjs` with no argument now applies this one by default. Both
+statements are idempotent: a second pass matches no rows.
+
+Running it before deploying is preferred but **not required**. `requestKind`
+re-reads the same rule at display time and shows an unqualified `QUOTE` row as an
+estimate regardless, so an un-migrated database is safe — merely inconsistent
+between what is stored and what is shown. `statusOptionsFor` covers the other half
+of that window: a row still carrying `QUOTE SENT` while being displayed as an
+estimate keeps its own value in the status menu instead of being silently
+rewritten by the first click.
+
+Verify:
+
+```bash
+# Should be 0 — anything here still calls itself a quote but cannot support one.
+turso db shell YOUR_DB \
+  "SELECT COUNT(*) FROM PartRequest WHERE kind='QUOTE' AND (guestEmail IS NOT NULL OR fileId IS NULL);"
 ```
 
 **Run the SQL before deploying the code, not after.** The migration is safe

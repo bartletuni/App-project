@@ -26,7 +26,8 @@ const GUEST_REQUEST = {
   dateNeeded: "2026-01-27T17:30:00.000Z",
   material: null,
   quantity: 1,
-  status: "QUOTE_REQUESTED",
+  status: "ESTIMATE REQUESTED",
+  kind: "ESTIMATE",
   quotedPrice: null,
   invoiceNumber: null,
   quoteRequested: true,
@@ -51,7 +52,7 @@ describe("reportRow", () => {
     expect(row[3]).toBe("385-555-0177");
   });
 
-  it("reads a no-account quote's contact off the request itself", () => {
+  it("reads a no-account estimate's contact off the request itself", () => {
     // The row is filed under the system owner, so the account on it is not
     // the person who wrote in. The report has to show the sender.
     const row = reportRow(GUEST_REQUEST);
@@ -64,13 +65,22 @@ describe("reportRow", () => {
   it("falls back to N/A rather than blank cells", () => {
     const row = reportRow(GUEST_REQUEST);
     expect(row[5]).toBe("N/A"); // material
-    expect(row[9]).toBe("N/A"); // quoted
+    expect(row[9]).toBe("N/A"); // price
     expect(row[10]).toBe("N/A"); // invoice
   });
 
-  it("marks the quote track separately from a build", () => {
-    expect(reportRow(GUEST_REQUEST)[7]).toBe("Quote");
+  it("names each track in the Type column", () => {
+    expect(reportRow(GUEST_REQUEST)[7]).toBe("Estimate");
     expect(reportRow(ACCOUNT_REQUEST)[7]).toBe("Request");
+    expect(
+      reportRow({ ...ACCOUNT_REQUEST, kind: "QUOTE", fileId: "r2-1" } as unknown as ReportRequest)[7]
+    ).toBe("Quote");
+  });
+
+  it("will not call a no-account row a quote, however it was filed", () => {
+    // Rows written before the estimate track existed all say "QUOTE".
+    const legacy = { ...GUEST_REQUEST, kind: "QUOTE" } as unknown as ReportRequest;
+    expect(reportRow(legacy)[7]).toBe("Estimate");
   });
 
   it("renders a zero quantity rather than dropping it", () => {

@@ -5,10 +5,10 @@ import { format } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
-import { NewRequestEmailHTML, QuoteReceivedEmailHTML } from "@/lib/email-templates";
+import { EstimateReceivedEmailHTML, NewRequestEmailHTML } from "@/lib/email-templates";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
 import { requestTitle } from "@/lib/part-source";
-import { DEFAULT_QUOTE_STATUS, KIND_QUOTE } from "@/lib/request-status";
+import { DEFAULT_ESTIMATE_STATUS, KIND_ESTIMATE } from "@/lib/request-status";
 import { describeFormTokenFailure, verifyFormToken } from "@/lib/form-token";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
@@ -22,30 +22,37 @@ import {
   FORM_TOKEN_FIELD,
   GUEST_OWNER_EMAIL,
   GUEST_OWNER_NAME,
-  GUEST_QUOTE_TOKEN_SCOPE,
+  GUEST_ESTIMATE_TOKEN_SCOPE,
   HONEYPOT_FIELD,
   MAX_COMPANY_CHARS,
   MAX_NOTES_CHARS,
   TURNSTILE_FIELD,
   normalizeEmail,
-  quoteReference,
+  estimateReference,
   resolveDateNeeded,
   validateGuestContact,
   validateGuestNotes,
-} from "@/lib/guest-quote";
+} from "@/lib/guest-estimate";
 
 /**
- * POST /api/requests/guest — a quote request from someone with no account.
+ * POST /api/requests/guest — an estimate request from someone with no account.
  *
- * The whole point of this route is that it creates nothing new. A guest quote
- * is an ordinary `PartRequest` on the QUOTE track, so the admin console, the
- * pricing and conversion flow, invoicing and the reports PDF all handle it
- * with no changes at all.
+ * The whole point of this route is that it creates nothing new. A guest
+ * estimate is an ordinary `PartRequest` on the ESTIMATE track, so the admin
+ * console, the pricing and conversion flow, invoicing and the reports PDF all
+ * handle it with no changes at all.
+ *
+ * It is an ESTIMATE and never a quote, and that is not a labelling choice: a
+ * guaranteed price needs an account to hold the job against and the part file
+ * we would be printing, and a submission through this form has neither. An
+ * admin can convert one onto the build queue at any time, but promoting it to
+ * a quote is refused until it qualifies — see `qualifiesForQuote` in
+ * src/lib/request-status.ts.
  *
  * What it never does is attach that request to a customer's account. Anyone
  * can type anyone's email into a public form, so matching a submitted address
  * against a registered one would let a stranger drop rows onto someone else's
- * desk. Every guest quote is filed under one system account instead
+ * desk. Every guest estimate is filed under one system account instead
  * (`GUEST_OWNER_EMAIL` — reserved domain, random password, nobody signs into
  * it), with the contact details the sender gave stored on the request. Owning
  * them somewhere rather than nowhere is deliberate too: a request with no
@@ -73,23 +80,23 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 /** Generous for a person, useless for a flood. */
-const GUEST_QUOTE_LIMITS = {
+const GUEST_ESTIMATE_LIMITS = {
   perIpHour: 5,
   perIpDay: 15,
   perEmailDay: 5,
 };
 
 const TOO_MANY =
-  "That's a lot of quote requests from one place in a short time. Give it a little while, or call the shop and we'll take the details directly.";
+  "That's a lot of estimate requests from one place in a short time. Give it a little while, or call the shop and we'll take the details directly.";
 
 /**
- * The system account every no-account quote is filed under, created the first
+ * The system account every no-account estimate is filed under, created the first
  * time one arrives.
  *
  * Not a customer and never one: the address is on the reserved `.invalid`
  * domain so it can never be registered or receive mail, the password is random
  * and held by nobody, and the Clients list filters the row out. It exists so a
- * guest quote has an owner — which is what keeps its uploads behind the admin
+ * guest estimate has an owner — which is what keeps its uploads behind the admin
  * check in /api/download/[fileId] — without that owner being a person.
  */
 async function guestOwner(): Promise<{ id: string }> {
@@ -127,13 +134,13 @@ export async function POST(req: NextRequest) {
     const honeypot = field(formData, HONEYPOT_FIELD).trim();
     if (honeypot) {
       console.warn(
-        `[guest-quote] honeypot tripped; dropped submission claiming email=${field(formData, "email").slice(0, 100)}`
+        `[guest-estimate] honeypot tripped; dropped submission claiming email=${field(formData, "email").slice(0, 100)}`
       );
       return NextResponse.json({ ok: true, reference: null }, { status: 202 });
     }
 
     // --- 2. Form token ----------------------------------------------------
-    const tokenResult = verifyFormToken(field(formData, FORM_TOKEN_FIELD), GUEST_QUOTE_TOKEN_SCOPE);
+    const tokenResult = verifyFormToken(field(formData, FORM_TOKEN_FIELD), GUEST_ESTIMATE_TOKEN_SCOPE);
     if (!tokenResult.ok) {
       return NextResponse.json(
         { error: describeFormTokenFailure(tokenResult.reason) },
@@ -159,7 +166,7 @@ export async function POST(req: NextRequest) {
     const ip = clientIp(req.headers);
     const turnstile = await verifyTurnstile(field(formData, TURNSTILE_FIELD) || null, ip);
     if (!turnstile.ok) {
-      console.warn(`[guest-quote] turnstile rejected a submission: ${turnstile.detail}`);
+      console.warn(`[guest-estimate] turnstile rejected a submission: ${turnstile.detail}`);
       return NextResponse.json(
         {
           error:
@@ -170,27 +177,30 @@ export async function POST(req: NextRequest) {
     }
 
     // --- 5. Rate limits ---------------------------------------------------
+    // The scope strings still say "guest-quote" after the estimate rename, and
+    // deliberately: a scope is half of the primary key each counter is stored
+    // under, so renaming one would hand every caller a fresh, empty window.
     const ipHash = hashIdentifier(ip);
     const emailHash = hashIdentifier(email);
     const verdict = await consumeRateLimits([
       {
         scope: "guest-quote:ip-hour",
         subject: ipHash,
-        limit: GUEST_QUOTE_LIMITS.perIpHour,
+        limit: GUEST_ESTIMATE_LIMITS.perIpHour,
         windowMs: HOUR_MS,
         message: TOO_MANY,
       },
       {
         scope: "guest-quote:ip-day",
         subject: ipHash,
-        limit: GUEST_QUOTE_LIMITS.perIpDay,
+        limit: GUEST_ESTIMATE_LIMITS.perIpDay,
         windowMs: DAY_MS,
         message: TOO_MANY,
       },
       {
         scope: "guest-quote:email-day",
         subject: emailHash,
-        limit: GUEST_QUOTE_LIMITS.perEmailDay,
+        limit: GUEST_ESTIMATE_LIMITS.perEmailDay,
         windowMs: DAY_MS,
         message: TOO_MANY,
       },
@@ -259,7 +269,7 @@ export async function POST(req: NextRequest) {
 
     // --- 8. Who this belongs to ------------------------------------------
     // Nobody. The submitted address is never looked up against the accounts
-    // table, so a quote can neither land on a stranger's desk nor reveal that
+    // table, so an estimate can neither land on a stranger's desk nor reveal that
     // an address is registered here. It is filed under the one system row
     // instead, and the contact block is stored on the request.
     const owner = await guestOwner();
@@ -292,10 +302,12 @@ export async function POST(req: NextRequest) {
         quantity,
         material: material || null,
         notes: notes || null,
-        // Nothing is built off this form. It is a price request, always.
+        // Nothing is built off this form. It is a price request, always —
+        // and, with no account and nothing verified behind it, an estimate
+        // rather than a price the shop is on the hook for.
         quoteRequested: true,
-        kind: KIND_QUOTE,
-        status: DEFAULT_QUOTE_STATUS,
+        kind: KIND_ESTIMATE,
+        status: DEFAULT_ESTIMATE_STATUS,
         dateNeeded: resolvedDate.date,
         ...(storedSource.stored.references.length > 0
           ? { attachments: { create: storedSource.stored.references } }
@@ -303,7 +315,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const reference = quoteReference(partRequest.id);
+    const reference = estimateReference(partRequest.id);
     const title = requestTitle({ fileName: partRequest.fileName, partName: partRequest.partName });
     const dateNeeded = format(resolvedDate.date, "PPP");
 
@@ -313,7 +325,7 @@ export async function POST(req: NextRequest) {
     try {
       await sendEmail({
         to: process.env.ADMIN_EMAIL || email,
-        subject: `[No account] Quote request ${reference}: ${title.replace(/[\r\n]/g, "")}`,
+        subject: `[No account] Estimate request ${reference}: ${title.replace(/[\r\n]/g, "")}`,
         html: NewRequestEmailHTML({
           customerName: contact.name,
           customerEmail: email,
@@ -330,19 +342,19 @@ export async function POST(req: NextRequest) {
           material: material || "Not specified — shop to recommend",
           dateNeeded,
           notes: customerNotes || undefined,
-          quoteRequested: true,
+          pricingKind: KIND_ESTIMATE,
         }),
-        label: "guest-quote admin notification",
+        label: "guest-estimate admin notification",
       });
     } catch (emailError) {
-      console.error("Failed to send guest quote admin notification:", emailError);
+      console.error("Failed to send guest estimate admin notification:", emailError);
     }
 
     try {
       await sendEmail({
         to: email,
-        subject: `We've got your quote request — ${reference}`,
-        html: QuoteReceivedEmailHTML({
+        subject: `We've got your estimate request — ${reference}`,
+        html: EstimateReceivedEmailHTML({
           customerName: contact.name,
           reference,
           partTitle: title,
@@ -350,15 +362,15 @@ export async function POST(req: NextRequest) {
           material: material || "To be recommended",
           dateNeeded,
         }),
-        label: "guest-quote customer confirmation",
+        label: "guest-estimate customer confirmation",
       });
     } catch (emailError) {
-      console.error("Failed to send guest quote confirmation:", emailError);
+      console.error("Failed to send guest estimate confirmation:", emailError);
     }
 
     return NextResponse.json({ ok: true, reference, email }, { status: 201 });
   } catch (error) {
-    console.error("Failed to create guest quote request:", error);
-    return NextResponse.json({ error: "Failed to submit this quote request" }, { status: 500 });
+    console.error("Failed to create guest estimate request:", error);
+    return NextResponse.json({ error: "Failed to submit this estimate request" }, { status: 500 });
   }
 }

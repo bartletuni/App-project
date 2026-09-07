@@ -6,7 +6,7 @@ import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { safeNextPath } from "@/lib/quote";
+import { safeNextPath } from "@/lib/estimate";
 import LegalLinks from "@/components/LegalLinks";
 
 const field =
@@ -18,14 +18,14 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  // Where the visitor was headed before sign-in got in the way — a quote
+  // Where the visitor was headed before sign-in got in the way — an estimate
   // button, say. Admins always land on the console instead.
   const nextPath = safeNextPath(searchParams.get("next"));
   const afterSignIn = nextPath || "/dashboard";
   // Sign-in unless the visitor was sent here to open an account — the offer
-  // after a no-account quote is the one that does that, and it brings the
+  // after a no-account estimate is the one that does that, and it brings the
   // address they just used along so they do not retype it. Read once, on
-  // mount, exactly as the composer reads its quote flag.
+  // mount, exactly as the composer reads its pricing flag.
   const [isLogin, setIsLogin] = useState(() => searchParams.get("register") !== "1");
   const [name, setName] = useState("");
   const [email, setEmail] = useState(() => searchParams.get("email")?.slice(0, 100) || "");

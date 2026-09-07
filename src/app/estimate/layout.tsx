@@ -8,9 +8,9 @@ import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
 // send a part. This page stays on what is distinctive about the page itself,
 // and on the one timing promise it can actually make: how fast a price comes
 // back.
-const title = "Request a Quote — No Account Needed";
+const title = "Request an Estimate — No Account Needed";
 const description =
-  "Get a price from TakomoCo within one business day. Upload an STL or just photograph the broken part and describe it — no sign-up, no password, and nothing built until you approve the price.";
+  "Get an estimate from TakomoCo within one business day. Upload an STL or just photograph the broken part and describe it — no sign-up, no password, and nothing built until you approve the price.";
 
 /**
  * The page itself is a client component, so its metadata lives here in the
@@ -19,10 +19,10 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/quote" },
+  alternates: { canonical: "/estimate" },
   openGraph: {
     type: "website",
-    url: "/quote",
+    url: "/estimate",
     siteName: SITE_NAME,
     title: `${title} | ${SITE_NAME}`,
     description,
@@ -36,12 +36,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function QuoteLayout({ children }: { children: React.ReactNode }) {
+export default function EstimateLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <JsonLd
-        id="ld-breadcrumb-quote"
-        data={breadcrumbSchema([{ name: "Request a quote", path: "/quote" }])}
+        id="ld-breadcrumb-estimate"
+        data={breadcrumbSchema([{ name: "Request an estimate", path: "/estimate" }])}
       />
       {children}
     </>

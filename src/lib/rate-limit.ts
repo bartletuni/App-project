@@ -17,7 +17,7 @@ import { prisma } from "@/lib/prisma";
  *   * Addresses are never stored in the clear. A key holds an HMAC of the IP,
  *     keyed by the deployment secret — enough to count repeat senders, useless
  *     as a record of who visited.
- *   * It fails OPEN. If the database is unreachable, a real customer's quote
+ *   * It fails OPEN. If the database is unreachable, a real customer's estimate
  *     still goes through; the honeypot, the form token, and Turnstile (where
  *     configured) are all still standing. Losing work beats losing a customer.
  */
