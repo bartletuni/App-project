@@ -13,17 +13,26 @@ import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
 import { parseStoredSettings } from "@/lib/print-settings";
 import {
   CANCELLED_STATUS,
+  KIND_ESTIMATE,
   KIND_QUOTE,
   KIND_REQUEST,
+  RequestKind,
   canConvert,
+  canPromoteToQuote,
   convertability,
+  isEstimate,
+  isPricing,
   isQuote,
+  kindLabel,
+  quoteBlocker,
   requestKind,
+  requestKindLabel,
   statusHint,
+  statusOptionsFor,
   statusTone,
   statusesFor,
 } from "@/lib/request-status";
-import { isGuestRequest, requestContact } from "@/lib/guest-quote";
+import { isGuestRequest, requestContact } from "@/lib/guest-estimate";
 
 /**
  * Console colours for a status, keyed by the tone the shared status table
@@ -44,16 +53,46 @@ function statusClasses(status: string): string {
   return TONE_CLASSES[statusTone(status)] || TONE_CLASSES.muted;
 }
 
-/** The status menu for one row — a quote and a build request differ. */
+/**
+ * The status menu for one row — an estimate, a quote and a build request each
+ * speak their own vocabulary. `statusOptionsFor` rather than the bare track
+ * list so a row still carrying a pre-estimate status keeps its own value in
+ * the menu instead of being silently rewritten by the first click.
+ */
 function StatusOptions({ request }: { request: any }) {
   return (
     <>
-      {statusesFor(requestKind(request)).map((option) => (
+      {statusOptionsFor(request).map((option) => (
         <option key={option} value={option} title={statusHint(option)}>
           {option}
         </option>
       ))}
     </>
+  );
+}
+
+/**
+ * The badge that says which track a row is on. An estimate is the one that has
+ * to be unmistakable: it is a number the shop has not committed to, and the
+ * whole point of splitting the tracks was that nobody should have to work that
+ * out from the status string.
+ */
+function KindBadge({ request, className = "" }: { request: any; className?: string }) {
+  if (!isPricing(request)) return null;
+  const estimate = isEstimate(request);
+  return (
+    <span
+      className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${
+        estimate ? "bg-clay-600/25 text-clay-100" : "bg-amber-500/15 text-amber-200"
+      } ${className}`}
+      title={
+        estimate
+          ? "Indicative price only — no account and/or no part file, so nothing here is guaranteed"
+          : "Guaranteed price — account holder, part file on the row"
+      }
+    >
+      {requestKindLabel(request)}
+    </span>
   );
 }
 
@@ -240,7 +279,7 @@ function AdminDashboardContent() {
   const handleSaveQuotedPrice = async (id: string) => {
     setSavingQuotedPrice(true);
     try {
-      const res = await fetch(`/api/requests/${id}/quote`, {
+      const res = await fetch(`/api/requests/${id}/price`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quotedPrice: quotedPriceInput }),
@@ -253,36 +292,51 @@ function AdminDashboardContent() {
             quotedPrice: quotedPriceInput === "" ? null : quotedPriceInput,
           });
         }
-        alert("Quoted price saved successfully");
+        alert("Price saved successfully");
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to save quoted price");
+        alert(data.error || "Failed to save the price");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving quoted price");
+      alert("Error saving the price");
     } finally {
       setSavingQuotedPrice(false);
     }
   };
 
   /**
-   * Moves a quote onto the build queue. The price in the modal rides along, so
-   * pricing it and starting it is one action. Anything already accepted is
-   * converted without ceremony; a declined or expired quote asks first, since
-   * that is reviving something the customer turned down.
+   * Moves a row forward, to whichever track `target` names.
+   *
+   *   REQUEST — the build queue. Open to an estimate and a quote alike; plenty
+   *             of jobs are agreed off a ballpark and never need a firm number.
+   *   QUOTE   — an estimate becomes a price the shop stands behind. Only
+   *             offered where it is allowed, and the server checks again.
+   *
+   * The price in the modal rides along, so pricing and moving is one action.
+   * Anything already accepted goes without ceremony; a declined or expired row
+   * asks first, since that is reviving something the customer turned down.
    */
-  const handleConvert = async (req: any) => {
-    const blocked = convertability(req);
+  const handleConvert = async (req: any, target: RequestKind = KIND_REQUEST) => {
+    const blocked = convertability(req, target);
     if (!blocked.ok) {
       alert(blocked.reason);
       return;
     }
 
-    const unusual = req.status === "QUOTE DECLINED" || req.status === "QUOTE EXPIRED";
-    const confirmation = unusual
-      ? `This quote is ${req.status}. Convert it into a build request anyway? It joins the queue as PENDING.`
-      : "Convert this quote into a build request? It leaves the quote track and joins the build queue as PENDING.";
+    const noun = kindLabel(requestKind(req)).toLowerCase();
+    const unusual = /DECLINED|EXPIRED/.test(req.status || "");
+
+    let confirmation: string;
+    if (target === KIND_QUOTE) {
+      confirmation = `Promote this estimate to a quote? The price on it becomes one the shop stands behind, and the row moves to ${
+        unusual ? "the quote track" : "QUOTE IN REVIEW"
+      }.`;
+    } else {
+      confirmation = unusual
+        ? `This ${noun} is ${req.status}. Convert it into a build request anyway? It joins the queue as PENDING.`
+        : `Convert this ${noun} into a build request? It leaves the pricing track and joins the build queue as PENDING.`;
+    }
     if (!confirm(confirmation)) return;
 
     setConvertingId(req.id);
@@ -290,7 +344,7 @@ function AdminDashboardContent() {
       const res = await fetch(`/api/requests/${req.id}/convert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quotedPrice: quotedPriceInput }),
+        body: JSON.stringify({ quotedPrice: quotedPriceInput, target }),
       });
       if (res.ok) {
         const converted = await res.json();
@@ -301,11 +355,11 @@ function AdminDashboardContent() {
         }
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to convert quote");
+        alert(data.error || `Failed to convert this ${noun}`);
       }
     } catch (err) {
       console.error(err);
-      alert("Error converting quote");
+      alert("Error converting this record");
     } finally {
       setConvertingId(null);
     }
@@ -329,7 +383,7 @@ function AdminDashboardContent() {
 
   const filteredRequests = requests.filter((req) => {
     // Searching by customer has to find a guest by the details they gave, not
-    // by the system row their quote is filed under.
+    // by the system row their estimate is filed under.
     const contact = requestContact(req);
     const userName = contact.name;
     const userEmail = contact.email;
@@ -397,7 +451,8 @@ function AdminDashboardContent() {
                     onChange={(e) => setFilterKind(e.target.value)}
                     className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 >
-                    <option value="ALL">Quotes &amp; requests</option>
+                    <option value="ALL">Everything</option>
+                    <option value={KIND_ESTIMATE}>Estimates only</option>
                     <option value={KIND_QUOTE}>Quotes only</option>
                     <option value={KIND_REQUEST}>Requests only</option>
                 </select>
@@ -410,6 +465,11 @@ function AdminDashboardContent() {
                     className="w-full border border-espresso-500 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500"
                 >
                     <option value="ALL">All Statuses</option>
+                    <optgroup label="Estimates">
+                      {statusesFor(KIND_ESTIMATE).filter((o) => o !== CANCELLED_STATUS).map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </optgroup>
                     <optgroup label="Quotes">
                       {statusesFor(KIND_QUOTE).filter((o) => o !== CANCELLED_STATUS).map((option) => (
                         <option key={option} value={option}>{option}</option>
@@ -482,11 +542,11 @@ function AdminDashboardContent() {
                           {(req.isFreeSample || isGuestRequest(req)) && (
                             <div className="mt-1.5 flex flex-wrap gap-1.5">
                               {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
-                              {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public quote form. Not linked to any account — answer the email and phone shown here.">No account</span>}
+                              {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public estimate form. Not linked to any account — answer the email and phone shown here. No account means no guaranteed price.">No account</span>}
                             </div>
                           )}
-                          {isQuote(req) && <div className="mt-1.5"><span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span></div>}
-                          {!isQuote(req) && req.convertedAt && <div className="mt-1.5"><span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span></div>}
+                          {isPricing(req) && <div className="mt-1.5"><KindBadge request={req} /></div>}
+                          {!isPricing(req) && req.convertedAt && <div className="mt-1.5"><span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted onto the build queue on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>Converted</span></div>}
                         </div>
                         <select
                           value={req.status}
@@ -588,11 +648,11 @@ function AdminDashboardContent() {
                               <div className="text-sm font-bold text-cream-200">{requestTitle(req)}</div>
                               <div className="flex gap-2 mt-1">
                                   {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
-                                  {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public quote form. Not linked to any account — answer the email and phone shown here.">No account</span>}
+                                  {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public estimate form. Not linked to any account — answer the email and phone shown here. No account means no guaranteed price.">No account</span>}
                                   {isDescriptionRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="No 3D file — model this part from the customer's description and references">Model it</span>}
-                                  {isQuote(req) && <span className="text-[10px] font-bold bg-amber-500/15 text-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Being priced — nothing is built until this is converted into a request">Quote</span>}
-                                  {!isQuote(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted from a quote on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>From quote</span>}
-                                  {req.quotedPrice && <span className="text-[10px] font-bold bg-green-500/12 text-green-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Price quoted to the customer">{req.quotedPrice}</span>}
+                                  <KindBadge request={req} />
+                                  {!isPricing(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted onto the build queue on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>Converted</span>}
+                                  {req.quotedPrice && <span className="text-[10px] font-bold bg-green-500/12 text-green-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={isEstimate(req) ? "Estimated price — an indication, not guaranteed" : "Price given to the customer"}>{isEstimate(req) ? `~${req.quotedPrice}` : req.quotedPrice}</span>}
                                   {req.material && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-300 px-1.5 py-0.5 rounded uppercase tracking-wide">{req.material}</span>}
                                   {req.printSettings && <span className="text-[10px] font-bold bg-teal-500/15 text-teal-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Customer supplied custom slicer settings">Custom settings</span>}
                                   {req.notes && <div className="text-xs text-cream-500 truncate max-w-[150px]" title={req.notes}>{req.notes}</div>}
@@ -632,13 +692,30 @@ function AdminDashboardContent() {
                                 className="inline-flex items-center gap-1.5 text-clay-300 hover:text-clay-200 bg-clay-500/12 hover:bg-clay-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                {isQuote(req) ? "View Quote" : "View Order"}
+                                {isPricing(req) ? `View ${kindLabel(requestKind(req))}` : "View Order"}
                             </button>
+                            {canPromoteToQuote(req) && (
+                              <button
+                                onClick={() => { setQuotedPriceInput(req.quotedPrice || ""); handleConvert(req, KIND_QUOTE); }}
+                                disabled={convertingId === req.id}
+                                title="Turn this estimate into a guaranteed price"
+                                className="inline-flex items-center gap-1.5 text-amber-100 hover:text-amber-50 bg-amber-500/15 hover:bg-amber-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                              >
+                                {convertingId === req.id ? (
+                                  <>
+                                    <span className="h-3.5 w-3.5 rounded-full border-2 border-amber-100/40 border-t-amber-100 animate-spin" />
+                                    Working
+                                  </>
+                                ) : (
+                                  "Quote it"
+                                )}
+                              </button>
+                            )}
                             {canConvert(req) && (
                               <button
                                 onClick={() => { setQuotedPriceInput(req.quotedPrice || ""); handleConvert(req); }}
                                 disabled={convertingId === req.id}
-                                title="Move this quote onto the build queue"
+                                title="Move this onto the build queue"
                                 className="inline-flex items-center gap-1.5 text-green-200 hover:text-green-100 bg-green-500/15 hover:bg-green-500/25 px-3 py-1.5 rounded-lg transition-colors font-semibold disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
                               >
                                 {convertingId === req.id ? (
@@ -682,7 +759,7 @@ function AdminDashboardContent() {
           <div className="bg-espresso-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-clay-500/20 overflow-hidden w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-5 border-b border-espresso-600/50 bg-espresso-800/45 flex justify-between items-center sticky top-0 z-10">
                 <h3 id="modal-title" className="text-xl leading-6 font-bold text-cream-200">
-                  {isQuote(selectedRequest) ? "Quote Details" : "Ticket Details"}
+                  {isPricing(selectedRequest) ? `${kindLabel(requestKind(selectedRequest))} Details` : "Ticket Details"}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -726,7 +803,7 @@ function AdminDashboardContent() {
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Phone Number</dt>
                         <dd className="mt-1 text-sm text-cream-200 font-semibold">{requestContact(selectedRequest).phone}</dd>
-                        {/* A guest quote is attached to no account at all, so
+                        {/* A guest estimate is attached to no account at all, so
                             what is shown here is the only way to reach them. */}
                         {isGuestRequest(selectedRequest) && (
                           <dd className="mt-1 text-xs text-clay-300">
@@ -744,15 +821,22 @@ function AdminDashboardContent() {
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Type</dt>
-                        <dd className={`mt-1 text-sm font-semibold ${isQuote(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
-                          {isQuote(selectedRequest)
-                            ? "Quote — price before build"
-                            : selectedRequest.convertedAt
-                              ? `Request — converted from a quote ${format(new Date(selectedRequest.convertedAt), "MMM d, yyyy")}`
-                              : selectedRequest.quoteRequested
-                                ? "Request — a quote was asked for"
-                                : "Request"}
+                        <dd className={`mt-1 text-sm font-semibold ${isPricing(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
+                          {isEstimate(selectedRequest)
+                            ? "Estimate — indicative price, not guaranteed"
+                            : isQuote(selectedRequest)
+                              ? "Quote — guaranteed price before build"
+                              : selectedRequest.convertedAt
+                                ? `Request — converted after pricing on ${format(new Date(selectedRequest.convertedAt), "MMM d, yyyy")}`
+                                : selectedRequest.quoteRequested
+                                  ? "Request — a price was asked for"
+                                  : "Request"}
                         </dd>
+                        {isEstimate(selectedRequest) && (
+                          <dd className="mt-1 text-xs text-clay-300">
+                            {quoteBlocker(selectedRequest)}
+                          </dd>
+                        )}
                     </div>
                     <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-cream-500">Date Needed</dt>
@@ -795,7 +879,9 @@ function AdminDashboardContent() {
                       </div>
                     )}
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-cream-500">Quoted Price</dt>
+                        <dt className="text-sm font-medium text-cream-500">
+                          {isEstimate(selectedRequest) ? "Estimated Price" : "Quoted Price"}
+                        </dt>
                         <dd className="mt-1 flex items-center gap-2">
                             <input
                               type="text"
@@ -813,7 +899,9 @@ function AdminDashboardContent() {
                             </button>
                         </dd>
                         <dd className="mt-1 text-xs text-cream-500">
-                          What was quoted to the customer. Kept on the record after conversion.
+                          {isEstimate(selectedRequest)
+                            ? "What the customer was told to expect. An indication — promote this to a quote before treating it as a number we stand behind. Kept on the record after conversion."
+                            : "What was quoted to the customer. Kept on the record after conversion."}
                         </dd>
                     </div>
                     <div className="sm:col-span-2">
@@ -872,11 +960,39 @@ function AdminDashboardContent() {
                             <StatusOptions request={selectedRequest} />
                        </select>
                    </div>
+                   {/* An estimate that qualifies can be worked into a quote —
+                       the customer has an account and we have the file, so the
+                       price can be one the shop stands behind. Where it does not
+                       qualify the control is shown disabled with the reason on
+                       it, rather than hidden: "why can't I quote this?" is the
+                       question the shop will actually have. */}
+                   {isEstimate(selectedRequest) && (
+                       <button
+                         onClick={() => handleConvert(selectedRequest, KIND_QUOTE)}
+                         disabled={
+                           convertingId === selectedRequest.id || !canPromoteToQuote(selectedRequest)
+                         }
+                         title={
+                           quoteBlocker(selectedRequest) ||
+                           "Turn this estimate into a guaranteed price"
+                         }
+                         className="inline-flex items-center gap-1.5 text-amber-100 bg-amber-500/18 hover:bg-amber-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                       >
+                         {convertingId === selectedRequest.id ? (
+                           <>
+                             <span className="h-3.5 w-3.5 rounded-full border-2 border-amber-100/40 border-t-amber-100 animate-spin" />
+                             Working
+                           </>
+                         ) : (
+                           "Promote to quote"
+                         )}
+                       </button>
+                   )}
                    {canConvert(selectedRequest) && (
                        <button
                          onClick={() => handleConvert(selectedRequest)}
                          disabled={convertingId === selectedRequest.id}
-                         title="Move this quote onto the build queue as PENDING"
+                         title="Move this onto the build queue as PENDING"
                          className="inline-flex items-center gap-1.5 text-green-200 bg-green-500/18 hover:bg-green-500/30 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                        >
                          {convertingId === selectedRequest.id ? (
@@ -901,7 +1017,9 @@ function AdminDashboardContent() {
                              Canceling
                            </>
                          ) : (
-                           isQuote(selectedRequest) ? "Cancel Quote" : "Cancel Request"
+                           isPricing(selectedRequest)
+                             ? `Cancel ${kindLabel(requestKind(selectedRequest))}`
+                             : "Cancel Request"
                          )}
                        </button>
                    )}

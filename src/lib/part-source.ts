@@ -7,8 +7,9 @@
  *                 path and is unchanged.
  *   DESCRIPTION — the customer has no 3D file. They name the part, describe it,
  *                 and (usually) attach photos or a sketch, and we draw the model
- *                 for them. These are always quoted before anything is built,
- *                 because there is nothing to price until we have modelled it.
+ *                 for them. These are always estimated before anything is built,
+ *                 because there is nothing to price until we have modelled it —
+ *                 and an estimate is all we can honestly give without the file.
  *
  * Everything here is shared by the customer composer, the admin console's
  * "add request" form, and the API route that stores the submission, so the two
@@ -51,7 +52,7 @@ export const MAX_DIMENSIONS_CHARS = 300;
 /**
  * Lives here rather than beside the STL loader so that asking "is this an STL?"
  * — a string comparison — does not drag three.js into a bundle that has no
- * geometry to draw. The public quote form is the reason: most of its visitors
+ * geometry to draw. The public estimate form is the reason: most of its visitors
  * are photographing a part on a phone and never pick a model at all.
  */
 export function isStlFileName(name: string | null | undefined): boolean {
@@ -174,10 +175,14 @@ export function validatePartSource(state: PartSourceState): string | null {
 
 /**
  * A described part cannot be priced until we have drawn it, so those requests
- * are always quoted first — the composer ticks and locks the quote box, and the
- * API forces the same flag.
+ * are always priced first — the composer ticks and locks the pricing box, and
+ * the API forces the same flag.
+ *
+ * What comes back is an *estimate*, never a quote: we are pricing a written
+ * description and some photographs, so there is no model to guarantee a number
+ * against. See `qualifiesForQuote` in src/lib/request-status.ts.
  */
-export function quoteIsForced(mode: SubmissionType): boolean {
+export function pricingIsForced(mode: SubmissionType): boolean {
   return mode === SUBMISSION_DESCRIPTION;
 }
 

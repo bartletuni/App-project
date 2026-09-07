@@ -25,7 +25,7 @@ import PartSourceFields from "@/components/PartSourceFields";
 import { useFormAlert } from "@/components/ui/useFormAlert";
 import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import { appendPartSource, emptyPartSource, PartSourceState, validatePartSource } from "@/lib/part-source";
-import { COMPOSER_QUOTE_HREF } from "@/lib/quote";
+import { COMPOSER_ESTIMATE_HREF } from "@/lib/estimate";
 import {
   FORM_TOKEN_FIELD,
   GuestContactState,
@@ -41,7 +41,7 @@ import {
   emptyGuestContact,
   turnstileSiteKey,
   validateGuestContact,
-} from "@/lib/guest-quote";
+} from "@/lib/guest-estimate";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-3 text-base text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
@@ -49,7 +49,7 @@ const labelCls =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
 /**
- * The no-account quote form.
+ * The no-account estimate form.
  *
  * Written for someone standing next to the machine that just broke: photograph
  * the part, say what it is, three contact fields, send. Everything the shop can
@@ -65,7 +65,7 @@ const labelCls =
  * limits at the endpoint, and Cloudflare Turnstile where a deployment has
  * configured it. A real customer clicks nothing extra.
  */
-function QuoteContent() {
+function EstimateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
@@ -73,7 +73,7 @@ function QuoteContent() {
   // A signed-in visitor has a composer that already knows their details and
   // keeps the result on their desk; this page would be a downgrade for them.
   useEffect(() => {
-    if (status === "authenticated") router.replace(COMPOSER_QUOTE_HREF);
+    if (status === "authenticated") router.replace(COMPOSER_ESTIMATE_HREF);
   }, [status, router]);
 
   const [partSource, setPartSource] = useState<PartSourceState>(emptyPartSource);
@@ -187,7 +187,7 @@ function QuoteContent() {
   };
 
   if (submitted) {
-    return <QuoteSent reference={submitted.reference} email={submitted.email} />;
+    return <EstimateSent reference={submitted.reference} email={submitted.email} />;
   }
 
   const submitBlocker = validatePartSource(partSource) || validateGuestContact(contact);
@@ -195,7 +195,7 @@ function QuoteContent() {
   return (
     <div className="mx-auto max-w-2xl px-5 sm:px-8 pt-28 pb-20">
       <Reveal>
-        <span className="eyebrow">QUOTE ⁄ NO ACCOUNT NEEDED</span>
+        <span className="eyebrow">ESTIMATE ⁄ NO ACCOUNT NEEDED</span>
         <h1 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">
           Send us the part.<br />
           <span className="italic text-clay-300">We&apos;ll send back a price.</span>
@@ -204,6 +204,18 @@ function QuoteContent() {
           No sign-up, no password. A photo and a sentence is enough to start — we
           answer within one business day, and nothing gets built or invoiced
           until you approve the price.
+        </p>
+
+        {/* Said once, plainly, before anyone types anything. What comes back
+            from this form is a considered indication, not a number the shop
+            has committed to — we cannot commit to one without an account and
+            the part file. Repeated on the confirmation screen and in the
+            confirmation email. */}
+        <p className="mt-4 border-l-2 border-clay-500/50 bg-clay-500/5 px-4 py-3 text-sm leading-relaxed text-cream-400">
+          <strong className="text-cream-200">This comes back as an estimate.</strong>{" "}
+          It is our best read of the job, not a guaranteed price — we can only
+          guarantee one for an account holder who has sent us the part file to
+          print. Everything is confirmed in writing before anything is made.
         </p>
 
         <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.16em] text-cream-500">
@@ -234,7 +246,7 @@ function QuoteContent() {
               <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
               <span>
                 <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-red-200">
-                  Quote not sent
+                  Estimate not sent
                 </span>
                 <span className="mt-1 block leading-relaxed">{error}</span>
               </span>
@@ -245,7 +257,7 @@ function QuoteContent() {
             <PartSourceFields
               value={partSource}
               onChange={setPartSource}
-              idPrefix="guest-quote"
+              idPrefix="guest-estimate"
               fieldClassName={field}
               labelClassName={labelCls}
               onLocalError={setError}
@@ -255,9 +267,9 @@ function QuoteContent() {
                 out of the tab order and hidden from assistive technology, so
                 nobody who could fill it in ever meets it. */}
             <div aria-hidden="true" className="hidden">
-              <label htmlFor="guest-quote-nickname">Leave this field empty</label>
+              <label htmlFor="guest-estimate-nickname">Leave this field empty</label>
               <input
-                id="guest-quote-nickname"
+                id="guest-estimate-nickname"
                 type="text"
                 name={HONEYPOT_FIELD}
                 tabIndex={-1}
@@ -326,8 +338,8 @@ function QuoteContent() {
                 </div>
               </div>
               <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-cream-600">
-                The quote goes to your email. The phone number is for the questions
-                that are faster asked than typed.
+                The estimate goes to your email. The phone number is for the
+                questions that are faster asked than typed.
               </p>
             </div>
 
@@ -443,7 +455,7 @@ function QuoteContent() {
                 </>
               ) : (
                 <>
-                  Get my quote
+                  Get my estimate
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </>
               )}
@@ -493,13 +505,13 @@ function QuoteContent() {
  * the phone, what happens next, and — as an offer, never a gate — the account
  * that would have kept it all in one place.
  */
-function QuoteSent({ reference, email }: { reference: string; email: string }) {
+function EstimateSent({ reference, email }: { reference: string; email: string }) {
   return (
     <div className="mx-auto max-w-2xl px-5 sm:px-8 pt-28 pb-20">
       <Reveal>
         <Panel className="p-7 sm:p-10 rounded-md">
           <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-green-300">
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Quote request sent
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Estimate request sent
           </span>
 
           <h1 className="mt-5 font-display text-4xl text-cream-100">
@@ -513,7 +525,7 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
               </div>
               <div className="mt-1 font-mono text-2xl tracking-[0.12em] text-clay-200">{reference}</div>
               <p className="mt-2 text-xs text-cream-500">
-                Quote this if you call. A copy is on its way to {email}.
+                Give this if you call. A copy is on its way to {email}.
               </p>
             </div>
           )}
@@ -521,7 +533,7 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
           <ol className="mt-7 space-y-4">
             {[
               ["01", "A person reads it", "Not a calculator — within one business day."],
-              ["02", "We come back with a price", "By email or phone, with anything we still need to ask."],
+              ["02", "We come back with an estimate", "By email or phone — an indication, not a guaranteed price."],
               ["03", "You decide", "Nothing is built and nothing is invoiced until you approve it."],
             ].map(([n, title, detail]) => (
               <li key={n} className="flex gap-4">
@@ -543,7 +555,7 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/quote"
+              href="/estimate"
               className="inline-flex flex-1 items-center justify-center rounded-md border border-clay-500/30 px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-300 transition-colors hover:border-clay-400 hover:text-cream-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               Send another part
@@ -552,9 +564,11 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
 
           <p className="mt-4 text-xs leading-relaxed text-cream-600">
             An account puts every <em>future</em> job on one desk where you can watch it
-            move. This quote stays where it is — we keep no-account quotes off accounts
-            on purpose, so nobody can attach anything to yours by typing your address
-            into a form. We&apos;ll answer this one at{" "}
+            move — and it is what lets us turn an estimate into a guaranteed price,
+            once you send the part file with it. This estimate stays where it is:
+            we keep no-account submissions off accounts on purpose, so nobody can
+            attach anything to yours by typing your address into a form.
+            We&apos;ll answer this one at{" "}
             <span className="text-cream-400">{email}</span> either way.
           </p>
         </Panel>
@@ -563,7 +577,7 @@ function QuoteSent({ reference, email }: { reference: string; email: string }) {
   );
 }
 
-export default function QuotePage() {
+export default function EstimatePage() {
   return (
     <>
       <SiteHeader />
@@ -574,7 +588,7 @@ export default function QuotePage() {
           </div>
         }
       >
-        <QuoteContent />
+        <EstimateContent />
       </Suspense>
       <SiteFooter />
     </>

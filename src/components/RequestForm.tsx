@@ -11,13 +11,14 @@ import { useFormAlert } from "@/components/ui/useFormAlert";
 import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
-import { QUOTE_PARAM, isQuoteRequested } from "@/lib/quote";
+import { ESTIMATE_PARAM, isPricingRequested } from "@/lib/estimate";
+import { KIND_QUOTE, kindLabel, pricingKindFor } from "@/lib/request-status";
 import { FREE_SAMPLE_MATERIAL } from "@/lib/free-sample";
 import {
   PartSourceState,
   appendPartSource,
   emptyPartSource,
-  quoteIsForced,
+  pricingIsForced,
   validatePartSource,
 } from "@/lib/part-source";
 
@@ -44,10 +45,10 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     mode: "AUTO",
     custom: { ...DEFAULT_CUSTOM_SETTINGS },
   });
-  // Off unless the visitor arrived through a "Request a quote" button, and
+  // Off unless the visitor arrived through a "Request an estimate" button, and
   // only for that visit — the initialiser runs once, and submitting clears it.
   const [quoteRequested, setQuoteRequested] = useState(() =>
-    isQuoteRequested(searchParams.get(QUOTE_PARAM))
+    isPricingRequested(searchParams.get(ESTIMATE_PARAM))
   );
   // null while we don't yet know; the offer stays hidden until we do, so it
   // never flashes on for someone who has already claimed theirs.
@@ -97,10 +98,20 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       .catch(() => setFreeSampleEligible(false));
   }, [initialMaterial]);
 
-  // A described part cannot be priced until we have modelled it, so the quote
+  // A described part cannot be priced until we have modelled it, so the pricing
   // box ticks itself and locks for that lane; the API enforces the same rule.
-  const quoteLocked = quoteIsForced(partSource.mode);
+  const quoteLocked = pricingIsForced(partSource.mode);
   const quoteChecked = quoteLocked || quoteRequested;
+
+  // This composer is the one place on the site that can promise a *quote*
+  // rather than an estimate, and only for the submission that earns it: the
+  // customer is signed in (they are, to be here) and has attached the part file
+  // we would actually print. Describe the part instead and there is no model to
+  // price against, so what we can offer is an estimate — the same words the
+  // public form uses. The server decides this again from the stored row; this
+  // only has to agree with it. See `pricingKindFor` in src/lib/request-status.
+  const pricingKind = pricingKindFor({ isGuest: false, hasFile: Boolean(partSource.file) });
+  const guaranteed = pricingKind === KIND_QUOTE;
 
   // What is still missing, if anything. Shown under the submit button rather
   // than used to disable it: a disabled control cannot be focused or hovered
@@ -378,7 +389,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={`${field} resize-none`} placeholder="Any special instructions?" />
         </div>
 
-        {/* A free sample has nothing to price, so the quote step only still
+        {/* A free sample has nothing to price, so the pricing step only still
             applies when the part also has to be modelled first. */}
         {(!freeSample || quoteLocked) && (
           <label
@@ -398,12 +409,15 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             />
             <span className="min-w-0">
               <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-300">
-                Quote {quoteLocked && <span className="text-clay-300">· always, on a described part</span>}
+                {kindLabel(pricingKind)}{" "}
+                {quoteLocked && <span className="text-clay-300">· always, on a described part</span>}
               </span>
               <span className="mt-1 block text-xs leading-relaxed text-cream-500">
                 {quoteLocked
-                  ? "There is nothing to price until we have modelled your part, so this one is quoted first. You approve the price before we build anything."
-                  : "Price this part first. We send a quote for your approval before the invoice — manufacturing still starts once that invoice is paid."}
+                  ? "There is nothing to price until we have modelled your part, so this one is estimated first. An estimate is our best read of the job rather than a guaranteed price — attach the part file and we can quote it firm instead. You approve either before we build anything."
+                  : guaranteed
+                    ? "Price this part first. Because you're signed in and we have the file we'd print, this comes back as a quote — a price we stand behind. You approve it before the invoice, and manufacturing still starts once that invoice is paid."
+                    : "Price this part first. Without the part file we can only estimate — our best read of the job, not a guaranteed price. You approve it before the invoice, and manufacturing still starts once that invoice is paid."}
               </span>
             </span>
           </label>

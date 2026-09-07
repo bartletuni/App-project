@@ -118,15 +118,35 @@ describe("spec sheets", () => {
 });
 
 describe("the console emails flag what the shop must act on", () => {
-  it("calls out a described part and a quote request", () => {
+  it("calls out a described part and the estimate it can only be", () => {
     const html = NewRequestEmailHTML({
       customerName: "c", customerEmail: "e@e.com", fileName: "Dryer catch",
-      submissionType: "DESCRIPTION", referenceCount: 2, quoteRequested: true,
+      submissionType: "DESCRIPTION", referenceCount: 2, pricingKind: "ESTIMATE",
       quantity: 1, material: "m", dateNeeded: "today",
     });
     expect(html).toContain("No 3D file");
     expect(html).toContain("attached 2 reference files");
+    expect(html).toContain("Estimate requested");
+    expect(html).not.toContain("Quote requested");
+  });
+
+  it("calls out a quote when the submission actually qualifies for one", () => {
+    const html = NewRequestEmailHTML({
+      customerName: "c", customerEmail: "e@e.com", fileName: "part.stl",
+      submissionType: "MODEL", pricingKind: "QUOTE",
+      quantity: 1, material: "m", dateNeeded: "today",
+    });
     expect(html).toContain("Quote requested");
+    expect(html).toContain("guaranteed price");
+  });
+
+  it("says nothing about pricing when no price was asked for", () => {
+    const html = NewRequestEmailHTML({
+      customerName: "c", customerEmail: "e@e.com", fileName: "part.stl",
+      submissionType: "MODEL", quantity: 1, material: "m", dateNeeded: "today",
+    });
+    expect(html).not.toContain("Estimate requested");
+    expect(html).not.toContain("Quote requested");
   });
 
   it("says nothing about modelling when a file came with the request", () => {

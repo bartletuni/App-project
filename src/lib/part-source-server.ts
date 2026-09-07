@@ -21,7 +21,7 @@ import { uploadToR2 } from "@/lib/r2";
  * the half that only ever runs on the server, because it reads bytes and
  * checks them against the extension they claim. Three routes take a part
  * submission — the signed-in composer, the admin console's add-request form,
- * and the public no-account quote form — and none of them may be more
+ * and the public no-account estimate form — and none of them may be more
  * trusting than the others about what a file actually contains, so they all
  * come through here.
  *

@@ -4,11 +4,11 @@ import {
   MIN_LEAD_DAYS,
   emptyGuestContact,
   normalizeEmail,
-  quoteReference,
+  estimateReference,
   resolveDateNeeded,
   validateGuestContact,
   validateGuestNotes,
-} from "@/lib/guest-quote";
+} from "@/lib/guest-estimate";
 
 const contact = (overrides: Partial<ReturnType<typeof emptyGuestContact>> = {}) => ({
   ...emptyGuestContact(),
@@ -18,7 +18,7 @@ const contact = (overrides: Partial<ReturnType<typeof emptyGuestContact>> = {}) 
   ...overrides,
 });
 
-describe("guest quote contact", () => {
+describe("guest estimate contact", () => {
   it("accepts the four things the form actually requires", () => {
     expect(validateGuestContact(contact())).toBeNull();
   });
@@ -79,7 +79,7 @@ describe("when the part is needed", () => {
 
 describe("the reference a guest is given", () => {
   it("is derived from the row it names, so it cannot drift from it", () => {
-    expect(quoteReference("clx1234abcd5f2a9c")).toBe("Q-5F2A9C");
-    expect(quoteReference("clx1234abcd5f2a9c")).toBe(quoteReference("clx1234abcd5f2a9c"));
+    expect(estimateReference("clx1234abcd5f2a9c")).toBe("E-5F2A9C");
+    expect(estimateReference("clx1234abcd5f2a9c")).toBe(estimateReference("clx1234abcd5f2a9c"));
   });
 });

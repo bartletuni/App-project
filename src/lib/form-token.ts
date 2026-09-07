@@ -3,7 +3,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 /**
  * Proof that a form was actually loaded, and that a human took a moment over it.
  *
- * The public quote endpoint is the first thing on this site anyone can POST to
+ * The public estimate endpoint is the first thing on this site anyone can POST to
  * without an account, and the cheapest spam is a script that posts straight at
  * the URL, thousands of times, having never fetched a page. This closes that
  * door without asking the customer for anything:
@@ -59,7 +59,7 @@ function sign(payload: string, key: string): string {
 
 /**
  * Issue a token for one form. `scope` binds it to that form, so a token minted
- * for the quote page cannot be spent anywhere else a token is ever accepted.
+ * for the estimate page cannot be spent anywhere else a token is ever accepted.
  */
 export function issueFormToken(scope: string, now: number = Date.now()): string | null {
   const key = secret();

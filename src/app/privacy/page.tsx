@@ -12,7 +12,7 @@ import {
 
 const title = "Privacy Policy";
 const description =
-  "What TakomoCo collects when you request a quote or open a client account, who processes it, how long it is kept, and how to have it corrected or deleted.";
+  "What TakomoCo collects when you request an estimate or open a client account, who processes it, how long it is kept, and how to have it corrected or deleted.";
 
 export const metadata: Metadata = {
   title,
@@ -47,7 +47,7 @@ const sections: LegalSection[] = [
           TakomoCo is an additive manufacturing studio operating in Utah, United
           States. This policy covers takomoco.com and the client dashboard
           attached to it, and explains what we do with personal information you
-          give us when you browse the site, request a quote, or open an account.
+          give us when you browse the site, request an estimate, or open an account.
         </p>
         <p>
           For anything in this policy, write to{" "}
@@ -82,7 +82,7 @@ const sections: LegalSection[] = [
           <em>.stl</em> or <em>.zip</em>), or, if you have no model yet, the part
           name, description, and dimensions you write instead; quantity;
           material; print settings; your notes; and the date you need it by. As
-          the job progresses we add the quoted price, order status, invoice
+          the job progresses we add the estimated or quoted price, order status, invoice
           number, and shipping tracking number.
         </p>
         <h3>Technical information</h3>
@@ -122,7 +122,7 @@ const sections: LegalSection[] = [
             settings, and notes are what the shop works from.
           </li>
           <li>
-            <strong>To reach you about your order.</strong> Quotes, invoices,
+            <strong>To reach you about your order.</strong> Estimates, quotes, invoices,
             status changes, and shipping notices go to your email address; we
             use your phone number if an order needs a conversation.
           </li>
@@ -189,7 +189,7 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Resend</strong> — delivers transactional email such as
-            quotes, invoices, and status updates.
+            estimates, quotes, invoices, and status updates.
           </li>
           <li>
             <strong>Square</strong> — issues your invoice and processes the
@@ -264,7 +264,7 @@ const sections: LegalSection[] = [
           <li>
             <strong>Uploaded model files</strong> — kept while the order is
             live and for a reasonable window afterwards so a part can be
-            reprinted or a revision quoted. Ask us and we will delete a file
+            reprinted or a revision priced. Ask us and we will delete a file
             sooner.
           </li>
           <li>

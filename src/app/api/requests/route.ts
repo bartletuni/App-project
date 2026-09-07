@@ -8,10 +8,10 @@ import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
 import {
-  DEFAULT_QUOTE_STATUS,
   DEFAULT_REQUEST_STATUS,
-  KIND_QUOTE,
   KIND_REQUEST,
+  defaultStatusFor,
+  pricingKindFor,
 } from "@/lib/request-status";
 import {
   FREE_SAMPLE_MATERIAL,
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     // 3D file, a written description plus optional reference photos. Both are
     // validated in parsePartSourceForm, which reads and checks the bytes of
     // anything uploaded; nothing reaches R2 until every check has passed. The
-    // public quote form runs the same reader, so the two front doors cannot
+    // public estimate form runs the same reader, so the two front doors cannot
     // drift apart on what they accept.
     const parsedSource = await parsePartSourceForm(formData);
     if ("error" in parsedSource) {
@@ -111,10 +111,10 @@ export async function POST(req: NextRequest) {
     const { submissionType, isDescription: isDescriptionRequest, model, partName, partDescription, dimensions } =
       parsedSource.source;
 
-    // The composer's "Quote" checkbox. Absent or anything falsy means a normal
+    // The composer's pricing checkbox. Absent or anything falsy means a normal
     // build request. A described part has nothing to price until we have drawn
-    // it, so those are always quoted first no matter what the client sent — the
-    // composer ticks and locks the box to match. A free sample skips quoting
+    // it, so those are always priced first no matter what the client sent — the
+    // composer ticks and locks the box to match. A free sample skips pricing
     // too, since there is nothing to price, but a described free sample still
     // needs modelling first, so that rule wins over the sample.
     const quoteRequested =
@@ -208,11 +208,21 @@ export async function POST(req: NextRequest) {
     }
     const { fileId, references: storedReferences } = storedSource.stored;
 
-    // A quote goes onto the quote track and starts at "QUOTE REQUESTED"; a
-    // plain build request keeps the original queue and starts at "PENDING".
-    // The two vocabularies never mix — see src/lib/request-status.ts.
-    const kind = quoteRequested ? KIND_QUOTE : KIND_REQUEST;
-    const initialStatus = quoteRequested ? DEFAULT_QUOTE_STATUS : DEFAULT_REQUEST_STATUS;
+    // Which pricing track this lands on, and therefore what we are allowed to
+    // call it. A signed-in customer who uploaded the part file gets a QUOTE —
+    // we know who they are and exactly what we would print, so the price can
+    // be one the shop stands behind. A described part has no model to price
+    // against, so it gets an ESTIMATE however it was submitted. This route is
+    // authenticated, so `isGuest` is false by construction; the public form at
+    // /api/requests/guest is the other caller of the same rule.
+    //
+    // A plain build request keeps the original queue and starts at "PENDING".
+    // The three vocabularies never mix — see src/lib/request-status.ts.
+    const pricingKind = quoteRequested
+      ? pricingKindFor({ isGuest: false, hasFile: Boolean(fileId) })
+      : null;
+    const kind = pricingKind || KIND_REQUEST;
+    const initialStatus = pricingKind ? defaultStatusFor(pricingKind) : DEFAULT_REQUEST_STATUS;
 
     // Create Part Request
     const partRequest = await prisma.partRequest.create({
@@ -265,7 +275,7 @@ export async function POST(req: NextRequest) {
           dateNeeded: format(dateNeeded, "PPP"),
           notes: notes || undefined,
           printSettings: summarizeSettings(customSettings),
-          quoteRequested,
+          pricingKind,
           isFreeSample,
         }),
         label: "new-request admin notification",

@@ -6,7 +6,7 @@ import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
-import RequestQuoteButton from "@/components/RequestQuoteButton";
+import RequestEstimateButton from "@/components/RequestEstimateButton";
 
 const coordinates = [
   { icon: Mail, k: "EMAIL", v: "info@takomoco.com" },
@@ -50,7 +50,7 @@ export default function ContactPage() {
               </a>
             </Magnetic>
 
-            <RequestQuoteButton
+            <RequestEstimateButton
               variant="outline"
               className="mt-3 w-full justify-between px-6 py-4 text-[11px] tracking-[0.18em]"
             />

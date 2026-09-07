@@ -1,5 +1,11 @@
 import { BUSINESS, absoluteUrl } from "@/lib/seo";
-import { StatusTone, statusTone } from "@/lib/request-status";
+import {
+  KIND_ESTIMATE,
+  KIND_QUOTE,
+  PricingKind,
+  StatusTone,
+  statusTone,
+} from "@/lib/request-status";
 import { CLAY, CREAM, DERIVED, EMBER, ESPRESSO, WORDMARK } from "@/lib/brand";
 
 /**
@@ -161,7 +167,8 @@ function button(href: string, label: string): string {
 /**
  * Status pill, mirroring the colours the build ledger uses on screen. The
  * status-to-tone mapping is shared with the app (src/lib/request-status.ts) so
- * a quote status renders here without a second list to keep in step; only the
+ * an estimate or quote status renders here without a second list to keep in
+ * step; only the
  * hex per tone lives in this file, since email cannot use the site's classes.
  */
 function statusChip(status: string): string {
@@ -224,7 +231,7 @@ function shell(opts: {
 
   const footer =
     opts.audience === "guest"
-      ? contactFooter("because you asked us for a quote.")
+      ? contactFooter("because you asked us for an estimate.")
       : opts.audience === "customer"
       ? contactFooter("because you have an account with us.")
       : `
@@ -323,7 +330,7 @@ export const WelcomeUserEmailHTML = (data: {
         {
           title: "We price it",
           detail:
-            "You get an invoice, or a quote first if you asked for one. Nothing is built until it is paid in full.",
+            "You get an invoice, or a price for approval first if you asked for one — a guaranteed quote when you have sent the part file, an estimate when we still have to model it. Nothing is built until the invoice is paid in full.",
         },
         {
           title: "We build and ship it",
@@ -384,13 +391,13 @@ export const NewUserAdminNotificationEmailHTML = (data: {
 export const NewRequestEmailHTML = (data: {
   customerName: string;
   customerEmail: string;
-  /** Present on a no-account quote, where a callback is how this gets answered. */
+  /** Present on a no-account estimate, where a callback answers it. */
   customerPhone?: string;
-  /** Optional, and only ever offered on the public quote form. */
+  /** Optional, and only ever offered on the public estimate form. */
   company?: string;
-  /** True when this came through /quote — the customer has no desk to watch. */
+  /** True when this came through /estimate — no desk for them to watch. */
   guestSubmitted?: boolean;
-  /** The short code the customer was given on screen, e.g. "Q-4F2A9C". */
+  /** The short code the customer was given on screen, e.g. "E-4F2A9C". */
   reference?: string;
   /** The uploaded file's name, or the customer's name for a described part. */
   fileName: string;
@@ -404,7 +411,12 @@ export const NewRequestEmailHTML = (data: {
   dateNeeded: string;
   notes?: string;
   printSettings?: string;
-  quoteRequested?: boolean;
+  /**
+   * Which pricing track this landed on — "ESTIMATE", "QUOTE", or null/absent
+   * when the customer did not ask for a price at all. The console needs to
+   * know which it owes them before it starts writing a number down.
+   */
+  pricingKind?: PricingKind | null;
   isFreeSample?: boolean;
 }) => {
   const described = data.submissionType === "DESCRIPTION";
@@ -415,7 +427,7 @@ export const NewRequestEmailHTML = (data: {
   return shell({
     audience: "console",
     preheader: `${data.customerName} — ${data.fileName}, ${data.quantity} off, needed ${data.dateNeeded}.`,
-    eyebrow: data.guestSubmitted ? "Console ⁄ No-account quote" : "Console ⁄ New build",
+    eyebrow: data.guestSubmitted ? "Console ⁄ No-account estimate" : "Console ⁄ New build",
     title: "New part request",
     content: `
       ${heading("New part request")}
@@ -424,7 +436,7 @@ export const NewRequestEmailHTML = (data: {
       ${
         data.guestSubmitted
           ? callout(
-              `<strong style="color:${C.clay};">No account.</strong> Came in through the public quote form and is attached to no account — the email and phone below are the only way to reach them. They were told to expect an answer within one business day.`,
+              `<strong style="color:${C.clay};">No account.</strong> Came in through the public estimate form and is attached to no account — the email and phone below are the only way to reach them. No account also means no guaranteed price: this is an estimate and cannot be promoted to a quote as it stands. They were told to expect an answer within one business day.`,
               C.clay
             )
           : ""
@@ -440,15 +452,20 @@ export const NewRequestEmailHTML = (data: {
       ${
         described
           ? callout(
-              `<strong style="color:${C.clay};">No 3D file.</strong> The customer described this part${references}. Model it first, then quote.`,
+              `<strong style="color:${C.clay};">No 3D file.</strong> The customer described this part${references}. Model it first, then estimate — with no model there is nothing to guarantee a price against.`,
               C.clay
             )
           : ""
       }
       ${
-        data.quoteRequested
+        data.pricingKind === KIND_QUOTE
           ? callout(
-              `<strong style="color:${C.ember};">Quote requested.</strong> Send a price for approval before invoicing.`,
+              `<strong style="color:${C.ember};">Quote requested.</strong> Account holder, part file on the row — this one qualifies for a guaranteed price. Send it for approval before invoicing.`,
+              C.ember
+            )
+          : data.pricingKind === KIND_ESTIMATE
+          ? callout(
+              `<strong style="color:${C.ember};">Estimate requested.</strong> Send an indicative price for approval before invoicing. Not a number the shop is committed to — say so when you send it.`,
               C.ember
             )
           : ""
@@ -485,18 +502,22 @@ export const NewRequestEmailHTML = (data: {
 };
 
 /**
- * The customer's receipt for a no-account quote request.
+ * The customer's receipt for a no-account estimate request.
  *
  * They have no desk to watch and no password to remember, so this email is the
  * whole of their side of the transaction: proof it arrived, the reference the
  * shop will use on the phone, what we understood them to be asking for, and
- * when to expect an answer. The account offer sits at the bottom, as an offer
- * for future work only — a no-account quote is deliberately attached to no
- * account, so opening one does not and must not inherit it.
+ * when to expect an answer. It says plainly that what is coming back is an
+ * estimate rather than a guaranteed price, because this email is the record
+ * the customer keeps and the last chance to set that expectation in writing.
+ *
+ * The account offer sits at the bottom, as an offer for future work only — a
+ * no-account estimate is deliberately attached to no account, so opening one
+ * does not and must not inherit it.
  */
-export const QuoteReceivedEmailHTML = (data: {
+export const EstimateReceivedEmailHTML = (data: {
   customerName: string;
-  /** The short code shown on screen when they submitted, e.g. "Q-4F2A9C". */
+  /** The short code shown on screen when they submitted, e.g. "E-4F2A9C". */
   reference: string;
   partTitle: string;
   quantity: number;
@@ -505,13 +526,18 @@ export const QuoteReceivedEmailHTML = (data: {
 }) =>
   shell({
     audience: "guest",
-    preheader: `Quote ${data.reference} is with the shop — we'll come back within one business day.`,
-    eyebrow: "Quote ⁄ Received",
-    title: `Quote ${data.reference} received`,
+    preheader: `Estimate ${data.reference} is with the shop — we'll come back within one business day.`,
+    eyebrow: "Estimate ⁄ Received",
+    title: `Estimate ${data.reference} received`,
     content: `
       ${heading(`We've got it, <span style="font-style:italic;color:${C.clay};">${escapeHtml(data.customerName.split(" ")[0] || data.customerName)}</span>`)}
       ${lede(
-        `Your quote request is with the shop. Quote your reference — <strong style="color:${C.creamSoft};">${escapeHtml(data.reference)}</strong> — if you call about it.`
+        `Your estimate request is with the shop. Give your reference — <strong style="color:${C.creamSoft};">${escapeHtml(data.reference)}</strong> — if you call about it.`
+      )}
+
+      ${callout(
+        `<strong style="color:${C.creamSoft};">What comes back is an estimate.</strong> It is our considered read of the job, not a price we have committed to. We can only guarantee a price for an account holder who has sent us the part file to print — everything is confirmed in writing before anything is made.`,
+        C.clay
       )}
 
       ${specSheet([
@@ -528,7 +554,7 @@ export const QuoteReceivedEmailHTML = (data: {
           detail: "A person looks at your part, not a calculator. Within one business day.",
         },
         {
-          title: "We come back with a price",
+          title: "We come back with an estimate",
           detail: "By email or phone, whichever reaches you — with anything we still need to ask.",
         },
         {
@@ -538,11 +564,11 @@ export const QuoteReceivedEmailHTML = (data: {
       ])}
 
       ${callout(
-        `Want your <em>next</em> job on a desk you can watch? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a>. This quote stays where it is — we keep no-account quotes off accounts on purpose, so nobody can attach anything to yours by typing your address into a form. We answer this one by email either way.`,
+        `Want your <em>next</em> job on a desk you can watch? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a> — it is also what lets us turn an estimate into a guaranteed quote, once you send the part file with it. This estimate stays where it is: we keep no-account submissions off accounts on purpose, so nobody can attach anything to yours by typing your address into a form. We answer this one by email either way.`,
         C.clay
       )}
 
-      ${button(absoluteUrl("/quote"), "Send another part")}`,
+      ${button(absoluteUrl("/estimate"), "Send another part")}`,
   });
 
 export const InvoiceSentEmailHTML = (data: {

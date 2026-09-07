@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isValidStatus, requestKind, statusesFor } from "@/lib/request-status";
+import { kindLabel, requestKind, statusOptionsFor } from "@/lib/request-status";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -42,17 +42,22 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    // A quote and a build request speak different status vocabularies, so what
-    // counts as valid depends on which track this row is on. Moving between the
-    // two is a conversion, not a status change — see ./convert.
+    // An estimate, a quote and a build request speak three different status
+    // vocabularies, so what counts as valid depends on which track this row is
+    // on. Moving between them is a conversion, not a status change — see
+    // ./convert.
+    //
+    // `statusOptionsFor` rather than the bare track list, so a row still
+    // carrying a status from before the estimate track existed can be re-saved
+    // as-is rather than being stuck behind a menu that has no room for it.
     const kind = requestKind(partRequest);
-    if (!isValidStatus(kind, status)) {
+    const allowed = statusOptionsFor(partRequest);
+    if (!allowed.includes(status)) {
       return NextResponse.json(
         {
-          error:
-            kind === "QUOTE"
-              ? `Invalid status for a quote. Expected one of: ${statusesFor(kind).join(", ")}`
-              : `Invalid status for a request. Expected one of: ${statusesFor(kind).join(", ")}`,
+          error: `Invalid status for ${
+            kind === "ESTIMATE" ? "an" : "a"
+          } ${kindLabel(kind).toLowerCase()}. Expected one of: ${allowed.join(", ")}`,
         },
         { status: 400 }
       );

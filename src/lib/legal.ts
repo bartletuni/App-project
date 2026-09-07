@@ -50,7 +50,7 @@ export const LEGAL_ROUTES: LegalRoute[] = [
   {
     href: "/terms",
     label: "Terms of Service",
-    blurb: "How orders, quotes, and manufacturing work",
+    blurb: "How orders, estimates, quotes, and manufacturing work",
   },
   {
     href: "/privacy",

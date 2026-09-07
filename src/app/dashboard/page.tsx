@@ -17,10 +17,18 @@ import PartSourceSummary from "@/components/PartSourceSummary";
 import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
 import { parseStoredSettings } from "@/lib/print-settings";
 import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
-import { isQuote, isUntouched, statusHint, statusTone } from "@/lib/request-status";
+import {
+  isEstimate,
+  isPricing,
+  isQuote,
+  isUntouched,
+  requestKindLabel,
+  statusHint,
+  statusTone,
+} from "@/lib/request-status";
 
 /**
- * One colour per tone rather than per status, so the quote statuses added
+ * One colour per tone rather than per status, so the pricing statuses added
  * alongside the build ones are styled without a second list to keep in step.
  */
 const toneStyle: Record<string, string> = {
@@ -73,7 +81,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      // Keep the destination (a "Request a quote" link, for instance) so the
+      // Keep the destination (a "Request an estimate" link, for instance) so the
       // composer opens as asked once they are signed in.
       const here = `${window.location.pathname}${window.location.search}`;
       router.push(`/login?next=${encodeURIComponent(here)}`);
@@ -122,11 +130,19 @@ export default function DashboardPage() {
 
   const stats = [
     { label: "Total", value: requests.length, icon: FileStack },
-    { label: "Quotes", value: requests.filter((r) => isQuote(r)).length, icon: Clock },
+    // Estimates and quotes counted together: both mean "we are pricing this,
+    // nothing is being built yet", which is the thing a customer is actually
+    // scanning this strip for. Which of the two a given row is shows on the row.
+    {
+      label: "Pricing",
+      value: requests.filter((r) => isPricing(r)).length,
+      icon: Clock,
+      hint: "Estimates and quotes — being priced, not yet in build",
+    },
     {
       label: "In build",
       value: requests.filter(
-        (r) => !isQuote(r) && ["PENDING", "ACTIVE", "NEEDS REVIEW", "INVOICE SENT"].includes(r.status)
+        (r) => !isPricing(r) && ["PENDING", "ACTIVE", "NEEDS REVIEW", "INVOICE SENT"].includes(r.status)
       ).length,
       icon: Loader2,
     },
@@ -148,7 +164,7 @@ export default function DashboardPage() {
           <Reveal delay={0.05}>
             <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-px bg-clay-500/15 border border-clay-500/15">
               {stats.map((s) => (
-                <div key={s.label} className="bg-espresso-900 p-4 sm:p-5">
+                <div key={s.label} className="bg-espresso-900 p-4 sm:p-5" title={(s as { hint?: string }).hint}>
                   <div className="flex items-center justify-between">
                     <span className="font-display text-3xl sm:text-4xl text-cream-100">
                       <AnimatedCounter value={s.value} />
@@ -212,27 +228,36 @@ export default function DashboardPage() {
                                 We model it
                               </span>
                             )}
-                            {isQuote(req) && (
+                            {isPricing(req) && (
                               <span
                                 className="shrink-0 border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200"
-                                title="We are pricing this — nothing is built until you approve it"
+                                title={
+                                  isEstimate(req)
+                                    ? "We are working out an indicative price — nothing is built until you approve it, and the final figure is confirmed in writing"
+                                    : "We are pricing this as a firm quote — nothing is built until you approve it"
+                                }
                               >
-                                Quote
+                                {requestKindLabel(req)}
                               </span>
                             )}
-                            {!isQuote(req) && req.convertedAt && (
+                            {!isPricing(req) && req.convertedAt && (
                               <span
                                 className="shrink-0 border border-clay-500/30 bg-clay-500/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-clay-200"
-                                title="This quote was approved and is now a build"
+                                title="This was priced first, approved, and is now a build"
                               >
-                                From quote
+                                From pricing
                               </span>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.1em] text-cream-500">
                             <span>QTY <span className="text-cream-200">{req.quantity}</span></span>
                             <span>INV <span className="text-clay-300">{req.invoiceNumber || "—"}</span></span>
-                            {req.quotedPrice && <span>QUOTED <span className="text-green-300">{req.quotedPrice}</span></span>}
+                            {req.quotedPrice && (
+                              <span>
+                                {isEstimate(req) ? "EST" : "QUOTED"}{" "}
+                                <span className="text-green-300">{req.quotedPrice}</span>
+                              </span>
+                            )}
                             <span>NEED <span className="text-cream-200">{format(new Date(req.dateNeeded), "MMM d")}</span></span>
                             {req.trackingNumber && <span>USPS <span className="text-teal-300">{req.trackingNumber}</span></span>}
                           </div>
@@ -334,16 +359,24 @@ export default function DashboardPage() {
                   <div className="text-sm text-clay-300">{selectedRequest.invoiceNumber || "Pending"}</div>
                 </div>
                 <div>
-                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Quote</div>
-                  <div className={`text-sm ${isQuote(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">
+                    {isQuote(selectedRequest) ? "Quote" : "Estimate"}
+                  </div>
+                  <div className={`text-sm ${isPricing(selectedRequest) ? "text-amber-200" : "text-cream-200"}`}>
                     {selectedRequest.quotedPrice
                       ? selectedRequest.quotedPrice
-                      : isQuote(selectedRequest)
+                      : isPricing(selectedRequest)
                         ? "Being priced"
                         : selectedRequest.quoteRequested
                           ? "Requested"
                           : "—"}
                   </div>
+                  {isEstimate(selectedRequest) && (
+                    <div className="mt-1 text-[11px] leading-relaxed text-cream-500">
+                      An indication, not a guaranteed price. Send the part file
+                      from your desk and we can quote it firm.
+                    </div>
+                  )}
                 </div>
                 <div className="col-span-1 sm:col-span-3">
                   <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Tracking</div>

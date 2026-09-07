@@ -7,7 +7,7 @@ import {
   emptyPartSource,
   isPreviewableImage,
   parseSubmissionType,
-  quoteIsForced,
+  pricingIsForced,
   requestTitle,
   validatePartSource,
 } from "@/lib/part-source";
@@ -83,10 +83,10 @@ describe("validatePartSource — description lane", () => {
   });
 });
 
-describe("quoteIsForced", () => {
-  it("forces a quote on a described part only", () => {
-    expect(quoteIsForced(SUBMISSION_DESCRIPTION)).toBe(true);
-    expect(quoteIsForced(SUBMISSION_MODEL)).toBe(false);
+describe("pricingIsForced", () => {
+  it("forces pricing on a described part only", () => {
+    expect(pricingIsForced(SUBMISSION_DESCRIPTION)).toBe(true);
+    expect(pricingIsForced(SUBMISSION_MODEL)).toBe(false);
   });
 });
 

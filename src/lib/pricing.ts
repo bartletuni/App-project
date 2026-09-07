@@ -79,7 +79,7 @@ export const DEFAULT_PRICING: PricingContent = {
     contactEmail: "info@takomoco.com",
     contactWeb: "takomoco.com",
     footerNote:
-      "All rates in USD. Material cost is quoted per material at time of order and is additional to the service fees listed above. Large or complex work is quoted individually.",
+      "All rates in USD. Material cost is set per material at time of order and is additional to the service fees listed above. Large or complex work is priced individually.",
   },
   sections: [
     {
@@ -133,7 +133,7 @@ export const DEFAULT_PRICING: PricingContent = {
           label: "Large / Complex Assembly Scan",
           detail: "Assemblies over 500mm.",
           price: "$250.00+",
-          note: "custom quote",
+          note: "custom estimate",
         },
         {
           label: "Dimensional Inspection & Metrology Report",

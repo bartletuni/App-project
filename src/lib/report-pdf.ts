@@ -4,8 +4,8 @@ import { format } from "date-fns";
 import { CLAY, CREAM, ESPRESSO, MARK, WORDMARK, rgb } from "@/lib/brand";
 import { BUSINESS, SITE_URL } from "@/lib/seo";
 import { requestTitle } from "@/lib/part-source";
-import { isQuote } from "@/lib/request-status";
-import { requestContact } from "@/lib/guest-quote";
+import { requestKindLabel } from "@/lib/request-status";
+import { requestContact } from "@/lib/guest-estimate";
 
 /**
  * The request-history report, in the shop's own voice.
@@ -120,14 +120,14 @@ export const REPORT_COLUMNS = [
   "Quantity",
   "Type",
   "Status",
-  "Quoted",
+  "Price",
   "Invoice #",
   "Date Needed",
 ] as const;
 
 /** One request as its row of cells. */
 export function reportRow(req: ReportRequest): string[] {
-  // A no-account quote is filed under a system row, so the report reads the
+  // A no-account estimate is filed under a system row, so the report reads the
   // contact the sender actually gave rather than the account that owns it.
   const contact = requestContact(req as never);
 
@@ -139,7 +139,7 @@ export function reportRow(req: ReportRequest): string[] {
     requestTitle(req as never),
     req.material || "N/A",
     String(req.quantity),
-    isQuote(req as never) ? "Quote" : "Request",
+    requestKindLabel(req as never),
     req.status,
     req.quotedPrice ? String(req.quotedPrice) : "N/A",
     req.invoiceNumber || "N/A",

@@ -17,9 +17,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      // The public quote form: the one page a visitor with a broken part in
+      // The public estimate form: the one page a visitor with a broken part in
       // their hand is actually looking for.
-      url: absoluteUrl("/quote"),
+      url: absoluteUrl("/estimate"),
       lastModified,
       changeFrequency: "monthly",
       priority: 0.95,

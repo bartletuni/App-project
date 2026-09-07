@@ -34,12 +34,32 @@ const statusRequest = (status: string) =>
 
 const params = { params: { id: "req-1" } };
 
+/** A genuine quote: an account holder's row with the part file on it. */
 const openQuote = {
   id: "req-1",
   kind: "QUOTE",
   status: "QUOTE ACCEPTED",
   quoteRequested: true,
   quotedPrice: null,
+  guestEmail: null,
+  fileId: "r2-object-1",
+};
+
+/** An estimate that qualifies for promotion: account holder, part file. */
+const qualifiedEstimate = {
+  id: "req-1",
+  kind: "ESTIMATE",
+  status: "ESTIMATE ACCEPTED",
+  quoteRequested: true,
+  quotedPrice: null,
+  guestEmail: null,
+  fileId: "r2-object-1",
+};
+
+/** The public form's output: no account, so no guaranteed price is possible. */
+const guestEstimate = {
+  ...qualifiedEstimate,
+  guestEmail: "dana@fieldservice.example",
 };
 
 beforeEach(() => {
@@ -129,6 +149,70 @@ describe("POST /api/requests/[id]/convert", () => {
   });
 });
 
+describe("POST /api/requests/[id]/convert?target=QUOTE", () => {
+  it("promotes an estimate that has an account and a part file", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(qualifiedEstimate);
+
+    const res = await POST(convertRequest({ target: "QUOTE" }), params);
+    expect(res.status).toBe(200);
+
+    const { data } = (prisma.partRequest.update as jest.Mock).mock.calls[0][0];
+    expect(data.kind).toBe("QUOTE");
+    expect(data.status).toBe("QUOTE IN REVIEW");
+    // Promoting is still pricing, not a conversion onto the build queue.
+    expect(data).not.toHaveProperty("convertedAt");
+  });
+
+  it("refuses to promote a no-account estimate", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(guestEstimate);
+
+    const res = await POST(convertRequest({ target: "QUOTE" }), params);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/no account/i);
+    expect(prisma.partRequest.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses to promote an estimate with no part file", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue({
+      ...qualifiedEstimate,
+      fileId: null,
+    });
+
+    const res = await POST(convertRequest({ target: "QUOTE" }), params);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/no part file/i);
+    expect(prisma.partRequest.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses to promote something that is already a quote", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(openQuote);
+
+    const res = await POST(convertRequest({ target: "QUOTE" }), params);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/already a quote/i);
+  });
+
+  it("rejects a target it does not recognise", async () => {
+    const res = await POST(convertRequest({ target: "SOMETHING" }), params);
+    expect(res.status).toBe(400);
+    expect(prisma.partRequest.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("still moves a no-account estimate onto the build queue", async () => {
+    // Promotion is blocked, conversion never is: plenty of jobs are agreed off
+    // a ballpark and go straight to the machines.
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(guestEstimate);
+
+    const res = await POST(convertRequest({}), params);
+    expect(res.status).toBe(200);
+
+    const { data } = (prisma.partRequest.update as jest.Mock).mock.calls[0][0];
+    expect(data.kind).toBe("REQUEST");
+    expect(data.status).toBe("PENDING");
+    expect(data.convertedAt).toBeInstanceOf(Date);
+  });
+});
+
 describe("PATCH /api/requests/[id]/status", () => {
   it("accepts a quote status on a quote", async () => {
     (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(openQuote);
@@ -154,6 +238,31 @@ describe("PATCH /api/requests/[id]/status", () => {
     const res = await PATCH_STATUS(statusRequest("QUOTE SENT"), params);
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/Invalid status for a request/);
+  });
+
+  it("accepts an estimate status on an estimate", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(qualifiedEstimate);
+    expect((await PATCH_STATUS(statusRequest("ESTIMATE SENT"), params)).status).toBe(200);
+  });
+
+  it("refuses a quote status on an estimate", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(qualifiedEstimate);
+
+    const res = await PATCH_STATUS(statusRequest("QUOTE SENT"), params);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/Invalid status for an estimate/);
+    expect(prisma.partRequest.update).not.toHaveBeenCalled();
+  });
+
+  it("lets a pre-estimate row keep the status it already has", async () => {
+    // Filed as a QUOTE before the split, shown as an estimate now. Its own
+    // value has to stay saveable or the console cannot touch the row at all.
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue({
+      ...guestEstimate,
+      kind: "QUOTE",
+      status: "QUOTE SENT",
+    });
+    expect((await PATCH_STATUS(statusRequest("QUOTE SENT"), params)).status).toBe(200);
   });
 
   it("still accepts the original build statuses", async () => {

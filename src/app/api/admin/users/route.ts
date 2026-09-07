@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // The system row that owns no-account quotes is not a client and must not
+    // The system row that owns no-account estimates is not a client and must not
     // be listed as one — see User.isGuest.
     const realClients = { isGuest: false };
 

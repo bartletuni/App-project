@@ -7,7 +7,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
-import RequestQuoteButton from "@/components/RequestQuoteButton";
+import RequestEstimateButton from "@/components/RequestEstimateButton";
 import { type PricingContent } from "@/lib/pricing";
 
 /** "A", "B", "C" … the section index used on the printed catalog. */
@@ -44,7 +44,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
                 {settings.heroIntro}
               </p>
             )}
-            <RequestQuoteButton className="mt-7" />
+            <RequestEstimateButton className="mt-7" />
           </div>
         </Reveal>
 
@@ -163,7 +163,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="max-w-xl">
                 <h2 className="font-display text-2xl sm:text-3xl text-cream-100">
-                  Ready to <span className="italic text-clay-300">quote</span> a part?
+                  Ready to <span className="italic text-clay-300">estimate</span> a part?
                 </h2>
                 {settings.footerNote && (
                   <p className="mt-3 text-sm text-cream-500 leading-relaxed">
@@ -172,7 +172,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
                 )}
               </div>
               <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                <RequestQuoteButton />
+                <RequestEstimateButton />
                 <Link
                   href="/login"
                   className="group inline-flex shrink-0 items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"

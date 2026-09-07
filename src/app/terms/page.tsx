@@ -17,7 +17,7 @@ import {
 
 const title = "Terms of Service";
 const description =
-  "The terms covering TakomoCo quotes, orders, and manufacturing — cancellation, payment, ownership of the files you upload, what we will not print, and the limits of our liability.";
+  "The terms covering TakomoCo estimates, quotes, orders, and manufacturing — cancellation, payment, ownership of the files you upload, what we will not print, and the limits of our liability.";
 
 export const metadata: Metadata = {
   title,
@@ -51,7 +51,7 @@ const sections: LegalSection[] = [
         <p>
           These terms are the agreement between you and TakomoCo (&ldquo;we&rdquo;,
           &ldquo;us&rdquo;, the shop) covering takomoco.com, the client
-          dashboard, and every quote and part we produce for you. By creating an
+          dashboard, and every estimate, quote and part we produce for you. By creating an
           account or submitting a request, you accept them.
         </p>
         <p>
@@ -80,24 +80,46 @@ const sections: LegalSection[] = [
     ),
   },
   {
-    id: "quotes",
+    id: "estimates-and-quotes",
     n: "03",
-    title: "Quotes and pricing",
+    title: "Estimates, quotes, and pricing",
     body: (
       <>
         <p>
           The rates published on the{" "}
-          <Link href="/pricing">pricing sheet</Link> are estimates to help you
-          budget. They are not offers, and no price is binding until we send you
-          a written quote for your specific part.
+          <Link href="/pricing">pricing sheet</Link> are general figures to help
+          you budget. They are not offers and they are not binding on either of
+          us.
         </p>
+        <p>
+          We give two kinds of price for a specific part, and we always tell you
+          which one you have:
+        </p>
+        <ul>
+          <li>
+            <strong>An estimate</strong> is our considered opinion of what the
+            job will cost. It is not an offer, it does not bind us, and the
+            final price may differ once we have the part in front of us. This is
+            what we give for anything submitted through the public{" "}
+            <Link href="/estimate">estimate form</Link>, and for any part we
+            still have to model from your description and photographs.
+          </li>
+          <li>
+            <strong>A quote</strong> is a price we will honour. We can only give
+            one where we know exactly what we would be making and who we would
+            be making it for, which means you hold an account with us and have
+            uploaded the part file we would print. Unless the quote says
+            otherwise, it is good for <strong>30 days</strong>.
+          </li>
+        </ul>
         <p>
           A quote is based on the model, quantity, material, and settings you
           submitted. If any of those change — a revised model, a different
           material, a rush date — the price may change too, and we will requote
-          before continuing. Unless a quote says otherwise, it is good for{" "}
-          <strong>30 days</strong>. Prices are in US dollars and exclude
-          shipping and any applicable sales tax.
+          before continuing. An estimate can become a quote once the part file
+          and account are in place; nothing you have been given as an estimate
+          becomes binding on us simply because work proceeded. Prices are in US
+          dollars and exclude shipping and any applicable sales tax.
         </p>
       </>
     ),
@@ -168,7 +190,7 @@ const sections: LegalSection[] = [
         <p>
           <strong>Your models stay yours.</strong> Uploading a file gives us no
           ownership of it. You grant us only the licence we need to do the job:
-          to store, view, repair, slice, and print your file in order to quote
+          to store, view, repair, slice, and print your file in order to price
           and produce your part, and to keep a copy for the period described in
           the <Link href="/privacy">Privacy Policy</Link> so the part can be
           reprinted or revised.
@@ -411,13 +433,14 @@ export default function TermsPage() {
         eyebrow="LEGAL ⁄ TERMS"
         title="Terms of"
         accent="service."
-        lede="How quotes, orders, and manufacturing work at this shop — including the two things worth reading before you upload anything: who is responsible for the part being yours to reproduce, and what a printed part should never be used for."
+        lede="How estimates, quotes, orders, and manufacturing work at this shop — including the two things worth reading before you upload anything: who is responsible for the part being yours to reproduce, and what a printed part should never be used for."
         summary={
           <>
             <ul>
               <li>
-                Published rates are estimates. A price is fixed only when we
-                send you a written quote, and work starts once the invoice is
+                Published rates and estimates are indications only. A price
+                is fixed only when we send you a written quote — which needs an
+                account and your part file — and work starts once the invoice is
                 paid.
               </li>
               <li>
