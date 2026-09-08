@@ -21,7 +21,7 @@ const PARTS: { name: string; profile: Profile }[] = [
   {
     name: "GEAR-07",
     profile: (dx, dy, z) => {
-      const r = Math.hypot(dx, dy);
+      const r = Math.sqrt(dx * dx + dy * dy);
       const theta = Math.atan2(dy, dx);
       if (z < 2) return r <= 6.6; // base plate disc
       if (z < 9) {
@@ -35,13 +35,15 @@ const PARTS: { name: string; profile: Profile }[] = [
   {
     name: "FLANGE-12",
     profile: (dx, dy, z) => {
-      const r = Math.hypot(dx, dy);
+      const r = Math.sqrt(dx * dx + dy * dy);
       if (z < 2) {
         // Base flange with four bolt bores
         if (r > 6.8) return false;
         for (let i = 0; i < 4; i++) {
           const a = (i * Math.PI) / 2 + Math.PI / 4;
-          if (Math.hypot(dx - Math.cos(a) * 4.9, dy - Math.sin(a) * 4.9) <= 1.2) return false;
+          const cx = dx - Math.cos(a) * 4.9;
+          const cy = dy - Math.sin(a) * 4.9;
+          if (Math.sqrt(cx * cx + cy * cy) <= 1.2) return false;
         }
         return true;
       }
@@ -54,13 +56,14 @@ const PARTS: { name: string; profile: Profile }[] = [
       if (z < 3) return Math.abs(dx) <= 6 && Math.abs(dy) <= 5; // foot slab
       // Thin vertical wall along the back edge, with a lightening hole
       if (dy < 3 || dy > 5 || Math.abs(dx) > 6) return false;
-      return Math.hypot(dx, z - 7) > 2.2;
+      const dz = z - 7;
+      return Math.sqrt(dx * dx + dz * dz) > 2.2;
     },
   },
   {
     name: "NOZZLE-V2",
     profile: (dx, dy, z) => {
-      const r = Math.hypot(dx, dy);
+      const r = Math.sqrt(dx * dx + dy * dy);
       if (z < 2) return r <= 6.4; // mounting disc
       const outer = 6.2 - (z - 2) * 0.52; // tapering cone
       return r <= outer && r >= Math.max(1.1, outer - 2.4);
@@ -71,7 +74,7 @@ const PARTS: { name: string; profile: Profile }[] = [
     profile: (dx, dy, z) => {
       const h = hexDist(dx, dy);
       if (z < 2) return h <= 6.2; // hex base
-      return h <= 4.2 && Math.hypot(dx, dy) >= 1.8; // hex column, bored
+      return h <= 4.2 && Math.sqrt(dx * dx + dy * dy) >= 1.8; // hex column, bored
     },
   },
 ];
@@ -247,7 +250,12 @@ export default function BuildPlate({ className = "" }: { className?: string }) {
       ctx.strokeStyle = "rgba(224, 190, 154, 0.22)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      plate.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      plate.forEach((p, i) => {
+        const rx = Math.round(p.x);
+        const ry = Math.round(p.y);
+        if (i) ctx.lineTo(rx, ry);
+        else ctx.moveTo(rx, ry);
+      });
       ctx.closePath();
       ctx.stroke();
 
@@ -322,7 +330,12 @@ export default function BuildPlate({ className = "" }: { className?: string }) {
 
         for (const f of faces) {
           ctx.beginPath();
-          f.pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+          f.pts.forEach((p, i) => {
+            const rx = Math.round(p.x);
+            const ry = Math.round(p.y);
+            if (i) ctx.lineTo(rx, ry);
+            else ctx.moveTo(rx, ry);
+          });
           ctx.closePath();
           ctx.fillStyle = f.fill;
           ctx.fill();
@@ -340,9 +353,12 @@ export default function BuildPlate({ className = "" }: { className?: string }) {
           // Fresh extrusion glow on the active layer's top
           ctx.fillStyle = `rgba(${EMBER.r}, ${EMBER.g}, ${EMBER.b}, ${tint * 0.22})`;
           ctx.beginPath();
-          [c001, c101, c111, c011].forEach((p, i) =>
-            i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y),
-          );
+          [c001, c101, c111, c011].forEach((p, i) => {
+            const rx = Math.round(p.x);
+            const ry = Math.round(p.y);
+            if (i) ctx.lineTo(rx, ry);
+            else ctx.moveTo(rx, ry);
+          });
           ctx.closePath();
           ctx.fill();
         }
@@ -351,18 +367,20 @@ export default function BuildPlate({ className = "" }: { className?: string }) {
       // --- Gantry + nozzle over the freshest voxel ---
       if (!reduced && head && revealCount < totalCells) {
         const hp = proj(head.x + 0.5, head.y + 0.5, head.z + 1);
+        const hpx = Math.round(hp.x);
+        const hpy = Math.round(hp.y);
         ctx.strokeStyle = `rgba(${EMBER.r}, ${EMBER.g}, ${EMBER.b}, 0.35)`;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(hp.x, 8);
-        ctx.lineTo(hp.x, hp.y - 4);
-        ctx.moveTo(hp.x - 26, hp.y);
-        ctx.lineTo(hp.x - 6, hp.y);
-        ctx.moveTo(hp.x + 6, hp.y);
-        ctx.lineTo(hp.x + 26, hp.y);
+        ctx.moveTo(hpx, 8);
+        ctx.lineTo(hpx, hpy - 4);
+        ctx.moveTo(hpx - 26, hpy);
+        ctx.lineTo(hpx - 6, hpy);
+        ctx.moveTo(hpx + 6, hpy);
+        ctx.lineTo(hpx + 26, hpy);
         ctx.stroke();
         ctx.fillStyle = `rgba(${EMBER.r}, ${EMBER.g}, ${EMBER.b}, 0.9)`;
-        ctx.fillRect(hp.x - 1.5, hp.y - 1.5, 3, 3);
+        ctx.fillRect(hpx - 1.5, hpy - 1.5, 3, 3);
       }
 
       ctx.globalAlpha = 1;

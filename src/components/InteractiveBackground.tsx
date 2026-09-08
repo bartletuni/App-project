@@ -227,7 +227,8 @@ export default function InteractiveBackground() {
         this.phase = Math.random() * Math.PI * 2;
         this.speed = 0.3 + Math.random() * 0.5;
         const c = emberPalette[Math.floor(Math.random() * emberPalette.length)];
-        this.color = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${0.5 + Math.random() * 0.4})`;
+        const alpha = 0.5 + Math.floor(Math.random() * 5) * 0.1;
+        this.color = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha.toFixed(1)})`;
       }
 
       update(t: number) {
@@ -251,7 +252,7 @@ export default function InteractiveBackground() {
           const RADIUS = 280;
           const mdx = m.x - tx;
           const mdy = m.y - ty;
-          const md = Math.hypot(mdx, mdy);
+          const md = Math.sqrt(mdx * mdx + mdy * mdy);
           if (md < RADIUS) {
             // Eased falloff so dots drift in smoothly from a wide area and
             // pull harder the closer they get to the cursor.
@@ -279,7 +280,7 @@ export default function InteractiveBackground() {
         // Square micro-dots: far cheaper than arc() at this density.
         ctx.fillStyle = this.color;
         const s = this.size * 1.6;
-        ctx.fillRect(this.x, this.y, s, s);
+        ctx.fillRect(Math.round(this.x), Math.round(this.y), s, s);
       }
     }
 
@@ -300,6 +301,8 @@ export default function InteractiveBackground() {
       return homes;
     };
 
+    let particleGroups: Record<string, Particle[]> = {};
+
     const init = () => {
       const W = canvas.width;
       const H = canvas.height;
@@ -319,8 +322,12 @@ export default function InteractiveBackground() {
       }
       homes.sort((a, b) => b.key - a.key);
       particles = [];
+      particleGroups = {};
       for (let i = 0; i < target; i++) {
-        particles.push(new Particle(homes[i].x, homes[i].y));
+        const p = new Particle(homes[i].x, homes[i].y);
+        particles.push(p);
+        if (!particleGroups[p.color]) particleGroups[p.color] = [];
+        particleGroups[p.color].push(p);
       }
     };
 
@@ -341,7 +348,7 @@ export default function InteractiveBackground() {
         const p = particles[i];
         const dx = p.x - cx;
         const dy = p.y - cy;
-        const d = Math.hypot(dx, dy) || 1;
+        const d = Math.sqrt(dx * dx + dy * dy) || 1;
         if (d < RADIUS) {
           const force = (1 - d / RADIUS) * 7;
           p.vx += (dx / d) * force;
@@ -355,10 +362,22 @@ export default function InteractiveBackground() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const t = performance.now() / 1000;
+
       for (let i = 0; i < particles.length; i++) {
         particles[i].update(t);
-        particles[i].draw();
       }
+
+      for (const color in particleGroups) {
+        ctx.fillStyle = color;
+        const group = particleGroups[color];
+        ctx.beginPath();
+        for (let i = 0; i < group.length; i++) {
+          const p = group[i];
+          const s = p.size * 1.6;
+          ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s);
+        }
+      }
+
       animationFrameId = requestAnimationFrame(animate);
     };
 
