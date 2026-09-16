@@ -16,3 +16,6 @@
 ## 2024-07-28 - Avoid Dead-End Empty States
 **Learning:** Empty states without a clear call to action act as dead-ends, confusing users on how to proceed. Including a contextual CTA dramatically improves navigability.
 **Action:** Always provide a relevant Call-to-Action (like "Return Home" or "Create New") when rendering an empty state index or data view.
+## 2024-09-16 - SVG Accessibility in Action Buttons
+**Learning:** Decorative or state-based SVGs inside action buttons (like loading spinners or icons in export/download buttons) are often announced redundantly by screen readers if they are not properly hidden.
+**Action:** Always add `aria-hidden="true"` to SVG elements within interactive elements (buttons, links) when they serve a decorative or supplementary visual purpose.
