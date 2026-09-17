@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
-import { FILE_RETENTION_CONSENT_REQUIRED } from "@/lib/legal";
+import { FILE_RETENTION_CONSENT_REQUIRED, TERMS_CONSENT_REQUIRED } from "@/lib/legal";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
       shippingAddress,
       billingAddress,
       phone,
+      termsAccepted,
       retentionPolicyAccepted,
     } = body;
 
@@ -26,12 +27,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
 
-    // Agreeing to the file retention policy is a condition of holding an
-    // account, so it is checked here and not only in the form — a POST made
-    // straight at this endpoint must not be able to skip the tick-box. It is
-    // required rather than recorded: every account this route creates has
-    // agreed, which is what the /file-retention page tells the customer. There
-    // is nothing to store, and so nothing new for the database to carry.
+    // Both agreements are conditions of holding an account, so they are
+    // checked here and not only in the form — a POST made straight at this
+    // endpoint must not be able to skip the tick-boxes. They are required
+    // rather than recorded: every account this route creates has given both,
+    // which is what the legal pages tell the customer. There is nothing to
+    // store, and so nothing new for the database to carry.
+    if (termsAccepted !== true) {
+      return NextResponse.json({ error: TERMS_CONSENT_REQUIRED }, { status: 400 });
+    }
+
     if (retentionPolicyAccepted !== true) {
       return NextResponse.json({ error: FILE_RETENTION_CONSENT_REQUIRED }, { status: 400 });
     }

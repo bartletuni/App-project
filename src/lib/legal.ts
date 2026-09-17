@@ -86,6 +86,14 @@ export const FILE_RETENTION_ROUTE = "/file-retention";
 export const FILE_RETENTION_CONSENT_REQUIRED =
   "You must agree to the File Retention Policy to create an account";
 
+/**
+ * The same, for the terms. Both agreements are conditions of holding an
+ * account and both are checked on the server; separate messages so a
+ * registration that is missing one is told which one.
+ */
+export const TERMS_CONSENT_REQUIRED =
+  "You must agree to the Terms of Service to create an account";
+
 export interface CookieEntry {
   /** The name as it appears in the browser, `__Secure-` prefix and all. */
   name: string;

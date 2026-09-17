@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { POST } from "../route";
 import { prisma } from "@/lib/prisma";
-import { FILE_RETENTION_CONSENT_REQUIRED } from "@/lib/legal";
+import { FILE_RETENTION_CONSENT_REQUIRED, TERMS_CONSENT_REQUIRED } from "@/lib/legal";
 
 // Mock the prisma client and NextResponse
 jest.mock("@/lib/prisma", () => ({
@@ -43,6 +43,7 @@ describe("POST /api/auth/register", () => {
     shippingAddress: "123 Test St",
     billingAddress: "123 Test St",
     phone: "1234567890",
+    termsAccepted: true,
     retentionPolicyAccepted: true,
   };
 
@@ -83,26 +84,42 @@ describe("POST /api/auth/register", () => {
     }
   });
 
-  describe("the file retention policy tick-box", () => {
+  describe("the agreement tick-boxes", () => {
     beforeEach(() => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.user.create as jest.Mock).mockResolvedValue({ id: "1", email: "test@example.com" });
     });
 
-    // The form disables its own button until the box is ticked, but the
-    // endpoint is reachable without the form, and agreement is a condition of
-    // holding an account rather than a nicety.
-    it.each([
+    // The form disables its own button until both boxes are ticked, but the
+    // endpoint is reachable without the form, and each agreement is a
+    // condition of holding an account rather than a nicety. Anything that is
+    // not exactly `true` is a refusal, so a truthy stand-in cannot pass for
+    // having read the document.
+    const notAgreed: [string, unknown][] = [
       ["missing", undefined],
       ["false", false],
       ["the string \"true\"", "true"],
       ["null", null],
-    ])("refuses a registration where the agreement is %s", async (_label, value) => {
-      const body: any = { ...validBody };
-      if (value === undefined) delete body.retentionPolicyAccepted;
-      else body.retentionPolicyAccepted = value;
+    ];
 
-      const res = await POST(createRequest(body));
+    const withField = (field: string, value: unknown) => {
+      const body: any = { ...validBody };
+      if (value === undefined) delete body[field];
+      else body[field] = value;
+      return body;
+    };
+
+    it.each(notAgreed)("refuses a registration where the terms agreement is %s", async (_label, value) => {
+      const res = await POST(createRequest(withField("termsAccepted", value)));
+      const json = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(json.error).toBe(TERMS_CONSENT_REQUIRED);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it.each(notAgreed)("refuses a registration where the retention agreement is %s", async (_label, value) => {
+      const res = await POST(createRequest(withField("retentionPolicyAccepted", value)));
       const json = await res.json();
 
       expect(res.status).toBe(400);
@@ -110,19 +127,20 @@ describe("POST /api/auth/register", () => {
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
-    it("creates the account when the agreement is given", async () => {
+    it("creates the account when both agreements are given", async () => {
       const res = await POST(createRequest(validBody));
 
       expect(res.status).toBe(201);
       expect(prisma.user.create).toHaveBeenCalled();
     });
 
-    // Nothing in the database carries the agreement — it is enforced, not
-    // stored — so the created row must not have grown a field for it.
-    it("stores nothing extra for it", async () => {
+    // Nothing in the database carries either agreement — they are enforced,
+    // not stored — so the created row must not have grown a field for them.
+    it("stores nothing extra for them", async () => {
       await POST(createRequest(validBody));
 
       const { data } = (prisma.user.create as jest.Mock).mock.calls[0][0];
+      expect(data).not.toHaveProperty("termsAccepted");
       expect(data).not.toHaveProperty("retentionPolicyAccepted");
     });
   });

@@ -14,6 +14,64 @@ const field =
   "w-full border border-clay-500/25 px-4 py-3 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
 const label =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
+const consentLink =
+  "text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm";
+
+/**
+ * One of the agreements a new account has to make.
+ *
+ * Both are real tick-boxes rather than sign-in-wrap, because both ask the
+ * customer to accept something they would want to have seen: what the shop
+ * may do with a file they upload, and the terms the work is done under. The
+ * box starts empty — a pre-ticked one is not a choice — `required` gives the
+ * browser's own "please tick this" bubble, the submit button stays disabled
+ * until every box is ticked, and the register API refuses a body that does
+ * not carry both agreements.
+ */
+function Consent({
+  id,
+  checked,
+  onChange,
+  children,
+  detail,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  /** The sentence beside the box — what is being agreed to. */
+  children: React.ReactNode;
+  /** The substance of it, so the agreement is made with the facts on screen. */
+  detail: React.ReactNode;
+}) {
+  return (
+    <div className="border border-clay-500/25 bg-espresso-800/40 p-4 rounded-md">
+      <label htmlFor={id} className="flex items-start gap-3 cursor-pointer">
+        <input
+          id={id}
+          name={id}
+          type="checkbox"
+          required
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          aria-describedby={`${id}-detail`}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+        />
+        <span className="text-xs leading-relaxed text-cream-400">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-clay-300">
+            Required
+          </span>
+          <span className="mt-1.5 block">{children}</span>
+        </span>
+      </label>
+      <p
+        id={`${id}-detail`}
+        className="mt-2.5 pl-7 text-xs leading-relaxed text-cream-500"
+      >
+        {detail}
+      </p>
+    </div>
+  );
+}
 
 function LoginContent() {
   const router = useRouter();
@@ -45,9 +103,9 @@ function LoginContent() {
 
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [phone, setPhone] = useState("");
-  // Agreement to the file retention policy. Mandatory to open an account, and
-  // deliberately unticked on arrival — a pre-ticked box is not a choice. The
-  // server checks it too; this only saves a round trip.
+  // The two agreements an account has to make. Both mandatory, both checked
+  // again on the server — these only save a round trip.
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [retentionAccepted, setRetentionAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,8 +141,10 @@ function LoginContent() {
           router.push(afterSignIn);
         }
       } else {
-        if (!retentionAccepted) {
-          setError("Please agree to the File Retention Policy to continue.");
+        if (!termsAccepted || !retentionAccepted) {
+          setError(
+            "Please agree to the Terms of Service and the File Retention Policy to continue."
+          );
           setLoading(false);
           return;
         }
@@ -106,6 +166,7 @@ function LoginContent() {
             shippingAddress: finalShippingAddress,
             billingAddress: finalBillingAddress,
             phone,
+            termsAccepted,
             retentionPolicyAccepted: retentionAccepted,
           }),
         });
@@ -308,85 +369,82 @@ function LoginContent() {
                 </>
               )}
 
-              {/* File retention consent. Required to open an account, so it
-                  is a real tick-box rather than sign-in-wrap: the customer is
-                  agreeing that a file they upload is kept afterwards, which is
-                  worth a deliberate act. `required` gives the browser's own
-                  "please tick this" bubble, the button stays disabled until it
-                  is ticked, and the API refuses a registration without it. */}
+              {/* The two agreements, side by side directly above the button
+                  that makes them, so both are on screen at the moment the
+                  account is opened. */}
               {!isLogin && (
-                <div className="border border-clay-500/25 bg-espresso-800/40 p-4 rounded-md">
-                  <label htmlFor="retention" className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      id="retention"
-                      name="retention"
-                      type="checkbox"
-                      required={!isLogin}
-                      checked={retentionAccepted}
-                      onChange={(e) => setRetentionAccepted(e.target.checked)}
-                      aria-describedby="retention-detail"
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
-                    />
-                    <span className="text-xs leading-relaxed text-cream-400">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-clay-300">
-                        Required
-                      </span>
-                      <span className="mt-1.5 block">
-                        I agree to the{" "}
-                        <Link
-                          href={FILE_RETENTION_ROUTE}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
-                        >
-                          File Retention Policy
-                        </Link>
-                        .
-                      </span>
-                    </span>
-                  </label>
-                  <p id="retention-detail" className="mt-2.5 pl-7 text-xs leading-relaxed text-cream-500">
-                    A file you submit may be kept on our database after the job
-                    is finished, so that asking for the same part again is a
-                    reprint rather than a fresh start. Any specific file is
-                    deleted on request — email{" "}
-                    <a
-                      href={`mailto:${LEGAL_CONTACT.email}`}
-                      className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                <div className="space-y-3">
+                  <Consent
+                    id="terms"
+                    checked={termsAccepted}
+                    onChange={setTermsAccepted}
+                    detail={
+                      <>
+                        The terms the shop works under: how estimates, quotes,
+                        orders, and cancellation work, that your models stay
+                        yours, and what a printed part should not be used for.
+                        We only email you about your own orders.
+                      </>
+                    }
+                  >
+                    I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={consentLink}
                     >
-                      {LEGAL_CONTACT.email}
-                    </a>
+                      Terms of Service
+                    </Link>{" "}
+                    and confirm I have read the{" "}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={consentLink}
+                    >
+                      Privacy Policy
+                    </Link>
                     .
-                  </p>
-                </div>
-              )}
+                  </Consent>
 
-              {/* Sign-in-wrap notice. Shown only on the register side, and
-                  placed directly above the button that accepts it, so the
-                  agreement is on screen at the moment it is made. */}
-              {!isLogin && (
-                <p className="border-l-2 border-clay-500/40 pl-4 text-xs leading-relaxed text-cream-500">
-                  By creating an account you agree to the{" "}
-                  <Link
-                    href="/terms"
-                    className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                  <Consent
+                    id="retention"
+                    checked={retentionAccepted}
+                    onChange={setRetentionAccepted}
+                    detail={
+                      <>
+                        A file you submit may be kept on our database after the
+                        job is finished, so that asking for the same part again
+                        is a reprint rather than a fresh start. Any specific
+                        file is deleted on request — email{" "}
+                        <a
+                          href={`mailto:${LEGAL_CONTACT.email}`}
+                          className={consentLink}
+                        >
+                          {LEGAL_CONTACT.email}
+                        </a>
+                        .
+                      </>
+                    }
                   >
-                    Terms of Service
-                  </Link>{" "}
-                  and confirm you have read the{" "}
-                  <Link
-                    href="/privacy"
-                    className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
-                  >
-                    Privacy Policy
-                  </Link>
-                  . We only email you about your own orders.
-                </p>
+                    I agree to the{" "}
+                    <Link
+                      href={FILE_RETENTION_ROUTE}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={consentLink}
+                    >
+                      File Retention Policy
+                    </Link>
+                    .
+                  </Consent>
+                </div>
               )}
 
               <button
                 type="submit"
-                disabled={loading || (!isLogin && !retentionAccepted)}
+                disabled={loading || (!isLogin && !(termsAccepted && retentionAccepted))}
                 className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {loading ? (
@@ -405,7 +463,7 @@ function LoginContent() {
 
             <div className="mt-6 flex items-center justify-between">
               <button
-                onClick={() => { setIsLogin(!isLogin); setError(""); setRetentionAccepted(false); }}
+                onClick={() => { setIsLogin(!isLogin); setError(""); setTermsAccepted(false); setRetentionAccepted(false); }}
                 className="font-mono text-[11px] uppercase tracking-[0.15em] text-clay-300 hover:text-clay-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {isLogin ? "Need an account?" : "Have an account?"}
