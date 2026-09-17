@@ -191,9 +191,10 @@ const sections: LegalSection[] = [
           <strong>Your models stay yours.</strong> Uploading a file gives us no
           ownership of it. You grant us only the licence we need to do the job:
           to store, view, repair, slice, and print your file in order to price
-          and produce your part, and to keep a copy for the period described in
-          the <Link href="/privacy">Privacy Policy</Link> so the part can be
-          reprinted or revised.
+          and produce your part, and to keep a copy, as set out in the{" "}
+          <Link href="/file-retention">File Retention Policy</Link>, so the
+          part can be reprinted or revised. Any specific file is deleted on
+          request.
         </p>
         <p>
           Where we create something for you — a model drawn from your

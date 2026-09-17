@@ -263,9 +263,10 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>Uploaded model files</strong> — kept while the order is
-            live and for a reasonable window afterwards so a part can be
-            reprinted or a revision priced. Ask us and we will delete a file
-            sooner.
+            live and afterwards so a part can be reprinted or a revision
+            priced. Ask us and we will delete a file sooner. The{" "}
+            <Link href="/file-retention">File Retention Policy</Link> sets this
+            out in full, including how to have a specific file deleted.
           </li>
           <li>
             <strong>Payment records</strong> — the invoice number and amount
