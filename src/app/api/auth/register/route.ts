@@ -3,11 +3,20 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
+import { FILE_RETENTION_CONSENT_REQUIRED } from "@/lib/legal";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email: rawEmail, password, shippingAddress, billingAddress, phone } = body;
+    const {
+      name,
+      email: rawEmail,
+      password,
+      shippingAddress,
+      billingAddress,
+      phone,
+      retentionPolicyAccepted,
+    } = body;
 
     if (!name || !rawEmail || !password || !shippingAddress || !billingAddress || !phone) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
@@ -15,6 +24,16 @@ export async function POST(req: NextRequest) {
 
     if (typeof name !== 'string' || typeof rawEmail !== 'string' || typeof password !== 'string' || typeof shippingAddress !== 'string' || typeof billingAddress !== 'string' || typeof phone !== 'string') {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
+    }
+
+    // Agreeing to the file retention policy is a condition of holding an
+    // account, so it is checked here and not only in the form — a POST made
+    // straight at this endpoint must not be able to skip the tick-box. It is
+    // required rather than recorded: every account this route creates has
+    // agreed, which is what the /file-retention page tells the customer. There
+    // is nothing to store, and so nothing new for the database to carry.
+    if (retentionPolicyAccepted !== true) {
+      return NextResponse.json({ error: FILE_RETENTION_CONSENT_REQUIRED }, { status: 400 });
     }
 
     // Normalize email to prevent account duplication/confusion vulnerabilities

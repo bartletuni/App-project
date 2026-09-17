@@ -58,11 +58,33 @@ export const LEGAL_ROUTES: LegalRoute[] = [
     blurb: "What we collect and what we do with it",
   },
   {
+    href: "/file-retention",
+    label: "File Retention Policy",
+    blurb: "What happens to the files you upload, and how to have one deleted",
+  },
+  {
     href: "/cookies",
     label: "Cookie Policy",
     blurb: "Every cookie this site sets, and why",
   },
 ];
+
+/**
+ * The file retention policy's route, named once so the registration form and
+ * the API that enforces the tick-box cannot drift from the document they are
+ * asking the customer to accept.
+ */
+export const FILE_RETENTION_ROUTE = "/file-retention";
+
+/**
+ * Shown when an account is submitted without the retention tick-box set.
+ *
+ * Agreement is a condition of opening an account, so it is checked on the
+ * server as well as in the form — a registration POST made directly must not
+ * be able to skip it. Kept here because both sides quote it.
+ */
+export const FILE_RETENTION_CONSENT_REQUIRED =
+  "You must agree to the File Retention Policy to create an account";
 
 export interface CookieEntry {
   /** The name as it appears in the browser, `__Secure-` prefix and all. */

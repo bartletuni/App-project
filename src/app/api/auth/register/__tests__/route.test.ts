@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { POST } from "../route";
 import { prisma } from "@/lib/prisma";
+import { FILE_RETENTION_CONSENT_REQUIRED } from "@/lib/legal";
 
 // Mock the prisma client and NextResponse
 jest.mock("@/lib/prisma", () => ({
@@ -42,6 +43,7 @@ describe("POST /api/auth/register", () => {
     shippingAddress: "123 Test St",
     billingAddress: "123 Test St",
     phone: "1234567890",
+    retentionPolicyAccepted: true,
   };
 
   it("should return 400 if password does not meet complexity requirements", async () => {
@@ -79,5 +81,49 @@ describe("POST /api/auth/register", () => {
       const res = await POST(req);
       expect(res.status).toBe(201);
     }
+  });
+
+  describe("the file retention policy tick-box", () => {
+    beforeEach(() => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.create as jest.Mock).mockResolvedValue({ id: "1", email: "test@example.com" });
+    });
+
+    // The form disables its own button until the box is ticked, but the
+    // endpoint is reachable without the form, and agreement is a condition of
+    // holding an account rather than a nicety.
+    it.each([
+      ["missing", undefined],
+      ["false", false],
+      ["the string \"true\"", "true"],
+      ["null", null],
+    ])("refuses a registration where the agreement is %s", async (_label, value) => {
+      const body: any = { ...validBody };
+      if (value === undefined) delete body.retentionPolicyAccepted;
+      else body.retentionPolicyAccepted = value;
+
+      const res = await POST(createRequest(body));
+      const json = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(json.error).toBe(FILE_RETENTION_CONSENT_REQUIRED);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it("creates the account when the agreement is given", async () => {
+      const res = await POST(createRequest(validBody));
+
+      expect(res.status).toBe(201);
+      expect(prisma.user.create).toHaveBeenCalled();
+    });
+
+    // Nothing in the database carries the agreement — it is enforced, not
+    // stored — so the created row must not have grown a field for it.
+    it("stores nothing extra for it", async () => {
+      await POST(createRequest(validBody));
+
+      const { data } = (prisma.user.create as jest.Mock).mock.calls[0][0];
+      expect(data).not.toHaveProperty("retentionPolicyAccepted");
+    });
   });
 });

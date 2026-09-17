@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { safeNextPath } from "@/lib/estimate";
 import LegalLinks from "@/components/LegalLinks";
+import { FILE_RETENTION_ROUTE, LEGAL_CONTACT } from "@/lib/legal";
 
 const field =
   "w-full border border-clay-500/25 px-4 py-3 text-cream-100 placeholder:text-cream-600 focus:border-clay-400 focus:ring-1 focus:ring-clay-500/40 outline-none transition rounded-md";
@@ -44,6 +45,10 @@ function LoginContent() {
 
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [phone, setPhone] = useState("");
+  // Agreement to the file retention policy. Mandatory to open an account, and
+  // deliberately unticked on arrival — a pre-ticked box is not a choice. The
+  // server checks it too; this only saves a round trip.
+  const [retentionAccepted, setRetentionAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -78,6 +83,12 @@ function LoginContent() {
           router.push(afterSignIn);
         }
       } else {
+        if (!retentionAccepted) {
+          setError("Please agree to the File Retention Policy to continue.");
+          setLoading(false);
+          return;
+        }
+
         const finalShippingAddress = `${shippingStreet}${shippingApt ? `, ${shippingApt}` : ""}, ${shippingCity}, ${shippingState} ${shippingZip}`;
         const finalBillingAddress = sameAsShipping
           ? finalShippingAddress
@@ -95,6 +106,7 @@ function LoginContent() {
             shippingAddress: finalShippingAddress,
             billingAddress: finalBillingAddress,
             phone,
+            retentionPolicyAccepted: retentionAccepted,
           }),
         });
 
@@ -296,6 +308,59 @@ function LoginContent() {
                 </>
               )}
 
+              {/* File retention consent. Required to open an account, so it
+                  is a real tick-box rather than sign-in-wrap: the customer is
+                  agreeing that a file they upload is kept afterwards, which is
+                  worth a deliberate act. `required` gives the browser's own
+                  "please tick this" bubble, the button stays disabled until it
+                  is ticked, and the API refuses a registration without it. */}
+              {!isLogin && (
+                <div className="border border-clay-500/25 bg-espresso-800/40 p-4 rounded-md">
+                  <label htmlFor="retention" className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      id="retention"
+                      name="retention"
+                      type="checkbox"
+                      required={!isLogin}
+                      checked={retentionAccepted}
+                      onChange={(e) => setRetentionAccepted(e.target.checked)}
+                      aria-describedby="retention-detail"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-clay-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                    />
+                    <span className="text-xs leading-relaxed text-cream-400">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-clay-300">
+                        Required
+                      </span>
+                      <span className="mt-1.5 block">
+                        I agree to the{" "}
+                        <Link
+                          href={FILE_RETENTION_ROUTE}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                        >
+                          File Retention Policy
+                        </Link>
+                        .
+                      </span>
+                    </span>
+                  </label>
+                  <p id="retention-detail" className="mt-2.5 pl-7 text-xs leading-relaxed text-cream-500">
+                    A file you submit may be kept on our database after the job
+                    is finished, so that asking for the same part again is a
+                    reprint rather than a fresh start. Any specific file is
+                    deleted on request — email{" "}
+                    <a
+                      href={`mailto:${LEGAL_CONTACT.email}`}
+                      className="text-clay-300 underline decoration-clay-500/50 underline-offset-2 transition-colors hover:text-cream-100 hover:decoration-clay-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                    >
+                      {LEGAL_CONTACT.email}
+                    </a>
+                    .
+                  </p>
+                </div>
+              )}
+
               {/* Sign-in-wrap notice. Shown only on the register side, and
                   placed directly above the button that accepts it, so the
                   agreement is on screen at the moment it is made. */}
@@ -321,7 +386,7 @@ function LoginContent() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (!isLogin && !retentionAccepted)}
                 className="group w-full inline-flex items-center justify-center gap-2 bg-clay-600 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {loading ? (
@@ -340,7 +405,7 @@ function LoginContent() {
 
             <div className="mt-6 flex items-center justify-between">
               <button
-                onClick={() => { setIsLogin(!isLogin); setError(""); }}
+                onClick={() => { setIsLogin(!isLogin); setError(""); setRetentionAccepted(false); }}
                 className="font-mono text-[11px] uppercase tracking-[0.15em] text-clay-300 hover:text-clay-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {isLogin ? "Need an account?" : "Have an account?"}
