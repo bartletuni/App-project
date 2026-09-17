@@ -43,12 +43,12 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          This policy covers the files you send the shop: 3D model files
-          (.stl, .3mf, .step, archives of the same), and the reference
-          photographs, sketches, and drawings attached to a request when there
-          is no model yet. It applies whether the file arrived with a signed-in
-          account or through the public{" "}
-          <Link href="/estimate">estimate form</Link>.
+          This policy covers the files you send the shop: the 3D model you
+          upload — an <em>.stl</em>, or a <em>.zip</em> holding the model and
+          anything that goes with it — and the reference photographs, sketches,
+          and PDF drawings attached to a request when there is no model yet. It
+          applies whether the file arrived with a signed-in account or through
+          the public <Link href="/estimate">estimate form</Link>.
         </p>
         <p>
           It sits alongside the{" "}
