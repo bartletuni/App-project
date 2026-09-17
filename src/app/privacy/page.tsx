@@ -79,11 +79,20 @@ const sections: LegalSection[] = [
         <h3>Order information</h3>
         <p>
           When you submit a part request: the 3D model file you upload (
-          <em>.stl</em> or <em>.zip</em>), or, if you have no model yet, the part
-          name, description, and dimensions you write instead; quantity;
-          material; print settings; your notes; and the date you need it by. As
-          the job progresses we add the estimated or quoted price, order status, invoice
-          number, and shipping tracking number.
+          <em>.stl</em>, or a <em>.zip</em> holding the model and anything that
+          goes with it), or, if you have no model yet, the part name,
+          description, and dimensions you write instead, together with any
+          reference photographs, sketches, or PDF drawings you attach to show
+          us the part; quantity; material; print settings; your notes; and the
+          date you need it by. As the job progresses we add the estimated or
+          quoted price, order status, invoice number, and shipping tracking
+          number.
+        </p>
+        <p>
+          What happens to an uploaded file after the job is finished — that we
+          keep it so the part can be run again, and how to have a specific one
+          deleted — is set out in the{" "}
+          <Link href="/file-retention">File Retention Policy</Link>.
         </p>
         <h3>Technical information</h3>
         <p>
@@ -125,6 +134,15 @@ const sections: LegalSection[] = [
             <strong>To reach you about your order.</strong> Estimates, quotes, invoices,
             status changes, and shipping notices go to your email address; we
             use your phone number if an order needs a conversation.
+          </li>
+          <li>
+            <strong>To make a reprint or a revision possible.</strong> We keep
+            your model and the settings it was printed with after the job is
+            finished, so that asking for the same part again is a reprint
+            rather than a fresh upload, and a change starts from the file we
+            actually printed. The{" "}
+            <Link href="/file-retention">File Retention Policy</Link> covers
+            this in full, including having a file deleted.
           </li>
           <li>
             <strong>To invoice you and take payment.</strong> Your name, email
@@ -325,10 +343,20 @@ const sections: LegalSection[] = [
           processed in the United States, where privacy law differs from the law
           where you live. If the GDPR or UK GDPR applies to you, our lawful
           bases are performance of a contract (making and delivering your part),
-          legal obligation (tax and business records), and our legitimate
-          interest in keeping the site secure and operating. You may object, ask
-          us to restrict processing, or complain to your local supervisory
-          authority.
+          legal obligation (tax and business records), your consent (the
+          retention agreement described below), and our legitimate interest in
+          keeping the site secure and operating. You may object, ask us to
+          restrict processing, or complain to your local supervisory authority.
+        </p>
+        <p>
+          Keeping your model after the order it came in for is finished rests
+          on two of those: your agreement, which you give by ticking the{" "}
+          <Link href="/file-retention">File Retention Policy</Link> when you
+          open an account, and our legitimate interest in being able to reprint
+          or revise a part you come back for. Withdrawing the agreement is one
+          email — ask us to delete the file and we will, as the list above
+          says — and nothing we did with the file before then becomes unlawful
+          for your having asked.
         </p>
       </>
     ),
