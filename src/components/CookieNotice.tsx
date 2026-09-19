@@ -105,6 +105,7 @@ export default function CookieNotice() {
               <button
                 type="button"
                 onClick={dismiss}
+                aria-label="Dismiss cookie notice"
                 className="flex items-center gap-2 bg-clay-600 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-cream-100 transition-colors hover:bg-clay-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-400"
               >
                 Got it
