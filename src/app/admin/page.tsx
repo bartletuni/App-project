@@ -381,6 +381,18 @@ function AdminDashboardContent() {
     setQuotedPriceInput("");
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    };
+    if (isModalOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
+
   const filteredRequests = requests.filter((req) => {
     // Searching by customer has to find a guest by the details they gave, not
     // by the system row their estimate is filed under.

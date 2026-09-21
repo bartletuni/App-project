@@ -119,6 +119,18 @@ export default function DashboardPage() {
     return diff <= 30;
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedRequest(null);
+      }
+    };
+    if (selectedRequest) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedRequest]);
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-transparent gap-4">
