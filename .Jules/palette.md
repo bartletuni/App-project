@@ -19,3 +19,6 @@
 ## 2024-09-16 - SVG Accessibility in Action Buttons
 **Learning:** Decorative or state-based SVGs inside action buttons (like loading spinners or icons in export/download buttons) are often announced redundantly by screen readers if they are not properly hidden.
 **Action:** Always add `aria-hidden="true"` to SVG elements within interactive elements (buttons, links) when they serve a decorative or supplementary visual purpose.
+## 2024-05-30 - Keyboard Accessibility for Modals
+**Learning:** Application modals lack keyboard support for dismissal, which breaks the standard expectation that pressing 'Escape' closes a modal.
+**Action:** Always add a global keydown event listener to modals checking for the 'Escape' key to ensure proper keyboard accessibility.
