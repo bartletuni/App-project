@@ -203,7 +203,7 @@ export default function AdminPricingPage() {
             <button
               onClick={handleReset}
               disabled={resetting || saving}
-              className="inline-flex items-center gap-2 border border-clay-500/30 text-cream-300 hover:bg-clay-500/12 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 border border-clay-500/30 text-cream-300 hover:bg-clay-500/12 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
               {resetting ? "Restoring…" : "Defaults"}
@@ -211,7 +211,7 @@ export default function AdminPricingPage() {
             <button
               onClick={handleSave}
               disabled={saving || resetting}
-              className="inline-flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               <Save className="w-4 h-4" aria-hidden="true" />
               {saving ? "Saving…" : "Save changes"}
@@ -326,7 +326,7 @@ export default function AdminPricingPage() {
                         setContent((c) => ({ ...c, sections: move(c.sections, sectionIndex, -1) }))
                       }
                       disabled={sectionIndex === 0}
-                      className="p-2 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                       aria-label={`Move section ${section.title || sectionIndex + 1} up`}
                     >
                       <ArrowUp className="w-4 h-4" aria-hidden="true" />
@@ -336,7 +336,7 @@ export default function AdminPricingPage() {
                         setContent((c) => ({ ...c, sections: move(c.sections, sectionIndex, 1) }))
                       }
                       disabled={sectionIndex === content.sections.length - 1}
-                      className="p-2 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                       aria-label={`Move section ${section.title || sectionIndex + 1} down`}
                     >
                       <ArrowDown className="w-4 h-4" aria-hidden="true" />
@@ -349,7 +349,7 @@ export default function AdminPricingPage() {
                           sections: c.sections.filter((_, i) => i !== sectionIndex),
                         }));
                       }}
-                      className="p-2 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all"
+                      className="p-2 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                       aria-label={`Delete section ${section.title || sectionIndex + 1}`}
                     >
                       <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -467,7 +467,7 @@ export default function AdminPricingPage() {
                             }))
                           }
                           disabled={itemIndex === 0}
-                          className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           aria-label={`Move line ${item.label || itemIndex + 1} up`}
                         >
                           <ArrowUp className="w-4 h-4" aria-hidden="true" />
@@ -482,7 +482,7 @@ export default function AdminPricingPage() {
                             }))
                           }
                           disabled={itemIndex === section.items.length - 1}
-                          className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 text-cream-500 hover:text-clay-300 hover:bg-clay-500/18 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           aria-label={`Move line ${item.label || itemIndex + 1} down`}
                         >
                           <ArrowDown className="w-4 h-4" aria-hidden="true" />
@@ -498,7 +498,7 @@ export default function AdminPricingPage() {
                               ),
                             }))
                           }
-                          className="p-1.5 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all"
+                          className="p-1.5 text-cream-500 hover:text-red-300 hover:bg-red-500/15 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           aria-label={`Delete line ${item.label || itemIndex + 1}`}
                         >
                           <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -532,14 +532,14 @@ export default function AdminPricingPage() {
           <button
             onClick={handleSave}
             disabled={saving || resetting}
-            className="inline-flex items-center justify-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
           >
             <Save className="w-4 h-4" aria-hidden="true" />
             {saving ? "Saving…" : "Save changes"}
           </button>
           <Link
             href="/pricing"
-            className="inline-flex items-center justify-center gap-2 border border-clay-500/30 text-cream-300 hover:bg-clay-500/12 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-colors"
+            className="inline-flex items-center justify-center gap-2 border border-clay-500/30 text-cream-300 hover:bg-clay-500/12 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
           >
             View public page
             <ExternalLink className="w-4 h-4" aria-hidden="true" />
