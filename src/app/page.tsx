@@ -49,7 +49,7 @@ const process = [
   { n: "01", title: "Scan & Capture", body: "Digitize legacy or reference parts with high-fidelity scanning." },
   { n: "02", title: "Design & Engineer", body: "CAD refinement, tolerancing, and material selection for the job." },
   { n: "03", title: "Print & Validate", body: "Production on engineering printers with dimensional verification." },
-  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door." },
+  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door, anywhere in the United States." },
 ];
 
 const specSheet = [
@@ -142,10 +142,10 @@ export default function LandingPage() {
 
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
                 Machine down, part discontinued, deadline this week? A US-based
-                additive manufacturing and rapid prototyping studio in Utah —
-                high-precision 3D printing and scanning for engineering and
-                reproduction work, made domestically, with most jobs back in
-                about 72 hours.
+                additive manufacturing and rapid prototyping studio in Utah,
+                shipping nationwide — high-precision 3D printing and scanning
+                for engineering and reproduction work, made domestically, with
+                most jobs back in about 72 hours.
               </p>
 
               <Reveal direction="up" delay={0.36}>

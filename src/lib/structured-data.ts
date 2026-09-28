@@ -51,10 +51,8 @@ export function organizationSchema(): Record<string, unknown> {
       addressRegion: BUSINESS.region,
       addressCountry: BUSINESS.country,
     },
-    areaServed: [
-      { "@type": "State", name: "Utah" },
-      { "@type": "Place", name: BUSINESS.areaServed },
-    ],
+    // Based in Utah (the address above), shipping anywhere in the country.
+    areaServed: { "@type": "Country", name: BUSINESS.areaServed },
     naics: BUSINESS.naics,
     openingHoursSpecification: [
       {
@@ -128,6 +126,7 @@ export function replacementPartsServiceSchema(): Record<string, unknown> {
       "Reproduction of broken, discontinued, and hard-to-source parts for repair and service businesses — modelled from photos, a 3D file, or a 3D scan of the original, and printed in engineering-grade and carbon-fiber-reinforced materials.",
     url: absoluteUrl("/replacement-parts"),
     provider: { "@id": ORGANIZATION_ID },
+    areaServed: { "@type": "Country", name: BUSINESS.areaServed },
     audience: { "@type": "BusinessAudience", name: "Repair and service companies" },
   };
 }

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
 import LegalLinks from "@/components/LegalLinks";
+import { BUSINESS } from "@/lib/seo";
 
 /**
  * Public masthead's counterpart: the site index at the bottom of every
@@ -143,8 +144,8 @@ export default function SiteFooter() {
                   385-695-4178
                 </a>
               </li>
-              <li className="text-cream-500">Mon–Fri · 9am – 5pm</li>
-              <li className="text-cream-500">Utah, USA</li>
+              <li className="text-cream-500">{BUSINESS.openingHours.label}</li>
+              <li className="text-cream-500">Utah, USA · ships nationwide</li>
             </ul>
           </div>
         </div>

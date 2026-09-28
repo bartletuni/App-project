@@ -15,7 +15,8 @@ import { OG_IMAGE } from "@/lib/seo";
  *
  * Every line on it is a claim the site already makes on the page: the 72-hour
  * turnaround (homepage spec sheet), the one-business-day answer (/estimate),
- * the materials and the scanning (homepage capabilities).
+ * nationwide shipping (homepage and footer), the materials and the scanning
+ * (homepage capabilities).
  *
  * No dynamic input, so Next renders it once at build time and serves a static
  * PNG. `twitter:image` points at the same file through `OG_IMAGE`.
@@ -104,7 +105,7 @@ export default function OpengraphImage() {
           </div>
         </div>
 
-        {/* Footer rule: the no-account estimate, and where to go. */}
+        {/* Footer rule: that it reaches the reader wherever they are, and where to go. */}
         <div
           style={{
             display: "flex",
@@ -116,7 +117,7 @@ export default function OpengraphImage() {
           }}
         >
           <div style={{ display: "flex", color: CREAM[300] }}>
-            Estimates in one business day · no account needed
+            Ships nationwide · estimates in one business day
           </div>
           <div style={{ display: "flex", color: CLAY[300], fontWeight: 700, letterSpacing: 2 }}>
             takomoco.com

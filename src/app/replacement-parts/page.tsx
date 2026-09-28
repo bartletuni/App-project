@@ -35,7 +35,7 @@ import { BUSINESS, OG_IMAGE, SITE_NAME } from "@/lib/seo";
 
 const title = "Replacement Parts for Repair & Service Companies";
 const description =
-  "Discontinued, obsolete, or broken part holding up a repair? TakomoCo reproduces it — 3D scanning, reverse engineering, and carbon-fiber printing on a 72-hour turnaround.";
+  "Discontinued part holding up a repair? We reproduce it — 3D scanning, reverse engineering, and carbon-fiber printing, shipped nationwide in about 72 hours.";
 
 export const metadata: Metadata = {
   title,
@@ -101,6 +101,16 @@ const steps = [
 ];
 
 const questions = [
+  {
+    q: "We're not in Utah. Can you still help?",
+    a: (
+      <>
+        Yes. The shop is in Utah and ships anywhere in the United States. Everything else —
+        the estimate, the questions, your approval — happens by email and phone, Monday to
+        Friday, 9am to 5pm Mountain Time.
+      </>
+    ),
+  },
   {
     q: "Do I need an account or a CAD file?",
     a: (
@@ -177,8 +187,8 @@ export default function ReplacementPartsPage() {
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-cream-400">
               TakomoCo reproduces broken, obsolete, and hard-to-source parts for repair and
               service businesses — modelled from a photo, a file, or the part itself, printed in
-              engineering-grade and carbon-fiber materials, and shipped to your door. Most jobs
-              are back in about 72 hours.
+              engineering-grade and carbon-fiber materials, and shipped anywhere in the United
+              States. Most jobs are back in about 72 hours.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <RequestEstimateButton />
@@ -191,7 +201,7 @@ export default function ReplacementPartsPage() {
               </a>
             </div>
             <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
-              Estimate in one business day · no account needed · made in Utah, USA
+              Estimate in one business day · no account needed · made in Utah, ships nationwide
             </p>
           </Reveal>
 

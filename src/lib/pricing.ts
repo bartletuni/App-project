@@ -71,7 +71,7 @@ export const DEFAULT_PRICING: PricingContent = {
     heroTitle: "Standardized",
     heroTitleAccent: "pricing.",
     heroIntro:
-      "TakomoCo provides high-precision, low-volume 3D printing, 0.02mm precision 3D scanning, and rapid reverse engineering for Wasatch Front tech, engineering, and hardware teams. We specialize in fast-turnaround production of functional prototypes, end-use replacement components, custom tooling, and high-performance carbon-fiber composite parts.",
+      "TakomoCo provides high-precision, low-volume 3D printing, 0.02mm precision 3D scanning, and rapid reverse engineering for tech, engineering, and hardware teams across the United States. We specialize in fast-turnaround production of functional prototypes, end-use replacement components, custom tooling, and high-performance carbon-fiber composite parts.",
     advantageLabel: "KEY ADVANTAGE",
     advantageBody:
       "24-Hour Express Turnaround available for urgent local engineering deadlines.",
