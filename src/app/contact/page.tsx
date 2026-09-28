@@ -7,11 +7,12 @@ import Reveal from "@/components/ui/Reveal";
 import Panel from "@/components/ui/Panel";
 import Magnetic from "@/components/ui/Magnetic";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
+import { BUSINESS } from "@/lib/seo";
 
 const coordinates = [
   { icon: Mail, k: "EMAIL", v: "info@takomoco.com" },
   { icon: Phone, k: "VOICE", v: "385-695-4178" },
-  { icon: Clock, k: "HOURS", v: "Mon–Fri · 9am – 5pm EST" },
+  { icon: Clock, k: "HOURS", v: BUSINESS.openingHours.label },
 ];
 
 export default function ContactPage() {
@@ -20,7 +21,7 @@ export default function ContactPage() {
     // one-line footer would only repeat it.
     <AppShell variant="user" footer={false}>
       <div className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-16">
-        <Reveal>
+        <Reveal priority>
           <span className="eyebrow">SUPPORT ⁄ DESK</span>
           <h1 className="mt-4 font-display text-5xl sm:text-6xl text-cream-100">
             Get in <span className="italic text-clay-300">touch.</span>

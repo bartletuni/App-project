@@ -74,7 +74,7 @@ export default function MaterialsView({ materials }: { materials: MaterialSummar
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-5 sm:px-8 pt-28 sm:pt-36 pb-20">
-        <Reveal>
+        <Reveal priority>
           <div className="flex items-end justify-between gap-6 mb-12 border-b border-clay-500/15 pb-8">
             <div>
               <span className="eyebrow">MATERIAL INDEX</span>

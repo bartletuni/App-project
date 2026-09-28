@@ -32,7 +32,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
 
       <main className="mx-auto max-w-6xl px-5 sm:px-8 pt-28 sm:pt-36 pb-20">
         {/* Masthead */}
-        <Reveal>
+        <Reveal priority>
           <div className="border-b border-clay-500/15 pb-8">
             <span className="eyebrow">{settings.heroEyebrow}</span>
             <h1 className="mt-4 font-display text-5xl sm:text-6xl text-cream-100">

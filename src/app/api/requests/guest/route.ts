@@ -4,8 +4,15 @@ import bcrypt from "bcryptjs";
 import { format } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, shopInbox } from "@/lib/email";
 import { EstimateReceivedEmailHTML, NewRequestEmailHTML } from "@/lib/email-templates";
+import { suppressionStatus } from "@/lib/email-suppression";
+import {
+  GUEST_CONFIRMATIONS_PER_ADDRESS_PER_DAY,
+  GuestConfirmationOutcome,
+  guestEmailLinks,
+  issueGuestEmailToken,
+} from "@/lib/guest-email";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
 import { requestTitle } from "@/lib/part-source";
 import { DEFAULT_ESTIMATE_STATUS, KIND_ESTIMATE } from "@/lib/request-status";
@@ -73,6 +80,14 @@ import {
  *
  * The order matters: everything that can reject a request without touching the
  * database or R2 happens before anything that does.
+ *
+ * None of those can tell whose email address was typed in, so once a request
+ * is filed the address is treated as a claim, not a fact. The one email sent
+ * to it carries nothing the sender typed and asks the address's owner to
+ * confirm or disown the estimate (src/lib/guest-email.ts); an address that has
+ * disowned one before is never emailed again, and none gets more than one a
+ * day. The shop's own notification goes to the shop, never to the address on
+ * the form.
  */
 
 export const dynamic = "force-dynamic";
@@ -120,6 +135,49 @@ async function guestOwner(): Promise<{ id: string }> {
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
   return typeof value === "string" ? value : "";
+}
+
+/**
+ * The one email this form sends to the address it was given — see
+ * src/lib/guest-email.ts for why it says so little. Withheld from an address
+ * on the do-not-email list, or when that list cannot be read, and from one
+ * that has already had one today, so the form cannot be aimed at a stranger's
+ * inbox over and over. Never throws; what happened is returned for the shop.
+ */
+async function sendGuestConfirmation(
+  requestId: string,
+  reference: string,
+  email: string,
+  emailHash: string
+): Promise<GuestConfirmationOutcome> {
+  const suppression = await suppressionStatus(email);
+  if (suppression === "listed") return "suppressed";
+  if (suppression === "unreadable") return "not-sent";
+
+  // Counted before sending, so a failed send still uses up the day's email —
+  // the ceiling is there to protect the recipient, so it errs on their side.
+  const cap = await consumeRateLimits([
+    {
+      scope: "guest-email:sent-day",
+      subject: emailHash,
+      limit: GUEST_CONFIRMATIONS_PER_ADDRESS_PER_DAY,
+      windowMs: DAY_MS,
+      message: "",
+    },
+  ]);
+  if (!cap.ok) return "capped";
+
+  const token = issueGuestEmailToken(requestId);
+  if (!token) return "not-sent";
+  const links = guestEmailLinks(token);
+
+  const sent = await sendEmail({
+    to: email,
+    subject: `Estimate request ${reference}: confirm it was you`,
+    html: EstimateReceivedEmailHTML({ reference, confirmUrl: links.confirm, disownUrl: links.disown }),
+    label: "guest-estimate confirmation",
+  });
+  return sent.ok ? "sent" : "not-sent";
 }
 
 export async function POST(req: NextRequest) {
@@ -319,12 +377,15 @@ export async function POST(req: NextRequest) {
     const title = requestTitle({ fileName: partRequest.fileName, partName: partRequest.partName });
     const dateNeeded = format(resolvedDate.date, "PPP");
 
-    // --- 10. Tell the shop, then the customer ----------------------------
+    // --- 10. Ask the address's owner, then tell the shop -----------------
     // Both sends are best-effort: a mail failure is logged and never costs the
-    // customer the request they just made.
+    // customer the request they just made. The confirmation goes first because
+    // the shop's notification says what became of it.
+    const guestConfirmation = await sendGuestConfirmation(partRequest.id, reference, email, emailHash);
+
     try {
       await sendEmail({
-        to: process.env.ADMIN_EMAIL || email,
+        to: shopInbox(),
         subject: `[No account] Estimate request ${reference}: ${title.replace(/[\r\n]/g, "")}`,
         html: NewRequestEmailHTML({
           customerName: contact.name,
@@ -332,6 +393,7 @@ export async function POST(req: NextRequest) {
           customerPhone: contact.phone,
           company: contact.company || undefined,
           guestSubmitted: true,
+          guestConfirmation,
           reference,
           fileName: title,
           submissionType: source.submissionType,
@@ -348,24 +410,6 @@ export async function POST(req: NextRequest) {
       });
     } catch (emailError) {
       console.error("Failed to send guest estimate admin notification:", emailError);
-    }
-
-    try {
-      await sendEmail({
-        to: email,
-        subject: `We've got your estimate request — ${reference}`,
-        html: EstimateReceivedEmailHTML({
-          customerName: contact.name,
-          reference,
-          partTitle: title,
-          quantity,
-          material: material || "To be recommended",
-          dateNeeded,
-        }),
-        label: "guest-estimate customer confirmation",
-      });
-    } catch (emailError) {
-      console.error("Failed to send guest estimate confirmation:", emailError);
     }
 
     return NextResponse.json({ ok: true, reference, email }, { status: 201 });

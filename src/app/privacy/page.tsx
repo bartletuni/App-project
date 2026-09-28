@@ -94,6 +94,26 @@ const sections: LegalSection[] = [
           deleted — is set out in the{" "}
           <Link href="/file-retention">File Retention Policy</Link>.
         </p>
+        <h3>Estimate requests without an account</h3>
+        <p>
+          The public <Link href="/estimate">estimate form</Link> asks for your
+          name, email address, and phone number, and optionally your company,
+          alongside the part details above. We send that email address one
+          message, with a link to confirm the request came from you; if you
+          click it, we record when. That message carries nothing typed into the
+          form except the address itself, and no address receives more than one
+          of them a day.
+        </p>
+        <p>
+          If you use the other link in that message to tell us you did not send
+          the request, we delete the request and everything uploaded with it —
+          unless the shop has already started work on it, in which case a person
+          looks at it first — and add a one-way fingerprint of the address to a
+          do-not-email list, so the form never writes to it again. The
+          fingerprint is not the address and cannot be turned back into one; all
+          it can tell us is that an address typed into the form later is one we
+          have promised not to email.
+        </p>
         <h3>Technical information</h3>
         <p>
           Our hosting and storage providers keep standard server logs — IP
@@ -156,6 +176,15 @@ const sections: LegalSection[] = [
           <li>
             <strong>To keep your account working and secure.</strong> Signing
             in, staying signed in, and protecting the account from misuse.
+          </li>
+          <li>
+            <strong>
+              To check an estimate request came from the owner of the email
+              address on it.
+            </strong>{" "}
+            Anyone can type any address into a public form. The confirmation
+            link and the do-not-email list described in section 02 exist to
+            protect the person at that address, and are used for nothing else.
           </li>
           <li>
             <strong>To meet our own legal and tax obligations.</strong> Business
@@ -295,6 +324,13 @@ const sections: LegalSection[] = [
             <strong>Server logs</strong> — short-lived, per our providers&apos;
             standard retention.
           </li>
+          <li>
+            <strong>The do-not-email list</strong> — kept indefinitely, because
+            the promise each entry records, never to email that address from
+            the estimate form again, is meant to last. An entry is a one-way
+            fingerprint of an address and nothing else: no name, no request, no
+            date beyond when it was added.
+          </li>
         </ul>
       </>
     ),
@@ -347,6 +383,9 @@ const sections: LegalSection[] = [
           retention agreement described below), and our legitimate interest in
           keeping the site secure and operating. You may object, ask us to
           restrict processing, or complain to your local supervisory authority.
+          The do-not-email list in section 02 rests on that last interest: it
+          exists so our form cannot be used to send mail to someone who never
+          asked for it.
         </p>
         <p>
           Keeping your model after the order it came in for is finished rests

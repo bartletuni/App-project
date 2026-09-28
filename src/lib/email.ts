@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { BUSINESS } from "@/lib/seo";
 
 /**
  * Transactional email through Resend.
@@ -14,6 +15,16 @@ import { Resend } from "resend";
 /** The sender, overridable per deployment. */
 export function emailFrom(): string {
   return process.env.EMAIL_FROM || "TakomoCo <onboarding@resend.dev>";
+}
+
+/**
+ * Where the shop's own notifications go. Falls back to the published shop
+ * address, never to a customer's: on the public estimate form the "customer"
+ * address is whatever somebody typed, and a console notification is full of
+ * text they typed too.
+ */
+export function shopInbox(): string {
+  return process.env.ADMIN_EMAIL || BUSINESS.email;
 }
 
 export interface SendEmailResult {

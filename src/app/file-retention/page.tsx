@@ -123,6 +123,15 @@ const sections: LegalSection[] = [
           for any live or foreseeable job.
         </p>
         <p>
+          A file sent through the public{" "}
+          <Link href="/estimate">estimate form</Link> is also removed at once if
+          the owner of the email address given with it tells us, through the
+          link in the email we send that address, that they did not send it.
+          The request and every file uploaded with it are deleted there and
+          then — unless the shop has already started work on it, in which case
+          a person looks at it first.
+        </p>
+        <p>
           The order record itself — dates, quantities, the invoice number, and
           the amount — is kept for our accounting and warranty obligations even
           after a file is deleted, as described in section 07 of the{" "}

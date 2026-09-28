@@ -84,6 +84,17 @@ export const metadata: Metadata = {
     },
   },
   category: "Manufacturing",
+  // Ownership tokens for Google Search Console and Bing Webmaster Tools, read
+  // at build time so verifying the site is an environment variable rather
+  // than a code change. Unset, no tag is emitted.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    }),
+    ...(process.env.BING_SITE_VERIFICATION && {
+      other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION },
+    }),
+  },
 };
 
 export const viewport: Viewport = {

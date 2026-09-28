@@ -49,7 +49,7 @@ const process = [
   { n: "01", title: "Scan & Capture", body: "Digitize legacy or reference parts with high-fidelity scanning." },
   { n: "02", title: "Design & Engineer", body: "CAD refinement, tolerancing, and material selection for the job." },
   { n: "03", title: "Print & Validate", body: "Production on engineering printers with dimensional verification." },
-  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door." },
+  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door, anywhere in the United States." },
 ];
 
 const specSheet = [
@@ -108,16 +108,13 @@ export default function LandingPage() {
                 </div>
               </Reveal>
 
+              {/* The headline and lede are the page's largest paint, so they
+                  are in the server HTML fully visible rather than waiting on
+                  hydration to fade in — see `priority` on Reveal. */}
               <h1 className="font-display font-semibold tracking-tight text-cream-100 text-[2.7rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-                <Reveal direction="up" delay={0.05}>
-                  <span className="block">Domestic 3D printing —</span>
-                </Reveal>
-                <Reveal direction="up" delay={0.12}>
-                  <span className="block">forging digital geometry</span>
-                </Reveal>
-                <Reveal direction="up" delay={0.19}>
-                  <span className="block italic text-clay-300">into physical parts.</span>
-                </Reveal>
+                <span className="block">Domestic 3D printing —</span>
+                <span className="block">forging digital geometry</span>
+                <span className="block italic text-clay-300">into physical parts.</span>
               </h1>
 
               {/* The lead promise, for the visitor whose machine is down right
@@ -143,15 +140,13 @@ export default function LandingPage() {
                 </div>
               </Reveal>
 
-              <Reveal direction="up" delay={0.32}>
-                <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
-                  Machine down, part discontinued, deadline this week? A US-based
-                  additive manufacturing and rapid prototyping studio in Utah —
-                  high-precision 3D printing and scanning for engineering and
-                  reproduction work, made domestically, with most jobs back in
-                  about 72 hours.
-                </p>
-              </Reveal>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
+                Machine down, part discontinued, deadline this week? A US-based
+                additive manufacturing and rapid prototyping studio in Utah,
+                shipping nationwide — high-precision 3D printing and scanning
+                for engineering and reproduction work, made domestically, with
+                most jobs back in about 72 hours.
+              </p>
 
               <Reveal direction="up" delay={0.36}>
                 <div className="mt-10 flex flex-col items-stretch sm:items-start gap-3">
@@ -290,6 +285,16 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal>
+          <Link
+            href="/replacement-parts"
+            className="group mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 transition-colors hover:text-cream-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+          >
+            Repair or service company? How we reproduce discontinued parts
+            <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+          </Link>
+        </Reveal>
       </section>
 
       {/* Process */}

@@ -42,9 +42,13 @@ export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturi
  * since the snippet under the title is what earns the click from someone
  * whose machine is already down. "Rapid prototyping" was the one phrase
  * traded out to make room; it still leads the homepage's own copy.
+ *
+ * "Shipped nationwide" is in it because the shop serves the whole country
+ * from Utah, and a searcher outside Utah who reads only "in Utah" assumes a
+ * local shop and scrolls past.
  */
 export const SITE_DESCRIPTION =
-  "Domestic additive manufacturing in Utah on a 72-hour turnaround — high-precision FDM 3D printing, 0.02mm 3D scanning, and reverse engineering in carbon-fiber.";
+  "Domestic additive manufacturing from Utah, shipped nationwide on a 72-hour turnaround — FDM 3D printing, 0.02mm scanning, and carbon-fiber reverse engineering.";
 
 export const BUSINESS = {
   telephone: "+1-385-695-4178",
@@ -52,11 +56,18 @@ export const BUSINESS = {
   /** Region only — the shop does not publish a street address. */
   region: "UT",
   country: "US",
-  areaServed: "Wasatch Front, Utah",
+  /** Where parts go: the shop is in Utah and ships anywhere in the country. */
+  areaServed: "United States",
+  /**
+   * Shop hours, in Utah local time. Schema.org has no time-zone field for
+   * opening hours — they are read as the business's local time — so the
+   * displayed form says "Mountain Time" outright for visitors elsewhere.
+   */
   openingHours: {
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     opens: "09:00",
     closes: "17:00",
+    label: "Mon–Fri · 9am – 5pm Mountain Time",
   },
   /** From the published capability statement. */
   naics: ["333248", "541330", "541420"],
@@ -68,12 +79,14 @@ export function absoluteUrl(path = "/"): string {
 }
 
 /**
- * The social preview image. `banner.png` is the only wide marketing image in
- * the repo, so it doubles as the Open Graph card.
+ * The social preview image, drawn by src/app/opengraph-image.tsx at the
+ * 1200×630 every link-preview surface expects. Every page's `openGraph` and
+ * `twitter` metadata points here, so a pasted link to any page previews with
+ * the same card.
  */
 export const OG_IMAGE = {
-  url: "/banner.png",
-  width: 1794,
-  height: 592,
-  alt: "TakomoCo — additive manufacturing and rapid prototyping studio",
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "TakomoCo — replacement parts and 3D printing on a 72-hour turnaround, made in Utah and shipped nationwide",
 };

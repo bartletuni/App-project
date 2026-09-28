@@ -123,6 +123,12 @@ model PartRequest {
   guestName       String?
   guestEmail      String?
   guestPhone      String?
+  /// When the person at `guestEmail` clicked "Confirm it's me" in the email the
+  /// estimate form sends. Anyone can type anyone's address into a public form,
+  /// so until this is set the shop has only the sender's word for who they
+  /// are — the console marks the row unconfirmed and the shop calls before
+  /// pricing it. Null on every signed-in request. See src/lib/guest-email.ts.
+  guestEmailConfirmedAt DateTime?
   /// True on the one free PLA 2.0 sample a first-time customer may request.
   /// Eligibility is meant to be "no existing row with this flag set for the
   /// user", not "no requests at all" — so someone who ordered before the
@@ -183,4 +189,17 @@ model RateLimit {
   key       String   @id
   count     Int      @default(1)
   expiresAt DateTime
+}
+
+/// An address the estimate form must never email again, because its owner told
+/// us — through the "This wasn't me" link in that form's confirmation email —
+/// that someone else typed it in.
+///
+/// The key is an HMAC of the lowercased address under the deployment secret
+/// (`hashIdentifier` in src/lib/rate-limit.ts), never the address itself: the
+/// list can answer "is this address on it?" and nothing else. Rotating
+/// NEXTAUTH_SECRET therefore empties it in effect. See src/lib/guest-email.ts.
+model EmailSuppression {
+  key       String   @id
+  createdAt DateTime @default(now())
 }

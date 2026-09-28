@@ -1,4 +1,6 @@
 import {
+  EstimateDisownedEmailHTML,
+  EstimateReceivedEmailHTML,
   NewRequestEmailHTML,
   NewUserAdminNotificationEmailHTML,
   WelcomeUserEmailHTML,
@@ -8,12 +10,19 @@ import {
 
 const details = { name: "N", email: "e@e.com", phone: "1", shippingAddress: "a", billingAddress: "b" };
 
+const links = {
+  confirmUrl: "https://takomoco.com/estimate/confirm?a=confirm&t=clx1.1.sig",
+  disownUrl: "https://takomoco.com/estimate/confirm?a=disown&t=clx1.1.sig",
+};
+
 const everyTemplate = () => [
   NewRequestEmailHTML({ customerName: "c", customerEmail: "e@e.com", fileName: "f.stl", quantity: 1, material: "m", dateNeeded: "today" }),
   NewUserAdminNotificationEmailHTML(details),
   WelcomeUserEmailHTML(details),
   InvoiceSentEmailHTML({ customerName: "c", fileName: "f.stl", invoiceNumber: "1" }),
   StatusUpdateEmailHTML({ customerName: "c", fileName: "f.stl", status: "s", message: "m" }),
+  EstimateReceivedEmailHTML({ reference: "E-ABCDEF", ...links }),
+  EstimateDisownedEmailHTML({ reference: "E-ABCDEF", email: "e@e.com", removed: true }),
 ];
 
 describe("email template links", () => {
@@ -76,6 +85,8 @@ describe("email templates escape everything a person can type", () => {
       }),
       InvoiceSentEmailHTML({ customerName: XSS, fileName: XSS, invoiceNumber: XSS }),
       StatusUpdateEmailHTML({ customerName: XSS, fileName: XSS, status: XSS, message: XSS, trackingNumber: XSS }),
+      EstimateReceivedEmailHTML({ reference: XSS, confirmUrl: XSS, disownUrl: XSS }),
+      EstimateDisownedEmailHTML({ reference: XSS, email: XSS, removed: false }),
     ];
     for (const html of pages) {
       expect(html).not.toContain("<script>");
@@ -90,6 +101,57 @@ describe("email templates escape everything a person can type", () => {
       quantity: 1, material: "m", dateNeeded: "today",
     });
     expect(html).toContain("line one<br>line &lt;two&gt;");
+  });
+});
+
+describe("the email the public estimate form sends to the address it was given", () => {
+  // Its inputs are the whole of what it can say: a reference derived from the
+  // row id and two links. There is no field for anything the sender typed, so
+  // nothing they typed can reach a stranger's inbox through it.
+  const html = EstimateReceivedEmailHTML({ reference: "E-ABCDEF", ...links });
+
+  it("offers both answers, with the ampersands in each link escaped", () => {
+    expect(html).toContain("E-ABCDEF");
+    expect(html).toContain("Confirm it&#039;s me");
+    expect(html).toContain('href="https://takomoco.com/estimate/confirm?a=confirm&amp;t=clx1.1.sig"');
+    expect(html).toContain('href="https://takomoco.com/estimate/confirm?a=disown&amp;t=clx1.1.sig"');
+  });
+
+  it("does not claim the reader asked for anything", () => {
+    expect(html).not.toContain("because you asked us");
+    expect(html).toContain("Someone asked TakomoCo for an estimate");
+  });
+
+  it("still says what comes back is an estimate, not a guaranteed price", () => {
+    expect(html).toContain("What comes back is an estimate");
+  });
+});
+
+describe("the shop hears what became of the confirmation email", () => {
+  const guest = (guestConfirmation: "sent" | "suppressed" | "capped" | "not-sent") =>
+    NewRequestEmailHTML({
+      customerName: "c", customerEmail: "e@e.com", fileName: "Dryer catch",
+      guestSubmitted: true, guestConfirmation, quantity: 1, material: "m", dateNeeded: "today",
+    });
+
+  it("names each outcome", () => {
+    expect(guest("sent")).toContain("Email unconfirmed");
+    expect(guest("suppressed")).toContain("Address disowned before");
+    expect(guest("capped")).toContain("already had one from the form today");
+    expect(guest("not-sent")).toContain("did not go out");
+  });
+
+  it("says nothing about confirmation on a signed-in request", () => {
+    const html = NewRequestEmailHTML({
+      customerName: "c", customerEmail: "e@e.com", fileName: "part.stl",
+      quantity: 1, material: "m", dateNeeded: "today",
+    });
+    expect(html).not.toContain("confirmation");
+  });
+
+  it("tells the shop whether a disowned estimate is already gone", () => {
+    expect(EstimateDisownedEmailHTML({ reference: "E-1", email: "e@e.com", removed: true })).toContain("Already deleted");
+    expect(EstimateDisownedEmailHTML({ reference: "E-1", email: "e@e.com", removed: false })).toContain("Not deleted");
   });
 });
 

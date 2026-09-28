@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
 import LegalLinks from "@/components/LegalLinks";
+import { BUSINESS } from "@/lib/seo";
 
 /**
  * Public masthead's counterpart: the site index at the bottom of every
@@ -22,11 +23,13 @@ const sitemap = [
   { href: "/contact", label: "Contact" },
 ];
 
-const services = [
-  "Additive manufacturing",
-  "3D scanning & reverse engineering",
-  "Rapid prototyping",
-  "Carbon-fiber & composite printing",
+/** A service with its own page carries an `href`; the rest are plain text. */
+const services: { label: string; href?: string }[] = [
+  { label: "Replacement parts for repair teams", href: "/replacement-parts" },
+  { label: "Additive manufacturing" },
+  { label: "3D scanning & reverse engineering" },
+  { label: "Rapid prototyping" },
+  { label: "Carbon-fiber & composite printing" },
 ];
 
 export default function SiteFooter() {
@@ -93,7 +96,8 @@ export default function SiteFooter() {
             </ul>
           </div>
 
-          {/* Services — plain text, not links; there are no service pages yet */}
+          {/* Services — linked where a service has a page of its own, so
+              every public page passes a crawlable link to it. */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="eyebrow">SERVICES</span>
@@ -101,8 +105,17 @@ export default function SiteFooter() {
             </div>
             <ul className="space-y-2.5">
               {services.map((s) => (
-                <li key={s} className="text-sm text-cream-400">
-                  {s}
+                <li key={s.label} className="text-sm text-cream-400">
+                  {s.href ? (
+                    <Link
+                      href={s.href}
+                      className="hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                    >
+                      {s.label}
+                    </Link>
+                  ) : (
+                    s.label
+                  )}
                 </li>
               ))}
             </ul>
@@ -131,8 +144,8 @@ export default function SiteFooter() {
                   385-695-4178
                 </a>
               </li>
-              <li className="text-cream-500">Mon–Fri · 9am – 5pm</li>
-              <li className="text-cream-500">Utah, USA</li>
+              <li className="text-cream-500">{BUSINESS.openingHours.label}</li>
+              <li className="text-cream-500">Utah, USA · ships nationwide</li>
             </ul>
           </div>
         </div>
