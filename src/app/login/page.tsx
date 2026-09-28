@@ -329,8 +329,8 @@ function LoginContent() {
                         <span className="eyebrow">BILLING</span>
                         <span className="hairline flex-1" />
                       </div>
-                      <label className="ml-4 flex items-center gap-2 cursor-pointer shrink-0">
-                        <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} className="h-4 w-4 accent-clay-500" />
+                      <label htmlFor="sameAsShipping" className="ml-4 flex items-center gap-2 cursor-pointer shrink-0">
+                        <input id="sameAsShipping" type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} className="h-4 w-4 accent-clay-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm" />
                         <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">Same as shipping</span>
                       </label>
                     </div>

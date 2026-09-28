@@ -22,3 +22,6 @@
 ## 2024-05-30 - Keyboard Accessibility for Modals
 **Learning:** Application modals lack keyboard support for dismissal, which breaks the standard expectation that pressing 'Escape' closes a modal.
 **Action:** Always add a global keydown event listener to modals checking for the 'Escape' key to ensure proper keyboard accessibility.
+## 2026-09-28 - Inline Checkbox Focus Accessibility
+**Learning:** Default browser focus outlines on inline checkboxes often lack sufficient contrast or disappear entirely on dark themes, making them inaccessible to keyboard users.
+**Action:** Always explicitly override default outlines using Tailwind classes (e.g., `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500`) and ensure explicit label association with `htmlFor` even when using implicit nesting.
