@@ -24,8 +24,8 @@ export default function LegalLinks({
 }) {
   const link =
     tone === "quiet"
-      ? "text-cream-600 hover:text-clay-300"
-      : "text-cream-500 hover:text-clay-300";
+      ? "text-cream-500 hover:text-clay-300"
+      : "text-cream-400 hover:text-clay-300";
 
   return (
     <ul

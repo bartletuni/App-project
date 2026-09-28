@@ -134,13 +134,15 @@ export default function LandingPage() {
                     </span>
                   </span>
                   <span className="hidden h-4 w-px bg-clay-500/40 sm:block" aria-hidden="true" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay-300">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay-200">
                     Fast · Fitted · Flawless
                   </span>
                 </div>
               </Reveal>
 
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-400">
+              {/* A step lighter than body copy elsewhere: the particle field
+                  drifts through this paragraph, and it is the pitch. */}
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-300">
                 Machine down, part discontinued, deadline this week? A US-based
                 additive manufacturing and rapid prototyping studio in Utah,
                 shipping nationwide — high-precision 3D printing and scanning
@@ -184,7 +186,7 @@ export default function LandingPage() {
                       </Link>
                     </Magnetic>
                   </div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-500">
                     On a deadline?{" "}
                     <a
                       href="tel:+13856954178"
@@ -220,7 +222,7 @@ export default function LandingPage() {
             </Panel>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <RequestEstimateButton size="sm" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-500">
                 Priced per part · no obligation
               </span>
             </div>
@@ -256,7 +258,7 @@ export default function LandingPage() {
               <span className="eyebrow">CAPABILITIES</span>
               <h2 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">What we do</h2>
             </div>
-            <span className="hidden sm:block font-mono text-xs text-cream-600">[ 03 DISCIPLINES ]</span>
+            <span className="hidden sm:block font-mono text-xs text-cream-500">[ 03 DISCIPLINES ]</span>
           </div>
         </Reveal>
 
@@ -265,7 +267,7 @@ export default function LandingPage() {
             <Reveal key={c.n} delay={i * 0.08}>
               <div className="group grid md:grid-cols-12 gap-4 md:gap-8 items-start border-b border-clay-500/15 py-8 transition-colors hover:bg-espresso-800/30">
                 <div className="md:col-span-1 flex md:block items-center gap-3">
-                  <span className="font-mono text-sm text-clay-400">{c.n}</span>
+                  <span className="font-mono text-sm text-clay-300">{c.n}</span>
                 </div>
                 <div className="md:col-span-1">
                   <span className="flex h-11 w-11 items-center justify-center border border-clay-500/25 text-clay-300 transition-colors group-hover:bg-clay-500/15">
@@ -309,7 +311,7 @@ export default function LandingPage() {
               <Reveal key={p.n} delay={i * 0.1} className="bg-espresso-900">
                 <div className="h-full p-6 hover:bg-espresso-800/50 transition-colors">
                   <div className="flex items-center justify-between mb-6">
-                    <span className="font-display text-4xl text-clay-500/70">{p.n}</span>
+                    <span className="font-display text-4xl text-clay-400">{p.n}</span>
                     <span className="h-2 w-2 rounded-full bg-clay-400" />
                   </div>
                   <h3 className="font-display text-xl text-cream-100 mb-2">{p.title}</h3>
@@ -379,7 +381,7 @@ export default function LandingPage() {
               </div>
               <div className="lg:col-span-4 flex flex-col gap-3">
                 <Magnetic strength={0.3}>
-                  <Link href="/login" className="group flex items-center justify-between gap-2 bg-clay-600 px-6 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-700 transition-colors">
+                  <Link href="/login" className="group flex items-center justify-between gap-2 bg-clay-700 px-6 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-800 transition-colors">
                     Submit a request
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                   </Link>
@@ -402,7 +404,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <p className="mt-16 max-w-3xl border-t border-clay-500/12 pt-8 font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-600">
+          <p className="mt-16 max-w-3xl border-t border-clay-500/12 pt-8 font-mono text-[10px] normal-case tracking-[0.08em] leading-relaxed text-cream-500">
             Every TakomoCo part is produced under strict internal quality
             control standards — controlled material handling and drying,
             calibrated and regularly maintained equipment, documented print

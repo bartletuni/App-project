@@ -35,6 +35,7 @@ export const CLAY = {
   500: "#c17a4b",
   600: "#a9663c",
   700: "#8a5230",
+  800: "#733f22",
 } as const;
 
 /** The brighter accent, used sparingly for emphasis. */

@@ -437,10 +437,10 @@ export default function BuildPlate({ className = "" }: { className?: string }) {
           Z <span ref={zRef} className="text-cream-200">0.00</span> mm
         </div>
       </div>
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-3 left-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream-600">
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-3 left-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream-500">
         PPA-CF · 0.2 mm
       </div>
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-3 right-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream-600">
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-3 right-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream-500">
         hover to rotate
       </div>
     </div>

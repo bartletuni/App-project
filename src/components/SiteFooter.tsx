@@ -151,10 +151,10 @@ export default function SiteFooter() {
         </div>
 
         <div className="mt-12 border-t border-clay-500/15 pt-6">
-          <div className="flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 sm:flex-row sm:items-center sm:justify-between">
             <span className="flex items-center gap-2 text-cream-300">
               TAKOMO<span className="text-clay-400">⁄</span>CO
-              <span className="text-clay-500/50">|</span>
+              <span className="text-clay-500" aria-hidden="true">|</span>
               <span className="font-normal tracking-[0.2em] text-clay-300">
                 FAST, FITTED, FLAWLESS
               </span>
