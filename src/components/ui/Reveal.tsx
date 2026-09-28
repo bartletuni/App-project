@@ -13,6 +13,15 @@ interface RevealProps {
   /** Travel distance in px before settling. */
   distance?: number;
   once?: boolean;
+  /**
+   * Above-the-fold content: render it visible from the server and skip the
+   * reveal. Framer Motion writes `initial` into the server HTML, so without
+   * this a page's headline ships at `opacity: 0` and stays invisible until the
+   * JavaScript bundle has downloaded and hydrated — which makes it the page's
+   * Largest Contentful Paint (a search ranking signal) and leaves a visitor
+   * who arrived from a link looking at an empty hero.
+   */
+  priority?: boolean;
 }
 
 const offset: Record<Direction, { x: number; y: number }> = {
@@ -34,7 +43,10 @@ export default function Reveal({
   delay = 0,
   distance,
   once = true,
+  priority = false,
 }: RevealProps) {
+  if (priority) return <div className={className}>{children}</div>;
+
   const base = offset[direction];
   const from = {
     opacity: 0,

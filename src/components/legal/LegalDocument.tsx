@@ -60,7 +60,7 @@ export default function LegalDocument({
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-12 sm:py-20">
         {/* Masthead */}
-        <Reveal>
+        <Reveal priority>
           <span className="eyebrow">{eyebrow}</span>
           <h1 className="mt-4 font-display text-5xl sm:text-6xl text-cream-100 text-balance">
             {title} <span className="italic text-clay-300">{accent}</span>

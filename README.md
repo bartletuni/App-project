@@ -25,6 +25,11 @@ EMAIL_FROM="TakomoCo <noreply@takomoco.com>" # Sender; must be on a domain verif
 # Set BOTH to enforce it. See "Estimates Without an Account" below.
 NEXT_PUBLIC_TURNSTILE_SITE_KEY="0x4AAA..."   # widget key, public
 TURNSTILE_SECRET_KEY="0x4AAA..."             # verification key, server only
+
+# Search engine ownership (OPTIONAL) — the token from the HTML-tag verification
+# method, not the whole tag. Read at build time; unset emits nothing.
+GOOGLE_SITE_VERIFICATION="abc123..."         # Google Search Console
+BING_SITE_VERIFICATION="ABC123..."           # Bing Webmaster Tools (msvalidate.01)
 ```
 
 ### Email notifications

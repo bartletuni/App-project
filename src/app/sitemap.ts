@@ -1,18 +1,22 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo";
-import { LEGAL_ROUTES } from "@/lib/legal";
+import { LEGAL_LAST_UPDATED, LEGAL_ROUTES } from "@/lib/legal";
 
 /**
  * Served at /sitemap.xml. Public, indexable routes only — the authenticated
  * areas and /login are excluded to match their `noindex` metadata.
+ *
+ * `lastModified` is given only where it is true. Stamping every URL with the
+ * time of the request tells a crawler that everything changed on every fetch,
+ * and Google stops trusting a sitemap's dates once they prove unreliable. The
+ * legal documents carry the date they last changed; the rest carry none.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
+  const legalUpdated = new Date(LEGAL_LAST_UPDATED);
 
   return [
     {
       url: absoluteUrl("/"),
-      lastModified,
       changeFrequency: "monthly",
       priority: 1,
     },
@@ -20,26 +24,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // The public estimate form: the one page a visitor with a broken part in
       // their hand is actually looking for.
       url: absoluteUrl("/estimate"),
-      lastModified,
       changeFrequency: "monthly",
       priority: 0.95,
     },
     {
+      // Where outreach to repair and service companies points, and what
+      // someone searching for a discontinued part should land on.
+      url: absoluteUrl("/replacement-parts"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: absoluteUrl("/pricing"),
-      lastModified,
       // Admin-editable, so it turns over more often than the rest.
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: absoluteUrl("/materials"),
-      lastModified,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: absoluteUrl("/contact"),
-      lastModified,
       changeFrequency: "yearly",
       priority: 0.7,
     },
@@ -47,7 +54,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // for a shop's terms before sending it a file.
     ...LEGAL_ROUTES.map((r) => ({
       url: absoluteUrl(r.href),
-      lastModified,
+      lastModified: legalUpdated,
       changeFrequency: "yearly" as const,
       priority: 0.3,
     })),

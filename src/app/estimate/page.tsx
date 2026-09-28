@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { addDays, format } from "date-fns";
 import {
@@ -64,10 +64,16 @@ const labelCls =
  * can see, a signed token proving this page was loaded and dwelt on, rate
  * limits at the endpoint, and Cloudflare Turnstile where a deployment has
  * configured it. A real customer clicks nothing extra.
+ *
+ * Nothing here may depend on the request at render time. The page is
+ * prerendered, and it used to read `?material=` with `useSearchParams`, which
+ * makes Next give up on the server render entirely: the HTML a crawler — or a
+ * slow phone before the script arrives — received was a loading skeleton with
+ * no heading, no copy, and no form. The query string and today's date are read
+ * after mount instead, so the whole page is in the server HTML.
  */
 function EstimateContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { status } = useSession();
 
   // A signed-in visitor has a composer that already knows their details and
@@ -95,8 +101,13 @@ function EstimateContent() {
   const setError = errorAlert.show;
 
   const siteKey = turnstileSiteKey();
-  const minDate = format(addDays(new Date(), MIN_LEAD_DAYS), "yyyy-MM-dd");
-  const initialMaterial = searchParams.get("material");
+  // Set after mount: computed during the prerender it would be frozen at the
+  // build date, and a hydrated attribute is not corrected. The server checks
+  // the lead time regardless.
+  const [minDate, setMinDate] = useState<string>();
+  useEffect(() => {
+    setMinDate(format(addDays(new Date(), MIN_LEAD_DAYS), "yyyy-MM-dd"));
+  }, []);
 
   // The proof-of-form-load token, fetched the moment the page mounts so the
   // dwell-time check is measured from when the customer actually arrived.
@@ -116,6 +127,7 @@ function EstimateContent() {
   }, []);
 
   useEffect(() => {
+    const initialMaterial = new URLSearchParams(window.location.search).get("material");
     fetch("/api/materials")
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
@@ -129,7 +141,7 @@ function EstimateContent() {
         }
       })
       .catch(() => setMaterials([]));
-  }, [initialMaterial]);
+  }, []);
 
   const updateContact = (patch: Partial<GuestContactState>) =>
     setContact((current) => ({ ...current, ...patch }));
@@ -194,7 +206,7 @@ function EstimateContent() {
 
   return (
     <div className="mx-auto max-w-2xl px-5 sm:px-8 pt-28 pb-20">
-      <Reveal>
+      <Reveal priority>
         <span className="eyebrow">ESTIMATE ⁄ NO ACCOUNT NEEDED</span>
         <h1 className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">
           Send us the part.<br />
@@ -590,15 +602,7 @@ export default function EstimatePage() {
   return (
     <>
       <SiteHeader />
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-2xl px-5 sm:px-8 pt-28 pb-20">
-            <div className="panel h-[32rem] animate-pulse rounded-md" />
-          </div>
-        }
-      >
-        <EstimateContent />
-      </Suspense>
+      <EstimateContent />
       <SiteFooter />
     </>
   );

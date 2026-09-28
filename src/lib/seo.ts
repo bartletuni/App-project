@@ -68,12 +68,14 @@ export function absoluteUrl(path = "/"): string {
 }
 
 /**
- * The social preview image. `banner.png` is the only wide marketing image in
- * the repo, so it doubles as the Open Graph card.
+ * The social preview image, drawn by src/app/opengraph-image.tsx at the
+ * 1200×630 every link-preview surface expects. Every page's `openGraph` and
+ * `twitter` metadata points here, so a pasted link to any page previews with
+ * the same card.
  */
 export const OG_IMAGE = {
-  url: "/banner.png",
-  width: 1794,
-  height: 592,
-  alt: "TakomoCo — additive manufacturing and rapid prototyping studio",
+  url: "/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "TakomoCo — replacement parts and 3D printing on a 72-hour turnaround, made in Utah, USA",
 };

@@ -11,6 +11,7 @@ import { BUSINESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from "@/
 
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
+const REPLACEMENT_PARTS_ID = `${SITE_URL}/replacement-parts#service`;
 
 /**
  * The shop as a ProfessionalService (a LocalBusiness subtype), which is the
@@ -30,8 +31,21 @@ export function organizationSchema(): Record<string, unknown> {
       url: absoluteUrl("/logo.png"),
     },
     image: absoluteUrl("/banner.png"),
+    // The brand line set in every footer and on the homepage hero.
+    slogan: "Fast, Fitted, Flawless",
     telephone: BUSINESS.telephone,
     email: BUSINESS.email,
+    // The same line and inbox every page publishes, marked as the one to use
+    // for a new job — what a search engine offers as "contact" for the shop.
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        telephone: BUSINESS.telephone,
+        email: BUSINESS.email,
+        availableLanguage: "English",
+      },
+    ],
     address: {
       "@type": "PostalAddress",
       addressRegion: BUSINESS.region,
@@ -89,8 +103,32 @@ export function organizationSchema(): Record<string, unknown> {
               "Iterative design support that compresses development cycles — from first concept to validated, shippable part.",
           },
         },
+        {
+          "@type": "Offer",
+          itemOffered: { "@id": REPLACEMENT_PARTS_ID },
+        },
       ],
     },
+  };
+}
+
+/**
+ * The part-reproduction service, described on its own page. Referenced from
+ * the Organization's offer catalog by `@id`, so the two stay one entity rather
+ * than two copies that could drift. Only what /replacement-parts itself says.
+ */
+export function replacementPartsServiceSchema(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": REPLACEMENT_PARTS_ID,
+    name: "Replacement part reproduction",
+    serviceType: "Replacement part reproduction",
+    description:
+      "Reproduction of broken, discontinued, and hard-to-source parts for repair and service businesses — modelled from photos, a 3D file, or a 3D scan of the original, and printed in engineering-grade and carbon-fiber-reinforced materials.",
+    url: absoluteUrl("/replacement-parts"),
+    provider: { "@id": ORGANIZATION_ID },
+    audience: { "@type": "BusinessAudience", name: "Repair and service companies" },
   };
 }
 
