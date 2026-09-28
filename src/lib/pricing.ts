@@ -74,7 +74,7 @@ export const DEFAULT_PRICING: PricingContent = {
       "TakomoCo provides high-precision, low-volume 3D printing, 0.02mm precision 3D scanning, and rapid reverse engineering for tech, engineering, and hardware teams across the United States. We specialize in fast-turnaround production of functional prototypes, end-use replacement components, custom tooling, and high-performance carbon-fiber composite parts.",
     advantageLabel: "KEY ADVANTAGE",
     advantageBody:
-      "24-Hour Express Turnaround available for urgent local engineering deadlines.",
+      "24-Hour Express Turnaround available for urgent engineering deadlines.",
     contactPhone: "(385) 695-4178",
     contactEmail: "info@takomoco.com",
     contactWeb: "takomoco.com",
@@ -166,15 +166,14 @@ export const DEFAULT_PRICING: PricingContent = {
       intro: "",
       items: [
         {
-          label: "Standard Local Turnaround",
-          detail: "Wasatch Front pickup or shipping.",
+          label: "Standard Turnaround",
+          detail: "Shipped anywhere in the United States.",
           price: "48–72 hours",
           note: "",
         },
         {
           label: "24-Hour Express Turnaround",
-          detail:
-            "Same-day / next-day local dropoff and pickup in Murray and SLC.",
+          detail: "Produced within 24 hours, then shipped.",
           price: "+35%",
           note: "express surcharge",
         },
