@@ -73,7 +73,7 @@ const sources = [
   {
     icon: ScanLine,
     title: "The part itself",
-    body: "For intricate geometry we 3D-scan the original and rebuild it from the scan. Call the shop to arrange it.",
+    body: "For intricate geometry we 3D-scan the original and rebuild it from the scan. Call the shop, then ship it to us.",
   },
 ];
 

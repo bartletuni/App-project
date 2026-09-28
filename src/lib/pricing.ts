@@ -198,9 +198,9 @@ export const DEFAULT_PRICING: PricingContent = {
           note: "",
         },
         {
-          label: "Physical Dropoff / Ship-to-Scan",
+          label: "Ship-to-Scan",
           detail:
-            "Ship or drop off worn or broken parts for 0.02mm precision scanning at our Murray, UT facility.",
+            "Ship worn or broken parts to our Murray, UT facility for 0.02mm precision scanning.",
           price: "",
           note: "",
         },
