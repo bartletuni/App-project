@@ -14,7 +14,9 @@ const sizes: Record<Size, string> = {
 };
 
 const variants: Record<Variant, string> = {
-  solid: "bg-clay-600 text-cream-100 hover:bg-clay-700 shadow-glow",
+  // 700 rather than 600: cream on 600 is 4.2:1, short of the 4.5:1 that
+  // small type needs. Hover goes darker still, so it never dips below.
+  solid: "bg-clay-700 text-cream-100 hover:bg-clay-800 shadow-glow",
   outline:
     "border border-clay-500/30 text-cream-300 hover:border-clay-400 hover:text-cream-100",
   ghost:

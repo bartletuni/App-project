@@ -28,6 +28,9 @@ const config: Config = {
           500: "#c17a4b",
           600: "#a9663c",
           700: "#8a5230",
+          // Hover fill for the solid clay buttons, which rest on 700: cream
+          // text on 600 is 4.2:1, under the 4.5:1 floor for small type.
+          800: "#733f22",
         },
         ember: {
           300: "#f0c08a",

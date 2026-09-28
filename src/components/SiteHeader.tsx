@@ -70,7 +70,7 @@ export default function SiteHeader() {
                 <span className="block whitespace-nowrap font-mono text-[13px] sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] text-cream-200">
                   TAKOMO<span className="text-clay-400">⁄</span>CO
                 </span>
-                <span className="mt-1 block whitespace-nowrap font-mono text-[9px] tracking-[0.24em] sm:tracking-[0.3em] text-cream-500">
+                <span className="mt-1 block whitespace-nowrap font-mono text-[9px] tracking-[0.24em] sm:tracking-[0.3em] text-cream-400">
                   ADDITIVE MFG.
                 </span>
               </span>

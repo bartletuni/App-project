@@ -16,3 +16,6 @@
 ## 2024-07-28 - Avoid Dead-End Empty States
 **Learning:** Empty states without a clear call to action act as dead-ends, confusing users on how to proceed. Including a contextual CTA dramatically improves navigability.
 **Action:** Always provide a relevant Call-to-Action (like "Return Home" or "Create New") when rendering an empty state index or data view.
+## 2026-09-28 - Small Muted Text and Solid Clay Buttons Need a Floor
+**Learning:** On the espresso ground, `cream-600` measures 5.2:1 — a technical pass, but at the 9–10px uppercase mono sizes it is used for it reads as nearly invisible, and translucent accents (`clay-500/70` step numbers at 3.2:1) fade out entirely. Cream text on a `clay-600` fill is 4.2:1, which fails WCAG AA for the 11–12px labels every solid button carries.
+**Action:** Use `cream-500` (7.4:1) or lighter for any text under 14px, and full-strength clay (`clay-400` and up) rather than an opacity-reduced one for text. Solid clay buttons rest on `clay-700` (5.9:1) and hover to `clay-800` (7.9:1) — never lighter, so no state drops below AA. Check a page by measuring text against the rendered background, particles and gradients included, not against the palette alone.
