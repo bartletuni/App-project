@@ -231,16 +231,51 @@ defended in layers, cheapest first, and **none of them asks the customer for any
 Everything that can reject a request without touching the database or R2 happens before
 anything that does.
 
+### Whose email address is it?
+
+None of the layers above can tell whether the address typed into the form belongs to the
+person typing. Nothing at the form can, without costing a real customer a step — an
+emailed code breaks the "standing next to the broken machine" case the form exists for.
+So the form accepts every estimate at once, and makes the address worthless to anyone who
+does not own it (`src/lib/guest-email.ts`):
+
+- **The one email the form sends carries nothing the sender typed** — no name, no part,
+  no notes — only the reference (derived from the row id) and two signed links. Nobody can
+  get a word of their own into a stranger's inbox through it.
+- **"Confirm it's me"** stamps `PartRequest.guestEmailConfirmedAt`. The console badges
+  every no-account estimate **Email confirmed** or **Email unconfirmed**; the shop calls the
+  number before pricing an unconfirmed one. Confirming is never required.
+- **"This wasn't me"** puts an HMAC of the address on `EmailSuppression`, so the form never
+  emails it again, and deletes the estimate with every file uploaded with it — files from
+  R2 first, so a storage failure leaves the row for a retry rather than orphaned files
+  behind a "deleted" message. An estimate the shop has already converted onto the build
+  queue is not deleted; the shop is told instead. Either way the shop gets a notice.
+- **At most one confirmation email a day reaches any address**, however many estimates
+  name it. A suppressed address gets none; the success screen is worded so it never reveals
+  which.
+- **The shop's own notification goes to `ADMIN_EMAIL`, or `info@takomoco.com` when that is
+  unset — never to the address on the form.** It says what became of the confirmation email.
+
+Both links land on `/estimate/confirm`, which **does nothing until a button is pressed**.
+Mail scanners (Outlook Safe Links and friends) fetch every link in an incoming message, so
+a link that acted on GET would confirm every estimate, or delete every real customer's,
+before anyone read the email. The page checks the link's signature with no database; the
+buttons POST to `/api/requests/guest/confirm`. Links last 30 days.
+
+The suppression key is the same `hashIdentifier` HMAC the rate limits use, under
+`NEXTAUTH_SECRET`. **Rotating that secret empties the do-not-email list in effect**, and
+invalidates every outstanding confirmation link.
+
 ### What lands where
 
 | | |
 |---|---|
-| Page | `/estimate` (public, indexed, in the sitemap; `/quote` permanently redirects to it) |
-| Endpoints | `POST /api/requests/guest`, `GET /api/requests/guest/token` |
+| Pages | `/estimate` (public, indexed, in the sitemap; `/quote` permanently redirects to it); `/estimate/confirm` (noindex, disallowed in robots.txt) |
+| Endpoints | `POST /api/requests/guest`, `GET /api/requests/guest/token`, `POST /api/requests/guest/confirm` |
 | Row | `PartRequest` · `kind: ESTIMATE` · `status: ESTIMATE REQUESTED` · `quoteRequested: true` · `guestEmail` set |
 | Owner | The one system `User` (`isGuest: true`) — never a customer account |
-| Console | Listed with everything else, badged **Estimate** and **No account** |
-| Emails | `[No account] Estimate request E-…` to `ADMIN_EMAIL`; a confirmation to the customer |
+| Console | Listed with everything else, badged **Estimate**, **No account**, and **Email confirmed** / **Email unconfirmed** |
+| Emails | `[No account] Estimate request E-…` to the shop; one confirm-or-disown email to the address given; a notice to the shop when an address disowns one |
 
 ### Applying this to Turso
 
@@ -256,6 +291,19 @@ Safe to run before deploying the new code — the currently deployed code never 
 of it. Against a local `file:` database, `npx prisma db push` is enough. Re-running the
 migration fails with "duplicate column name: isGuest" and changes nothing; that is the
 signal it is already applied, not damage.
+
+Email confirmation is a second migration — one table and one nullable column, additive:
+
+```
+TURSO_DATABASE_URL="libsql://YOUR_DB.turso.io" \
+TURSO_AUTH_TOKEN="YOUR_TOKEN" \
+node scripts/migrate-turso.mjs prisma/migrations/2026-add-guest-email-confirmation.sql
+```
+
+`node migrate-turso.mjs` with no argument applies this one. **Run it before deploying the
+code**: Prisma selects every column it knows about, so the new code cannot read a
+`PartRequest` table without `guestEmailConfirmedAt`. Re-running it fails with "table
+EmailSuppression already exists" and changes nothing.
 
 ## Submitting a Part Without an STL or ZIP
 
@@ -529,8 +577,8 @@ TURSO_AUTH_TOKEN="YOUR_TOKEN" \
 node scripts/migrate-turso.mjs prisma/migrations/2026-add-estimate-track.sql
 ```
 
-`node migrate-turso.mjs` with no argument now applies this one by default. Both
-statements are idempotent: a second pass matches no rows.
+`node migrate-turso.mjs prisma/migrations/2026-add-estimate-track.sql` applies
+it interactively. Both statements are idempotent: a second pass matches no rows.
 
 Running it before deploying is preferred but **not required**. `requestKind`
 re-reads the same rule at display time and shows an unqualified `QUOTE` row as an

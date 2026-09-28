@@ -9,6 +9,7 @@ import {
   FORM_TOKEN_FIELD,
 } from "@/lib/guest-estimate";
 import { MIN_FILL_MS } from "@/lib/form-token";
+import { BUSINESS } from "@/lib/seo";
 
 jest.mock("@/lib/prisma", () => ({
   prisma: {
@@ -28,6 +29,9 @@ jest.mock("@/lib/prisma", () => ({
       upsert: jest.fn(),
       deleteMany: jest.fn(),
     },
+    emailSuppression: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
@@ -35,10 +39,9 @@ jest.mock("@/lib/r2", () => ({
   uploadToR2: jest.fn().mockResolvedValue("test-file-id"),
 }));
 
+const mockSend = jest.fn();
 jest.mock("resend", () => ({
-  Resend: jest.fn().mockImplementation(() => ({
-    emails: { send: jest.fn().mockResolvedValue({ data: { id: "email-1" }, error: null }) },
-  })),
+  Resend: jest.fn().mockImplementation(() => ({ emails: { send: mockSend } })),
 }));
 
 /**
@@ -51,6 +54,8 @@ describe("POST /api/requests/guest", () => {
     process.env.NEXTAUTH_SECRET = "test-secret-for-guest-quotes";
     process.env.RESEND_API_KEY = "re_test";
     delete process.env.TURNSTILE_SECRET_KEY;
+    // The fallback is what these tests pin: never the address on the form.
+    delete process.env.ADMIN_EMAIL;
   });
 
   beforeEach(() => {
@@ -68,7 +73,15 @@ describe("POST /api/requests/guest", () => {
     // Under every ceiling unless a test says otherwise.
     (prisma.rateLimit.upsert as jest.Mock).mockResolvedValue({ count: 1 });
     (prisma.rateLimit.deleteMany as jest.Mock).mockResolvedValue({ count: 0 });
+    // Nobody has disowned anything.
+    (prisma.emailSuppression.findUnique as jest.Mock).mockResolvedValue(null);
+    mockSend.mockResolvedValue({ data: { id: "email-1" }, error: null });
   });
+
+  /** Every email the route sent, as { to, subject, html }. */
+  const sent = (): { to: string; subject: string; html: string }[] =>
+    mockSend.mock.calls.map((call) => call[0]);
+  const sentTo = (address: string) => sent().filter((mail) => mail.to === address);
 
   /** A described part — the fast path, and the one with no file to fake. */
   const buildForm = (overrides: Record<string, string> = {}) => {
@@ -178,6 +191,73 @@ describe("POST /api/requests/guest", () => {
   it("keeps the company with the request, without losing the customer's own words", async () => {
     await POST(buildForm({ company: "Rivera Appliance", notes: "Black, if you have it." }));
     expect(createdRow().notes).toBe("Company: Rivera Appliance\nBlack, if you have it.");
+  });
+
+  // --- whose address is it? ------------------------------------------------
+  // Anyone can type anyone's address into the form, so the one email that goes
+  // to it must be useless to anyone but its owner.
+
+  it("asks the address's owner to confirm, with nothing the sender typed in the email", async () => {
+    await POST(
+      buildForm({
+        name: "Visit spam.example",
+        partName: "Cheap pills at spam.example",
+        notes: "spam.example spam.example",
+        company: "spam.example Ltd",
+      })
+    );
+
+    const [mail] = sentTo("alex@example.com");
+    expect(mail).toBeDefined();
+    expect(mail.subject).toContain("E-ABCDEF");
+    expect(mail.html).toContain("E-ABCDEF");
+    expect(mail.html).toMatch(/\/estimate\/confirm\?a=confirm&amp;t=/);
+    expect(mail.html).toMatch(/\/estimate\/confirm\?a=disown&amp;t=/);
+    expect(mail.subject + mail.html).not.toContain("spam.example");
+  });
+
+  it("sends the shop's notification to the shop, never to the address on the form", async () => {
+    await POST(buildForm());
+
+    const toShop = sentTo(BUSINESS.email);
+    expect(toShop).toHaveLength(1);
+    expect(toShop[0].html).toContain("Email unconfirmed");
+    // The customer gets exactly one message: the confirmation.
+    expect(sentTo("alex@example.com")).toHaveLength(1);
+  });
+
+  it("never emails an address whose owner has disowned an estimate before", async () => {
+    (prisma.emailSuppression.findUnique as jest.Mock).mockResolvedValue({ key: "listed" });
+
+    const res = await POST(buildForm());
+
+    // Still filed — the shop calls — but nothing goes to that inbox.
+    expect(res.status).toBe(201);
+    expect(prisma.partRequest.create).toHaveBeenCalled();
+    expect(sentTo("alex@example.com")).toHaveLength(0);
+    expect(sentTo(BUSINESS.email)[0].html).toContain("Address disowned before");
+  });
+
+  it("does not email when it cannot tell whether the address is on the list", async () => {
+    (prisma.emailSuppression.findUnique as jest.Mock).mockRejectedValue(new Error("db down"));
+
+    const res = await POST(buildForm());
+
+    expect(res.status).toBe(201);
+    expect(sentTo("alex@example.com")).toHaveLength(0);
+    expect(sentTo(BUSINESS.email)[0].html).toContain("No confirmation email");
+  });
+
+  it("sends any one address at most one confirmation a day", async () => {
+    (prisma.rateLimit.upsert as jest.Mock).mockImplementation(({ where }: { where: { key: string } }) =>
+      Promise.resolve({ count: where.key.startsWith("guest-email:sent-day:") ? 2 : 1 })
+    );
+
+    const res = await POST(buildForm());
+
+    expect(res.status).toBe(201);
+    expect(sentTo("alex@example.com")).toHaveLength(0);
+    expect(sentTo(BUSINESS.email)[0].html).toContain("already had one from the form today");
   });
 
   // --- what must not get through -----------------------------------------

@@ -7,6 +7,7 @@ import {
   statusTone,
 } from "@/lib/request-status";
 import { CLAY, CREAM, DERIVED, EMBER, ESPRESSO, WORDMARK } from "@/lib/brand";
+import type { GuestConfirmationOutcome } from "@/lib/guest-email";
 
 /**
  * Transactional email, in the same voice as the site.
@@ -209,7 +210,8 @@ function steps(items: { title: string; detail: string }[]): string {
  * `audience` decides the footer only — a customer gets the shop's contact
  * details, the console gets a plain automated-notice line, and a guest gets
  * the same contact details with the one line that differs: they have no
- * account, so nothing may claim they do.
+ * account, so nothing may claim they do — and the address was typed into a
+ * public form by somebody, so nothing may claim it was them either.
  */
 function shell(opts: {
   preheader: string;
@@ -231,7 +233,7 @@ function shell(opts: {
 
   const footer =
     opts.audience === "guest"
-      ? contactFooter("because you asked us for an estimate.")
+      ? contactFooter("because this address was given on our estimate form.")
       : opts.audience === "customer"
       ? contactFooter("because you have an account with us.")
       : `
@@ -388,6 +390,36 @@ export const NewUserAdminNotificationEmailHTML = (data: {
       ${button(absoluteUrl("/admin/users"), "Open client list")}`,
   });
 
+/**
+ * Whether the shop can expect a confirmation click on a no-account estimate.
+ * The address on it is only the sender's word until its owner clicks, so every
+ * case that is not "sent" ends in the same instruction: call before working.
+ */
+function guestConfirmationCallout(outcome: GuestConfirmationOutcome): string {
+  if (outcome === "sent") {
+    return callout(
+      `<strong style="color:${C.creamSoft};">Email unconfirmed.</strong> A confirmation link went to the address below. Anyone can type any address into the form, so until it is clicked the console marks this unconfirmed — call the number before pricing it.`,
+      C.clay
+    );
+  }
+  if (outcome === "suppressed") {
+    return callout(
+      `<strong style="color:${C.ember};">Address disowned before.</strong> No confirmation email was sent: the owner of this address has already told us, through that link, that someone else was using it. Treat this one with suspicion and call before doing any work.`,
+      C.ember
+    );
+  }
+  if (outcome === "capped") {
+    return callout(
+      `<strong style="color:${C.creamSoft};">No confirmation email.</strong> This address already had one from the form today, and it gets at most one a day. Call the number to confirm it before pricing.`,
+      C.clay
+    );
+  }
+  return callout(
+    `<strong style="color:${C.creamSoft};">No confirmation email.</strong> It did not go out — the server log says why. Call the number to confirm it before pricing.`,
+    C.clay
+  );
+}
+
 export const NewRequestEmailHTML = (data: {
   customerName: string;
   customerEmail: string;
@@ -397,6 +429,11 @@ export const NewRequestEmailHTML = (data: {
   company?: string;
   /** True when this came through /estimate — no desk for them to watch. */
   guestSubmitted?: boolean;
+  /**
+   * On a no-account estimate, what became of the confirmation email — the
+   * shop needs to know whether to wait for a click or pick up the phone.
+   */
+  guestConfirmation?: GuestConfirmationOutcome;
   /** The short code the customer was given on screen, e.g. "E-4F2A9C". */
   reference?: string;
   /** The uploaded file's name, or the customer's name for a described part. */
@@ -441,6 +478,7 @@ export const NewRequestEmailHTML = (data: {
             )
           : ""
       }
+      ${data.guestSubmitted && data.guestConfirmation ? guestConfirmationCallout(data.guestConfirmation) : ""}
       ${
         data.isFreeSample
           ? callout(
@@ -502,51 +540,55 @@ export const NewRequestEmailHTML = (data: {
 };
 
 /**
- * The customer's receipt for a no-account estimate request.
+ * The one email the no-account estimate form sends to the address it was given.
  *
- * They have no desk to watch and no password to remember, so this email is the
- * whole of their side of the transaction: proof it arrived, the reference the
- * shop will use on the phone, what we understood them to be asking for, and
- * when to expect an answer. It says plainly that what is coming back is an
- * estimate rather than a guaranteed price, because this email is the record
- * the customer keeps and the last chance to set that expectation in writing.
+ * That address is whatever somebody typed, so this email is built to be
+ * useless to anyone but the address's owner: it carries nothing the sender
+ * typed — not their name, not the part, not the notes — only the reference,
+ * which is derived from the row id, and two links. Nobody can get a word of
+ * their own into a stranger's inbox through it. See src/lib/guest-email.ts.
+ *
+ * To the real customer it is still the whole of their side of the transaction:
+ * proof it arrived, the reference the shop will use on the phone, the one
+ * click that saves a checking call, and — the last chance to set the
+ * expectation in writing — that what comes back is an estimate rather than a
+ * guaranteed price. To anyone else it is one email with a way to make sure
+ * there is never another.
  *
  * The account offer sits at the bottom, as an offer for future work only — a
  * no-account estimate is deliberately attached to no account, so opening one
  * does not and must not inherit it.
  */
 export const EstimateReceivedEmailHTML = (data: {
-  customerName: string;
   /** The short code shown on screen when they submitted, e.g. "E-4F2A9C". */
   reference: string;
-  partTitle: string;
-  quantity: number;
-  material: string;
-  dateNeeded: string;
+  /** Signed links to /estimate/confirm — see `guestEmailLinks`. */
+  confirmUrl: string;
+  disownUrl: string;
 }) =>
   shell({
     audience: "guest",
-    preheader: `Estimate ${data.reference} is with the shop — we'll come back within one business day.`,
+    preheader: `Estimate ${data.reference} is with the shop — one click confirms it was you.`,
     eyebrow: "Estimate ⁄ Received",
     title: `Estimate ${data.reference} received`,
     content: `
-      ${heading(`We've got it, <span style="font-style:italic;color:${C.clay};">${escapeHtml(data.customerName.split(" ")[0] || data.customerName)}</span>`)}
+      ${heading(`Estimate request <span style="font-style:italic;color:${C.clay};">received</span>`)}
       ${lede(
-        `Your estimate request is with the shop. Give your reference — <strong style="color:${C.creamSoft};">${escapeHtml(data.reference)}</strong> — if you call about it.`
+        `Reference <strong style="color:${C.creamSoft};">${escapeHtml(data.reference)}</strong>. Someone asked TakomoCo for an estimate and gave this email address for the answer. If that was you, confirm it — one click, and we can start on your part without calling to check first.`
       )}
+
+      <div style="padding:0 0 6px;">${button(escapeHtml(data.confirmUrl), "Confirm it's me")}</div>
+      <p style="margin:0 0 30px;font-family:${SANS};font-size:13px;line-height:1.7;color:${C.muted};">
+        Didn't ask us for anything?
+        <a href="${escapeHtml(data.disownUrl)}" style="color:${C.clay};text-decoration:underline;">Tell us it wasn't you</a>
+        and we will delete the request and anything uploaded with it, and our
+        estimate form will never email this address again.
+      </p>
 
       ${callout(
         `<strong style="color:${C.creamSoft};">What comes back is an estimate.</strong> It is our considered read of the job, not a price we have committed to. We can only guarantee a price for an account holder who has sent us the part file to print — everything is confirmed in writing before anything is made.`,
         C.clay
       )}
-
-      ${specSheet([
-        { label: "Reference", value: escapeHtml(data.reference) },
-        { label: "Part", value: escapeHtml(data.partTitle) },
-        { label: "Quantity", value: String(data.quantity) },
-        { label: "Material", value: escapeHtml(data.material) },
-        { label: "Needed by", value: escapeHtml(data.dateNeeded) },
-      ])}
 
       ${steps([
         {
@@ -566,9 +608,45 @@ export const EstimateReceivedEmailHTML = (data: {
       ${callout(
         `Want your <em>next</em> job on a desk you can watch? <a href="${absoluteUrl("/login?register=1")}" style="color:${C.clay};text-decoration:none;">Open an account</a> — it is also what lets us turn an estimate into a guaranteed quote, once you send the part file with it. This estimate stays where it is: we keep no-account submissions off accounts on purpose, so nobody can attach anything to yours by typing your address into a form. We answer this one by email either way.`,
         C.clay
+      )}`,
+  });
+
+/**
+ * Tells the shop that the owner of a no-account estimate's email address says
+ * they never sent it. Either the estimate is already gone — deleted with its
+ * files by that click — and this is so nobody works on it or calls the number
+ * on it, or the shop had already moved it on and a person has to decide.
+ */
+export const EstimateDisownedEmailHTML = (data: {
+  reference: string;
+  email: string;
+  /** True when the click deleted the estimate; false when it was left for a person. */
+  removed: boolean;
+}) =>
+  shell({
+    audience: "console",
+    preheader: `${data.reference}: the owner of ${data.email} says they didn't send it.`,
+    eyebrow: "Console ⁄ Estimate disowned",
+    title: `Estimate ${data.reference} disowned`,
+    content: `
+      ${heading(`Estimate ${escapeHtml(data.reference)} disowned`)}
+      ${lede(
+        `The owner of <span style="color:${C.creamSoft};">${escapeHtml(data.email)}</span> used the link in the confirmation email to say they never sent this estimate request. The address is on the do-not-email list now; the estimate form will not write to it again.`
       )}
 
-      ${button(absoluteUrl("/estimate"), "Send another part")}`,
+      ${
+        data.removed
+          ? callout(
+              `<strong style="color:${C.clay};">Already deleted.</strong> The estimate and every file uploaded with it were removed by that click. Anything you had from it — the phone number included — came from whoever typed this address in, so there is no one to call back.`,
+              C.clay
+            )
+          : callout(
+              `<strong style="color:${C.ember};">Not deleted — needs a person.</strong> This one had already been moved onto the build queue, so it was left alone. Check who you have actually been dealing with before doing any more work on it.`,
+              C.ember
+            )
+      }
+
+      ${button(absoluteUrl("/admin"), "Open in console")}`,
   });
 
 export const InvoiceSentEmailHTML = (data: {

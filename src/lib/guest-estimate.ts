@@ -237,6 +237,7 @@ export interface GuestContactRecord {
   guestName?: string | null;
   guestEmail?: string | null;
   guestPhone?: string | null;
+  guestEmailConfirmedAt?: Date | string | null;
 }
 
 /**
@@ -250,6 +251,16 @@ export interface GuestContactRecord {
  */
 export function isGuestRequest(request: GuestContactRecord | null | undefined): boolean {
   return Boolean(request?.guestEmail);
+}
+
+/**
+ * True once the person at a guest request's email address has clicked the
+ * confirm link in the form's email. Until then the address is only the
+ * sender's word — anyone can type anyone's — and the console says so.
+ * Always false on a signed-in request, which has nothing to confirm.
+ */
+export function isGuestEmailConfirmed(request: GuestContactRecord | null | undefined): boolean {
+  return isGuestRequest(request) && Boolean(request?.guestEmailConfirmedAt);
 }
 
 /**

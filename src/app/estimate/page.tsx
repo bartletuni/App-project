@@ -524,11 +524,20 @@ function EstimateSent({ reference, email }: { reference: string; email: string }
                 Your reference
               </div>
               <div className="mt-1 font-mono text-2xl tracking-[0.12em] text-clay-200">{reference}</div>
-              <p className="mt-2 text-xs text-cream-500">
-                Give this if you call. A copy is on its way to {email}.
-              </p>
+              <p className="mt-2 text-xs text-cream-500">Give this if you call.</p>
             </div>
           )}
+
+          {/* Worded so it is true whether or not an email went out: the form
+              sends at most one a day to an address, and none to an address
+              whose owner has disowned an earlier estimate — which this screen
+              must not reveal to whoever typed it. */}
+          <p className="mt-5 text-sm leading-relaxed text-cream-400">
+            Look in <span className="text-cream-200">{email}</span> for a one-click link to
+            confirm it was you — it lets us start without calling to check first. No email?
+            Nothing to do: we&apos;ll call the number you gave before we start. (Our form sends
+            any one address at most one email a day.)
+          </p>
 
           <ol className="mt-7 space-y-4">
             {[

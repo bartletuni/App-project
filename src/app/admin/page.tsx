@@ -32,7 +32,7 @@ import {
   statusTone,
   statusesFor,
 } from "@/lib/request-status";
-import { isGuestRequest, requestContact } from "@/lib/guest-estimate";
+import { isGuestEmailConfirmed, isGuestRequest, requestContact } from "@/lib/guest-estimate";
 
 /**
  * Console colours for a status, keyed by the tone the shared status table
@@ -92,6 +92,31 @@ function KindBadge({ request, className = "" }: { request: any; className?: stri
       }
     >
       {requestKindLabel(request)}
+    </span>
+  );
+}
+
+/**
+ * On a no-account estimate, whether the person at its email address has
+ * vouched for it. Unconfirmed is the default and the loud one: anyone can type
+ * anyone's address into the public form, so until the link in the form's
+ * email is clicked, the shop calls the number before doing any work.
+ */
+function GuestEmailBadge({ request }: { request: any }) {
+  if (!isGuestRequest(request)) return null;
+  return isGuestEmailConfirmed(request) ? (
+    <span
+      className="text-[10px] font-bold bg-green-500/15 text-green-200 px-1.5 py-0.5 rounded uppercase tracking-wide"
+      title={`The person at this address clicked the confirm link on ${format(new Date(request.guestEmailConfirmedAt), "MMM d, yyyy")}`}
+    >
+      Email confirmed
+    </span>
+  ) : (
+    <span
+      className="text-[10px] font-bold bg-yellow-500/15 text-yellow-200 px-1.5 py-0.5 rounded uppercase tracking-wide"
+      title="Nobody has clicked the confirm link sent to this address. Anyone can type any address into the public form — call the number before pricing this."
+    >
+      Email unconfirmed
     </span>
   );
 }
@@ -555,6 +580,7 @@ function AdminDashboardContent() {
                             <div className="mt-1.5 flex flex-wrap gap-1.5">
                               {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
                               {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public estimate form. Not linked to any account — answer the email and phone shown here. No account means no guaranteed price.">No account</span>}
+                              <GuestEmailBadge request={req} />
                             </div>
                           )}
                           {isPricing(req) && <div className="mt-1.5"><KindBadge request={req} /></div>}
@@ -661,6 +687,7 @@ function AdminDashboardContent() {
                               <div className="flex gap-2 mt-1">
                                   {req.isFreeSample && <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-1.5 py-0.5 rounded uppercase tracking-wide" title="First-time customer's free PLA 2.0 sample — do not invoice">Free sample</span>}
                                   {isGuestRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="Came in through the public estimate form. Not linked to any account — answer the email and phone shown here. No account means no guaranteed price.">No account</span>}
+                                  <GuestEmailBadge request={req} />
                                   {isDescriptionRequest(req) && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title="No 3D file — model this part from the customer's description and references">Model it</span>}
                                   <KindBadge request={req} />
                                   {!isPricing(req) && req.convertedAt && <span className="text-[10px] font-bold bg-clay-500/15 text-clay-200 px-1.5 py-0.5 rounded uppercase tracking-wide" title={`Converted onto the build queue on ${format(new Date(req.convertedAt), "MMM d, yyyy")}`}>Converted</span>}
@@ -820,6 +847,13 @@ function AdminDashboardContent() {
                         {isGuestRequest(selectedRequest) && (
                           <dd className="mt-1 text-xs text-clay-300">
                             No account — this email and phone are the only way to reach them.
+                          </dd>
+                        )}
+                        {isGuestRequest(selectedRequest) && (
+                          <dd className={`mt-1 text-xs ${isGuestEmailConfirmed(selectedRequest) ? "text-green-300" : "text-yellow-200"}`}>
+                            {isGuestEmailConfirmed(selectedRequest)
+                              ? `Email confirmed ${format(new Date(selectedRequest.guestEmailConfirmedAt), "MMM d, yyyy")} — the person at this address says it was them.`
+                              : "Email unconfirmed — nobody has clicked the link sent to it. Call before pricing: anyone can type any address into the form."}
                           </dd>
                         )}
                     </div>

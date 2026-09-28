@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 
@@ -47,4 +47,17 @@ export async function uploadToR2(fileName: string, mimeType: string, fileBuffer:
     console.error("Full Error:", error);
     throw new Error(`Failed to upload to R2: ${error.message || error.name}`);
   }
+}
+
+/**
+ * Remove one object. Throws on failure so a caller can refuse to report a file
+ * as deleted when it is not. Deleting a key that is already gone succeeds (S3
+ * semantics), which is what makes a retried deletion safe.
+ */
+export async function deleteFromR2(objectKey: string): Promise<void> {
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+    throw new Error("Missing Cloudflare R2 credentials in environment variables.");
+  }
+
+  await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: objectKey }));
 }
