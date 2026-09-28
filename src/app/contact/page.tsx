@@ -42,7 +42,7 @@ export default function ContactPage() {
             <Magnetic strength={0.25} className="w-full">
               <a
                 href="mailto:info@takomoco.com"
-                className="group flex items-center justify-between gap-3 bg-clay-600 px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-700 transition-colors shadow-glow active:scale-[0.99]"
+                className="group flex items-center justify-between gap-3 bg-clay-700 px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-800 transition-colors shadow-glow active:scale-[0.99]"
               >
                 <span className="flex items-center gap-3">
                   <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />

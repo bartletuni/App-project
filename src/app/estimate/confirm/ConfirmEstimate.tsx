@@ -172,7 +172,7 @@ export default function ConfirmEstimate({
                 disabled={busy}
                 className={`${primary} ${
                   intent === "confirm"
-                    ? "bg-clay-600 shadow-glow hover:bg-clay-700 focus-visible:ring-clay-500"
+                    ? "bg-clay-700 shadow-glow hover:bg-clay-800 focus-visible:ring-clay-500"
                     : "bg-red-700/80 hover:bg-red-700 focus-visible:ring-red-400"
                 }`}
               >

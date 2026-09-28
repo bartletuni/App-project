@@ -458,7 +458,7 @@ function EstimateContent() {
             <button
               type="submit"
               disabled={loading}
-              className="group w-full inline-flex items-center justify-center gap-2 rounded-md bg-clay-600 px-4 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 shadow-glow transition-colors hover:bg-clay-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+              className="group w-full inline-flex items-center justify-center gap-2 rounded-md bg-clay-700 px-4 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 shadow-glow transition-colors hover:bg-clay-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               {loading ? (
                 <>
@@ -570,7 +570,7 @@ function EstimateSent({ reference, email }: { reference: string; email: string }
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href={`/login?register=1&email=${encodeURIComponent(email)}`}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-clay-600 px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 shadow-glow transition-colors hover:bg-clay-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-clay-700 px-5 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 shadow-glow transition-colors hover:bg-clay-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               Open an account
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

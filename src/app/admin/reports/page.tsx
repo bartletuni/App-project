@@ -118,7 +118,7 @@ export default function GenerateReportsPage() {
                     <button
                         onClick={handleGeneratePDF}
                         disabled={loading || !startDate || !endDate}
-                        className="bg-clay-600 hover:bg-clay-700 text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="bg-clay-700 hover:bg-clay-800 text-white font-bold py-3 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         {loading ? (
                              <span className="flex items-center gap-2">

@@ -211,7 +211,7 @@ export default function AdminPricingPage() {
             <button
               onClick={handleSave}
               disabled={saving || resetting}
-              className="inline-flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+              className="inline-flex items-center gap-2 bg-clay-700 hover:bg-clay-800 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               <Save className="w-4 h-4" aria-hidden="true" />
               {saving ? "Saving…" : "Save changes"}
@@ -532,7 +532,7 @@ export default function AdminPricingPage() {
           <button
             onClick={handleSave}
             disabled={saving || resetting}
-            className="inline-flex items-center justify-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+            className="inline-flex items-center justify-center gap-2 bg-clay-700 hover:bg-clay-800 text-cream-100 px-6 py-3 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
           >
             <Save className="w-4 h-4" aria-hidden="true" />
             {saving ? "Saving…" : "Save changes"}
