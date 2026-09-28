@@ -13,7 +13,7 @@ const field =
 const labelCls =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 const btn =
-  "inline-flex items-center justify-center gap-2 bg-clay-600 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] w-full sm:w-auto";
+  "inline-flex items-center justify-center gap-2 bg-clay-700 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 hover:bg-clay-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] w-full sm:w-auto";
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();

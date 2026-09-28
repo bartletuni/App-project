@@ -187,7 +187,7 @@ export default function AdminMaterialsPage() {
           </div>
           <button
             onClick={() => setIsAdding(true)}
-            className="shrink-0 inline-flex items-center gap-2 bg-clay-600 hover:bg-clay-700 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow"
+            className="shrink-0 inline-flex items-center gap-2 bg-clay-700 hover:bg-clay-800 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow"
           >
             <Plus className="w-4 h-4" />
             Add Material
@@ -286,7 +286,7 @@ export default function AdminMaterialsPage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="bg-clay-600 hover:bg-clay-700 text-white px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="bg-clay-700 hover:bg-clay-800 text-white px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSaving ? (
                     <>

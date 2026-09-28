@@ -939,7 +939,7 @@ function AdminDashboardContent() {
                             <button
                               onClick={() => handleSaveQuotedPrice(selectedRequest.id)}
                               disabled={savingQuotedPrice || quotedPriceInput === (selectedRequest.quotedPrice || "")}
-                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-clay-700 hover:bg-clay-800 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingQuotedPrice ? "Saving..." : "Save Price"}
                             </button>
@@ -963,7 +963,7 @@ function AdminDashboardContent() {
                             <button
                               onClick={() => handleSaveInvoice(selectedRequest.id)}
                               disabled={savingInvoice || invoiceInput === selectedRequest.invoiceNumber || (!invoiceInput && !selectedRequest.invoiceNumber)}
-                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-clay-700 hover:bg-clay-800 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingInvoice ? "Saving..." : "Save Invoice"}
                             </button>
@@ -982,7 +982,7 @@ function AdminDashboardContent() {
                             <button
                               onClick={() => handleSaveTracking(selectedRequest.id)}
                               disabled={savingTracking || trackingInput === selectedRequest.trackingNumber || (!trackingInput && !selectedRequest.trackingNumber)}
-                              className="bg-clay-600 hover:bg-clay-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-clay-700 hover:bg-clay-800 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {savingTracking ? "Saving..." : "Save Tracking"}
                             </button>

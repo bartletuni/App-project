@@ -429,7 +429,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           className={`group w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 rounded-md ${
             freeSample
               ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
-              : "bg-clay-600 hover:bg-clay-700 focus-visible:ring-clay-500"
+              : "bg-clay-700 hover:bg-clay-800 focus-visible:ring-clay-500"
           }`}
         >
           {loading ? (
