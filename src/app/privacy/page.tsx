@@ -12,7 +12,7 @@ import {
 
 const title = "Privacy Policy";
 const description =
-  "What TakomoCo collects when you request an estimate or open a client account, who processes it, how long it is kept, and how to have it corrected or deleted.";
+  "What TakomoCo collects when you request an estimate, open a client account, or email or text the shop, who processes it, how long it is kept, and how to have it corrected or deleted.";
 
 export const metadata: Metadata = {
   title,
@@ -45,9 +45,11 @@ const sections: LegalSection[] = [
       <>
         <p>
           TakomoCo is an additive manufacturing studio operating in Utah, United
-          States. This policy covers takomoco.com and the client dashboard
-          attached to it, and explains what we do with personal information you
-          give us when you browse the site, request an estimate, or open an account.
+          States. This policy covers takomoco.com, the client dashboard
+          attached to it, and the shop&apos;s email address and phone line, and
+          explains what we do with personal information you give us when you
+          browse the site, request an estimate, open an account, or email or
+          text us.
         </p>
         <p>
           For anything in this policy, write to{" "}
@@ -114,6 +116,22 @@ const sections: LegalSection[] = [
           it can tell us is that an address typed into the form later is one we
           have promised not to email.
         </p>
+        <h3>Email and text messages</h3>
+        <p>
+          If you email the shop or text its phone number, we receive what you
+          send: your email address or phone number, your name and company if
+          you give them, the message itself, and anything attached to it —
+          photographs, sketches, drawings, 3D model files, or other documents.
+          Your replies to us, and ours to you, become part of the same
+          conversation. We keep them as correspondence about your part, in the
+          shop&apos;s mailbox and on its phone.
+        </p>
+        <p>
+          A file you send this way is covered by the{" "}
+          <Link href="/file-retention">File Retention Policy</Link> just as an
+          upload is. When we take on a job from it, we may add it to that
+          job&apos;s record, where it is held like any other upload.
+        </p>
         <h3>Technical information</h3>
         <p>
           Our hosting and storage providers keep standard server logs — IP
@@ -148,12 +166,14 @@ const sections: LegalSection[] = [
         <ul>
           <li>
             <strong>To manufacture your part.</strong> Your model file, print
-            settings, and notes are what the shop works from.
+            settings, and notes — whether uploaded, emailed, or texted — are
+            what the shop works from.
           </li>
           <li>
             <strong>To reach you about your order.</strong> Estimates, quotes, invoices,
             status changes, and shipping notices go to your email address; we
-            use your phone number if an order needs a conversation.
+            use your phone number, by call or text, if an order needs a
+            conversation.
           </li>
           <li>
             <strong>To make a reprint or a revision possible.</strong> We keep
@@ -163,6 +183,11 @@ const sections: LegalSection[] = [
             actually printed. The{" "}
             <Link href="/file-retention">File Retention Policy</Link> covers
             this in full, including having a file deleted.
+          </li>
+          <li>
+            <strong>To answer what you send us.</strong> An email or text is
+            used to reply to it and to price or make the part it is about, and,
+            if it becomes an order, it stays with that order&apos;s record.
           </li>
           <li>
             <strong>To invoice you and take payment.</strong> Your name, email
@@ -211,7 +236,7 @@ const sections: LegalSection[] = [
             cross-context behavioural advertising, and we do not intend to.
           </strong>{" "}
           Your model files and part descriptions are treated as your
-          confidential business information. We do not publish them, show them
+          confidential business information, however they reach us. We do not publish them, show them
           to other customers, or use them as portfolio work without asking you
           first, in writing.
         </p>
@@ -237,6 +262,16 @@ const sections: LegalSection[] = [
           <li>
             <strong>Resend</strong> — delivers transactional email such as
             estimates, quotes, invoices, and status updates.
+          </li>
+          <li>
+            <strong>Our email provider</strong> — hosts the shop&apos;s mailbox,
+            where the email you send us, and anything attached to it, is kept.
+          </li>
+          <li>
+            <strong>Our phone and messaging provider</strong> — carries calls
+            and text messages to and from the shop&apos;s number. Like any
+            carrier, it keeps its own records of the messages it carries, under
+            its own retention policy, which we do not control.
           </li>
           <li>
             <strong>Square</strong> — issues your invoice and processes the
@@ -316,6 +351,16 @@ const sections: LegalSection[] = [
             out in full, including how to have a specific file deleted.
           </li>
           <li>
+            <strong>Emails and text messages</strong> — kept in the shop&apos;s
+            mailbox and on its phone while they may be needed for the job they
+            are about, including a later reprint or revision of it, on the same
+            basis as uploaded files. Ask us and we will delete a message, or a
+            whole conversation, sooner; files attached to them are covered by
+            the <Link href="/file-retention">File Retention Policy</Link>.
+            Copies held by your own email or phone provider, and by ours, are
+            kept under those providers&apos; own policies.
+          </li>
+          <li>
             <strong>Payment records</strong> — the invoice number and amount
             stay with the order record above. Square keeps its own record of the
             transaction under its own retention policy, which we do not control.
@@ -354,7 +399,10 @@ const sections: LegalSection[] = [
             delete your account and the personal information attached to it,
             except records we must keep for tax or legal reasons;
           </li>
-          <li>delete a specific uploaded model file;</li>
+          <li>
+            delete a specific model file, photograph, or message you sent us,
+            however it reached us;
+          </li>
           <li>send you a copy of your information in a portable format.</li>
         </ul>
         <p>
@@ -392,7 +440,8 @@ const sections: LegalSection[] = [
           on two of those: your agreement, which you give by ticking the{" "}
           <Link href="/file-retention">File Retention Policy</Link> when you
           open an account, and our legitimate interest in being able to reprint
-          or revise a part you come back for. Withdrawing the agreement is one
+          or revise a part you come back for. A file or message you email or
+          text us, with no account behind it, rests on that interest alone. Withdrawing the agreement is one
           email — ask us to delete the file and we will, as the list above
           says — and nothing we did with the file before then becomes unlawful
           for your having asked.
@@ -413,6 +462,15 @@ const sections: LegalSection[] = [
           public URLs, and every upload is checked against its real file
           signature before it is stored. Order and account records are reachable
           only by you and by shop staff who need them to do the work.
+        </p>
+        <p>
+          Email and text messages are less protected than an upload, and we
+          would rather say so. Text messages are not encrypted end to end, and
+          email is encrypted in transit only when both your provider and ours
+          support it. Once they reach us they are read only by the people at
+          the shop. For a model you want kept as close as possible, upload it
+          through the <Link href="/estimate">estimate form</Link> or your
+          account instead.
         </p>
         <p>
           No system is perfectly secure, and we will not pretend otherwise. If a
@@ -484,8 +542,12 @@ export default function PrivacyPage() {
                 reach us.
               </li>
               <li>
-                Your uploads and account details are yours — ask and we will
-                correct or delete them.
+                What you email or text the shop is covered too: kept
+                confidential, used only for your job, and deleted on request.
+              </li>
+              <li>
+                Your uploads, messages, and account details are yours — ask and
+                we will correct or delete them.
               </li>
             </ul>
           </>

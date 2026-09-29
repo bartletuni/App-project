@@ -28,10 +28,11 @@ import type { FaqItem } from "@/lib/faq";
  * It leads with an email to the shop, not the form, on purpose. The estimate
  * form only takes dates at least MIN_LEAD_DAYS out, and a job that cannot
  * wait that long needs a conversation about what is possible before anyone
- * pays. Files still go through the form: uploads are private and
- * access-controlled, and /privacy and /file-retention describe them, where an
- * email attachment would sit outside both. The email link pre-fills a "Rush
- * job" subject so the shop can pick these out of the inbox.
+ * pays. Files are still asked for through the form, because an upload is
+ * the better-protected route: both policies cover a file sent by email or
+ * text, and both say plainly that it is less protected in transit (/privacy
+ * §09, /file-retention §05). The email link pre-fills a "Rush job" subject so
+ * the shop can pick these out of the inbox.
  *
  * Every speed it names is one the shop already publishes: the 72-hour lead
  * time (homepage spec sheet) and the 24-hour express line (the rate sheet at

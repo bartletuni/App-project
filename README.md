@@ -159,9 +159,10 @@ permanently, so the address survives being said on a phone call or printed on a 
 least `MIN_LEAD_DAYS` out, and a job that cannot wait that long needs a conversation
 about what is possible before anyone pays. The email link pre-fills a "Rush job" subject
 so the shop can pick these out of the inbox, and the estimate button is still there,
-second. Files and photos are still asked for through the form, not as attachments:
-uploads are private and access-controlled, and `/privacy` and `/file-retention` describe
-them, where an emailed file would sit outside both. Across the site, suggestions to get
+second. Files and photos are still asked for through the form rather than as
+attachments, because an upload is the better-protected route: both policies cover a file
+sent by email or text, and both say plainly that it is less protected in transit
+(`/privacy` §09, `/file-retention` §05). Across the site, suggestions to get
 in touch say email rather than call; the phone number is still listed where contact
 details are (footer, mobile directory, `/contact`, the rate sheet).
 
@@ -169,9 +170,15 @@ details are (footer, mobile directory, `/contact`, the rate sheet).
 spec sheet, 24-hour express from the rate sheet — and it says as plainly as the Terms do
 that a date is a target worked to in good faith and runs from payment (`/terms` §04), and
 that a rush date can change a price (§03). The express surcharge is linked, not quoted:
-it is admin-editable on `/pricing` and would drift if copied into code. The page
-deliberately does not promote texting photos to the shop, although the rate sheet lists
-it, because `/privacy` does not yet describe text messages.
+it is admin-editable on `/pricing` and would drift if copied into code.
+
+**Email and text are covered by the policies.** What a customer emails or texts the shop
+— the message and anything attached — is described in `/privacy` (§02 what we collect,
+§03 purposes, §05 the email and phone providers, §07 how long, §08 rights, §09 how
+protected), `/file-retention` (§01–§06, on the same basis as uploads and deleted on
+request), and `/terms` §05 (sending a file by any route gives the shop no ownership of
+it). The site suggests email rather than text, but the rate sheet's SMS line is no longer
+outside the policies.
 
 It is reached from the header (desktop from `lg` up, where the row has room; the mobile
 directory at every width), the footer's services list on every public page, the homepage
