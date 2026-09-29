@@ -4,11 +4,11 @@ import { breadcrumbSchema } from "@/lib/structured-data";
 import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
 
 // Someone who searches for the shop's contact details is usually ready to
-// talk now, and the ones in a hurry are the ones a call serves best — so the
-// snippet says what to do in that case before anything else.
-const title = "Contact — Call the Shop for Rush Jobs";
+// get in touch now, and the ones in a hurry need to know what to do first —
+// so the snippet says that before anything else.
+const title = "Contact — Email the Shop for Rush Jobs";
 const description =
-  "Need a part fast? Call TakomoCo at 385-695-4178 — rush jobs start with a call. Or email info@takomoco.com; we respond to inquiries within 24 business hours.";
+  "Need a part fast? Email TakomoCo at info@takomoco.com — rush jobs start with an email, and we respond to inquiries within 24 business hours.";
 
 /**
  * The page itself is a client component, so its metadata lives here in the

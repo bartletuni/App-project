@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Clock,
   Loader2,
-  Phone,
+  Mail,
   ShieldCheck,
 } from "lucide-react";
 
@@ -238,9 +238,9 @@ function EstimateContent() {
             <ShieldCheck className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" /> No obligation
           </li>
           <li className="flex items-center gap-2">
-            <Phone className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
-            <a href="tel:+13856954178" className="hover:text-clay-300 transition-colors">
-              Or call 385-695-4178
+            <Mail className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
+            <a href="mailto:info@takomoco.com" className="hover:text-clay-300 transition-colors">
+              Or email <span className="normal-case">info@takomoco.com</span>
             </a>
           </li>
         </ul>
@@ -397,7 +397,7 @@ function EstimateContent() {
                   </div>
                 </div>
                 <p className="-mt-2 font-mono text-[9px] uppercase tracking-[0.12em] text-cream-600">
-                  {MIN_LEAD_DAYS}-day minimum lead time · sooner than that, call the shop
+                  {MIN_LEAD_DAYS}-day minimum lead time · sooner than that, email the shop
                 </p>
 
                 <div>
@@ -536,7 +536,7 @@ function EstimateSent({ reference, email }: { reference: string; email: string }
                 Your reference
               </div>
               <div className="mt-1 font-mono text-2xl tracking-[0.12em] text-clay-200">{reference}</div>
-              <p className="mt-2 text-xs text-cream-500">Give this if you call.</p>
+              <p className="mt-2 text-xs text-cream-500">Include this if you email us.</p>
             </div>
           )}
 

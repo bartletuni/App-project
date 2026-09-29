@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Camera, FileBox, Phone, ScanLine } from "lucide-react";
+import { ArrowUpRight, Camera, FileBox, Mail, ScanLine } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -14,7 +14,7 @@ import {
   faqPageSchema,
   replacementPartsServiceSchema,
 } from "@/lib/structured-data";
-import { BUSINESS, OG_IMAGE, SITE_NAME, TELEPHONE_DISPLAY } from "@/lib/seo";
+import { BUSINESS, OG_IMAGE, SITE_NAME } from "@/lib/seo";
 import type { FaqItem } from "@/lib/faq";
 
 /**
@@ -77,7 +77,7 @@ const sources = [
   {
     icon: ScanLine,
     title: "The part itself",
-    body: "For intricate geometry we 3D-scan the original and rebuild it from the scan. Call the shop, then ship it to us.",
+    body: "For intricate geometry we 3D-scan the original and rebuild it from the scan. Email the shop, then ship it to us.",
   },
 ];
 
@@ -104,7 +104,7 @@ const steps = [
   },
 ];
 
-const tel = { href: `tel:${BUSINESS.telephone}`, text: TELEPHONE_DISPLAY };
+const mail = { href: `mailto:${BUSINESS.email}`, text: BUSINESS.email };
 
 const questions: FaqItem[] = [
   {
@@ -124,8 +124,8 @@ const questions: FaqItem[] = [
   {
     q: "How fast is it?",
     a: [
-      "Most jobs are back in about 72 hours, and the estimate comes within one business day. The form takes dates at least three days out; if you need it sooner, call ",
-      tel,
+      "Most jobs are back in about 72 hours, and the estimate comes within one business day. The form takes dates at least three days out; if you need it sooner, email ",
+      mail,
       " and ask about ",
       { href: "/rush-3d-printing", text: "24-hour express" },
       ".",
@@ -186,11 +186,11 @@ export default function ReplacementPartsPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <RequestEstimateButton />
               <a
-                href={`tel:${BUSINESS.telephone}`}
+                href={mail.href}
                 className="inline-flex items-center justify-center gap-2 border border-clay-500/40 bg-clay-500/5 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 transition-colors hover:border-clay-400 hover:bg-clay-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
               >
-                <Phone className="h-4 w-4 text-clay-300" aria-hidden="true" />
-                Call {TELEPHONE_DISPLAY}
+                <Mail className="h-4 w-4 text-clay-300" aria-hidden="true" />
+                Email <span className="normal-case tracking-normal">{BUSINESS.email}</span>
               </a>
             </div>
             <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">

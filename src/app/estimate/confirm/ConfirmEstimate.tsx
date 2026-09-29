@@ -17,8 +17,6 @@ const secondary =
 
 type Outcome = { action: "confirm" } | { action: "disown"; removed: boolean };
 
-const telephone = BUSINESS.telephone.replace(/^\+1-/, "");
-
 /**
  * The two answers to "was this you?", one at a time.
  *
@@ -72,11 +70,7 @@ export default function ConfirmEstimate({
 
   const contact = (
     <p className="mt-6 text-sm leading-relaxed text-cream-500">
-      Questions? Call{" "}
-      <a href={`tel:${BUSINESS.telephone}`} className="text-clay-300 hover:text-clay-200">
-        {telephone}
-      </a>{" "}
-      or email{" "}
+      Questions? Email{" "}
       <a href={`mailto:${BUSINESS.email}`} className="text-clay-300 hover:text-clay-200">
         {BUSINESS.email}
       </a>

@@ -97,6 +97,3 @@ export const OG_IMAGE = {
   height: 630,
   alt: "TakomoCo — need a part fast? Replacement parts and 3D printing on a 72-hour turnaround, 24-hour express available, shipped nationwide",
 };
-
-/** The shop's line in the form every page prints it, for copy and link text. */
-export const TELEPHONE_DISPLAY = BUSINESS.telephone.replace(/^\+1-/, "");

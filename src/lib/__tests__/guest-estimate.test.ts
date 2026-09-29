@@ -67,9 +67,9 @@ describe("when the part is needed", () => {
     expect("date" in result).toBe(true);
   });
 
-  it("refuses a date inside the minimum, and says to call instead", () => {
+  it("refuses a date inside the minimum, and says to email instead", () => {
     const result = resolveDateNeeded(addDays(now, 1).toISOString(), now);
-    expect("error" in result && result.error).toMatch(/Call the shop/i);
+    expect("error" in result && result.error).toMatch(/Email the shop/i);
   });
 
   it("refuses a date that is not one", () => {

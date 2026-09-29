@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Clock, Phone, Zap } from "lucide-react";
+import { ArrowUpRight, Clock, Mail, Zap } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -14,7 +14,7 @@ import {
   faqPageSchema,
   rushPrintingServiceSchema,
 } from "@/lib/structured-data";
-import { BUSINESS, OG_IMAGE, SITE_NAME, TELEPHONE_DISPLAY } from "@/lib/seo";
+import { BUSINESS, OG_IMAGE, SITE_NAME } from "@/lib/seo";
 import { MIN_LEAD_DAYS } from "@/lib/guest-estimate";
 import type { FaqItem } from "@/lib/faq";
 
@@ -25,9 +25,13 @@ import type { FaqItem } from "@/lib/faq";
  * printing" should land on, and the address outreach can say out loud —
  * /rush and /express redirect here.
  *
- * It leads with the phone, not the form, on purpose. The estimate form only
- * takes dates at least MIN_LEAD_DAYS out, and a job that cannot wait that
- * long needs a conversation about what is possible before anyone pays.
+ * It leads with an email to the shop, not the form, on purpose. The estimate
+ * form only takes dates at least MIN_LEAD_DAYS out, and a job that cannot
+ * wait that long needs a conversation about what is possible before anyone
+ * pays. Files still go through the form: uploads are private and
+ * access-controlled, and /privacy and /file-retention describe them, where an
+ * email attachment would sit outside both. The email link pre-fills a "Rush
+ * job" subject so the shop can pick these out of the inbox.
  *
  * Every speed it names is one the shop already publishes: the 72-hour lead
  * time (homepage spec sheet) and the 24-hour express line (the rate sheet at
@@ -66,18 +70,21 @@ export const metadata: Metadata = {
   },
 };
 
-const tel = { href: `tel:${BUSINESS.telephone}`, text: TELEPHONE_DISPLAY };
+const mail = {
+  href: `mailto:${BUSINESS.email}?subject=${encodeURIComponent("Rush job")}`,
+  text: BUSINESS.email,
+};
 
 const steps = [
   {
     n: "01",
-    title: "Call the shop",
+    title: "Email the shop",
     body: "Tell us what broke, what it does, and the date it has to arrive. We will tell you straight whether that date is realistic.",
   },
   {
     n: "02",
     title: "Send what you have",
-    body: "A 3D file is fastest — we print exactly that. No file? Photos and a few measurements work too.",
+    body: "A 3D file is fastest — we print exactly that. No file? Photos and a few measurements work too. Upload them through the estimate form, where they stay private.",
   },
   {
     n: "03",
@@ -114,8 +121,8 @@ const questions: FaqItem[] = [
   {
     q: "Can you really make a part in 24 hours?",
     a: [
-      "Express means the part is produced within 24 hours of the invoice being paid, then shipped. Whether a particular part fits that window depends on its size and on whether we have to model it first, so call ",
-      tel,
+      "Express means the part is produced within 24 hours of the invoice being paid, then shipped. Whether a particular part fits that window depends on its size and on whether we have to model it first, so email ",
+      mail,
       " and we will tell you before you pay anything.",
     ],
   },
@@ -132,15 +139,15 @@ const questions: FaqItem[] = [
   {
     q: "I don't have a CAD file. Can it still be rushed?",
     a: [
-      "Yes, though modelling adds time. We model parts from photos and measurements, or from a 3D scan of the original, and that happens before printing starts — so tell us your deadline on the call and we will say what is realistic.",
+      "Yes, though modelling adds time. We model parts from photos and measurements, or from a 3D scan of the original, and that happens before printing starts — so tell us your deadline when you email and we will say what is realistic.",
     ],
   },
   {
     q: `Why won't the estimate form take a date sooner than ${MIN_LEAD_DAYS} days out?`,
     a: [
-      "The form is for standard work. Anything sooner needs a conversation about what is possible first, so call ",
-      tel,
-      " — Monday to Friday, 9am to 5pm Mountain Time.",
+      "The form is for standard work. For anything sooner, email ",
+      mail,
+      " with the date you need it by, then send the part through the form and leave its date blank.",
     ],
   },
   {
@@ -165,7 +172,7 @@ const questions: FaqItem[] = [
   },
 ];
 
-const callButton =
+const emailButton =
   "inline-flex items-center justify-center gap-2 bg-clay-700 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 shadow-glow transition-colors hover:bg-clay-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 focus-visible:ring-offset-2 focus-visible:ring-offset-espresso-950";
 
 const proseLinks =
@@ -199,14 +206,14 @@ export default function RushPrintingPage() {
               the United States.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a href={tel.href} className={callButton}>
-                <Phone className="h-4 w-4" aria-hidden="true" />
-                Call {TELEPHONE_DISPLAY}
+              <a href={mail.href} className={emailButton}>
+                <Mail className="h-4 w-4" aria-hidden="true" />
+                Email <span className="normal-case tracking-normal">{BUSINESS.email}</span>
               </a>
               <RequestEstimateButton variant="ghost" />
             </div>
             <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream-500">
-              Rush jobs start with a call · {BUSINESS.openingHours.label}
+              Rush jobs start with an email · {BUSINESS.openingHours.label}
             </p>
           </Reveal>
 
@@ -233,7 +240,7 @@ export default function RushPrintingPage() {
                   <p className="mt-3 text-cream-400 leading-relaxed">
                     Produced within 24 hours of payment, then shipped — for the machine that is
                     down now. It carries a surcharge, listed on the{" "}
-                    <Link href="/pricing">rate sheet</Link>, and it starts with a call, so we can
+                    <Link href="/pricing">rate sheet</Link>, and it starts with an email, so we can
                     tell you whether your part fits the window before you pay for it.
                   </p>
                 </div>
@@ -250,9 +257,10 @@ export default function RushPrintingPage() {
                   </div>
                   <h3 className="mt-5 font-display text-3xl text-cream-100">72-hour standard</h3>
                   <p className="mt-3 text-cream-400 leading-relaxed">
-                    Made within about 72 hours of payment, at no extra charge. Call, or send it
-                    through the <Link href="/estimate">estimate form</Link> — no account needed,
-                    and the estimate comes back within one business day.
+                    Made within about 72 hours of payment, at no extra charge.{" "}
+                    <a href={mail.href}>Email us</a>, or send it through the{" "}
+                    <Link href="/estimate">estimate form</Link> — no account needed, and the
+                    estimate comes back within one business day.
                   </p>
                 </div>
               </Reveal>
@@ -311,7 +319,7 @@ export default function RushPrintingPage() {
             <Reveal>
               <span className="eyebrow">STRAIGHT ANSWERS</span>
               <h2 id="questions-heading" className="mt-4 font-display text-4xl sm:text-5xl text-cream-100">
-                Before you call
+                Before you email
               </h2>
             </Reveal>
             <FaqList items={questions} />
@@ -325,13 +333,13 @@ export default function RushPrintingPage() {
                   Machine down right now?
                 </h2>
                 <p className="mt-3 max-w-xl text-cream-400">
-                  Call and tell us what broke and when it has to be running again.
+                  Email us what broke and when it has to be running again.
                 </p>
               </div>
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-                <a href={tel.href} className={callButton}>
-                  <Phone className="h-4 w-4" aria-hidden="true" />
-                  Call {TELEPHONE_DISPLAY}
+                <a href={mail.href} className={emailButton}>
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Email <span className="normal-case tracking-normal">{BUSINESS.email}</span>
                 </a>
                 <RequestEstimateButton variant="ghost" className="shrink-0" />
               </div>

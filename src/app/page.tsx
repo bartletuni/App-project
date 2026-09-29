@@ -198,10 +198,10 @@ export default function LandingPage() {
                     </Link>
                     {" · "}
                     <a
-                      href="tel:+13856954178"
+                      href="mailto:info@takomoco.com"
                       className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                     >
-                      Call the shop · 385-695-4178
+                      Email the shop · <span className="normal-case">info@takomoco.com</span>
                     </a>
                   </p>
                 </div>

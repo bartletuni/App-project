@@ -135,7 +135,7 @@ visitor meets them:
 3. **The hero's buttons.** "Request an estimate" takes the primary weight and "Start a
    build" — which goes to sign-in — steps back to a secondary, because a visitor in a
    hurry should not meet a login wall first. Under them, for anyone who cannot wait even
-   for a form, a link to 24-hour express (`/rush-3d-printing`) and the phone.
+   for a form, a link to 24-hour express (`/rush-3d-printing`) and the shop's email.
 4. **The page itself,** where it always was: the spec sheet's "Lead time" row (72 hours,
    with 24-hour express), the 72h counter, and the closing call to action. This is what
    keeps the title honest rather than a bare meta claim.
@@ -155,9 +155,15 @@ printing", "24 hour 3D printing" or "fast replacement part" should land on, and 
 outreach should link to when the pitch is speed. `/rush` and `/express` redirect to it
 permanently, so the address survives being said on a phone call or printed on a card.
 
-**It leads with the phone, not the form.** `/estimate` only takes dates at least
-`MIN_LEAD_DAYS` out, and a job that cannot wait that long needs a conversation about
-what is possible before anyone pays. The estimate button is still there, second.
+**It leads with an email to the shop, not the form.** `/estimate` only takes dates at
+least `MIN_LEAD_DAYS` out, and a job that cannot wait that long needs a conversation
+about what is possible before anyone pays. The email link pre-fills a "Rush job" subject
+so the shop can pick these out of the inbox, and the estimate button is still there,
+second. Files and photos are still asked for through the form, not as attachments:
+uploads are private and access-controlled, and `/privacy` and `/file-retention` describe
+them, where an emailed file would sit outside both. Across the site, suggestions to get
+in touch say email rather than call; the phone number is still listed where contact
+details are (footer, mobile directory, `/contact`, the rate sheet).
 
 **Every speed it names is one the shop already publishes** — 72 hours from the homepage
 spec sheet, 24-hour express from the rate sheet — and it says as plainly as the Terms do
