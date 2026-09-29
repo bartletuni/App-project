@@ -102,7 +102,7 @@ const tips = [
   },
   {
     title: "Say what it has to survive",
-    body: "Heat, load, oil, sunlight. Knowing up front means we choose the material once, not twice.",
+    body: "Heat, wear, oil, sunlight. Knowing up front means we choose the material once, not twice.",
   },
   {
     title: "Give us the arrive-by date",
@@ -152,9 +152,7 @@ const questions: FaqItem[] = [
   {
     q: "Will a part made in a hurry hold up?",
     a: [
-      "A rush changes the queue, not the part. It is made in the material chosen for the job — carbon-fiber nylons and grades with heat-deflection temperatures up to 252 °C among them — and checked against the model before it ships, like every other part. What no printed part is, rushed or not, is qualified for safety-critical use; the ",
-      { href: "/terms#part-limits", text: "Terms" },
-      " spell out where that line is.",
+      "A rush changes the queue, not the part. It is made in the material chosen for the job — carbon-fiber nylons and grades with heat-deflection temperatures up to 252 °C among them — and checked against the model before it ships, like every other part.",
     ],
   },
   {
