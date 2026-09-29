@@ -25,6 +25,7 @@ const sitemap = [
 
 /** A service with its own page carries an `href`; the rest are plain text. */
 const services: { label: string; href?: string }[] = [
+  { label: "Rush 3D printing · 24-hour express", href: "/rush-3d-printing" },
   { label: "Replacement parts for repair teams", href: "/replacement-parts" },
   { label: "Additive manufacturing" },
   { label: "3D scanning & reverse engineering" },
@@ -57,9 +58,9 @@ export default function SiteFooter() {
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-cream-500">
-              A domestic additive manufacturing studio in Utah — high-precision
-              3D printing, scanning, and reverse engineering for engineering and
-              reproduction work.
+              A domestic additive manufacturing studio in Utah — fast-turnaround
+              3D printing, replacement parts, scanning, and reverse engineering,
+              shipped anywhere in the United States.
             </p>
             <RequestEstimateButton size="sm" className="mt-5 w-full sm:w-auto rounded-sm" />
           </div>

@@ -5,11 +5,17 @@ import { ArrowUpRight, Camera, FileBox, Phone, ScanLine } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
+import FaqList from "@/components/FaqList";
 import Panel from "@/components/ui/Panel";
 import Reveal from "@/components/ui/Reveal";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
-import { breadcrumbSchema, replacementPartsServiceSchema } from "@/lib/structured-data";
-import { BUSINESS, OG_IMAGE, SITE_NAME } from "@/lib/seo";
+import {
+  breadcrumbSchema,
+  faqPageSchema,
+  replacementPartsServiceSchema,
+} from "@/lib/structured-data";
+import { BUSINESS, OG_IMAGE, SITE_NAME, TELEPHONE_DISPLAY } from "@/lib/seo";
+import type { FaqItem } from "@/lib/faq";
 
 /**
  * The page a repair or service company lands on — from an outreach email, or
@@ -57,8 +63,6 @@ export const metadata: Metadata = {
   },
 };
 
-const telephone = BUSINESS.telephone.replace(/^\+1-/, "");
-
 const sources = [
   {
     icon: Camera,
@@ -100,68 +104,56 @@ const steps = [
   },
 ];
 
-const questions = [
+const tel = { href: `tel:${BUSINESS.telephone}`, text: TELEPHONE_DISPLAY };
+
+const questions: FaqItem[] = [
   {
     q: "We're not in Utah. Can you still help?",
-    a: (
-      <>
-        Yes. The shop is in Utah and ships anywhere in the United States. Everything else —
-        the estimate, the questions, your approval — happens by email and phone, Monday to
-        Friday, 9am to 5pm Mountain Time.
-      </>
-    ),
+    a: [
+      "Yes. The shop is in Utah and ships anywhere in the United States. Everything else — the estimate, the questions, your approval — happens by email and phone, Monday to Friday, 9am to 5pm Mountain Time.",
+    ],
   },
   {
     q: "Do I need an account or a CAD file?",
-    a: (
-      <>
-        No to both. The <Link href="/estimate">estimate form</Link> takes photos and a
-        description and needs no account. An account is only what lets us turn an estimate
-        into a guaranteed quote, once we have the part file to print.
-      </>
-    ),
+    a: [
+      "No to both. The ",
+      { href: "/estimate", text: "estimate form" },
+      " takes photos and a description and needs no account. An account is only what lets us turn an estimate into a guaranteed quote, once we have the part file to print.",
+    ],
   },
   {
     q: "How fast is it?",
-    a: (
-      <>
-        Most jobs are back in about 72 hours, and the estimate comes within one business day.
-        The form takes dates at least three days out; if you need it sooner, call{" "}
-        <a href={`tel:${BUSINESS.telephone}`}>{telephone}</a> and we will see what we can do.
-      </>
-    ),
+    a: [
+      "Most jobs are back in about 72 hours, and the estimate comes within one business day. The form takes dates at least three days out; if you need it sooner, call ",
+      tel,
+      " and ask about ",
+      { href: "/rush-3d-printing", text: "24-hour express" },
+      ".",
+    ],
   },
   {
     q: "Will a printed part hold up?",
-    a: (
-      <>
-        It depends on the part, which is why we pick the material for the job — including
-        carbon-fiber nylons and grades with heat-deflection temperatures up to 252 °C — rather
-        than printing everything in one plastic. What a printed part is not is qualified for safety-critical
-        use: brakes, steering, lifting, pressure, or anything whose failure could hurt someone.
-        Our <Link href="/terms#part-limits">Terms</Link> spell that out.
-      </>
-    ),
+    a: [
+      "It depends on the part, which is why we pick the material for the job — including carbon-fiber nylons and grades with heat-deflection temperatures up to 252 °C — rather than printing everything in one plastic. What a printed part is not is qualified for safety-critical use: brakes, steering, lifting, pressure, or anything whose failure could hurt someone. Our ",
+      { href: "/terms#part-limits", text: "Terms" },
+      " spell that out.",
+    ],
   },
   {
     q: "Can I order the same part again?",
-    a: (
-      <>
-        Yes. We keep the file after the job, so the next one is a reprint rather than a fresh
-        start — and it stays yours; we never print it for anyone else. The{" "}
-        <Link href="/file-retention">File Retention Policy</Link> has the detail.
-      </>
-    ),
+    a: [
+      "Yes. We keep the file after the job, so the next one is a reprint rather than a fresh start — and it stays yours; we never print it for anyone else. The ",
+      { href: "/file-retention", text: "File Retention Policy" },
+      " has the detail.",
+    ],
   },
   {
     q: "Is there anything you won't reproduce?",
-    a: (
-      <>
-        You need the right to have the part reproduced, and we will not copy a part carrying
-        someone else&apos;s trademark without their authorisation, or anything regulated, such
-        as weapon components. The <Link href="/terms#your-files">Terms</Link> list it all.
-      </>
-    ),
+    a: [
+      "You need the right to have the part reproduced, and we will not copy a part carrying someone else's trademark without their authorisation, or anything regulated, such as weapon components. The ",
+      { href: "/terms#your-files", text: "Terms" },
+      " list it all.",
+    ],
   },
 ];
 
@@ -173,6 +165,7 @@ export default function ReplacementPartsPage() {
         data={breadcrumbSchema([{ name: "Replacement parts", path: "/replacement-parts" }])}
       />
       <JsonLd id="ld-service-replacement-parts" data={replacementPartsServiceSchema()} />
+      <JsonLd id="ld-faq-replacement-parts" data={faqPageSchema(questions)} />
 
       <div className="min-h-screen bg-transparent text-cream-200">
         <SiteHeader />
@@ -197,7 +190,7 @@ export default function ReplacementPartsPage() {
                 className="inline-flex items-center justify-center gap-2 border border-clay-500/40 bg-clay-500/5 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 transition-colors hover:border-clay-400 hover:bg-clay-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
               >
                 <Phone className="h-4 w-4 text-clay-300" aria-hidden="true" />
-                Call {telephone}
+                Call {TELEPHONE_DISPLAY}
               </a>
             </div>
             <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-cream-600">
@@ -286,16 +279,7 @@ export default function ReplacementPartsPage() {
                 What repair shops ask first
               </h2>
             </Reveal>
-            <dl className="mt-10 divide-y divide-clay-500/15 border-y border-clay-500/15">
-              {questions.map((item) => (
-                <div key={item.q} className="grid gap-3 py-7 md:grid-cols-12 md:gap-8">
-                  <dt className="md:col-span-4 font-display text-xl text-cream-100">{item.q}</dt>
-                  <dd className="md:col-span-8 text-cream-400 leading-relaxed [&_a]:text-clay-300 [&_a]:underline [&_a]:decoration-clay-500/40 [&_a]:underline-offset-2 hover:[&_a]:text-clay-200">
-                    {item.a}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <FaqList items={questions} />
           </section>
 
           {/* Closing CTA */}

@@ -9,11 +9,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import Magnetic from "@/components/ui/Magnetic";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
 
-const nav = [
+// "Rush" sits second, straight after the index: the visitor the site is
+// written for needs a part fast, and this is the page that answers them.
+//
+// `wide` keeps an entry out of the desktop row until `lg`. The row is already
+// at its limit between `sm` and `lg`, and a sixth link pushed "Enter" off the
+// right edge there; the mobile directory lists every entry at every width.
+const nav: { href: string; n: string; label: string; blurb: string; wide?: boolean }[] = [
   { href: "/", n: "01", label: "Index", blurb: "Studio overview & capabilities" },
-  { href: "/materials", n: "02", label: "Materials", blurb: "Filament & composite stock" },
-  { href: "/pricing", n: "03", label: "Pricing", blurb: "Service rate sheet" },
-  { href: "/contact", n: "04", label: "Contact", blurb: "Reach the shop directly" },
+  { href: "/rush-3d-printing", n: "02", label: "Rush", blurb: "Need a part fast? 24-hour express", wide: true },
+  { href: "/materials", n: "03", label: "Materials", blurb: "Filament & composite stock" },
+  { href: "/pricing", n: "04", label: "Pricing", blurb: "Service rate sheet" },
+  { href: "/contact", n: "05", label: "Contact", blurb: "Reach the shop directly" },
 ];
 
 /**
@@ -82,7 +89,7 @@ export default function SiteHeader() {
                   key={n.href}
                   href={n.href}
                   aria-current={isActive(n.href) ? "page" : undefined}
-                  className="group relative hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                  className={`group relative hidden ${n.wide ? "lg:block" : "sm:block"} font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm`}
                 >
                   {n.label}
                   <span
@@ -204,7 +211,7 @@ export default function SiteHeader() {
                       href="/login"
                       className="flex items-center gap-4 border-b border-clay-500/15 py-4 transition-colors active:bg-espresso-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                     >
-                      <span className="font-mono text-sm text-clay-500">05</span>
+                      <span className="font-mono text-sm text-clay-500">06</span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-display text-xl text-cream-100">
                           Client Desk

@@ -3,9 +3,12 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbSchema } from "@/lib/structured-data";
 import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
 
-const title = "Contact — Talk to the Shop";
+// Someone who searches for the shop's contact details is usually ready to
+// talk now, and the ones in a hurry are the ones a call serves best — so the
+// snippet says what to do in that case before anything else.
+const title = "Contact — Call the Shop for Rush Jobs";
 const description =
-  "Get in touch with TakomoCo about a custom additive manufacturing order. Call 385-695-4178 or email info@takomoco.com — we respond to inquiries within 24 business hours.";
+  "Need a part fast? Call TakomoCo at 385-695-4178 — rush jobs start with a call. Or email info@takomoco.com; we respond to inquiries within 24 business hours.";
 
 /**
  * The page itself is a client component, so its metadata lives here in the

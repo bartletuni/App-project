@@ -13,10 +13,14 @@ import { OG_IMAGE } from "@/lib/seo";
  * all expect, from the same palette and the same logo geometry as the email
  * and the PDF (src/lib/brand.ts), so it cannot drift from the site.
  *
+ * It opens on the reader's situation — "Need a part fast?" — because the
+ * person the shop is built for is one with a deadline, and a preview that
+ * names their problem is the one they open.
+ *
  * Every line on it is a claim the site already makes on the page: the 72-hour
- * turnaround (homepage spec sheet), the one-business-day answer (/estimate),
- * nationwide shipping (homepage and footer), the materials and the scanning
- * (homepage capabilities).
+ * turnaround (homepage spec sheet), 24-hour express (the rate sheet and
+ * /rush-3d-printing), the one-business-day answer (/estimate), nationwide
+ * shipping (homepage and footer), and the materials (homepage capabilities).
  *
  * No dynamic input, so Next renders it once at build time and serves a static
  * PNG. `twitter:image` points at the same file through `OG_IMAGE`.
@@ -82,7 +86,7 @@ export default function OpengraphImage() {
         {/* The promise, in the words a buyer with a broken part searches in. */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: 24, letterSpacing: 6, color: DERIVED.eyebrow }}>
-            DOMESTIC ADDITIVE MANUFACTURING
+            NEED A PART FAST?
           </div>
           <div
             style={{
@@ -101,7 +105,7 @@ export default function OpengraphImage() {
             <span style={{ color: CLAY[300] }}>on a 72-hour turnaround.</span>
           </div>
           <div style={{ display: "flex", marginTop: 26, fontSize: 26, color: CREAM[400] }}>
-            Carbon-fiber &amp; engineering-grade parts · 3D scanning · reverse engineering
+            24-hour express available · carbon-fiber &amp; engineering-grade parts
           </div>
         </div>
 

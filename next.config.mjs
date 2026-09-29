@@ -12,6 +12,19 @@ const nextConfig = {
         destination: '/estimate',
         permanent: true,
       },
+      // Short addresses for the rush page, for anywhere a link has to be said
+      // or printed rather than clicked: a phone call, a card, a van door.
+      // "takomoco.com/rush" survives being read aloud; the full path does not.
+      {
+        source: '/rush',
+        destination: '/rush-3d-printing',
+        permanent: true,
+      },
+      {
+        source: '/express',
+        destination: '/rush-3d-printing',
+        permanent: true,
+      },
     ];
   },
   async headers() {
