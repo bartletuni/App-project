@@ -338,7 +338,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             <div className="flex gap-2">
               <input id="phoneNumber" type="tel" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} className={field} placeholder="(123) 456-7890" required />
               {pastPhones.length > 0 && (
-                <button type="button" onClick={() => setIsAddingPhone(false)} className="shrink-0 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-cream-400 hover:text-clay-300 hover:border-clay-400 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
+                <button type="button" aria-label="Cancel adding new phone number" onClick={() => setIsAddingPhone(false)} className="shrink-0 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-cream-400 hover:text-clay-300 hover:border-clay-400 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                   Cancel
                 </button>
               )}
@@ -350,7 +350,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
                   <option key={phone.id} value={phone.number}>{phone.number}</option>
                 ))}
               </select>
-              <button type="button" onClick={() => setIsAddingPhone(true)} className="shrink-0 inline-flex items-center gap-1 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-300 hover:bg-clay-500/15 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
+              <button type="button" aria-label="Add new phone number" onClick={() => setIsAddingPhone(true)} className="shrink-0 inline-flex items-center gap-1 border border-clay-500/25 px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-300 hover:bg-clay-500/15 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500">
                 <Plus className="h-3 w-3" aria-hidden="true" /> New
               </button>
             </div>
