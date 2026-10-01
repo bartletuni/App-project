@@ -1,0 +1,9 @@
+💡 What: Added inline loading spinners (SVGs) and explicit focus-visible states (`focus-visible:ring-2 focus-visible:ring-clay-500`) to the "Save Price", "Save Invoice", and "Save Tracking" action buttons in the admin dashboard.
+
+🎯 Why: To provide immediate, confidence-inspiring feedback during asynchronous save operations and to ensure keyboard navigators have a clear, high-contrast visual indicator of focus.
+
+📸 Before/After:
+Before: Buttons had default browser focus states (often low contrast) and no visual loading feedback when clicked, leaving the user guessing if the action was processing.
+After: Buttons display an inline spinning SVG during the fetch cycle and feature a high-contrast ring when focused via keyboard.
+
+♿ Accessibility: Added explicit, high-contrast `focus-visible` styles to ensure keyboard accessibility on dark themes, and applied `aria-hidden="true"` to the decorative loading SVGs to prevent redundant screen reader announcements.
