@@ -17,7 +17,7 @@ import {
 
 const title = "Terms of Service";
 const description =
-  "The terms covering TakomoCo estimates, quotes, orders, and manufacturing — cancellation, payment, ownership of the files you upload, what we will not print, and the limits of our liability.";
+  "The terms covering TakomoCo estimates, quotes, orders, and manufacturing — cancellation, payment, ownership of the files you send us, what we will not print, and the limits of our liability.";
 
 export const metadata: Metadata = {
   title,
@@ -188,8 +188,8 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          <strong>Your models stay yours.</strong> Uploading a file gives us no
-          ownership of it. You grant us only the licence we need to do the job:
+          <strong>Your models stay yours.</strong> Sending us a file — uploaded,
+          emailed, or texted — gives us no ownership of it. You grant us only the licence we need to do the job:
           to store, view, repair, slice, and print your file in order to price
           and produce your part, and to keep a copy, as set out in the{" "}
           <Link href="/file-retention">File Retention Policy</Link>, so the
@@ -434,7 +434,7 @@ export default function TermsPage() {
         eyebrow="LEGAL ⁄ TERMS"
         title="Terms of"
         accent="service."
-        lede="How estimates, quotes, orders, and manufacturing work at this shop — including the two things worth reading before you upload anything: who is responsible for the part being yours to reproduce, and what a printed part should never be used for."
+        lede="How estimates, quotes, orders, and manufacturing work at this shop — including the two things worth reading before you send us anything: who is responsible for the part being yours to reproduce, and what a printed part should never be used for."
         summary={
           <>
             <ul>

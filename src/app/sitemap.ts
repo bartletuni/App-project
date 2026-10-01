@@ -21,6 +21,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      // The page for the shop's main customer — someone who needs a part fast
+      // and is choosing a shop today. Listed straight after the homepage so a
+      // crawler meets it early.
+      url: absoluteUrl("/rush-3d-printing"),
+      changeFrequency: "monthly",
+      priority: 0.95,
+    },
+    {
       // The public estimate form: the one page a visitor with a broken part in
       // their hand is actually looking for.
       url: absoluteUrl("/estimate"),

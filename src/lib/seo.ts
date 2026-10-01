@@ -24,31 +24,38 @@ export const SITE_NAME = "TakomoCo";
 
 /**
  * The homepage title, after the brand name — and the only page title Google
- * shows for a search of the shop itself. The turnaround leads it because that
- * is what someone with a broken part searches for, and it sits early enough to
- * survive the ~60-character truncation in a result listing. Nothing was given
- * up for it: "Domestic", "3D Printing" and "Additive Manufacturing" all stay.
+ * shows for a search of the shop itself.
  *
- * The claim is the shop's standing lead time, already published on the
- * homepage spec sheet ("Lead time · 72 hours") and its counter, so the page
- * backs up its own title.
+ * Written for the customer the shop exists to serve: someone who needs a part
+ * quickly and is searching for somewhere to make it right now. They type
+ * "fast 3D printing" or "replacement part", not "additive manufacturing", so
+ * those words lead and the turnaround closes it, all inside the ~60-character
+ * truncation of a result listing. "Domestic" and "Additive Manufacturing" were
+ * traded out to make room; both still lead the homepage's own copy, which is
+ * what ranks the page for them.
+ *
+ * The figure is the shop's standing lead time, published on the homepage
+ * spec sheet ("Lead time · 72 hours") and its counter, so the page backs up
+ * its own title.
  */
-export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturing";
+export const SITE_TAGLINE = "Fast 3D Printing & Replacement Parts in 72 Hours";
 
 /**
  * Used as the default meta description and the Organization description.
- * Kept near 160 characters so Google shows it without truncating, with the
- * terms that matter most placed first — which now includes the turnaround,
- * since the snippet under the title is what earns the click from someone
- * whose machine is already down. "Rapid prototyping" was the one phrase
- * traded out to make room; it still leads the homepage's own copy.
+ * Kept under 160 characters so Google shows it without truncating.
  *
- * "Shipped nationwide" is in it because the shop serves the whole country
- * from Utah, and a searcher outside Utah who reads only "in Utah" assumes a
- * local shop and scrolls past.
+ * It opens on the searcher's situation rather than on the shop, because the
+ * snippet under the title is what earns the click from someone whose machine
+ * is already down, and then answers the three things they need to know: how
+ * fast (72 hours, or 24 on express), whether it reaches them (nationwide),
+ * and how soon they hear back (one business day).
+ *
+ * The 24-hour express figure is the rate sheet's express line (/pricing). It
+ * is admin-editable there but stated here in code, so if the shop stops
+ * offering it, this has to change too — AGENTS.md lists every place it does.
  */
 export const SITE_DESCRIPTION =
-  "Domestic additive manufacturing from Utah, shipped nationwide on a 72-hour turnaround — FDM 3D printing, 0.02mm scanning, and carbon-fiber reverse engineering.";
+  "Need a part fast? Replacement and custom parts 3D printed in Utah, shipped nationwide — 72-hour turnaround, 24-hour express, estimates in one business day.";
 
 export const BUSINESS = {
   telephone: "+1-385-695-4178",
@@ -88,5 +95,5 @@ export const OG_IMAGE = {
   url: "/opengraph-image",
   width: 1200,
   height: 630,
-  alt: "TakomoCo — replacement parts and 3D printing on a 72-hour turnaround, made in Utah and shipped nationwide",
+  alt: "TakomoCo — need a part fast? Replacement parts and 3D printing on a 72-hour turnaround, 24-hour express available, shipped nationwide",
 };

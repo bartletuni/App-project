@@ -15,7 +15,7 @@
 import { BUSINESS, SITE_NAME } from "./seo";
 
 /** Shown on every legal page. Bump whenever the substance changes. */
-export const LEGAL_LAST_UPDATED = "September 28, 2026";
+export const LEGAL_LAST_UPDATED = "September 29, 2026";
 
 /** Where privacy and terms questions go. Same inbox published site-wide. */
 export const LEGAL_CONTACT = {
@@ -60,7 +60,7 @@ export const LEGAL_ROUTES: LegalRoute[] = [
   {
     href: "/file-retention",
     label: "File Retention Policy",
-    blurb: "What happens to the files you upload, and how to have one deleted",
+    blurb: "What happens to the files you send us, and how to have one deleted",
   },
   {
     href: "/cookies",

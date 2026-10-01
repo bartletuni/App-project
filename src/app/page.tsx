@@ -58,7 +58,7 @@ const specSheet = [
   ["Minimum layer height", "0.05 mm"],
   ["Materials", "PPA-CF · PPS-CF · PPS-GF · PETG-CF · PA12-CF · PC · PC-CF/FR · ASA-CF/GF · ABS · PETG · PLA · TPU · PA6-CF · PA12-CF · PA612-CF · and more"],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
-  ["Lead time", "72 hours"],
+  ["Lead time", "72 hours · 24-hour express available"],
 ];
 
 const differentiators: {
@@ -186,13 +186,22 @@ export default function LandingPage() {
                       </Link>
                     </Magnetic>
                   </div>
+                  {/* The way in for the visitor this page is written for:
+                      someone who cannot wait even for a form. */}
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-500">
                     On a deadline?{" "}
-                    <a
-                      href="tel:+13856954178"
+                    <Link
+                      href="/rush-3d-printing"
                       className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                     >
-                      Call the shop · 385-695-4178
+                      24-hour express
+                    </Link>
+                    {" · "}
+                    <a
+                      href="mailto:info@takomoco.com"
+                      className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                    >
+                      Email the shop · <span className="normal-case">info@takomoco.com</span>
                     </a>
                   </p>
                 </div>
@@ -289,13 +298,22 @@ export default function LandingPage() {
         </div>
 
         <Reveal>
-          <Link
-            href="/replacement-parts"
-            className="group mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 transition-colors hover:text-cream-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
-          >
-            Repair or service company? How we reproduce discontinued parts
-            <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
-          </Link>
+          <div className="mt-8 flex flex-col items-start gap-4">
+            <Link
+              href="/rush-3d-printing"
+              className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 transition-colors hover:text-cream-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+            >
+              Machine down? Rush 3D printing on 24-hour express
+              <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/replacement-parts"
+              className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-cream-300 transition-colors hover:text-cream-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+            >
+              Repair or service company? How we reproduce discontinued parts
+              <ArrowUpRight className="h-4 w-4 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+            </Link>
+          </div>
         </Reveal>
       </section>
 

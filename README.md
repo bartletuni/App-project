@@ -118,13 +118,15 @@ the visitor whose machine is down today. It appears in four places, in the order
 visitor meets them:
 
 1. **The result listing.** `SITE_TAGLINE` makes the homepage title
-   `TakomoCo — 72-Hour Domestic 3D Printing & Additive Manufacturing`, and
-   `SITE_DESCRIPTION` opens the snippet under it with the same figure. Both live in
-   `src/lib/seo.ts`, and the tagline also feeds the homepage's Open Graph and Twitter
-   titles, so all of them stay in step from one constant. The figure leads because it
-   has to survive the ~60-character truncation in a listing. Nothing was dropped from
-   the title for it; the description traded out "rapid prototyping", which still leads
-   the homepage's own copy.
+   `TakomoCo — Fast 3D Printing & Replacement Parts in 72 Hours`, and
+   `SITE_DESCRIPTION` opens the snippet under it on the searcher's situation — "Need a
+   part fast?" — before the 72-hour and 24-hour figures. Both live in `src/lib/seo.ts`,
+   and the tagline also feeds the homepage's Open Graph and Twitter titles, so all of
+   them stay in step from one constant. The title uses the words someone in a hurry
+   searches in ("fast", "replacement parts") and fits the ~60-character truncation in a
+   listing; "Domestic" and "Additive Manufacturing" were traded out for them and still
+   lead the homepage's own copy. `src/lib/__tests__/structured-data.test.ts` fails if
+   either outgrows its listing.
 2. **The hero.** A bordered badge directly under the H1 — `72h · Typical turnaround` —
    replacing a chip that read "Fast · Fitted · Flawless" and promised nothing checkable.
    The brand line keeps its place beside the number rather than being replaced by it: a
@@ -132,11 +134,11 @@ visitor meets them:
    ("Machine down, part discontinued, deadline this week?") and closes on the figure.
 3. **The hero's buttons.** "Request an estimate" takes the primary weight and "Start a
    build" — which goes to sign-in — steps back to a secondary, because a visitor in a
-   hurry should not meet a login wall first. Under them, a phone link for anyone who
-   cannot wait even for a form.
-4. **The page itself,** where it always was: the spec sheet's "Lead time · 72 hours" row,
-   the 72h counter, and the closing call to action. This is what keeps the title honest
-   rather than a bare meta claim.
+   hurry should not meet a login wall first. Under them, for anyone who cannot wait even
+   for a form, a link to 24-hour express (`/rush-3d-printing`) and the shop's email.
+4. **The page itself,** where it always was: the spec sheet's "Lead time" row (72 hours,
+   with 24-hour express), the 72h counter, and the closing call to action. This is what
+   keeps the title honest rather than a bare meta claim.
 
 **It is deliberately absent from `/estimate`.** A visitor who has reached the form is
 already sold and is there to send a part; that page makes the one timing promise it can
@@ -144,6 +146,50 @@ actually keep — a price back within one business day — and nothing more. The
 are different promises and must not be blurred into one: an **estimate** comes back
 within a business day, the **part** runs on the 72-hour turnaround once the price is
 approved.
+
+## Rush Jobs: the 24-Hour Express Page
+
+`/rush-3d-printing` is written for the customer the shop is built around: someone who
+needs a part quickly and is choosing a shop today. It is what a search for "rush 3D
+printing", "24 hour 3D printing" or "fast replacement part" should land on, and what
+outreach should link to when the pitch is speed. `/rush` and `/express` redirect to it
+permanently, so the address survives being said on a phone call or printed on a card.
+
+**It leads with an email to the shop, not the form.** `/estimate` only takes dates at
+least `MIN_LEAD_DAYS` out, and a job that cannot wait that long needs a conversation
+about what is possible before anyone pays. The email link pre-fills a "Rush job" subject
+so the shop can pick these out of the inbox, and the estimate button is still there,
+second. Files and photos are still asked for through the form rather than as
+attachments, because an upload is the better-protected route: both policies cover a file
+sent by email or text, and both say plainly that it is less protected in transit
+(`/privacy` §09, `/file-retention` §05). Across the site, suggestions to get
+in touch say email rather than call; the phone number is still listed where contact
+details are (footer, mobile directory, `/contact`, the rate sheet).
+
+**Every speed it names is one the shop already publishes** — 72 hours from the homepage
+spec sheet, 24-hour express from the rate sheet — and it says as plainly as the Terms do
+that a date is a target worked to in good faith and runs from payment (`/terms` §04), and
+that a rush date can change a price (§03). The express surcharge is linked, not quoted:
+it is admin-editable on `/pricing` and would drift if copied into code.
+
+**Email and text are covered by the policies.** What a customer emails or texts the shop
+— the message and anything attached — is described in `/privacy` (§02 what we collect,
+§03 purposes, §05 the email and phone providers, §07 how long, §08 rights, §09 how
+protected), `/file-retention` (§01–§06, on the same basis as uploads and deleted on
+request), and `/terms` §05 (sending a file by any route gives the shop no ownership of
+it). The site suggests email rather than text, but the rate sheet's SMS line is no longer
+outside the policies.
+
+It is reached from the header (desktop from `lg` up, where the row has room; the mobile
+directory at every width), the footer's services list on every public page, the homepage
+hero and capabilities, `/contact`, and the "How fast is it?" answer on
+`/replacement-parts`. It is second in the sitemap, after the homepage.
+
+**Its questions are structured data too.** The FAQs on this page and on
+`/replacement-parts` are written once as `FaqItem`s (`src/lib/faq.ts`), rendered by
+`<FaqList>`, and published as FAQPage markup by `faqPageSchema` from the same items, so the
+markup cannot say anything the page does not. The page also carries a `Service` entity,
+listed in the Organization's offer catalog by `@id` as the replacement-parts service is.
 
 ## Estimates Without an Account
 

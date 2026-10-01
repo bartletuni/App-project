@@ -8,7 +8,7 @@ import { LEGAL_CONTACT, LEGAL_LAST_UPDATED } from "@/lib/legal";
 
 const title = "File Retention Policy";
 const description =
-  "What happens to the model files and photographs you upload to TakomoCo: we keep them so a part can be reprinted or revised without you starting over, and we delete any specific file on request.";
+  "What happens to the model files and photographs you upload, email, or text to TakomoCo: we keep them so a part can be reprinted or revised without you starting over, and we delete any specific file on request.";
 
 export const metadata: Metadata = {
   title,
@@ -47,8 +47,10 @@ const sections: LegalSection[] = [
           upload — an <em>.stl</em>, or a <em>.zip</em> holding the model and
           anything that goes with it — and the reference photographs, sketches,
           and PDF drawings attached to a request when there is no model yet. It
-          applies whether the file arrived with a signed-in account or through
-          the public <Link href="/estimate">estimate form</Link>.
+          applies whether the file arrived with a signed-in account, through
+          the public <Link href="/estimate">estimate form</Link>, or attached to
+          an email or a text message sent to the shop — and to the message it
+          came with.
         </p>
         <p>
           It sits alongside the{" "}
@@ -73,6 +75,9 @@ const sections: LegalSection[] = [
             When you submit a file it may be retained in our database and file
             storage after the job it came in for is finished.
           </strong>{" "}
+          A file you email or text us is kept in the shop&apos;s mailbox or on
+          its phone instead, and when we take on a job from it we may also add
+          it to that job&apos;s record, where it is kept like any upload.
           That is deliberate, and it is for your benefit: the most common thing
           a customer asks for is the part they already had made.
         </p>
@@ -115,12 +120,16 @@ const sections: LegalSection[] = [
           something you might reasonably ask for again. We do not set a fixed
           expiry, because a customer coming back for a replacement part three
           years later is normal work for this shop rather than an edge case.
+          A file you emailed or texted us, and the message it came with, is
+          kept on the same basis, whether or not you hold an account.
         </p>
         <p>
           A file is removed sooner in any of these cases: you ask us to delete
           it (section 04); you close your account, which removes the files
           attached to it; or the shop retires storage that is no longer needed
-          for any live or foreseeable job.
+          for any live or foreseeable job. Closing an account does not reach
+          the shop&apos;s mailbox or phone on its own — if you want what you
+          emailed or texted us deleted as well, say so and we will.
         </p>
         <p>
           A file sent through the public{" "}
@@ -149,7 +158,8 @@ const sections: LegalSection[] = [
       <>
         <p>
           <strong>
-            Any specific file can be deleted on request. Email{" "}
+            Any specific file can be deleted on request, including one you
+            emailed or texted us, and the message it came with. Email{" "}
             <a href={deletionMail}>{LEGAL_CONTACT.email}</a> and tell us which
             one, and we will remove it.
           </strong>
@@ -159,7 +169,8 @@ const sections: LegalSection[] = [
           account and name the file or the request it belongs to — the file
           name, the part name, or the order it was printed for is plenty. If
           you would rather we cleared everything, say so and we will delete
-          every model file we hold for you.
+          every model file we hold for you, and every email and text you sent
+          with one.
         </p>
         <p>
           We will action the request and confirm it by reply, normally within a
@@ -173,10 +184,13 @@ const sections: LegalSection[] = [
           be deleted mid-run — we will finish or cancel the part first, your
           choice. And routine backups cycle out on their own schedule, so a
           deleted file may persist in a backup for a short period afterwards; it
-          is not restored to live storage and is not used for anything.
+          is not restored to live storage and is not used for anything. For
+          email and text, we delete our copy; the copy in your own mailbox or
+          phone, and whatever your provider and ours keep under their own
+          policies, is outside what we can reach.
         </p>
         <p>
-          After a deletion, a later reprint of that part means uploading the
+          After a deletion, a later reprint of that part means sending us the
           file again. That is the trade, and it is yours to make.
         </p>
       </>
@@ -193,6 +207,15 @@ const sections: LegalSection[] = [
           public address. A download link is served only to the account that
           owns the file, or to the shop. Other customers cannot reach your
           models, and we do not publish, share, or sell them.
+        </p>
+        <p>
+          A file you email or text us is held in the shop&apos;s mailbox or on
+          its phone, which only the people at the shop can reach. It is less
+          protected on the way to us than an upload: text messages are not
+          encrypted end to end, and email is encrypted in transit only when
+          both your provider and ours support it. For a model you want kept as
+          close as possible, upload it through the{" "}
+          <Link href="/estimate">estimate form</Link> or your account instead.
         </p>
         <p>
           Inside the shop, access is limited to the people running the job. We
@@ -214,15 +237,16 @@ const sections: LegalSection[] = [
           Agreeing to this policy is required to open an account: the sign-up
           form asks you to tick a box confirming you accept it, and an account
           cannot be created without that. Submitting a file through the public
-          estimate form accepts it too.
+          estimate form accepts it too, and so does sending one to the shop by
+          email or text.
         </p>
         <p>
           You warrant, as under section 05 of the{" "}
           <Link href="/terms">Terms of Service</Link>, that you have the right
-          to send us each file you upload and to have the part reproduced. If
-          you hold someone else&apos;s model under an agreement that forbids a
-          third party keeping a copy, do not upload it — or upload it and then
-          ask us to delete it once the job is done, which is exactly what
+          to send us each file, however it reaches us, and to have the part
+          reproduced. If you hold someone else&apos;s model under an agreement
+          that forbids a third party keeping a copy, do not send it — or send it
+          and then ask us to delete it once the job is done, which is exactly what
           section 04 is for.
         </p>
       </>
@@ -263,8 +287,8 @@ export default function FileRetentionPage() {
           <>
             <ul>
               <li>
-                A file you submit may be retained in our database and file
-                storage after the job is done.
+                A file you submit may be retained after the job is done —
+                whether you uploaded it, emailed it, or texted it.
               </li>
               <li>
                 That is so a reprint or a revision is easy: ask for the part
@@ -273,8 +297,9 @@ export default function FileRetentionPage() {
               </li>
               <li>
                 Your models stay yours. They are held in access-controlled
-                storage, seen only by the shop and by you, and never published,
-                sold, or printed for anyone else.
+                storage, or in the shop&apos;s own mailbox and phone, seen only
+                by the shop and by you, and never published, sold, or printed
+                for anyone else.
               </li>
               <li>
                 Any specific file is deleted on request — email{" "}
@@ -283,7 +308,7 @@ export default function FileRetentionPage() {
               </li>
               <li>
                 Deleting a model does not erase the order record behind it, and
-                after a deletion a future reprint means uploading the file
+                after a deletion a future reprint means sending us the file
                 again.
               </li>
             </ul>

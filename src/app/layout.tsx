@@ -36,7 +36,21 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  // Google has ignored this tag for years and Bing weighs it lightly, so it
+  // is a statement of intent more than a ranking lever — what ranks is the
+  // same words in titles, headings and copy. The urgent-buyer phrases lead
+  // because that is who the site is now written for; /rush-3d-printing and
+  // /replacement-parts are the pages that carry them.
   keywords: [
+    "rush 3D printing",
+    "fast 3D printing service",
+    "24 hour 3D printing",
+    "express 3D printing",
+    "quick turnaround 3D printing",
+    "replacement parts fast",
+    "3D printed replacement parts",
+    "discontinued part replacement",
+    "obsolete part reproduction",
     "additive manufacturing",
     "3D printing service",
     "domestic 3D printing",

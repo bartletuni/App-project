@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Mail, Phone, Clock, Send } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import SiteFooter from "@/components/SiteFooter";
@@ -29,6 +30,14 @@ export default function ContactPage() {
           <p className="mt-5 max-w-xl text-cream-400 leading-relaxed">
             Questions about a custom additive manufacturing order? The shop is
             standing by — we respond to inquiries within 24 business hours.
+            Need a part in a hurry? Email us, and ask about{" "}
+            <Link
+              href="/rush-3d-printing"
+              className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+            >
+              24-hour express
+            </Link>
+            .
           </p>
         </Reveal>
 

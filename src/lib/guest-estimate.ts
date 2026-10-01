@@ -202,7 +202,7 @@ export function resolveDateNeeded(
   earliest.setHours(0, 0, 0, 0);
   if (date < earliest) {
     return {
-      error: `We need at least ${MIN_LEAD_DAYS} days' lead time. Need it sooner? Call the shop and we'll see what we can do.`,
+      error: `We need at least ${MIN_LEAD_DAYS} days' lead time. Need it sooner? Email the shop and we'll see what we can do.`,
     };
   }
 

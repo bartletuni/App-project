@@ -1,4 +1,5 @@
 import { BUSINESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
+import { type FaqItem, faqAnswerText } from "@/lib/faq";
 
 /**
  * Schema.org payloads describing the shop.
@@ -12,6 +13,19 @@ import { BUSINESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from "@/
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 const REPLACEMENT_PARTS_ID = `${SITE_URL}/replacement-parts#service`;
+const RUSH_PRINTING_ID = `${SITE_URL}/rush-3d-printing#service`;
+
+/** The shop's published hours, shared by the business and the rush service. */
+function openingHoursSpecification(): Record<string, unknown>[] {
+  return [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: BUSINESS.openingHours.days,
+      opens: BUSINESS.openingHours.opens,
+      closes: BUSINESS.openingHours.closes,
+    },
+  ];
+}
 
 /**
  * The shop as a ProfessionalService (a LocalBusiness subtype), which is the
@@ -54,15 +68,10 @@ export function organizationSchema(): Record<string, unknown> {
     // Based in Utah (the address above), shipping anywhere in the country.
     areaServed: { "@type": "Country", name: BUSINESS.areaServed },
     naics: BUSINESS.naics,
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: BUSINESS.openingHours.days,
-        opens: BUSINESS.openingHours.opens,
-        closes: BUSINESS.openingHours.closes,
-      },
-    ],
+    openingHoursSpecification: openingHoursSpecification(),
     knowsAbout: [
+      "Rush 3D printing",
+      "Replacement part reproduction",
       "Additive manufacturing",
       "FDM/FFF 3D printing",
       "Carbon-fiber reinforced thermoplastics",
@@ -105,6 +114,10 @@ export function organizationSchema(): Record<string, unknown> {
           "@type": "Offer",
           itemOffered: { "@id": REPLACEMENT_PARTS_ID },
         },
+        {
+          "@type": "Offer",
+          itemOffered: { "@id": RUSH_PRINTING_ID },
+        },
       ],
     },
   };
@@ -128,6 +141,44 @@ export function replacementPartsServiceSchema(): Record<string, unknown> {
     provider: { "@id": ORGANIZATION_ID },
     areaServed: { "@type": "Country", name: BUSINESS.areaServed },
     audience: { "@type": "BusinessAudience", name: "Repair and service companies" },
+  };
+}
+
+/**
+ * Rush and express printing, described on its own page and referenced from
+ * the offer catalog by `@id`, as the replacement-parts service is. The two
+ * turnarounds are the rate sheet's; no price is given because the express
+ * surcharge is admin-editable on /pricing and would drift if copied here.
+ */
+export function rushPrintingServiceSchema(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": RUSH_PRINTING_ID,
+    name: "Rush 3D printing",
+    serviceType: "Expedited 3D printing and replacement parts",
+    description:
+      "Replacement and custom parts 3D printed in engineering-grade and carbon-fiber-reinforced materials on a 72-hour standard or 24-hour express turnaround, and shipped anywhere in the United States.",
+    url: absoluteUrl("/rush-3d-printing"),
+    provider: { "@id": ORGANIZATION_ID },
+    areaServed: { "@type": "Country", name: BUSINESS.areaServed },
+    hoursAvailable: openingHoursSpecification(),
+  };
+}
+
+/**
+ * A page's questions as FAQPage markup, from the same items `<FaqList>`
+ * renders — see src/lib/faq.ts for why they must be one source.
+ */
+export function faqPageSchema(items: FaqItem[]): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: faqAnswerText(item.a) },
+    })),
   };
 }
 
