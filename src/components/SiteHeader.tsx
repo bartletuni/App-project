@@ -118,7 +118,7 @@ export default function SiteHeader() {
                   className="group inline-flex items-center gap-1.5 border border-clay-500/40 bg-clay-500/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
                   Enter
-                  <ArrowUpRight className="h-3.5 w-3.5 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="h-3.5 w-3.5 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                 </Link>
               </Magnetic>
             </nav>

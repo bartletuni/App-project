@@ -22,3 +22,6 @@
 ## 2024-05-30 - Keyboard Accessibility for Modals
 **Learning:** Application modals lack keyboard support for dismissal, which breaks the standard expectation that pressing 'Escape' closes a modal.
 **Action:** Always add a global keydown event listener to modals checking for the 'Escape' key to ensure proper keyboard accessibility.
+## 2024-10-02 - Decorative SVGs inside action buttons
+**Learning:** Decorative SVGs inside links (like the ArrowUpRight icon in the "Enter" link) are announced redundantly by screen readers if they are not properly hidden.
+**Action:** Always add aria-hidden="true" to decorative SVG elements within interactive elements.

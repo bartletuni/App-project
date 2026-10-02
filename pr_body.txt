@@ -1,0 +1,4 @@
+💡 What: Added `aria-hidden="true"` to the decorative ArrowUpRight icon in the SiteHeader "Enter" link.
+🎯 Why: To prevent redundant screen reader announcements for purely decorative visual icons.
+📸 Before/After: Visual changes are nil.
+♿ Accessibility: Improves screen reader accessibility by keeping the focus on the actionable text ("Enter") without polluting the audio feedback with icon names.
