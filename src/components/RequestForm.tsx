@@ -426,6 +426,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <button
           type="submit"
           disabled={loading}
+          aria-busy={loading}
           className={`group w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 rounded-md ${
             freeSample
               ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
@@ -459,7 +460,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
             <span>{error}</span>
           </p>
         ) : submitBlocker ? (
-          <p className="text-xs leading-relaxed text-cream-500" aria-hidden="true">
+          <p className="text-xs leading-relaxed text-cream-500" role="status" aria-live="polite">
             {submitBlocker}
           </p>
         ) : null}
