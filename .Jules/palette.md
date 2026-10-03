@@ -25,3 +25,6 @@
 ## 2024-10-02 - Decorative SVGs inside action buttons
 **Learning:** Decorative SVGs inside links (like the ArrowUpRight icon in the "Enter" link) are announced redundantly by screen readers if they are not properly hidden.
 **Action:** Always add aria-hidden="true" to decorative SVG elements within interactive elements.
+## 2026-10-03 - Accessible form submission state
+**Learning:** Submit buttons in loading states and submit blocker messages must not hide crucial context from screen readers.
+**Action:** Applied aria-busy to loading buttons and utilized role=status for submit blockers.
