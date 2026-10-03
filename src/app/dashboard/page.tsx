@@ -26,6 +26,7 @@ import {
   statusHint,
   statusTone,
 } from "@/lib/request-status";
+import { carrierLabel, shipmentLabel, trackingUrl } from "@/lib/shipping";
 
 /**
  * One colour per tone rather than per status, so the pricing statuses added
@@ -271,7 +272,7 @@ export default function DashboardPage() {
                               </span>
                             )}
                             <span>NEED <span className="text-cream-200">{format(new Date(req.dateNeeded), "MMM d")}</span></span>
-                            {req.trackingNumber && <span>USPS <span className="text-teal-300">{req.trackingNumber}</span></span>}
+                            {req.trackingNumber && <span>{carrierLabel(req.shippingCarrier)} <span className="text-teal-300">{req.trackingNumber}</span></span>}
                           </div>
                         </div>
                       </button>
@@ -392,7 +393,22 @@ export default function DashboardPage() {
                 </div>
                 <div className="col-span-1 sm:col-span-3">
                   <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-cream-500">Tracking</div>
-                  <div className="text-sm text-teal-300">{selectedRequest.trackingNumber || "—"}</div>
+                  {selectedRequest.trackingNumber ? (
+                    <div className="text-sm">
+                      <span className="text-cream-300">{shipmentLabel(selectedRequest.shippingCarrier, selectedRequest.shippingService)}</span>{" "}
+                      <a
+                        href={trackingUrl(selectedRequest.shippingCarrier, selectedRequest.trackingNumber)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-teal-300 hover:text-teal-200 underline underline-offset-2 break-all rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                      >
+                        {selectedRequest.trackingNumber}
+                        <span className="sr-only"> (track on {carrierLabel(selectedRequest.shippingCarrier)}, opens in a new tab)</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-teal-300">—</div>
+                  )}
                 </div>
               </div>
 

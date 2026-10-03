@@ -33,6 +33,17 @@ import {
   statusesFor,
 } from "@/lib/request-status";
 import { isGuestEmailConfirmed, isGuestRequest, requestContact } from "@/lib/guest-estimate";
+import {
+  CARRIERS,
+  CARRIER_SERVICES,
+  DEFAULT_CARRIER,
+  MAX_SERVICE_LENGTH,
+  MAX_TRACKING_LENGTH,
+  carrierLabel,
+  isCarrier,
+  trackingUrl,
+  type Carrier,
+} from "@/lib/shipping";
 
 /**
  * Console colours for a status, keyed by the tone the shared status table
@@ -140,6 +151,8 @@ function AdminDashboardContent() {
   const [invoiceInput, setInvoiceInput] = useState("");
   const [savingInvoice, setSavingInvoice] = useState(false);
   const [trackingInput, setTrackingInput] = useState("");
+  const [carrierInput, setCarrierInput] = useState<Carrier>(DEFAULT_CARRIER);
+  const [serviceInput, setServiceInput] = useState("");
   const [savingTracking, setSavingTracking] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
@@ -282,20 +295,31 @@ function AdminDashboardContent() {
       const res = await fetch(`/api/requests/${id}/tracking`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingNumber: trackingInput }),
+        body: JSON.stringify({ trackingNumber: trackingInput, carrier: carrierInput, service: serviceInput }),
       });
       if (res.ok) {
+        // The route trims and nulls what it stores, so the panel takes the
+        // saved row back rather than echoing what was typed.
+        const saved = await res.json();
         fetchRequests();
         if (selectedRequest && selectedRequest.id === id) {
-            setSelectedRequest({ ...selectedRequest, trackingNumber: trackingInput === "" ? null : trackingInput });
+            setSelectedRequest({
+              ...selectedRequest,
+              trackingNumber: saved.trackingNumber,
+              shippingCarrier: saved.shippingCarrier,
+              shippingService: saved.shippingService,
+            });
+            setTrackingInput(saved.trackingNumber || "");
+            setServiceInput(saved.shippingService || "");
         }
-        alert("Tracking number saved successfully");
+        alert("Shipping details saved");
       } else {
-        alert("Failed to save tracking number");
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to save shipping details");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving tracking number");
+      alert("Error saving shipping details");
     } finally {
       setSavingTracking(false);
     }
@@ -394,6 +418,8 @@ function AdminDashboardContent() {
     setSelectedRequest(req);
     setInvoiceInput(req.invoiceNumber || "");
     setTrackingInput(req.trackingNumber || "");
+    setCarrierInput(isCarrier(req.shippingCarrier) ? req.shippingCarrier : DEFAULT_CARRIER);
+    setServiceInput(req.shippingService || "");
     setQuotedPriceInput(req.quotedPrice || "");
     setIsModalOpen(true);
   };
@@ -403,6 +429,8 @@ function AdminDashboardContent() {
     setSelectedRequest(null);
     setInvoiceInput("");
     setTrackingInput("");
+    setCarrierInput(DEFAULT_CARRIER);
+    setServiceInput("");
     setQuotedPriceInput("");
   };
 
@@ -990,18 +1018,61 @@ function AdminDashboardContent() {
                         </dd>
                     </div>
                     <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-cream-500">USPS Tracking Number</dt>
-                        <dd className="mt-1 flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={trackingInput}
-                              onChange={(e) => setTrackingInput(e.target.value)}
-                              placeholder="Enter Tracking #"
-                              className="border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 w-48 bg-espresso-800 text-black"
-                            />
+                        <dt className="text-sm font-medium text-cream-500">Shipping</dt>
+                        <dd className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label htmlFor="shipping-carrier" className="block text-xs text-cream-500 mb-1">Carrier</label>
+                              <select
+                                id="shipping-carrier"
+                                value={carrierInput}
+                                onChange={(e) => setCarrierInput(e.target.value as Carrier)}
+                                className="w-full border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 bg-espresso-800 text-cream-100"
+                              >
+                                {CARRIERS.map((c) => (
+                                  <option key={c} value={c}>{carrierLabel(c)}{c === DEFAULT_CARRIER ? " (primary)" : ""}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor="shipping-service" className="block text-xs text-cream-500 mb-1">Service</label>
+                              <input
+                                id="shipping-service"
+                                type="text"
+                                list="shipping-service-options"
+                                value={serviceInput}
+                                maxLength={MAX_SERVICE_LENGTH}
+                                onChange={(e) => setServiceInput(e.target.value)}
+                                placeholder={CARRIER_SERVICES[carrierInput][0]}
+                                className="w-full border border-espresso-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clay-500 bg-espresso-800 text-cream-100"
+                              />
+                              <datalist id="shipping-service-options">
+                                {CARRIER_SERVICES[carrierInput].map((svc) => (
+                                  <option key={svc} value={svc} />
+                                ))}
+                              </datalist>
+                            </div>
+                            <div>
+                              <label htmlFor="shipping-tracking" className="block text-xs text-cream-500 mb-1">Tracking number</label>
+                              <input
+                                id="shipping-tracking"
+                                type="text"
+                                value={trackingInput}
+                                maxLength={MAX_TRACKING_LENGTH}
+                                onChange={(e) => setTrackingInput(e.target.value)}
+                                placeholder="Enter Tracking #"
+                                className="w-full border border-espresso-500 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-clay-500 bg-espresso-800 text-cream-100"
+                              />
+                            </div>
+                        </dd>
+                        <dd className="mt-3 flex flex-wrap items-center gap-3">
                             <button
                               onClick={() => handleSaveTracking(selectedRequest.id)}
-                              disabled={savingTracking || trackingInput === selectedRequest.trackingNumber || (!trackingInput && !selectedRequest.trackingNumber)}
+                              disabled={
+                                savingTracking ||
+                                (trackingInput === (selectedRequest.trackingNumber || "") &&
+                                  carrierInput === (isCarrier(selectedRequest.shippingCarrier) ? selectedRequest.shippingCarrier : DEFAULT_CARRIER) &&
+                                  serviceInput === (selectedRequest.shippingService || ""))
+                              }
                               className="inline-flex items-center justify-center gap-1.5 bg-clay-700 hover:bg-clay-800 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                             >
                               {savingTracking ? (
@@ -1013,9 +1084,22 @@ function AdminDashboardContent() {
                                   Saving...
                                 </>
                               ) : (
-                                "Save Tracking"
+                                "Save Shipping"
                               )}
                             </button>
+                            {trackingUrl(selectedRequest.shippingCarrier, selectedRequest.trackingNumber) && (
+                              <a
+                                href={trackingUrl(selectedRequest.shippingCarrier, selectedRequest.trackingNumber)!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-teal-300 hover:text-teal-200 underline underline-offset-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                              >
+                                Track on {carrierLabel(selectedRequest.shippingCarrier)}
+                              </a>
+                            )}
+                        </dd>
+                        <dd className="mt-2 text-xs text-cream-500">
+                          USPS unless a part is too large or heavy for it, or the customer asked for another carrier. The customer sees the carrier, service, and a tracking link on their desk.
                         </dd>
                     </div>
                 </dl>

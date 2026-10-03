@@ -8,6 +8,7 @@ import {
 } from "@/lib/request-status";
 import { CLAY, CREAM, DERIVED, EMBER, ESPRESSO, WORDMARK } from "@/lib/brand";
 import type { GuestConfirmationOutcome } from "@/lib/guest-email";
+import { shipmentLabel } from "@/lib/shipping";
 
 /**
  * Transactional email, in the same voice as the site.
@@ -682,6 +683,9 @@ export const StatusUpdateEmailHTML = (data: {
   status: string;
   message: string;
   trackingNumber?: string | null;
+  /** Stored carrier key; absent reads as USPS, the primary carrier. */
+  shippingCarrier?: string | null;
+  shippingService?: string | null;
 }) =>
   shell({
     audience: "customer",
@@ -695,7 +699,7 @@ export const StatusUpdateEmailHTML = (data: {
 
       ${specSheet([
         {
-          label: "USPS tracking",
+          label: `${shipmentLabel(data.shippingCarrier, data.shippingService)} tracking`,
           value: data.trackingNumber
             ? `<span style="font-family:${MONO};font-size:15px;letter-spacing:0.06em;color:#7fbfb5;">${escapeHtml(data.trackingNumber)}</span>`
             : "",

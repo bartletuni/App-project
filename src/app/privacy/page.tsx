@@ -86,8 +86,8 @@ const sections: LegalSection[] = [
           reference photographs, sketches, or PDF drawings you attach to show
           us the part; quantity; material; print settings; your notes; and the
           date you need it by. As the job progresses we add the estimated or
-          quoted price, order status, invoice number, and the tracking number
-          of the parcel your part ships in.
+          quoted price, order status, invoice number, and the carrier, service,
+          and tracking number of the parcel your part ships in.
         </p>
         <p>
           What happens to an uploaded file after the job is finished — that we
@@ -332,8 +332,8 @@ const sections: LegalSection[] = [
             transaction under its own retention policy, which we do not control.
           </li>
           <li>
-            <strong>Shipping records</strong> — the tracking number stays with
-            the order record above. USPS keeps its own record of the parcel
+            <strong>Shipping records</strong> — the carrier, service, and
+            tracking number stay with the order record above. USPS keeps its own record of the parcel
             under its own retention policy, which we do not control.
           </li>
           <li>
