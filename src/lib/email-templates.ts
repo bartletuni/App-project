@@ -337,7 +337,7 @@ export const WelcomeUserEmailHTML = (data: {
         {
           title: "We build and ship it",
           detail:
-            "Track status and tracking numbers from your desk the whole way through.",
+            "Parts ship by USPS to the shipping address below. Track status and the USPS tracking number from your desk the whole way through.",
         },
       ])}
 
