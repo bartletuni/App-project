@@ -15,7 +15,7 @@
 import { BUSINESS, SITE_NAME } from "./seo";
 
 /** Shown on every legal page. Bump whenever the substance changes. */
-export const LEGAL_LAST_UPDATED = "September 28, 2026";
+export const LEGAL_LAST_UPDATED = "October 3, 2026";
 
 /** Where privacy and terms questions go. Same inbox published site-wide. */
 export const LEGAL_CONTACT = {
@@ -35,6 +35,18 @@ export const LEGAL_CONTACT = {
  */
 export const SQUARE_PRIVACY_URL =
   "https://squareup.com/us/en/legal/general/privacy";
+
+/**
+ * The USPS privacy policy, cited by the privacy policy where it names USPS.
+ *
+ * USPS is the shop's primary carrier, and unlike the service providers in
+ * the privacy policy's §05 it is not acting for us: it handles the name and
+ * address on a parcel under its own policy, so the document points there.
+ * Like the Square link above, this could not be reached from the build
+ * environment to confirm it, so it needs a click-through before release.
+ */
+export const USPS_PRIVACY_URL =
+  "https://about.usps.com/who/legal/privacy-policy/welcome.htm";
 
 /** Governing law for the Terms, and the venue named in them. */
 export const GOVERNING_LAW = "the State of Utah, United States";

@@ -164,6 +164,12 @@ describe("spec sheets", () => {
       customerName: "c", fileName: "f.stl", status: "ACTIVE", message: "m",
     });
     expect(withTracking).toContain("USPS tracking");
+    const byUps = StatusUpdateEmailHTML({
+      customerName: "c", fileName: "f.stl", status: "SHIPPED", message: "m", trackingNumber: "1Z",
+      shippingCarrier: "UPS", shippingService: "Ground",
+    });
+    expect(byUps).toContain("UPS · Ground tracking");
+    expect(byUps).not.toContain("USPS");
     // The panel background appears only when there is a row to show.
     expect(without).not.toContain("#241d17");
   });

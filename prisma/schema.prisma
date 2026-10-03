@@ -158,6 +158,12 @@ model PartRequest {
   status          String      @default("PENDING")
   invoiceNumber   String?
   trackingNumber  String?
+  /// Who carries the parcel: a value from CARRIERS in src/lib/shipping.ts.
+  /// USPS is the primary carrier, and every row from before this column was
+  /// shipped by it, hence the default.
+  shippingCarrier String      @default("USPS")
+  /// The carrier's service level ("Priority Mail", "Ground"), free text.
+  shippingService String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
