@@ -167,13 +167,13 @@ export const DEFAULT_PRICING: PricingContent = {
       items: [
         {
           label: "Standard Turnaround",
-          detail: "Shipped anywhere in the United States.",
+          detail: "Made, then shipped by USPS anywhere in the United States. Transit time is extra.",
           price: "48–72 hours",
           note: "",
         },
         {
           label: "24-Hour Express Turnaround",
-          detail: "Produced within 24 hours, then shipped.",
+          detail: "Produced within 24 hours, then shipped by USPS.",
           price: "+35%",
           note: "express surcharge",
         },

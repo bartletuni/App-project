@@ -91,6 +91,12 @@ it. Most of these are *not* enforced by a test; the last column says which are.
 | The free sample | `src/lib/free-sample.ts` holds the material, quantity, and label; `/terms` §04 describes the offer; `POST /api/requests` and `/api/requests/free-sample` both decide eligibility as "no existing row for this account with `isFreeSample` set". | nothing |
 | Pricing sheet content | It is admin-editable at runtime (`PricingSection` / `PricingItem` / `PricingSetting`). `src/lib/pricing.ts` only seeds the defaults, so editing it does not change a deployed site whose admin has already edited the sheet. | `pricing.test.ts` |
 
+### Shipping
+
+| If you change | You must also | Guarded by |
+| --- | --- | --- |
+| The carrier, or how parts ship | USPS is the primary carrier and is named, not implied, in: `/terms` §04 (shipping, risk of loss, lost or damaged parcels, sending us a part), `/privacy` §03, §05 (USPS is *not* a service provider acting for us — it sits outside that list under its own policy, `USPS_PRIVACY_URL` in `legal.ts`) and §07, the address hints on the sign-up form and in `/settings`, the welcome email, the replacement-parts and home pages, and the pricing seed. Each shipment records its own carrier (`PartRequest.shippingCarrier`, default `USPS`) and service; `src/lib/shipping.ts` holds the closed carrier set, the service suggestions, and the tracking links, and every surface that shows a tracking number labels and links it through there — never hard-code a carrier name next to one. A published turnaround is make-and-post time; transit is always extra — keep it that way. A customer can correct their own addresses through `/api/user/addresses`; the Terms rely on that when they put a stale address at the customer's risk. | `src/lib/__tests__/shipping.test.ts`, `src/app/api/requests/[id]/__tests__/tracking.test.ts`, `src/app/api/user/addresses/__tests__/route.test.ts` — but **not** the copy |
+
 ### Brand, metadata, email, PDF
 
 | If you change | You must also | Guarded by |
@@ -132,7 +138,7 @@ Before you open a PR, ask each question and act on it:
 5. **Does it set a cookie or write to browser storage?** → `COOKIE_INVENTORY`
    and `/cookies`. Non-essential storage needs consent *before* it is written.
 6. **Does it change what the shop promises about a part, a price, or a file?**
-   → `/terms` (§03 estimates vs quotes, §04 orders and cancellation, §05 the
+   → `/terms` (§03 estimates vs quotes, §04 orders, shipping, and cancellation, §05 the
    file licence and the customer's warranty, §07 what a printed part is not).
 7. **Does it change what a customer agrees to at sign-up?** → the tick-box row
    in §3 above, plus `/file-retention` §06 and `/privacy` §08, which both

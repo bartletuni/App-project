@@ -17,7 +17,7 @@ import {
 
 const title = "Terms of Service";
 const description =
-  "The terms covering TakomoCo estimates, quotes, orders, and manufacturing — cancellation, payment, ownership of the files you upload, what we will not print, and the limits of our liability.";
+  "The terms covering TakomoCo estimates, quotes, orders, and manufacturing — cancellation, payment, USPS shipping, ownership of the files you upload, what we will not print, and the limits of our liability.";
 
 export const metadata: Metadata = {
   title,
@@ -73,8 +73,10 @@ const sections: LegalSection[] = [
           <a href={mail}>{LEGAL_CONTACT.email}</a> if you think someone else has
           reached your account. Activity under your sign-in is treated as yours.
           Give us accurate contact and address details and keep them current in{" "}
-          <Link href="/settings">Account settings</Link> — a part shipped to a
-          stale address is not something we can recover for you.
+          <Link href="/settings">Account settings</Link>, where your shipping
+          address can be changed at any time. A part ships to the address on
+          your account when it leaves the shop, and a part shipped to a stale
+          address is not something we can recover for you.
         </p>
       </>
     ),
@@ -127,7 +129,7 @@ const sections: LegalSection[] = [
   {
     id: "orders",
     n: "04",
-    title: "Orders, payment, and cancellation",
+    title: "Orders, payment, shipping, and cancellation",
     body: (
       <>
         <p>
@@ -167,8 +169,52 @@ const sections: LegalSection[] = [
         <p>
           The date you need a part by is a target we work towards in good faith,
           not a guaranteed delivery date, and it runs from payment rather than
-          from submission. Once a part is handed to the carrier, transit time
-          and risk of loss pass to you.
+          from submission. A turnaround we publish — on the pricing sheet or
+          anywhere else on the site — is the time it takes to make the part and
+          put it in the post. Transit time comes on top of it.
+        </p>
+        <h3>Shipping</h3>
+        <p>
+          We ship finished parts by <strong>USPS</strong>, the United States
+          Postal Service, to the shipping address on your account. That means we
+          can send to a PO Box or to an APO, FPO, or DPO military address as
+          well as to a street address. Parcels to Alaska, Hawaii, US
+          territories, and military addresses take longer to arrive. The
+          delivery dates USPS shows, including in its tracking, are its
+          estimates, not ours, and we do not guarantee them. A part too large or
+          heavy for USPS to accept, or one you ask us to send another way, may
+          go by another carrier, and we will tell you which carrier when it
+          ships.
+        </p>
+        <p>
+          <strong>
+            Once a part is handed to USPS, or to any other carrier, risk of loss
+            passes to you,
+          </strong>{" "}
+          along with the time it spends in transit. If USPS returns a parcel to
+          us because it could not be delivered to the address on your account,
+          we will send it again once the address is corrected, and the postage
+          for the second trip is yours.
+        </p>
+        <h3>Lost or damaged in transit</h3>
+        <p>
+          If a parcel arrives damaged, or never arrives, tell us within{" "}
+          <strong>10 days</strong>. For a damaged parcel that means 10 days from
+          delivery. For a missing one it means 10 days from the date USPS
+          expected to deliver it. Keep the box and all of the packing, because
+          USPS can ask to inspect both before it pays a damage claim. We will
+          help you pursue a claim with USPS. What USPS pays on a claim is
+          decided by USPS, and it is limited to the coverage the parcel carried.
+        </p>
+        <h3>Sending us a part</h3>
+        <p>
+          For scanning or reverse engineering, you may send us the original
+          part. You choose the carrier, you pay for the shipping, and the part
+          travels at your risk until it reaches us. Pack it well and follow your
+          carrier&apos;s mailing rules. USPS, for one, restricts batteries,
+          fuel, and anything still holding fuel or pressure, so remove or drain
+          those before you send it. If we return the original to you, it
+          travels the same way, and on the same terms, as a finished part.
         </p>
         <h3>The free sample</h3>
         <p>
@@ -318,6 +364,8 @@ const sections: LegalSection[] = [
           care, in the material and quantity ordered, and substantially to the
           model or description you supplied. Inspect what arrives and tell us
           within <strong>10 days</strong> of delivery if something is wrong.
+          Damage or loss in transit is covered by section 04 rather than by
+          this warranty.
         </p>
         <p>
           If it is our error, we will, at our option,{" "}
@@ -451,6 +499,11 @@ export default function TermsPage() {
               <li>
                 Invoices are issued and paid through Square, and refunds go back
                 the same way.
+              </li>
+              <li>
+                Parts ship by USPS. Once a parcel is with USPS it travels at your
+                risk, and the delivery dates USPS shows are its estimates. Tell
+                us within 10 days if a parcel arrives damaged or never arrives.
               </li>
               <li>
                 Your models stay yours — but you are confirming you have the

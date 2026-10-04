@@ -297,10 +297,14 @@ function LoginContent() {
                       <span className="eyebrow">SHIPPING</span>
                       <span className="hairline flex-1" />
                     </div>
+                    <p id="shippingHint" className="-mt-2 mb-4 text-xs text-cream-500">
+                      Parts ship by USPS. A PO Box or an APO, FPO, or DPO address works
+                      too, and you can change it later in Account settings.
+                    </p>
                     <div className="space-y-4">
                       <div>
                         <label className={label} htmlFor="shippingStreet">Street address</label>
-                        <input id="shippingStreet" type="text" required={!isLogin} value={shippingStreet} onChange={(e) => setShippingStreet(e.target.value)} className={field} placeholder="123 Main St" autoComplete="shipping street-address" />
+                        <input id="shippingStreet" type="text" required={!isLogin} value={shippingStreet} onChange={(e) => setShippingStreet(e.target.value)} className={field} placeholder="123 Main St" autoComplete="shipping street-address" aria-describedby="shippingHint" />
                       </div>
                       <div>
                         <label className={label} htmlFor="shippingApt">Apartment, suite, etc. (optional)</label>

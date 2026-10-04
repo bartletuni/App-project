@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Lock, User, Truck, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 import AppShell from "@/components/AppShell";
 import Reveal from "@/components/ui/Reveal";
@@ -31,12 +31,61 @@ export default function SettingsPage() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileSuccess, setProfileSuccess] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressError, setAddressError] = useState("");
+  const [addressSuccess, setAddressSuccess] = useState(false);
 
   useEffect(() => {
     if (session?.user?.name) {
       setName(session.user.name);
     }
   }, [session]);
+
+  // The addresses are not on the session, so they are read once on arrival.
+  // Saving stays disabled until they have loaded, so an empty form can never
+  // overwrite a real address.
+  useEffect(() => {
+    fetch("/api/user/addresses")
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        setShippingAddress(data.shippingAddress || "");
+        setBillingAddress(data.billingAddress || "");
+        setAddressesLoaded(true);
+      })
+      .catch(() => setAddressError("Your saved addresses could not be loaded. Refresh to try again."));
+  }, []);
+
+  const handleAddressUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddressError("");
+    setAddressSuccess(false);
+    setAddressLoading(true);
+
+    try {
+      const res = await fetch("/api/user/addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shippingAddress, billingAddress }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAddressError(data.error || "Failed to update addresses.");
+      } else {
+        setShippingAddress(data.shippingAddress);
+        setBillingAddress(data.billingAddress);
+        setAddressSuccess(true);
+      }
+    } catch (err) {
+      setAddressError("An unexpected error occurred. Please try again.");
+    } finally {
+      setAddressLoading(false);
+    }
+  };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +166,7 @@ export default function SettingsPage() {
         <Reveal>
           <span className="eyebrow">ACCOUNT ⁄ CONFIG</span>
           <h1 className="mt-3 font-display text-4xl sm:text-5xl text-cream-100">Settings</h1>
-          <p className="mt-2 text-cream-400">Manage your profile and security credentials.</p>
+          <p className="mt-2 text-cream-400">Manage your profile, addresses, and security credentials.</p>
         </Reveal>
 
         <div className="mt-10 space-y-6">
@@ -164,6 +213,78 @@ export default function SettingsPage() {
                     {profileLoading ? (
                       <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" /> Saving…</>
                     ) : "Save name"}
+                  </button>
+                </div>
+              </form>
+            </Panel>
+          </Reveal>
+
+          {/* Addresses */}
+          <Reveal delay={0.05}>
+            <Panel className="p-6 sm:p-7 rounded-md">
+              <div className="flex items-center gap-3 mb-6">
+                <Truck className="h-4 w-4 text-clay-300" aria-hidden="true" />
+                <span className="eyebrow">ADDRESSES</span>
+                <span className="hairline flex-1" />
+              </div>
+
+              <form onSubmit={handleAddressUpdate} className="space-y-5">
+                {addressError && (
+                  <div className="border-l-2 border-red-500 bg-red-500/10 px-4 py-3 flex items-start gap-3" role="alert">
+                    <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-red-300">{addressError}</p>
+                  </div>
+                )}
+                {addressSuccess && (
+                  <div className="border-l-2 border-green-500 bg-green-500/10 px-4 py-3 flex items-start gap-3" role="status">
+                    <CheckCircle2 className="h-4 w-4 text-green-300 mt-0.5 shrink-0" aria-hidden="true" />
+                    <p className="text-sm text-green-300">Addresses updated.</p>
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="shippingAddress" className={labelCls}>Shipping address</label>
+                  <textarea
+                    id="shippingAddress"
+                    rows={3}
+                    maxLength={500}
+                    required
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    disabled={!addressesLoaded}
+                    aria-describedby="shippingAddressHint"
+                    autoComplete="shipping street-address"
+                    className={`${field} resize-y disabled:opacity-60`}
+                    placeholder="123 Main St, Apt 4B, City, ST 12345"
+                  />
+                  <p id="shippingAddressHint" className="mt-2 text-xs text-cream-500">
+                    Parts ship by USPS to this address. A PO Box or an APO, FPO, or DPO
+                    address works too. A change here does not reach a part that has
+                    already shipped.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="billingAddress" className={labelCls}>Billing address</label>
+                  <textarea
+                    id="billingAddress"
+                    rows={3}
+                    maxLength={500}
+                    required
+                    value={billingAddress}
+                    onChange={(e) => setBillingAddress(e.target.value)}
+                    disabled={!addressesLoaded}
+                    autoComplete="billing street-address"
+                    className={`${field} resize-y disabled:opacity-60`}
+                    placeholder="123 Main St, City, ST 12345"
+                  />
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button type="submit" disabled={addressLoading || !addressesLoaded} className={btn}>
+                    {addressLoading ? (
+                      <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" aria-hidden="true" /> Saving…</>
+                    ) : "Save addresses"}
                   </button>
                 </div>
               </form>

@@ -96,7 +96,7 @@ const steps = [
   {
     n: "04",
     title: "It ships to you",
-    body: "Most jobs are back in about 72 hours. Nothing is built or invoiced until you approve the price.",
+    body: "Most jobs are made and in the post by USPS in about 72 hours. Nothing is built or invoiced until you approve the price.",
   },
 ];
 
@@ -105,7 +105,7 @@ const questions = [
     q: "We're not in Utah. Can you still help?",
     a: (
       <>
-        Yes. The shop is in Utah and ships anywhere in the United States. Everything else —
+        Yes. The shop is in Utah and ships by USPS anywhere in the United States. Everything else —
         the estimate, the questions, your approval — happens by email and phone, Monday to
         Friday, 9am to 5pm Mountain Time.
       </>
@@ -125,7 +125,8 @@ const questions = [
     q: "How fast is it?",
     a: (
       <>
-        Most jobs are back in about 72 hours, and the estimate comes within one business day.
+        Most jobs are made and in the post in about 72 hours, with USPS transit time on top,
+        and the estimate comes within one business day.
         The form takes dates at least three days out; if you need it sooner, call{" "}
         <a href={`tel:${BUSINESS.telephone}`}>{telephone}</a> and we will see what we can do.
       </>

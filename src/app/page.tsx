@@ -49,7 +49,7 @@ const process = [
   { n: "01", title: "Scan & Capture", body: "Digitize legacy or reference parts with high-fidelity scanning." },
   { n: "02", title: "Design & Engineer", body: "CAD refinement, tolerancing, and material selection for the job." },
   { n: "03", title: "Print & Validate", body: "Production on engineering printers with dimensional verification." },
-  { n: "04", title: "Deliver", body: "Inspected, finished components shipped direct to your door, anywhere in the United States." },
+  { n: "04", title: "Deliver", body: "Inspected, finished components shipped by USPS direct to your door, anywhere in the United States." },
 ];
 
 const specSheet = [

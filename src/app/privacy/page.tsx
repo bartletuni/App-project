@@ -8,6 +8,7 @@ import {
   LEGAL_CONTACT,
   LEGAL_LAST_UPDATED,
   SQUARE_PRIVACY_URL,
+  USPS_PRIVACY_URL,
 } from "@/lib/legal";
 
 const title = "Privacy Policy";
@@ -85,8 +86,8 @@ const sections: LegalSection[] = [
           reference photographs, sketches, or PDF drawings you attach to show
           us the part; quantity; material; print settings; your notes; and the
           date you need it by. As the job progresses we add the estimated or
-          quoted price, order status, invoice number, and shipping tracking
-          number.
+          quoted price, order status, invoice number, and the carrier, service,
+          and tracking number of the parcel your part ships in.
         </p>
         <p>
           What happens to an uploaded file after the job is finished — that we
@@ -170,8 +171,8 @@ const sections: LegalSection[] = [
             and collects on it.
           </li>
           <li>
-            <strong>To ship it.</strong> Your shipping address goes to the
-            carrier.
+            <strong>To ship it.</strong> Your name and shipping address go on
+            the label of the parcel, and so to USPS, which carries it.
           </li>
           <li>
             <strong>To keep your account working and secure.</strong> Signing
@@ -258,11 +259,21 @@ const sections: LegalSection[] = [
             <strong>Our database and application hosting providers</strong> —
             store account and order records and serve the site.
           </li>
-          <li>
-            <strong>Shipping carriers</strong> — receive the name and address
-            needed to deliver a finished part.
-          </li>
         </ul>
+        <p>
+          <strong>USPS</strong> carries finished parts, and it is not one of the
+          service providers above. It is the United States Postal Service, and
+          it does not act for us. It receives your name and shipping address
+          because they are printed on the parcel, and it records the
+          parcel&apos;s movements itself. It handles that information under{" "}
+          <a href={USPS_PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+            its own privacy policy
+          </a>
+          , not ours. That includes the tracking it shows on usps.com and any
+          notice it sends you through its own services, such as Informed
+          Delivery. If a part ever has to go by another carrier, that carrier
+          receives the same name and address on the same terms.
+        </p>
         <p>
           Beyond those, we disclose personal information only when the law
           requires it — a valid subpoena, court order, or similar legal process
@@ -321,6 +332,11 @@ const sections: LegalSection[] = [
             transaction under its own retention policy, which we do not control.
           </li>
           <li>
+            <strong>Shipping records</strong> — the carrier, service, and
+            tracking number stay with the order record above. USPS keeps its own record of the parcel
+            under its own retention policy, which we do not control.
+          </li>
+          <li>
             <strong>Server logs</strong> — short-lived, per our providers&apos;
             standard retention.
           </li>
@@ -342,8 +358,8 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          You can see and change your name, addresses, phone numbers, and
-          password yourself at any time from{" "}
+          You can see and change your name, shipping and billing addresses,
+          and password yourself at any time from{" "}
           <Link href="/settings">Account settings</Link>. Beyond that, you may
           ask us to:
         </p>
@@ -482,6 +498,10 @@ export default function PrivacyPage() {
               <li>
                 Invoices are issued through Square, so your card details never
                 reach us.
+              </li>
+              <li>
+                Parts ship by USPS, which gets the name and address on the label
+                and handles them under its own privacy policy.
               </li>
               <li>
                 Your uploads and account details are yours — ask and we will
