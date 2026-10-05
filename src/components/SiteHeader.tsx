@@ -10,36 +10,39 @@ import Magnetic from "@/components/ui/Magnetic";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
 
 const nav = [
-  { href: "/", n: "01", label: "Index", blurb: "Studio overview & capabilities" },
-  { href: "/materials", n: "02", label: "Materials", blurb: "Filament & composite stock" },
-  { href: "/pricing", n: "03", label: "Pricing", blurb: "Service rate sheet" },
-  { href: "/contact", n: "04", label: "Contact", blurb: "Reach the shop directly" },
+  { href: "/", n: "01", label: "Home", blurb: "Studio overview & capabilities" },
+  { href: "/replacement-parts", n: "02", label: "Repair & service", blurb: "Replacement parts for repair teams" },
+  { href: "/materials", n: "03", label: "Materials", blurb: "Filament & composite stock" },
+  { href: "/pricing", n: "04", label: "Pricing", blurb: "Service rate sheet" },
+  { href: "/contact", n: "05", label: "Contact", blurb: "Reach the shop directly" },
 ];
 
 /**
  * Slim public masthead: a thin clay accent line, a monospace wordmark,
- * underlined section links, and a ghost "Enter" action.
+ * underlined section links, and a ghost "Sign in" action.
  *
- * The section links collapse below `sm`, so small screens get a directory
- * toggle instead — a full-width index panel of every public destination.
+ * The section links collapse below `lg`, so anything narrower gets a menu
+ * toggle instead — a full-width panel of every public destination. They used to
+ * collapse at `sm`, but five labels plus two actions need about 960px; between
+ * 640 and there the bar overflowed and pushed "Sign in" off the right edge.
  */
 export default function SiteHeader() {
   const pathname = usePathname();
-  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  // Navigating away closes the directory.
+  // Navigating away closes the menu.
   useEffect(() => {
-    setDirectoryOpen(false);
+    setMenuOpen(false);
   }, [pathname]);
 
   // Escape closes it, and the page behind it stays put while it is open.
   useEffect(() => {
-    if (!directoryOpen) return;
+    if (!menuOpen) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDirectoryOpen(false);
+      if (e.key === "Escape") setMenuOpen(false);
     };
     const previousOverflow = document.body.style.overflow;
 
@@ -50,7 +53,7 @@ export default function SiteHeader() {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [directoryOpen]);
+  }, [menuOpen]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -76,13 +79,13 @@ export default function SiteHeader() {
               </span>
             </Link>
 
-            <nav className="flex items-center gap-2.5 sm:gap-8" aria-label="Primary">
+            <nav className="flex items-center gap-2.5 sm:gap-4 lg:gap-6 xl:gap-8" aria-label="Primary">
               {nav.map((n) => (
                 <Link
                   key={n.href}
                   href={n.href}
                   aria-current={isActive(n.href) ? "page" : undefined}
-                  className="group relative hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                  className="group relative hidden lg:block whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.2em] text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
                   {n.label}
                   <span
@@ -100,13 +103,13 @@ export default function SiteHeader() {
               />
               <button
                 type="button"
-                onClick={() => setDirectoryOpen((open) => !open)}
-                aria-expanded={directoryOpen}
-                aria-controls="mobile-directory"
-                aria-label={directoryOpen ? "Close directory" : "Open directory"}
-                className="sm:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm border border-clay-500/25 text-clay-300 hover:text-cream-100 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-expanded={menuOpen}
+                aria-controls="mobile-menu"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-sm border border-clay-500/25 text-clay-300 hover:text-cream-100 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
               >
-                {directoryOpen ? (
+                {menuOpen ? (
                   <X className="h-5 w-5" aria-hidden="true" />
                 ) : (
                   <Menu className="h-5 w-5" aria-hidden="true" />
@@ -117,7 +120,7 @@ export default function SiteHeader() {
                   href="/login"
                   className="group inline-flex items-center gap-1.5 border border-clay-500/40 bg-clay-500/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                 >
-                  Enter
+                  Sign in
                   <ArrowUpRight className="h-3.5 w-3.5 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                 </Link>
               </Magnetic>
@@ -132,33 +135,33 @@ export default function SiteHeader() {
         className="h-px origin-left bg-gradient-to-r from-clay-500/30 to-transparent"
       />
 
-      {/* Mobile directory — the full public index, one tap from the top of any page. */}
+      {/* Mobile menu — every public page, one tap from the top of any page. */}
       <AnimatePresence>
-        {directoryOpen && (
+        {menuOpen && (
           <>
             <motion.div
-              key="directory-scrim"
+              key="menu-scrim"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              onClick={() => setDirectoryOpen(false)}
-              className="sm:hidden fixed inset-0 -z-10 bg-espresso-950/70 backdrop-blur-sm"
+              onClick={() => setMenuOpen(false)}
+              className="lg:hidden fixed inset-0 -z-10 bg-espresso-950/70 backdrop-blur-sm"
               aria-hidden="true"
             />
             <motion.nav
-              key="directory-panel"
-              id="mobile-directory"
-              aria-label="Site directory"
+              key="menu-panel"
+              id="mobile-menu"
+              aria-label="Site menu"
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="sm:hidden max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-clay-500/20 bg-espresso-900/95 backdrop-blur-xl"
+              className="lg:hidden max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-clay-500/20 bg-espresso-900/95 backdrop-blur-xl"
             >
               <div className="px-5 pt-5 pb-6">
                 <div className="flex items-center gap-3">
-                  <span className="eyebrow">DIRECTORY</span>
+                  <span className="eyebrow">MENU</span>
                   <span className="h-px flex-1 bg-clay-500/25" />
                 </div>
 
@@ -204,10 +207,12 @@ export default function SiteHeader() {
                       href="/login"
                       className="flex items-center gap-4 border-b border-clay-500/15 py-4 transition-colors active:bg-espresso-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                     >
-                      <span className="font-mono text-sm text-clay-500">05</span>
+                      <span className="font-mono text-sm text-clay-500">
+                        {String(nav.length + 1).padStart(2, "0")}
+                      </span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-display text-xl text-cream-100">
-                          Client Desk
+                          Client sign in
                         </span>
                         <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">
                           Sign in & submit a request

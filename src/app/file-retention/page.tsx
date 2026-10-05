@@ -44,11 +44,13 @@ const sections: LegalSection[] = [
       <>
         <p>
           This policy covers the files you send the shop: the 3D model you
-          upload — an <em>.stl</em>, or a <em>.zip</em> holding the model and
-          anything that goes with it — and the reference photographs, sketches,
-          and PDF drawings attached to a request when there is no model yet. It
-          applies whether the file arrived with a signed-in account or through
-          the public <Link href="/estimate">estimate form</Link>.
+          upload — an <em>.stl</em>, a STEP or IGES export (<em>.step</em>,{" "}
+          <em>.stp</em>, <em>.iges</em>, <em>.igs</em>), or a <em>.zip</em>{" "}
+          holding the model and anything that goes with it — and the reference
+          photographs, sketches, and PDF drawings attached to a request when
+          there is no model yet. It applies whether the file arrived with a
+          signed-in account or through the public{" "}
+          <Link href="/estimate">estimate form</Link>.
         </p>
         <p>
           It sits alongside the{" "}
@@ -130,6 +132,13 @@ const sections: LegalSection[] = [
           The request and every file uploaded with it are deleted there and
           then — unless the shop has already started work on it, in which case
           a person looks at it first.
+        </p>
+        <p>
+          A larger file is sent from your browser straight to our file storage
+          and waits in a holding area until you submit the form. If you never
+          submit it — you close the tab, or change your mind — it is deleted
+          automatically, within about a day. It is never attached to a request,
+          and nobody but the shop can reach it, while it waits.
         </p>
         <p>
           The order record itself — dates, quantities, the invoice number, and

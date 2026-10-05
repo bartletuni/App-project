@@ -322,7 +322,14 @@ const sections: LegalSection[] = [
         <h3>Variation is normal</h3>
         <p>
           Printed parts vary in dimension, colour, surface finish, and layer
-          appearance between runs and between spools. Published material figures
+          appearance between runs and between spools.{" "}
+          <strong>
+            The dimensional tolerance we publish for FDM parts, ±0.2&nbsp;mm,
+            is a typical figure, not a guarantee.
+          </strong>{" "}
+          It depends on the size, geometry, material, and orientation of the
+          part, and a tolerance binds us only when we have agreed it in writing
+          before work starts. Published material figures
           — tensile strength, stiffness, heat-deflection temperature, impact
           resistance — are typical values from material suppliers, measured on
           test coupons. A printed part is anisotropic: it is weaker across layer

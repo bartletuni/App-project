@@ -9,19 +9,23 @@
  * never render as a blank banner.
  */
 
+import { INLINE_LIMIT_LABEL, LARGE_FILE_ADVICE } from "@/lib/part-source";
+
 /** Shown when we genuinely cannot tell what went wrong. */
 export const GENERIC_SUBMIT_ERROR =
   "Something went wrong submitting this request. Nothing was saved — please try again.";
 
 /**
- * Vercel caps a serverless function's request body at ~4.5MB, well under the
- * 20MB the upload field advertises, and rejects the request before the route
- * ever runs. That arrives as a 413 with no JSON body, so name it plainly
- * instead of letting it surface as a parse error.
+ * Vercel caps a serverless function's request body at ~4.5MB and rejects the
+ * request before the route ever runs. The forms keep a post under that
+ * (MAX_INLINE_BYTES) — a bigger file goes straight to storage instead — so this
+ * should be rare: a browser that did not check, or a request that came another
+ * way. It arrives as a 413 with no JSON body, so name it plainly instead of
+ * letting it surface as a parse error.
  */
 const TOO_LARGE =
-  "That upload is too large to send. The server rejected it before it arrived — " +
-  "try a ZIP of the model, or get in touch and we'll take the file another way.";
+  `That upload is too large to send. The limit is ${INLINE_LIMIT_LABEL} per request — ` +
+  `a ZIP of the model may bring it under. ${LARGE_FILE_ADVICE}`;
 
 const SESSION_EXPIRED =
   "Your session has expired. Sign in again, then resubmit — nothing was saved.";

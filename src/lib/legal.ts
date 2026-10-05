@@ -15,7 +15,7 @@
 import { BUSINESS, SITE_NAME } from "./seo";
 
 /** Shown on every legal page. Bump whenever the substance changes. */
-export const LEGAL_LAST_UPDATED = "October 3, 2026";
+export const LEGAL_LAST_UPDATED = "October 5, 2026";
 
 /** Where privacy and terms questions go. Same inbox published site-wide. */
 export const LEGAL_CONTACT = {

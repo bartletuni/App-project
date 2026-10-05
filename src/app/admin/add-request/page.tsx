@@ -12,11 +12,13 @@ import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSetti
 import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
 import {
   PartSourceState,
+  PreparedUploads,
   appendPartSource,
   emptyPartSource,
   pricingIsForced,
   validatePartSource,
 } from "@/lib/part-source";
+import { describeProgress, needsDirectUpload, prepareUploads } from "@/lib/direct-upload-client";
 
 const adminField =
   "block w-full border border-espresso-500 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-clay-500 focus:border-clay-500 transition-shadow text-cream-300 bg-espresso-800";
@@ -38,6 +40,8 @@ function AdminAddRequestContent() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [isAddingPhone, setIsAddingPhone] = useState(false);
+  // "Uploading 43%" while a large file goes to storage; empty otherwise.
+  const [uploadStatus, setUploadStatus] = useState("");
   const [pastPhones, setPastPhones] = useState<{ id: string; number: string }[]>([]);
   const [printSettings, setPrintSettings] = useState<PrintSettingsState>({
     mode: "AUTO",
@@ -151,9 +155,24 @@ function AdminAddRequestContent() {
       printSettingsJson = JSON.stringify(result.settings);
     }
 
+    // A submission too big for the form post sends its files straight to
+    // storage first, and posts receipts for them instead.
+    let prepared: PreparedUploads | null = null;
+    if (needsDirectUpload(partSource)) {
+      try {
+        prepared = await prepareUploads(partSource, {}, (p) => setUploadStatus(describeProgress(p)));
+      } catch (err: unknown) {
+        setError(describeSubmitException(err));
+        setLoading(false);
+        return;
+      } finally {
+        setUploadStatus("");
+      }
+    }
+
     const formData = new FormData();
     formData.append("userId", selectedUserId);
-    appendPartSource(formData, partSource);
+    appendPartSource(formData, partSource, prepared);
     formData.append("quantity", quantity);
     formData.append("material", material);
     formData.append("notes", notes);
@@ -399,7 +418,7 @@ function AdminAddRequestContent() {
                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                    </svg>
-                   Submitting...
+                   {uploadStatus || "Submitting..."}
                  </span>
               ) : "Submit Request"}
             </button>

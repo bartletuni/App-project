@@ -328,7 +328,7 @@ export const WelcomeUserEmailHTML = (data: {
         {
           title: "Send us the part",
           detail:
-            "Upload an STL or ZIP if you have one. No model? Describe the part and send photos — we draw it for you.",
+            "Upload a 3D file (STL, STEP, IGES, or ZIP) if you have one. No model? Describe the part and send photos — we draw it for you.",
         },
         {
           title: "We price it",

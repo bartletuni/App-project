@@ -6,7 +6,10 @@ import {
   ArrowRight,
   ArrowUpRight,
   Layers,
+  Lock,
+  PencilRuler,
   Scan,
+  Wrench,
   Zap,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -20,6 +23,7 @@ import Magnetic from "@/components/ui/Magnetic";
 import Marquee from "@/components/ui/Marquee";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
+import { MATERIAL_LEGEND, MATERIAL_NAMES } from "@/lib/material-names";
 
 const capabilities = [
   {
@@ -52,13 +56,48 @@ const process = [
   { n: "04", title: "Deliver", body: "Inspected, finished components shipped by USPS direct to your door, anywhere in the United States." },
 ];
 
-const specSheet = [
+// The tolerance is the figure a buyer asks for first. It is a typical value,
+// not a promise — /terms §07 says the same, and says a tolerance is only
+// guaranteed when it has been agreed in writing.
+//
+// The lead time is when the shop's clock starts as well as how long it runs:
+// from payment, because that is when manufacturing begins (/terms §04), and
+// make-and-post only, because transit is USPS's and always extra.
+const specSheet: [string, string | readonly string[]][] = [
   ["Maximum build volume", "256 × 256 × 256 mm"],
   ["Max heat deflection temperature", "Up to 485 °F / 252 °C"],
+  ["Max print temperature", "Up to 608 °F / 320 °C"],
   ["Minimum layer height", "0.05 mm"],
-  ["Materials", "PPA-CF · PPS-CF · PPS-GF · PETG-CF · PA12-CF · PC · PC-CF/FR · ASA-CF/GF · ABS · PETG · PLA · TPU · PA6-CF · PA12-CF · PA612-CF · and more"],
+  ["Typical FDM tolerance", "±0.2 mm"],
+  ["Materials", [...MATERIAL_NAMES, "and more"]],
   ["Scanning", "Intricate geometry · near-exact reproduction"],
-  ["Lead time", "72 hours"],
+  ["Typical lead time", "72 hours from payment · USPS transit extra"],
+];
+
+/**
+ * Who the site is for, said once, near the top. The homepage speaks to two
+ * different buyers — the repair shop with a machine down and the engineer with
+ * a drawing — and each should see their own situation before they scroll. The
+ * engineer's door goes through `RequestEstimateButton` like every other pricing
+ * call to action on the site, so it follows the visitor's session the same way.
+ */
+const audiences = [
+  {
+    icon: Wrench,
+    eyebrow: "REPAIR & SERVICE TEAMS",
+    title: "Part discontinued or out of stock?",
+    body: "Send a photo, a file, or the part itself. We model it, print it in a material chosen for the job, and ship it to you. No account and no CAD file needed to get an estimate.",
+    href: "/replacement-parts",
+    cta: "How replacement parts work",
+  },
+  {
+    icon: PencilRuler,
+    eyebrow: "ENGINEERS & PRODUCT TEAMS",
+    title: "Prototypes, tooling, and short runs",
+    body: "Functional prototypes, custom tooling, and low-volume end-use parts in carbon-fiber and other engineering-grade composites, from your STEP, IGES, or STL file.",
+    href: null,
+    cta: null,
+  },
 ];
 
 const differentiators: {
@@ -72,10 +111,12 @@ const differentiators: {
   { title: "Dimensional verification", body: "Every part checked against the model before it ships — no surprises on arrival." },
 ];
 
+// The materials come from the same list as the spec sheet, so the two cannot
+// drift; the rest are the kinds of work and the properties people ask about.
 const marqueeItems = [
-  "Fast · Fitted · Flawless", "Carbon-Fiber Nylons", "PET-CF/GF", "ASA-CF/GF", "Polycarbonate", "TPU", "PPA-CF",
-  "PPS-CF/GF", "PEBA", "Reverse Engineering", "3D Scanning", "1:1 Reproduction",
-  "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials",
+  "Fast · Fitted · Flawless", ...MATERIAL_NAMES,
+  "Carbon-Fiber Nylons", "Flexible Materials", "Flame Retardant Materials", "Impact Resistant Materials", "Fiber Reinforced Materials",
+  "Reverse Engineering", "3D Scanning", "1:1 Reproduction",
 ];
 
 export default function LandingPage() {
@@ -119,9 +160,9 @@ export default function LandingPage() {
 
               {/* The lead promise, for the visitor whose machine is down right
                   now: the number at a size that survives a glance, directly
-                  under the headline. "Fast · Fitted · Flawless" keeps its place
-                  beside it rather than being replaced by it — a specific claim
-                  and a brand line do different jobs. */}
+                  under the headline. The brand line that used to sit beside it
+                  came out — it promised nothing a buyer could check, and it
+                  still has the footer and the ticker. */}
               <Reveal direction="up" delay={0.25}>
                 <div className="mt-6 inline-flex flex-wrap items-center gap-x-4 gap-y-2 border border-clay-500/40 bg-clay-500/10 px-5 py-3 shadow-glow">
                   <span className="flex items-center gap-2.5">
@@ -133,10 +174,6 @@ export default function LandingPage() {
                       Typical turnaround
                     </span>
                   </span>
-                  <span className="hidden h-4 w-px bg-clay-500/40 sm:block" aria-hidden="true" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay-200">
-                    Fast · Fitted · Flawless
-                  </span>
                 </div>
               </Reveal>
 
@@ -146,8 +183,8 @@ export default function LandingPage() {
                 Machine down, part discontinued, deadline this week? A US-based
                 additive manufacturing and rapid prototyping studio in Utah,
                 shipping nationwide — high-precision 3D printing and scanning
-                for engineering and reproduction work, made domestically, with
-                most jobs back in about 72 hours.
+                for engineering and reproduction work, made domestically and,
+                for most jobs, in the post about 72 hours after payment.
               </p>
 
               <Reveal direction="up" delay={0.36}>
@@ -161,7 +198,7 @@ export default function LandingPage() {
                         href="/login"
                         className="group inline-flex items-center justify-center gap-2 border border-clay-500/40 bg-clay-500/5 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-500/15 hover:border-clay-400 transition-colors"
                       >
-                        Start a build
+                        Client sign in
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                       </Link>
                     </Magnetic>
@@ -202,6 +239,67 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* Who it's for — each buyer's own situation, before the spec sheet. */}
+      <section
+        className="mx-auto max-w-6xl px-5 sm:px-8 pb-16 sm:pb-20"
+        aria-label="Who we work with"
+      >
+        <Reveal>
+          <div className="mb-5 flex items-center gap-3">
+            <span className="eyebrow">WHO WE WORK WITH</span>
+            <span className="h-px flex-1 bg-clay-500/20" />
+          </div>
+          <div className="grid gap-px bg-clay-500/15 md:grid-cols-2">
+            {audiences.map((a) => (
+              <div key={a.eyebrow} className="flex flex-col bg-espresso-900 p-6 sm:p-8">
+                <span className="flex h-11 w-11 items-center justify-center border border-clay-500/25 text-clay-300">
+                  <a.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="mt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-clay-300">
+                  {a.eyebrow}
+                </span>
+                <h2 className="mt-2 font-display text-2xl sm:text-3xl text-cream-100">{a.title}</h2>
+                <p className="mt-3 flex-1 leading-relaxed text-cream-400">{a.body}</p>
+                <div className="mt-6">
+                  {a.href ? (
+                    <Link
+                      href={a.href}
+                      className="group inline-flex items-center justify-center gap-2 border border-clay-500/40 bg-clay-500/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-cream-100 transition-colors hover:border-clay-400 hover:bg-clay-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                    >
+                      {a.cta}
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 shrink-0 text-clay-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  ) : (
+                    <RequestEstimateButton variant="ghost" size="sm" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* A part file is often the customer's own design, and keeping it
+              private is a promise /file-retention already makes in these
+              words. Said here because it is what a professional wonders
+              before sending one. */}
+          <p className="mt-5 flex items-start gap-2.5 text-sm leading-relaxed text-cream-400">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-clay-300" aria-hidden="true" />
+            <span>
+              <strong className="font-medium text-cream-200">Your files stay yours.</strong>{" "}
+              Uploads are held in access-controlled storage, seen only by you and the
+              shop, and never published, sold, or printed for anyone else.{" "}
+              <Link
+                href="/file-retention"
+                className="text-clay-300 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+              >
+                How we handle files
+              </Link>
+            </span>
+          </p>
+        </Reveal>
+      </section>
+
       {/* Shop floor — live voxel build preview + specification */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20 sm:pb-24" aria-label="Shop floor">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
@@ -214,12 +312,25 @@ export default function LandingPage() {
                   {specSheet.map(([k, v], i) => (
                     <tr key={k} className={i % 2 ? "bg-espresso-800/30" : ""}>
                       <th scope="row" className="text-left align-top px-5 py-4 font-mono text-[10px] uppercase tracking-[0.15em] text-cream-500 w-2/5">{k}</th>
-                      <td className="px-5 py-4 text-cream-200 font-medium">{v}</td>
+                      <td className="px-5 py-4 text-cream-200 font-medium">
+                        {typeof v === "string"
+                          ? v
+                          : // A list wraps between items, never inside one — "PA6-" over "CF" reads as two materials.
+                            v.map((item, n) => (
+                              <span key={item}>
+                                {n > 0 && " · "}
+                                <span className="whitespace-nowrap">{item}</span>
+                              </span>
+                            ))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </Panel>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-cream-500">
+              {MATERIAL_LEGEND}
+            </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <RequestEstimateButton size="sm" />
               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-cream-500">
@@ -374,9 +485,9 @@ export default function LandingPage() {
                   Ready to start <span className="italic text-clay-300">building?</span>
                 </h2>
                 <p className="mt-5 max-w-lg text-cream-400">
-                  Submit a request or reach out directly — most jobs are back in
-                  about 72 hours. We specialize in high-strength, chemically and
-                  impact-resistant composites.
+                  Submit a request or reach out directly — most jobs are in the
+                  post about 72 hours after payment. We specialize in
+                  high-strength, chemically and impact-resistant composites.
                 </p>
               </div>
               <div className="lg:col-span-4 flex flex-col gap-3">

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FileArchive, Box, Wand2 } from "lucide-react";
 import { isStlFileName, thumbnailForFile, thumbnailForFileId } from "@/lib/stl";
+import { modelFormatName } from "@/lib/part-source";
 
 interface StlThumbnailProps {
   fileId?: string | null;
@@ -18,8 +19,9 @@ interface StlThumbnailProps {
 /**
  * Small static image preview of an STL part. Renders lazily (only when
  * scrolled into view) and shares the geometry/thumbnail cache with StlViewer.
- * Non-STL files (ZIP) get an archive glyph instead, and a described part —
- * submitted with no model at all — gets the modelling glyph.
+ * Non-STL files get a glyph instead: an archive for a ZIP, a solid for a STEP
+ * or IGES export, which a browser cannot draw. A described part, submitted with
+ * no model at all, gets the modelling glyph.
  */
 export default function StlThumbnail({
   fileId,
@@ -84,6 +86,14 @@ export default function StlThumbnail({
   }
 
   if (!isStl) {
+    const format = modelFormatName(fileName);
+    if (format === "STEP" || format === "IGES") {
+      return (
+        <div className={box} style={style} title={`${format} file — no 3D preview`}>
+          <Box className="h-1/2 w-1/2 text-clay-400/60" aria-hidden="true" />
+        </div>
+      );
+    }
     return (
       <div className={box} style={style} title="ZIP archive — no 3D preview">
         <FileArchive className="h-1/2 w-1/2 text-clay-400/60" aria-hidden="true" />

@@ -193,6 +193,50 @@ describe("POST /api/requests/guest", () => {
     expect(createdRow().notes).toBe("Company: Rivera Appliance\nBlack, if you have it.");
   });
 
+  it("files the equipment and part number as labelled lines ahead of the customer's words", async () => {
+    await POST(
+      buildForm({
+        company: "Rivera Appliance",
+        equipment: "Bosch WTG86",
+        partNumber: "00 4.1.12",
+        notes: "Black, if you have it.",
+      })
+    );
+    expect(createdRow().notes).toBe(
+      "Company: Rivera Appliance\nEquipment: Bosch WTG86\nPart number: 00 4.1.12\nBlack, if you have it."
+    );
+  });
+
+  it("never cuts the customer's own words to make room for the labelled lines", async () => {
+    const notes = "x".repeat(2000);
+    await POST(buildForm({ company: "Rivera Appliance", equipment: "Bosch WTG86", notes }));
+    expect(createdRow().notes.endsWith(notes)).toBe(true);
+  });
+
+  it("leaves the notes alone when the optional fields are blank", async () => {
+    await POST(buildForm({ equipment: "  ", partNumber: "", notes: "Black." }));
+    expect(createdRow().notes).toBe("Black.");
+  });
+
+  it("refuses an equipment or part number too long to be either", async () => {
+    const tooLongEquipment = await POST(buildForm({ equipment: "x".repeat(121) }));
+    expect(tooLongEquipment.status).toBe(400);
+    const tooLongNumber = await POST(buildForm({ partNumber: "x".repeat(81) }));
+    expect(tooLongNumber.status).toBe(400);
+    expect(prisma.partRequest.create).not.toHaveBeenCalled();
+  });
+
+  it("refuses a file where the equipment should be", async () => {
+    const form = buildForm();
+    const body = await form.formData();
+    body.set("equipment", new File(["x"], "x.txt"));
+    const res = await POST(
+      new NextRequest("http://localhost/api/requests/guest", { method: "POST", body })
+    );
+    expect(res.status).toBe(400);
+    expect(prisma.partRequest.create).not.toHaveBeenCalled();
+  });
+
   // --- whose address is it? ------------------------------------------------
   // Anyone can type anyone's address into the form, so the one email that goes
   // to it must be useless to anyone but its owner.

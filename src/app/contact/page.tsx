@@ -22,7 +22,7 @@ export default function ContactPage() {
     <AppShell variant="user" footer={false}>
       <div className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-16">
         <Reveal priority>
-          <span className="eyebrow">SUPPORT ⁄ DESK</span>
+          <span className="eyebrow">CONTACT</span>
           <h1 className="mt-4 font-display text-5xl sm:text-6xl text-cream-100">
             Get in <span className="italic text-clay-300">touch.</span>
           </h1>

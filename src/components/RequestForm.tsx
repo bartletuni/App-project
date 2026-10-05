@@ -1,24 +1,30 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { format, addDays } from "date-fns";
-import { AlertTriangle, Plus, ArrowRight, Gift } from "lucide-react";
+import { AlertTriangle, Plus, ArrowRight, Gift, RotateCcw } from "lucide-react";
 import Panel from "@/components/ui/Panel";
 import PartSourceFields from "@/components/PartSourceFields";
 import { useFormAlert } from "@/components/ui/useFormAlert";
 import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
 import PrintSettingsFields, { PrintSettingsState } from "@/components/PrintSettingsFields";
-import { DEFAULT_CUSTOM_SETTINGS, validateCustomSettings } from "@/lib/print-settings";
+import { DEFAULT_CUSTOM_SETTINGS, parseStoredSettings, validateCustomSettings } from "@/lib/print-settings";
 import { ESTIMATE_PARAM, isPricingRequested } from "@/lib/estimate";
 import { KIND_QUOTE, kindLabel, pricingKindFor } from "@/lib/request-status";
 import { FREE_SAMPLE_MATERIAL } from "@/lib/free-sample";
+import { describeProgress, needsDirectUpload, prepareUploads } from "@/lib/direct-upload-client";
 import {
   PartSourceState,
+  PreparedUploads,
+  SUBMISSION_DESCRIPTION,
+  SUBMISSION_MODEL,
   appendPartSource,
   emptyPartSource,
   pricingIsForced,
+  requestTitle,
+  splitNotes,
   validatePartSource,
 } from "@/lib/part-source";
 
@@ -27,9 +33,22 @@ const field =
 const labelCls =
   "block font-mono text-[10px] uppercase tracking-[0.18em] text-cream-500 mb-2";
 
+/** The earlier order a form is being refilled from — what the banner says. */
+interface ReorderBanner {
+  id: string;
+  title: string;
+  submittedAt: string;
+  hasFile: boolean;
+  material: string | null;
+}
+
 function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialMaterial = searchParams.get("material");
+  // Set by the dashboard's "Reorder" buttons: the id of one of this customer's
+  // own earlier orders, to be repeated. The server checks it belongs to them.
+  const reorderId = searchParams.get("reorder");
 
   const [partSource, setPartSource] = useState<PartSourceState>(emptyPartSource);
   const [notes, setNotes] = useState("");
@@ -54,7 +73,11 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   // never flashes on for someone who has already claimed theirs.
   const [freeSampleEligible, setFreeSampleEligible] = useState<boolean | null>(null);
   const [freeSample, setFreeSample] = useState(false);
+  const [reorder, setReorder] = useState<ReorderBanner | null>(null);
+  const [reorderLoading, setReorderLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  // "Uploading 43%" while a large file goes to storage; empty otherwise.
+  const [uploadStatus, setUploadStatus] = useState("");
   // The banner sits at the top of the panel, well above the submit button, so
   // it scrolls itself into view rather than failing somewhere off-screen.
   const errorAlert = useFormAlert<HTMLDivElement>();
@@ -98,6 +121,107 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       .catch(() => setFreeSampleEligible(false));
   }, [initialMaterial]);
 
+  // Reordering: refill the whole form from an earlier order, so "the same
+  // again" is a quantity and a date rather than a fresh start. The stored file
+  // is not downloaded and uploaded again — the form carries a pointer to it, and
+  // the server reuses it after checking the order is this customer's own. The
+  // date is left blank on purpose: the old one is in the past by definition.
+  useEffect(() => {
+    if (!reorderId) {
+      setReorder(null);
+      return;
+    }
+
+    let cancelled = false;
+    setReorderLoading(true);
+    errorAlert.clear();
+
+    fetch(`/api/requests/${encodeURIComponent(reorderId)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        return res.json();
+      })
+      .then((original) => {
+        if (cancelled) return;
+
+        const described = original.submissionType === SUBMISSION_DESCRIPTION;
+        const split = splitNotes(original.notes);
+        const settings = parseStoredSettings(original.printSettings);
+
+        setPartSource({
+          ...emptyPartSource(),
+          mode: described ? SUBMISSION_DESCRIPTION : SUBMISSION_MODEL,
+          carried:
+            !described && original.fileId
+              ? { fileId: original.fileId, fileName: original.fileName || "your file" }
+              : null,
+          partName: original.partName || "",
+          description: original.partDescription || "",
+          dimensions: original.dimensions || "",
+          equipment: split.equipment,
+          partNumber: split.partNumber,
+        });
+        setNotes(split.notes);
+        setQuantity(String(original.quantity || 1));
+        setDateNeeded("");
+        setPrintSettings(
+          settings
+            ? { mode: "CUSTOM", custom: settings }
+            : { mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } }
+        );
+        setQuoteRequested(Boolean(original.quoteRequested));
+        // A sample is a one-off; a reorder is an ordinary request.
+        setFreeSample(false);
+        setReorder({
+          id: original.id,
+          title: requestTitle(original),
+          submittedAt: format(new Date(original.createdAt), "MMM d, yyyy"),
+          hasFile: !described && Boolean(original.fileId),
+          material: original.material || null,
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setReorder(null);
+        setError(
+          "We couldn't load that order to reorder it. Start a new request below, or try again from your ledger."
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setReorderLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reorderId]);
+
+  // The material list and the earlier order arrive separately and in either
+  // order, so the earlier material is applied once both are in — and only if
+  // it is still in stock. Otherwise the list's default stands, and the banner
+  // says so rather than letting it change quietly.
+  useEffect(() => {
+    if (!reorder?.material || availableMaterials.length === 0) return;
+    if (availableMaterials.some((m) => m.name === reorder.material)) setMaterial(reorder.material);
+  }, [reorder, availableMaterials]);
+  const materialGone =
+    Boolean(reorder?.material) &&
+    availableMaterials.length > 0 &&
+    !availableMaterials.some((m) => m.name === reorder?.material);
+
+  const startFresh = () => {
+    setReorder(null);
+    setPartSource(emptyPartSource());
+    setNotes("");
+    setQuantity("1");
+    setDateNeeded("");
+    setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
+    setQuoteRequested(false);
+    if (availableMaterials.length > 0) setMaterial(availableMaterials[0].name);
+    router.replace("/dashboard", { scroll: false });
+  };
+
   // A described part cannot be priced until we have modelled it, so the pricing
   // box ticks itself and locks for that lane; the API enforces the same rule.
   const quoteLocked = pricingIsForced(partSource.mode);
@@ -110,7 +234,10 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   // price against, so what we can offer is an estimate — the same words the
   // public form uses. The server decides this again from the stored row; this
   // only has to agree with it. See `pricingKindFor` in src/lib/request-status.
-  const pricingKind = pricingKindFor({ isGuest: false, hasFile: Boolean(partSource.file) });
+  const pricingKind = pricingKindFor({
+    isGuest: false,
+    hasFile: Boolean(partSource.file || partSource.carried),
+  });
   const guaranteed = pricingKind === KIND_QUOTE;
 
   // What is still missing, if anything. Shown under the submit button rather
@@ -148,8 +275,23 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       printSettingsJson = JSON.stringify(result.settings);
     }
 
+    // A submission too big for the form post sends its files straight to
+    // storage first, and posts receipts for them instead.
+    let prepared: PreparedUploads | null = null;
+    if (needsDirectUpload(partSource)) {
+      try {
+        prepared = await prepareUploads(partSource, {}, (p) => setUploadStatus(describeProgress(p)));
+      } catch (err: unknown) {
+        setError(describeSubmitException(err));
+        setLoading(false);
+        return;
+      } finally {
+        setUploadStatus("");
+      }
+    }
+
     const formData = new FormData();
-    appendPartSource(formData, partSource);
+    appendPartSource(formData, partSource, prepared);
     formData.append("quantity", freeSample ? "1" : quantity);
     formData.append("material", freeSample ? FREE_SAMPLE_MATERIAL : material);
     formData.append("notes", notes);
@@ -157,6 +299,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
     formData.append("phoneNumber", finalPhone);
     formData.append("quoteRequested", quoteChecked ? "true" : "false");
     if (freeSample) formData.append("isFreeSample", "true");
+    if (reorder) formData.append("reorderOf", reorder.id);
     if (printSettingsJson) formData.append("printSettings", printSettingsJson);
 
     try {
@@ -178,6 +321,10 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       setIsAddingPhone(false);
       setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
       setQuoteRequested(false);
+      if (reorder) {
+        setReorder(null);
+        router.replace("/dashboard", { scroll: false });
+      }
       if (freeSample) {
         // Claimed — the offer will not come back for this account, so hide it
         // immediately rather than waiting on a re-fetch.
@@ -198,6 +345,46 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
         <span className="eyebrow">NEW BUILD ⁄ COMPOSER</span>
         <span className="hairline flex-1" />
       </div>
+
+      {/* Reordering: say what the form was filled from, and leave a way out. */}
+      {reorderLoading && (
+        <p className="mb-6 text-xs text-cream-500" role="status" aria-live="polite">
+          Loading your earlier order…
+        </p>
+      )}
+      {reorder && (
+        <div
+          className="mb-6 flex gap-3 border-l-2 border-clay-500/50 bg-clay-500/10 px-4 py-3"
+          role="status"
+        >
+          <RotateCcw className="h-4 w-4 shrink-0 mt-0.5 text-clay-300" aria-hidden="true" />
+          <div className="min-w-0 flex-1 text-xs leading-relaxed text-cream-300">
+            <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-clay-300">
+              Reordering
+            </span>
+            <span className="block truncate text-sm text-cream-100">
+              {reorder.title} <span className="text-cream-500">· {reorder.submittedAt}</span>
+            </span>
+            <span className="mt-1 block">
+              Everything from that order is filled in below
+              {reorder.hasFile ? ", and its file is already on record" : ""}. Set the quantity and
+              the date you need it by, then submit.
+            </span>
+            {materialGone && (
+              <span className="mt-1 block text-yellow-200">
+                {reorder.material} is no longer in stock, so check the material below.
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={startFresh}
+              className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-200 underline decoration-clay-500/40 underline-offset-2 transition-colors hover:text-clay-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+            >
+              Start a new request instead
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* First-time offer. Hidden until we know the account qualifies, and
           gone for good the moment it renders a request — never shown to
@@ -436,7 +623,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           {loading ? (
             <>
               <span className="h-4 w-4 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" />
-              Submitting…
+              {uploadStatus || "Submitting…"}
             </>
           ) : freeSample ? (
             <>

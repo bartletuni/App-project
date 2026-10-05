@@ -65,11 +65,52 @@ export function referenceMimeType(fileName: string, buffer: Buffer): string | nu
 }
 
 /**
+ * STEP (ISO 10303-21) is clear text and opens with the keyword
+ * `ISO-10303-21;`. Real exporters write it at byte zero; a byte-order mark and
+ * leading white space are tolerated because some Windows tools add them.
+ */
+function isStep(buffer: Buffer): boolean {
+  // Latin-1 decodes each byte to one character, so a UTF-8 byte-order mark
+  // reads as \xEF\xBB\xBF here.
+  const head = buffer.subarray(0, 64).toString("latin1").replace(/^\xEF\xBB\xBF/, "");
+  return /^\s*ISO-10303-21\s*;/i.test(head);
+}
+
+/**
+ * IGES is a fixed-format text file of 80-column records. Column 73 names the
+ * section and columns 74-80 hold a right-justified sequence number, and the
+ * file always opens with the first record of the Start section: an `S` in
+ * column 73 and a `1` ending column 80. The 72 columns before it are free text
+ * — usually blank, sometimes a description a non-English CAD install wrote with
+ * accents — so they may hold anything but control bytes, which is what keeps a
+ * binary file out.
+ */
+function isIges(buffer: Buffer): boolean {
+  if (buffer.length < 80) return false;
+  for (let i = 0; i < 72; i++) {
+    if (buffer[i] < 0x20 || buffer[i] === 0x7f) return false;
+  }
+  if (buffer[72] !== 0x53) return false; // "S"
+  return buffer.subarray(73, 80).toString("ascii").trim() === "1";
+}
+
+/**
  * The MIME type for a 3D model upload, or null when the name and the bytes
  * disagree. ZIP is checked by its local-file-header signature; STL may be ASCII
- * ("solid" …) or binary (an exact 84 + 50 × triangle-count byte length).
+ * ("solid" …) or binary (an exact 84 + 50 × triangle-count byte length); STEP
+ * and IGES are text formats with a fixed opening, checked above.
+ *
+ * Every check reads only the start of the file, except a binary STL's length
+ * check, which needs the whole file's size. A file uploaded straight to storage
+ * is never held in memory, so the caller passes the first few hundred bytes as
+ * `buffer` and the object's real size as `totalLength`; for a file already in
+ * memory the two are the same and `totalLength` can be left out.
  */
-export function modelMimeType(fileName: string, buffer: Buffer): string | null {
+export function modelMimeType(
+  fileName: string,
+  buffer: Buffer,
+  totalLength: number = buffer.length
+): string | null {
   const name = fileName.toLowerCase();
 
   if (name.endsWith(".zip")) {
@@ -83,10 +124,45 @@ export function modelMimeType(fileName: string, buffer: Buffer): string | null {
     let isBinaryStl = false;
     if (buffer.length >= 84) {
       const triangleCount = buffer.readUInt32LE(80);
-      isBinaryStl = buffer.length === 84 + triangleCount * 50;
+      isBinaryStl = totalLength === 84 + triangleCount * 50;
     }
     return isAsciiStl || isBinaryStl ? "application/sla" : null;
   }
 
+  if (name.endsWith(".step") || name.endsWith(".stp")) {
+    return isStep(buffer) ? "model/step" : null;
+  }
+
+  if (name.endsWith(".iges") || name.endsWith(".igs")) {
+    return isIges(buffer) ? "model/iges" : null;
+  }
+
+  return null;
+}
+
+/**
+ * What a file name promises, with no bytes involved. A direct upload has to
+ * say what it is before it exists — the storage URL is signed over its content
+ * type — so the label comes from the extension, and inspectUpload then checks
+ * the bytes agree with it. These return the same types the sniffers above do.
+ */
+export function expectedModelMime(fileName: string): string | null {
+  const name = fileName.toLowerCase();
+  if (name.endsWith(".zip")) return "application/zip";
+  if (name.endsWith(".stl")) return "application/sla";
+  if (name.endsWith(".step") || name.endsWith(".stp")) return "model/step";
+  if (name.endsWith(".iges") || name.endsWith(".igs")) return "model/iges";
+  return null;
+}
+
+export function expectedReferenceMime(fileName: string): string | null {
+  const name = fileName.toLowerCase();
+  if (name.endsWith(".png")) return "image/png";
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".webp")) return "image/webp";
+  if (name.endsWith(".gif")) return "image/gif";
+  if (name.endsWith(".heic")) return "image/heic";
+  if (name.endsWith(".heif")) return "image/heif";
+  if (name.endsWith(".pdf")) return "application/pdf";
   return null;
 }

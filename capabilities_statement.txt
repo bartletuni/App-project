@@ -6,8 +6,8 @@ Additive Manufacturing: Expert FDM/FFF printing with a focus on engineering-grad
 Rapid Prototyping: Iterative design support to accelerate product development cycles.
 •	Technical Material Expertise: Specializing in high-strength, chemically resistant, high temperature resistant, and impact resistant composites.
 Technical Specifications
-Maximum Build Volume: 220mm x 220mm x 220mm
-Thermal Capacity: Optimized for materials requiring up to 280 deg C extrusion temperature.
+Maximum Build Volume: 256mm x 256mm x 256mm
+Thermal Capacity: Optimized for materials requiring up to 320 deg C extrusion temperature.
 •	Scanning Precision: Capable of capturing intricate geometries for near-exact 1:1 reproductions.
 Material Specializations
 We work with a wide array of high-performance thermoplastics, including but not limited to:

@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Clock,
   Loader2,
+  Lock,
   Phone,
   ShieldCheck,
 } from "lucide-react";
@@ -24,7 +25,14 @@ import Reveal from "@/components/ui/Reveal";
 import PartSourceFields from "@/components/PartSourceFields";
 import { useFormAlert } from "@/components/ui/useFormAlert";
 import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
-import { appendPartSource, emptyPartSource, PartSourceState, validatePartSource } from "@/lib/part-source";
+import {
+  appendPartSource,
+  emptyPartSource,
+  PartSourceState,
+  PreparedUploads,
+  validatePartSource,
+} from "@/lib/part-source";
+import { describeProgress, needsDirectUpload, prepareUploads } from "@/lib/direct-upload-client";
 import { COMPOSER_ESTIMATE_HREF } from "@/lib/estimate";
 import {
   FORM_TOKEN_FIELD,
@@ -93,6 +101,8 @@ function EstimateContent() {
 
   const [formToken, setFormToken] = useState("");
   const [loading, setLoading] = useState(false);
+  // "Uploading 43%" while a large file goes to storage; empty otherwise.
+  const [uploadStatus, setUploadStatus] = useState("");
   const [submitted, setSubmitted] = useState<{ reference: string; email: string } | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -164,8 +174,23 @@ function EstimateContent() {
 
     setLoading(true);
 
+    // A submission too big for the form post sends its files straight to
+    // storage first, and posts receipts for them instead.
+    let prepared: PreparedUploads | null = null;
+    if (needsDirectUpload(partSource)) {
+      try {
+        prepared = await prepareUploads(partSource, { formToken }, (p) => setUploadStatus(describeProgress(p)));
+      } catch (err: unknown) {
+        setError(describeSubmitException(err));
+        setLoading(false);
+        return;
+      } finally {
+        setUploadStatus("");
+      }
+    }
+
     const formData = new FormData();
-    appendPartSource(formData, partSource);
+    appendPartSource(formData, partSource, prepared);
     formData.append("name", contact.name);
     formData.append("email", contact.email);
     formData.append("phone", contact.phone);
@@ -238,6 +263,12 @@ function EstimateContent() {
             <ShieldCheck className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" /> No obligation
           </li>
           <li className="flex items-center gap-2">
+            <Lock className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
+            <Link href="/file-retention" className="hover:text-clay-300 transition-colors">
+              Your files stay private
+            </Link>
+          </li>
+          <li className="flex items-center gap-2">
             <Phone className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
             <a href="tel:+13856954178" className="hover:text-clay-300 transition-colors">
               Or call 385-695-4178
@@ -296,21 +327,42 @@ function EstimateContent() {
                 <span className="hairline flex-1" />
               </div>
 
-              <div>
-                <label htmlFor="guest-name" className={labelCls}>
-                  Your name <span className="text-clay-400">*</span>
-                </label>
-                <input
-                  id="guest-name"
-                  type="text"
-                  value={contact.name}
-                  onChange={(e) => updateContact({ name: e.target.value })}
-                  maxLength={MAX_CONTACT_NAME_CHARS}
-                  autoComplete="name"
-                  className={field}
-                  placeholder="Alex Rivera"
-                  required
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="guest-name" className={labelCls}>
+                    Your name <span className="text-clay-400">*</span>
+                  </label>
+                  <input
+                    id="guest-name"
+                    type="text"
+                    value={contact.name}
+                    onChange={(e) => updateContact({ name: e.target.value })}
+                    maxLength={MAX_CONTACT_NAME_CHARS}
+                    autoComplete="name"
+                    className={field}
+                    placeholder="Alex Rivera"
+                    required
+                  />
+                </div>
+                {/* Out of the disclosure it used to sit in: for a business
+                    this is the second thing the shop wants to know, and
+                    optional does not have to mean hidden. */}
+                <div>
+                  <label htmlFor="guest-company" className={labelCls}>
+                    Company{" "}
+                    <span className="text-cream-500 normal-case tracking-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="guest-company"
+                    type="text"
+                    value={contact.company}
+                    onChange={(e) => updateContact({ company: e.target.value })}
+                    maxLength={MAX_COMPANY_CHARS}
+                    autoComplete="organization"
+                    className={field}
+                    placeholder="Rivera Appliance Repair"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -416,19 +468,6 @@ function EstimateContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="guest-company" className={labelCls}>Company</label>
-                  <input
-                    id="guest-company"
-                    type="text"
-                    value={contact.company}
-                    onChange={(e) => updateContact({ company: e.target.value })}
-                    maxLength={MAX_COMPANY_CHARS}
-                    autoComplete="organization"
-                    className={field}
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="guest-notes" className={labelCls}>Anything else</label>
                   <textarea
                     id="guest-notes"
@@ -463,7 +502,7 @@ function EstimateContent() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Sending…
+                  {uploadStatus || "Sending…"}
                 </>
               ) : (
                 <>

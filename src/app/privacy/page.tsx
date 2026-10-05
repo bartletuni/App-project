@@ -80,12 +80,13 @@ const sections: LegalSection[] = [
         <h3>Order information</h3>
         <p>
           When you submit a part request: the 3D model file you upload (
-          <em>.stl</em>, or a <em>.zip</em> holding the model and anything that
-          goes with it), or, if you have no model yet, the part name,
+          <em>.stl</em>, a STEP or IGES export, or a <em>.zip</em> holding the
+          model and anything that goes with it), or, if you have no model yet, the part name,
           description, and dimensions you write instead, together with any
           reference photographs, sketches, or PDF drawings you attach to show
-          us the part; quantity; material; print settings; your notes; and the
-          date you need it by. As the job progresses we add the estimated or
+          us the part; the make and model of the equipment it came from and its
+          part number, if you give them; quantity; material; print settings;
+          your notes; and the date you need it by. As the job progresses we add the estimated or
           quoted price, order status, invoice number, and the carrier, service,
           and tracking number of the parcel your part ships in.
         </p>
@@ -233,7 +234,9 @@ const sections: LegalSection[] = [
         <ul>
           <li>
             <strong>Cloudflare R2</strong> — stores the model files and
-            reference images you upload.
+            reference images you upload. Larger files go from your browser
+            straight to it, on a short-lived signed link, rather than through
+            our own server.
           </li>
           <li>
             <strong>Resend</strong> — delivers transactional email such as
@@ -322,7 +325,8 @@ const sections: LegalSection[] = [
           <li>
             <strong>Uploaded model files</strong> — kept while the order is
             live and afterwards so a part can be reprinted or a revision
-            priced. Ask us and we will delete a file sooner. The{" "}
+            priced. A file you upload but never submit is deleted within about
+            a day. Ask us and we will delete a file sooner. The{" "}
             <Link href="/file-retention">File Retention Policy</Link> sets this
             out in full, including how to have a specific file deleted.
           </li>
@@ -427,7 +431,8 @@ const sections: LegalSection[] = [
           stored only as bcrypt hashes. Uploaded files are held in private
           storage and reached through short-lived signed links rather than
           public URLs, and every upload is checked against its real file
-          signature before it is stored. Order and account records are reachable
+          signature before it is attached to a request — a file that fails the
+          check is deleted. Order and account records are reachable
           only by you and by shop staff who need them to do the work.
         </p>
         <p>
