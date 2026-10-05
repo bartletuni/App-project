@@ -66,6 +66,7 @@ const process = [
 const specSheet: [string, string | readonly string[]][] = [
   ["Maximum build volume", "256 × 256 × 256 mm"],
   ["Max heat deflection temperature", "Up to 485 °F / 252 °C"],
+  ["Max print temperature", "Up to 608 °F / 320 °C"],
   ["Minimum layer height", "0.05 mm"],
   ["Typical FDM tolerance", "±0.2 mm"],
   ["Materials", [...MATERIAL_NAMES, "and more"]],
