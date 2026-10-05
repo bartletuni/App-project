@@ -18,11 +18,14 @@ import {
   MAX_MODEL_BYTES,
   MAX_PART_NAME_CHARS,
   MAX_PART_NUMBER_CHARS,
-  MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
+  MAX_REFERENCE_TOTAL_BYTES,
   MIN_DESCRIPTION_CHARS,
   MODEL_ACCEPT,
   MODEL_FILE_TYPE_ERROR,
+  MODEL_TOO_LARGE,
+  REFERENCES_TOO_LARGE,
+  UPLOAD_LIMIT_LABEL,
   PartSourceState,
   REFERENCE_ACCEPT,
   SUBMISSION_DESCRIPTION,
@@ -33,6 +36,7 @@ import {
   isPreviewableImage,
   isReferenceFileName,
   isStlFileName,
+  totalBytes,
 } from "@/lib/part-source";
 
 interface PartSourceFieldsProps {
@@ -97,7 +101,7 @@ export default function PartSourceFields({
         return;
       }
       if (file.size > MAX_MODEL_BYTES) {
-        raise("File size exceeds the 20MB limit.");
+        raise(MODEL_TOO_LARGE);
         return;
       }
       // A newly picked file replaces the one on record from an earlier order.
@@ -122,11 +126,12 @@ export default function PartSourceFields({
           raise(`${file.name} is not supported. Use JPG, PNG, WEBP, GIF, HEIC, or PDF.`);
           continue;
         }
-        if (file.size > MAX_REFERENCE_BYTES) {
-          raise(`${file.name} is larger than the ${formatBytes(MAX_REFERENCE_BYTES)} limit.`);
+        if (next.some((f) => f.name === file.name && f.size === file.size)) continue;
+        // The host limits the whole request, so the photos are held to a total.
+        if (totalBytes(next) + file.size > MAX_REFERENCE_TOTAL_BYTES) {
+          raise(REFERENCES_TOO_LARGE);
           continue;
         }
-        if (next.some((f) => f.name === file.name && f.size === file.size)) continue;
         next.push(file);
       }
       onChange({ ...value, references: next });
@@ -172,7 +177,7 @@ export default function PartSourceFields({
           <label htmlFor={`${idPrefix}-file`} className={labelClassName}>
             3D file <span className="text-clay-400">*</span>{" "}
             <span className="text-cream-500 normal-case tracking-normal">
-              (STL, STEP, IGES, or ZIP — max 20MB)
+              (STL, STEP, IGES, or ZIP — max {UPLOAD_LIMIT_LABEL}; larger by email)
             </span>
           </label>
           <input
@@ -353,7 +358,7 @@ export default function PartSourceFields({
             <label htmlFor={`${idPrefix}-references`} className={labelClassName}>
               Reference photos or drawings{" "}
               <span className="text-cream-600 normal-case tracking-normal">
-                (optional — up to {MAX_REFERENCE_FILES}, 10MB each)
+                (optional — up to {MAX_REFERENCE_FILES}, {UPLOAD_LIMIT_LABEL} in total)
               </span>
             </label>
             <input

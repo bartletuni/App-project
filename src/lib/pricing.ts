@@ -182,7 +182,7 @@ export const DEFAULT_PRICING: PricingContent = {
         {
           label: "Web Upload",
           detail:
-            "Submit CAD files (.STEP, .STL, .IGES) directly at takomoco.com.",
+            "Submit CAD files (.STEP, .STL, .IGES) up to 4MB directly at takomoco.com. Larger files by email.",
           price: "",
           note: "",
         },

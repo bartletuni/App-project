@@ -338,14 +338,14 @@ EmailSuppression already exists" and changes nothing.
 The composer opens on **"What are we making?"** with two lanes:
 
 - **I have a 3D file** — the original path. Upload an `.stl`, a STEP or IGES
-  export (`.step`/`.stp`/`.iges`/`.igs`), or a `.zip` (20MB), and submit. Only an
+  export (`.step`/`.stp`/`.iges`/`.igs`), or a `.zip` (4MB), and submit. Only an
   STL gets the in-browser 3D preview; STEP, IGES, and ZIP show a glyph and are
   opened by the shop. Each format is content-sniffed like the rest (see
   `src/lib/file-signatures.ts`): a STEP must open with `ISO-10303-21;`, and an
   IGES with the `S      1` start record in columns 73-80.
 - **No file yet** — for a customer who has a broken part but no model. They name
   the part, describe it, optionally give rough dimensions, and attach up to 5
-  reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 10MB each). HEIC
+  reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 4MB in total). HEIC
   is accepted because it is what an iPhone hands over; it uploads fine but shows
   a glyph rather than an inline preview, since browsers will not draw it.
 
@@ -716,9 +716,12 @@ happened.
 something actionable. It prefers the API's own `{ error }` body and falls back
 to the status when there is no JSON to read at all:
 
-- **413** — the host rejected the upload before the route ran. Note that Vercel
-  caps a serverless function's request body at roughly 4.5MB, below the 20MB the
-  upload field advertises, so a large STL fails here rather than in our code.
+- **413** — the host rejected the upload before the route ran. Vercel caps a
+  serverless function's request body at roughly 4.5MB, so the forms hold uploads
+  to 4MB in total (`MAX_UPLOAD_BYTES` in `src/lib/part-source.ts`) and say where
+  larger files go (email). This message is the safety net for anything that gets
+  past that check. Cloudflare R2 would take far larger files; the function in
+  front of it is the limit, and uploading straight to R2 is how it would be lifted.
 - **401 / 403** — expired session, or no permission.
 - **408 / 504** — the server took too long.
 - **5xx / 4xx with no JSON** — named by status, and clear that nothing was saved.

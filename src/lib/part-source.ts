@@ -17,15 +17,40 @@
  * forms and the server agree on limits and error wording.
  */
 
+import { BUSINESS } from "@/lib/seo";
+
 export type SubmissionType = "MODEL" | "DESCRIPTION";
 
 export const SUBMISSION_MODEL: SubmissionType = "MODEL";
 export const SUBMISSION_DESCRIPTION: SubmissionType = "DESCRIPTION";
 
-/** Upload ceilings. The model limit is the pre-existing one. */
-export const MAX_MODEL_BYTES = 20 * 1024 * 1024;
-export const MAX_REFERENCE_BYTES = 10 * 1024 * 1024;
+/**
+ * How much one submission may carry, in total.
+ *
+ * The ceiling is the host's, not ours. The forms post through a serverless
+ * function, and Vercel rejects a request body over about 4.5MB before our code
+ * runs — a bare 413 with no message. Cloudflare R2 would take far more; the
+ * function in front of it is the limit. This used to advertise 20MB for a
+ * model and 10MB per photo, which promised what the host would refuse, so it
+ * is now the one figure that works, held under 4.5MB with room for the form's
+ * own fields.
+ *
+ * It is for everything in the submission together: a model on its own, or the
+ * photos of a described part added up. Anything larger goes by email, which is
+ * what every message here says. If uploads ever go straight to R2 instead,
+ * this is the number to raise — and the copy that quotes it follows from the
+ * constants below.
+ */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+export const MAX_MODEL_BYTES = MAX_UPLOAD_BYTES;
+export const MAX_REFERENCE_TOTAL_BYTES = MAX_UPLOAD_BYTES;
 export const MAX_REFERENCE_FILES = 5;
+
+/** How the limit reads in a sentence. */
+export const UPLOAD_LIMIT_LABEL = "4MB";
+export const LARGE_FILE_ADVICE = `For anything larger, email it to ${BUSINESS.email}.`;
+export const MODEL_TOO_LARGE = `File size exceeds the ${UPLOAD_LIMIT_LABEL} limit. ${LARGE_FILE_ADVICE}`;
+export const REFERENCES_TOO_LARGE = `Photos and drawings can total ${UPLOAD_LIMIT_LABEL} per request. Send fewer or smaller ones. ${LARGE_FILE_ADVICE}`;
 
 /** Photos off a phone, a scanned sketch, or a dimensioned PDF drawing. */
 export const REFERENCE_EXTENSIONS = [
@@ -139,6 +164,11 @@ export function requestTitle(
  */
 export function isPreviewableImage(mimeType: string | null | undefined): boolean {
   return ["image/png", "image/jpeg", "image/webp", "image/gif"].includes(mimeType || "");
+}
+
+/** The combined size of a set of files, which is what the host actually limits. */
+export function totalBytes(files: { size: number }[]): number {
+  return files.reduce((sum, file) => sum + file.size, 0);
 }
 
 export function formatBytes(bytes: number): string {
@@ -267,7 +297,7 @@ export function validatePartSource(state: PartSourceState): string | null {
       return `Add an ${MODEL_FORMATS_LABEL} file, or switch to “No file yet” and describe the part.`;
     }
     if (!isModelFileName(state.file.name)) return `${MODEL_FILE_TYPE_ERROR}.`;
-    if (state.file.size > MAX_MODEL_BYTES) return "File size exceeds the 20MB limit.";
+    if (state.file.size > MAX_MODEL_BYTES) return MODEL_TOO_LARGE;
     return null;
   }
 
@@ -295,10 +325,8 @@ export function validatePartSource(state: PartSourceState): string | null {
     if (!isReferenceFileName(reference.name)) {
       return `${reference.name} is not a supported reference file. Use JPG, PNG, WEBP, GIF, HEIC, or PDF.`;
     }
-    if (reference.size > MAX_REFERENCE_BYTES) {
-      return `${reference.name} is larger than the 10MB limit for reference files.`;
-    }
   }
+  if (totalBytes(state.references) > MAX_REFERENCE_TOTAL_BYTES) return REFERENCES_TOO_LARGE;
 
   return null;
 }

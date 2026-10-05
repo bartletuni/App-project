@@ -5,16 +5,19 @@ import {
   MAX_MODEL_BYTES,
   MAX_PART_NAME_CHARS,
   MAX_PART_NUMBER_CHARS,
-  MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
+  MAX_REFERENCE_TOTAL_BYTES,
   MIN_DESCRIPTION_CHARS,
   MODEL_FILE_REQUIRED,
   MODEL_FILE_TYPE_ERROR,
+  MODEL_TOO_LARGE,
+  REFERENCES_TOO_LARGE,
   SUBMISSION_DESCRIPTION,
   SubmissionType,
   isModelFileName,
   isReferenceFileName,
   parseSubmissionType,
+  totalBytes,
 } from "@/lib/part-source";
 import { modelMimeType, referenceMimeType } from "@/lib/file-signatures";
 import { uploadToR2 } from "@/lib/r2";
@@ -132,7 +135,7 @@ export async function parsePartSourceForm(
     if (typeof file === "string" || !file.name) return { error: "Invalid file uploaded" };
     if (file.name.length > 255) return { error: "File name exceeds maximum allowed length" };
     if (!isModelFileName(file.name)) return { error: MODEL_FILE_TYPE_ERROR };
-    if (file.size > MAX_MODEL_BYTES) return { error: "File size exceeds the 20MB limit" };
+    if (file.size > MAX_MODEL_BYTES) return { error: MODEL_TOO_LARGE };
 
     // The extension is only a claim; the leading bytes have to back it up.
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -179,6 +182,12 @@ export async function parsePartSourceForm(
     return { error: `Attach at most ${MAX_REFERENCE_FILES} reference files` };
   }
 
+  // The host limits the whole request, so the photos are held to a total, not
+  // a size each — and before any of them is read into memory.
+  if (totalBytes(referenceFiles) > MAX_REFERENCE_TOTAL_BYTES) {
+    return { error: REFERENCES_TOO_LARGE };
+  }
+
   const references: ParsedReference[] = [];
   for (const reference of referenceFiles) {
     if (!reference.name) return { error: "Invalid reference file uploaded" };
@@ -187,9 +196,6 @@ export async function parsePartSourceForm(
     }
     if (!isReferenceFileName(reference.name)) {
       return { error: "Reference files must be JPG, PNG, WEBP, GIF, HEIC, or PDF" };
-    }
-    if (reference.size > MAX_REFERENCE_BYTES) {
-      return { error: "Reference file size exceeds the 10MB limit" };
     }
     const buffer = Buffer.from(await reference.arrayBuffer());
     const mimeType = referenceMimeType(reference.name, buffer);

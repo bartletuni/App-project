@@ -141,6 +141,28 @@ describe("POST /api/requests", () => {
     );
   });
 
+  it("should refuse a model over the size limit, and point to email", async () => {
+    const big = Buffer.concat([Buffer.from("solid big"), Buffer.alloc(4 * 1024 * 1024)]);
+    const res = await POST(createRequest("big.stl", big));
+    expect(res.status).toBe(400);
+    const { error } = await res.json();
+    expect(error).toMatch(/exceeds the 4MB limit/);
+    expect(error).toMatch(/info@takomoco\.com/);
+    expect(uploadToR2).not.toHaveBeenCalled();
+  });
+
+  it("should refuse described-part photos that are over the limit together", async () => {
+    const photo = { name: "p.png", content: Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(2.5 * 1024 * 1024)]) };
+    const res = await POST(
+      createDescriptionRequest({
+        references: [photo, { ...photo, name: "q.png" }],
+      })
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/total 4MB per request/);
+    expect(uploadToR2).not.toHaveBeenCalled();
+  });
+
   it("should reject a STEP file whose content is something else", async () => {
     const res = await POST(createRequest("bracket.step", Buffer.from("MZ not a model")));
     expect(res.status).toBe(400);

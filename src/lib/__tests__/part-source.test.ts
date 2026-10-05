@@ -1,8 +1,9 @@
 import {
   MAX_EQUIPMENT_CHARS,
   MAX_PART_NUMBER_CHARS,
-  MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
+  MAX_REFERENCE_TOTAL_BYTES,
+  MAX_UPLOAD_BYTES,
   SUBMISSION_DESCRIPTION,
   SUBMISSION_MODEL,
   appendPartSource,
@@ -80,9 +81,20 @@ describe("validatePartSource — model lane", () => {
     expect(formData.get("submissionType")).toBe("MODEL");
   });
 
-  it("rejects a file over 20MB", () => {
-    const state = { ...emptyPartSource(), file: fakeFile("part.stl", 21 * 1024 * 1024) };
-    expect(validatePartSource(state)).toMatch(/20MB/);
+  it("rejects a file over the limit, and says where larger ones go", () => {
+    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_UPLOAD_BYTES + 1) };
+    expect(validatePartSource(state)).toMatch(/4MB/);
+    expect(validatePartSource(state)).toMatch(/email it to info@takomoco\.com/);
+  });
+
+  it("accepts a file exactly at the limit", () => {
+    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_UPLOAD_BYTES) };
+    expect(validatePartSource(state)).toBeNull();
+  });
+
+  it("holds the limit under what the host will take", () => {
+    // Vercel rejects a request body over ~4.5MB; the form's own fields ride in it too.
+    expect(MAX_UPLOAD_BYTES).toBeLessThan(4.5 * 1000 * 1000);
   });
 });
 
@@ -113,9 +125,15 @@ describe("validatePartSource — description lane", () => {
     expect(validatePartSource({ ...described(), references })).toMatch(/at most/);
   });
 
-  it("rejects an oversized reference", () => {
-    const references = [fakeFile("photo.jpg", MAX_REFERENCE_BYTES + 1)];
-    expect(validatePartSource({ ...described(), references })).toMatch(/10MB/);
+  it("rejects photos that are over the limit together, not just one by one", () => {
+    const half = Math.floor(MAX_REFERENCE_TOTAL_BYTES / 2);
+    const references = [fakeFile("a.jpg", half), fakeFile("b.jpg", half), fakeFile("c.jpg", 10)];
+    expect(validatePartSource({ ...described(), references })).toMatch(/total 4MB per request/);
+  });
+
+  it("accepts several photos that fit under the limit together", () => {
+    const references = [fakeFile("a.jpg", 1024 * 1024), fakeFile("b.jpg", 1024 * 1024)];
+    expect(validatePartSource({ ...described(), references })).toBeNull();
   });
 
   it("rejects an unsupported reference type", () => {
