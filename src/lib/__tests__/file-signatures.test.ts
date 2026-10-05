@@ -45,4 +45,73 @@ describe("modelMimeType", () => {
     expect(modelMimeType("part.stl", Buffer.from([0x50, 0x4b, 0x03, 0x04]))).toBeNull();
     expect(modelMimeType("photo.png", PNG)).toBeNull();
   });
+
+  describe("STEP", () => {
+    const step = "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('part'),'2;1');\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n";
+
+    it("accepts a STEP export under either extension, in any case", () => {
+      expect(modelMimeType("bracket.step", Buffer.from(step))).toBe("model/step");
+      expect(modelMimeType("BRACKET.STP", Buffer.from(step))).toBe("model/step");
+    });
+
+    it("tolerates a byte-order mark and leading white space", () => {
+      const bom = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(`\r\n  ${step}`)]);
+      expect(modelMimeType("bracket.step", bom)).toBe("model/step");
+    });
+
+    it("refuses a file that only claims to be one", () => {
+      expect(modelMimeType("bracket.step", Buffer.from("solid part"))).toBeNull();
+      expect(modelMimeType("bracket.stp", Buffer.from([0x4d, 0x5a, 0x90, 0x00]))).toBeNull();
+      expect(modelMimeType("bracket.step", Buffer.from("// ISO-10303-21;"))).toBeNull();
+      expect(modelMimeType("bracket.step", Buffer.alloc(0))).toBeNull();
+    });
+
+    it("does not let STEP bytes ride in under another model extension", () => {
+      expect(modelMimeType("bracket.stl", Buffer.from(step))).toBeNull();
+      expect(modelMimeType("bracket.zip", Buffer.from(step))).toBeNull();
+    });
+  });
+
+  describe("IGES", () => {
+    /** One 80-column record: 72 columns of text, a section letter, a sequence number. */
+    const record = (text: string, section: string, n: number) =>
+      `${text.padEnd(72)}${section}${String(n).padStart(7)}`;
+    const iges = [
+      record("Exported by a CAD package", "S", 1),
+      record(",,31HBracket,4Hpart,7Hsystem,32,38,6,308,15,4Hpart,1.0,2,2HMM,1,0.01,", "G", 1),
+      record("", "T", 1),
+    ].join("\n");
+
+    it("accepts an IGES export under either extension", () => {
+      expect(modelMimeType("bracket.iges", Buffer.from(iges))).toBe("model/iges");
+      expect(modelMimeType("bracket.IGS", Buffer.from(iges))).toBe("model/iges");
+    });
+
+    it("accepts a blank start-section line, which is what most exporters write", () => {
+      expect(modelMimeType("bracket.igs", Buffer.from(record("", "S", 1)))).toBe("model/iges");
+    });
+
+    it("refuses a file that only claims to be one", () => {
+      expect(modelMimeType("bracket.iges", Buffer.from("solid part"))).toBeNull();
+      expect(modelMimeType("bracket.iges", Buffer.from(record("", "S", 2)))).toBeNull();
+      expect(modelMimeType("bracket.iges", Buffer.from(record("", "G", 1)))).toBeNull();
+      expect(modelMimeType("bracket.iges", Buffer.from(record("", "S", 1).slice(0, 79)))).toBeNull();
+    });
+
+    it("accepts accented text in the free-text columns", () => {
+      const accented = Buffer.from(record("Pièce n° 4 - Bracket", "S", 1), "latin1");
+      expect(modelMimeType("bracket.iges", accented)).toBe("model/iges");
+    });
+
+    it("refuses control bytes in the text columns", () => {
+      const binary = Buffer.from(record("", "S", 1));
+      binary[10] = 0x00;
+      expect(modelMimeType("bracket.iges", binary)).toBeNull();
+    });
+
+    it("does not let IGES bytes ride in under another model extension", () => {
+      expect(modelMimeType("bracket.step", Buffer.from(iges))).toBeNull();
+      expect(modelMimeType("bracket.stl", Buffer.from(iges))).toBeNull();
+    });
+  });
 });

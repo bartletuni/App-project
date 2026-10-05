@@ -65,9 +65,40 @@ export function referenceMimeType(fileName: string, buffer: Buffer): string | nu
 }
 
 /**
+ * STEP (ISO 10303-21) is clear text and opens with the keyword
+ * `ISO-10303-21;`. Real exporters write it at byte zero; a byte-order mark and
+ * leading white space are tolerated because some Windows tools add them.
+ */
+function isStep(buffer: Buffer): boolean {
+  // Latin-1 decodes each byte to one character, so a UTF-8 byte-order mark
+  // reads as \xEF\xBB\xBF here.
+  const head = buffer.subarray(0, 64).toString("latin1").replace(/^\xEF\xBB\xBF/, "");
+  return /^\s*ISO-10303-21\s*;/i.test(head);
+}
+
+/**
+ * IGES is a fixed-format text file of 80-column records. Column 73 names the
+ * section and columns 74-80 hold a right-justified sequence number, and the
+ * file always opens with the first record of the Start section: an `S` in
+ * column 73 and a `1` ending column 80. The 72 columns before it are free text
+ * — usually blank, sometimes a description a non-English CAD install wrote with
+ * accents — so they may hold anything but control bytes, which is what keeps a
+ * binary file out.
+ */
+function isIges(buffer: Buffer): boolean {
+  if (buffer.length < 80) return false;
+  for (let i = 0; i < 72; i++) {
+    if (buffer[i] < 0x20 || buffer[i] === 0x7f) return false;
+  }
+  if (buffer[72] !== 0x53) return false; // "S"
+  return buffer.subarray(73, 80).toString("ascii").trim() === "1";
+}
+
+/**
  * The MIME type for a 3D model upload, or null when the name and the bytes
  * disagree. ZIP is checked by its local-file-header signature; STL may be ASCII
- * ("solid" …) or binary (an exact 84 + 50 × triangle-count byte length).
+ * ("solid" …) or binary (an exact 84 + 50 × triangle-count byte length); STEP
+ * and IGES are text formats with a fixed opening, checked above.
  */
 export function modelMimeType(fileName: string, buffer: Buffer): string | null {
   const name = fileName.toLowerCase();
@@ -86,6 +117,14 @@ export function modelMimeType(fileName: string, buffer: Buffer): string | null {
       isBinaryStl = buffer.length === 84 + triangleCount * 50;
     }
     return isAsciiStl || isBinaryStl ? "application/sla" : null;
+  }
+
+  if (name.endsWith(".step") || name.endsWith(".stp")) {
+    return isStep(buffer) ? "model/step" : null;
+  }
+
+  if (name.endsWith(".iges") || name.endsWith(".igs")) {
+    return isIges(buffer) ? "model/iges" : null;
   }
 
   return null;

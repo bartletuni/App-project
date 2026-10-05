@@ -122,7 +122,7 @@ export interface PricedRecord {
   status?: string | null;
   /** Set only on a submission that came through the public, no-account form. */
   guestEmail?: string | null;
-  /** The uploaded .stl/.zip, null when the shop still has to model the part. */
+  /** The uploaded 3D file, null when the shop still has to model the part. */
   fileId?: string | null;
 }
 
@@ -176,7 +176,7 @@ export function quoteBlocker(request: PricedRecord | null | undefined): string |
 export function pricingKindFor(submission: {
   /** True for the public, no-account form. */
   isGuest?: boolean;
-  /** True when the customer uploaded the .stl/.zip we would print. */
+  /** True when the customer uploaded the 3D file we would print. */
   hasFile?: boolean;
 }): PricingKind {
   return !submission.isGuest && submission.hasFile ? KIND_QUOTE : KIND_ESTIMATE;
@@ -341,6 +341,23 @@ export function canPromoteToQuote(request: PricedRecord | null | undefined): boo
  * console, the customer ledger, and the email templates can each render it in
  * their own idiom without keeping three lists of statuses in step.
  */
+/**
+ * Whether a customer can be offered "Reorder" on this row: a finished build
+ * that left something to repeat — the part file on record, or, for a part the
+ * shop modelled from a description, the description it was modelled from.
+ *
+ * Only COMPLETED and SHIPPED. Anything earlier has not produced a part yet, so
+ * "again" would be premature; a cancelled row never did. A no-account estimate
+ * is never on a customer's desk, so it is never offered one either.
+ */
+export function canReorder(
+  request: (PricedRecord & { partName?: string | null }) | null | undefined
+): boolean {
+  if (!request || request.guestEmail) return false;
+  if (request.status !== "COMPLETED" && request.status !== "SHIPPED") return false;
+  return Boolean(request.fileId || request.partName);
+}
+
 export type StatusTone = "wait" | "review" | "sent" | "active" | "done" | "ship" | "bad" | "muted";
 
 const TONES: Record<string, StatusTone> = {

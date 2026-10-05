@@ -2,6 +2,7 @@ import { POST } from "../route";
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
+import { objectExistsInR2, uploadToR2 } from "@/lib/r2";
 
 jest.mock("next-auth/next", () => ({
   getServerSession: jest.fn(),
@@ -16,12 +17,14 @@ jest.mock("@/lib/prisma", () => ({
     partRequest: {
       create: jest.fn().mockResolvedValue({ id: "req-1", attachments: [] }),
       count: jest.fn().mockResolvedValue(0),
+      findFirst: jest.fn(),
     },
   }
 }));
 
 jest.mock("@/lib/r2", () => ({
   uploadToR2: jest.fn().mockResolvedValue("test-file-id"),
+  objectExistsInR2: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock("resend", () => {
@@ -37,6 +40,9 @@ describe("POST /api/requests", () => {
     (getServerSession as jest.Mock).mockResolvedValue({ user: { id: "user-1", email: "test@example.com", name: "Test" } });
     (prisma.partRequest.create as jest.Mock).mockClear();
     (prisma.partRequest.count as jest.Mock).mockReset().mockResolvedValue(0);
+    (uploadToR2 as jest.Mock).mockClear();
+    (objectExistsInR2 as jest.Mock).mockReset().mockResolvedValue(true);
+    (prisma.partRequest.findFirst as jest.Mock).mockReset().mockResolvedValue(null);
   });
 
   const createRequest = (
@@ -97,7 +103,49 @@ describe("POST /api/requests", () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toBe("Only .STL and .ZIP files are allowed");
+    expect(body.error).toBe("Only .STL, .STEP/.STP, .IGES/.IGS, and .ZIP files are accepted");
+  });
+
+  it("should accept a STEP export, stored under its own media type", async () => {
+    const req = createRequest("bracket.step", Buffer.from("ISO-10303-21;\nHEADER;\nENDSEC;\n"));
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect(createdRequestData().fileName).toBe("bracket.step");
+    expect(uploadToR2).toHaveBeenCalledWith("bracket.step", "model/step", expect.any(Buffer));
+  });
+
+  it("should accept an IGES export", async () => {
+    const start = `${"".padEnd(72)}S${"1".padStart(7)}`;
+    const req = createRequest("bracket.igs", Buffer.from(start));
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+    expect(uploadToR2).toHaveBeenCalledWith("bracket.igs", "model/iges", expect.any(Buffer));
+  });
+
+  it("stores the equipment and part number as labelled lines ahead of the notes", async () => {
+    const formData = new FormData();
+    formData.append("file", new File([Buffer.from("solid test")], "test.stl"));
+    formData.append("quantity", "1");
+    formData.append("material", "PLA");
+    formData.append("notes", "Black, if you have it.");
+    formData.append("equipment", "Bosch WTG86");
+    formData.append("partNumber", "00 4.1.12");
+    formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString());
+    formData.append("phoneNumber", "1234567890");
+    const res = await POST(
+      new NextRequest("http://localhost/api/requests", { method: "POST", body: formData })
+    );
+    expect(res.status).toBe(201);
+    expect(createdRequestData().notes).toBe(
+      "Equipment: Bosch WTG86\nPart number: 00 4.1.12\nBlack, if you have it."
+    );
+  });
+
+  it("should reject a STEP file whose content is something else", async () => {
+    const res = await POST(createRequest("bracket.step", Buffer.from("MZ not a model")));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("File content does not match its extension");
+    expect(uploadToR2).not.toHaveBeenCalled();
   });
 
   it("should reject polyglot files (e.g. ZIP extension with STL magic numbers)", async () => {
@@ -177,7 +225,7 @@ describe("POST /api/requests", () => {
       new NextRequest("http://localhost/api/requests", { method: "POST", body: formData })
     );
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("STL or ZIP file is required");
+    expect((await res.json()).error).toBe("STL, STEP, IGES, or ZIP file is required");
   });
 
   it("rejects a described part with no name", async () => {
@@ -341,6 +389,169 @@ describe("POST /api/requests", () => {
       expect(data.quantity).toBe(3);
       expect(data.quoteRequested).toBe(true);
       expect(data.quotedPrice).toBeUndefined();
+    });
+  });
+
+  // --- Reordering ----------------------------------------------------------
+  // "The same again": a new request whose file is the one already on record.
+  describe("reordering a part", () => {
+    const earlier = {
+      id: "orig-1",
+      fileId: "orig-key-bracket.stl",
+      fileName: "bracket.stl",
+      partName: null,
+      createdAt: new Date("2026-09-03T12:00:00Z"),
+    };
+
+    const reorderRequest = (
+      fields: Record<string, string | File> = {},
+      options: { file?: { name: string; content: Buffer } } = {}
+    ) => {
+      const formData = new FormData();
+      formData.append("submissionType", "MODEL");
+      if (options.file) {
+        // A plain Uint8Array: a Buffer is not a BlobPart under this tsconfig.
+        formData.append("file", new File([new Uint8Array(options.file.content)], options.file.name));
+      }
+      formData.append("quantity", "12");
+      formData.append("material", "PLA");
+      formData.append("dateNeeded", new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString());
+      formData.append("phoneNumber", "1234567890");
+      formData.append("reorderOf", "orig-1");
+      for (const [key, value] of Object.entries(fields)) formData.set(key, value);
+      return new NextRequest("http://localhost/api/requests", { method: "POST", body: formData });
+    };
+
+    it("reuses the file on record instead of asking for it again", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+
+      const res = await POST(reorderRequest({ quoteRequested: "true" }));
+      expect(res.status).toBe(201);
+
+      const row = createdRequestData();
+      expect(row.fileId).toBe("orig-key-bracket.stl");
+      expect(row.fileName).toBe("bracket.stl");
+      expect(row.quantity).toBe(12);
+      // Nothing was uploaded: the key is shared, not copied.
+      expect(uploadToR2).not.toHaveBeenCalled();
+      expect(objectExistsInR2).toHaveBeenCalledWith("orig-key-bracket.stl");
+      // It has an account and the part file, so a price it asks for is a quote.
+      expect(row.kind).toBe("QUOTE");
+    });
+
+    it("looks for the order among this customer's own, in the same query", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+
+      await POST(reorderRequest());
+      expect((prisma.partRequest.findFirst as jest.Mock).mock.calls[0][0].where).toEqual({
+        id: "orig-1",
+        userId: "user-1",
+      });
+    });
+
+    it("tells the shop what it repeats", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+
+      await POST(
+        reorderRequest({ notes: "Black, please.", equipment: "Bosch WTG86", partNumber: "00 4.1.12" })
+      );
+      expect(createdRequestData().notes).toBe(
+        "Reorder of: bracket.stl (Sep 3, 2026)\nEquipment: Bosch WTG86\nPart number: 00 4.1.12\nBlack, please."
+      );
+    });
+
+    it("answers the same way for an order that is missing and one that is someone else's", async () => {
+      // Ownership is in the query, so another customer's order simply is not found.
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const res = await POST(reorderRequest());
+      expect(res.status).toBe(404);
+      expect((await res.json()).error).toBe("We couldn't find the order to reorder from.");
+      expect(prisma.partRequest.create).not.toHaveBeenCalled();
+      expect(objectExistsInR2).not.toHaveBeenCalled();
+    });
+
+    it("refuses when the file has since been deleted, and creates nothing", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+      (objectExistsInR2 as jest.Mock).mockResolvedValue(false);
+
+      const res = await POST(reorderRequest());
+      expect(res.status).toBe(409);
+      expect((await res.json()).error).toMatch(/no longer on record/);
+      expect(prisma.partRequest.create).not.toHaveBeenCalled();
+    });
+
+    it("does not mistake a storage outage for a deleted file", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+      (objectExistsInR2 as jest.Mock).mockRejectedValue(new Error("R2 unreachable"));
+
+      const res = await POST(reorderRequest());
+      expect(res.status).toBe(503);
+      expect(prisma.partRequest.create).not.toHaveBeenCalled();
+    });
+
+    it("takes a new upload over the old file, and does not look for the old one", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(earlier);
+
+      const res = await POST(
+        reorderRequest({}, { file: { name: "bracket-rev2.stl", content: Buffer.from("solid rev2") } })
+      );
+      expect(res.status).toBe(201);
+      expect(createdRequestData().fileName).toBe("bracket-rev2.stl");
+      expect(createdRequestData().fileId).toBe("test-file-id");
+      expect(objectExistsInR2).not.toHaveBeenCalled();
+    });
+
+    it("still needs a file when the order it names never had one", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue({
+        ...earlier,
+        fileId: null,
+        fileName: null,
+        partName: "Dryer door catch",
+      });
+
+      const res = await POST(reorderRequest());
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe("STL, STEP, IGES, or ZIP file is required");
+      expect(prisma.partRequest.create).not.toHaveBeenCalled();
+    });
+
+    it("lets a described part be reordered too, with the pointer in the notes", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue({
+        ...earlier,
+        fileId: null,
+        fileName: null,
+        partName: "Dryer door catch",
+      });
+
+      const res = await POST(
+        reorderRequest({
+          submissionType: "DESCRIPTION",
+          partName: "Dryer door catch",
+          partDescription: "A small nylon catch that holds the dryer door shut.",
+        })
+      );
+      expect(res.status).toBe(201);
+      const row = createdRequestData();
+      expect(row.fileId).toBeNull();
+      expect(row.notes).toBe("Reorder of: Dryer door catch (Sep 3, 2026)");
+      expect(row.kind).toBe("ESTIMATE");
+    });
+
+    it("rejects a reorder id that is not text", async () => {
+      const res = await POST(reorderRequest({ reorderOf: new File(["x"], "x.txt") }));
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe("Invalid input types");
+    });
+
+    it("still checks the order named when the request uploads a file of its own", async () => {
+      (prisma.partRequest.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const res = await POST(
+        reorderRequest({}, { file: { name: "new.stl", content: Buffer.from("solid new") } })
+      );
+      expect(res.status).toBe(404);
+      expect(uploadToR2).not.toHaveBeenCalled();
     });
   });
 });

@@ -80,12 +80,13 @@ const sections: LegalSection[] = [
         <h3>Order information</h3>
         <p>
           When you submit a part request: the 3D model file you upload (
-          <em>.stl</em>, or a <em>.zip</em> holding the model and anything that
-          goes with it), or, if you have no model yet, the part name,
+          <em>.stl</em>, a STEP or IGES export, or a <em>.zip</em> holding the
+          model and anything that goes with it), or, if you have no model yet, the part name,
           description, and dimensions you write instead, together with any
           reference photographs, sketches, or PDF drawings you attach to show
-          us the part; quantity; material; print settings; your notes; and the
-          date you need it by. As the job progresses we add the estimated or
+          us the part; the make and model of the equipment it came from and its
+          part number, if you give them; quantity; material; print settings;
+          your notes; and the date you need it by. As the job progresses we add the estimated or
           quoted price, order status, invoice number, and the carrier, service,
           and tracking number of the parcel your part ships in.
         </p>

@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Clock,
   Loader2,
+  Lock,
   Phone,
   ShieldCheck,
 } from "lucide-react";
@@ -238,6 +239,12 @@ function EstimateContent() {
             <ShieldCheck className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" /> No obligation
           </li>
           <li className="flex items-center gap-2">
+            <Lock className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
+            <Link href="/file-retention" className="hover:text-clay-300 transition-colors">
+              Your files stay private
+            </Link>
+          </li>
+          <li className="flex items-center gap-2">
             <Phone className="h-3.5 w-3.5 text-clay-400" aria-hidden="true" />
             <a href="tel:+13856954178" className="hover:text-clay-300 transition-colors">
               Or call 385-695-4178
@@ -296,21 +303,42 @@ function EstimateContent() {
                 <span className="hairline flex-1" />
               </div>
 
-              <div>
-                <label htmlFor="guest-name" className={labelCls}>
-                  Your name <span className="text-clay-400">*</span>
-                </label>
-                <input
-                  id="guest-name"
-                  type="text"
-                  value={contact.name}
-                  onChange={(e) => updateContact({ name: e.target.value })}
-                  maxLength={MAX_CONTACT_NAME_CHARS}
-                  autoComplete="name"
-                  className={field}
-                  placeholder="Alex Rivera"
-                  required
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="guest-name" className={labelCls}>
+                    Your name <span className="text-clay-400">*</span>
+                  </label>
+                  <input
+                    id="guest-name"
+                    type="text"
+                    value={contact.name}
+                    onChange={(e) => updateContact({ name: e.target.value })}
+                    maxLength={MAX_CONTACT_NAME_CHARS}
+                    autoComplete="name"
+                    className={field}
+                    placeholder="Alex Rivera"
+                    required
+                  />
+                </div>
+                {/* Out of the disclosure it used to sit in: for a business
+                    this is the second thing the shop wants to know, and
+                    optional does not have to mean hidden. */}
+                <div>
+                  <label htmlFor="guest-company" className={labelCls}>
+                    Company{" "}
+                    <span className="text-cream-500 normal-case tracking-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="guest-company"
+                    type="text"
+                    value={contact.company}
+                    onChange={(e) => updateContact({ company: e.target.value })}
+                    maxLength={MAX_COMPANY_CHARS}
+                    autoComplete="organization"
+                    className={field}
+                    placeholder="Rivera Appliance Repair"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -413,19 +441,6 @@ function EstimateContent() {
                       <option key={m.id} value={m.name}>{m.name}</option>
                     ))}
                   </select>
-                </div>
-
-                <div>
-                  <label htmlFor="guest-company" className={labelCls}>Company</label>
-                  <input
-                    id="guest-company"
-                    type="text"
-                    value={contact.company}
-                    onChange={(e) => updateContact({ company: e.target.value })}
-                    maxLength={MAX_COMPANY_CHARS}
-                    autoComplete="organization"
-                    className={field}
-                  />
                 </div>
 
                 <div>

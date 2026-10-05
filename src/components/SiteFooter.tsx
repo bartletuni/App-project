@@ -17,7 +17,8 @@ import { BUSINESS } from "@/lib/seo";
  */
 
 const sitemap = [
-  { href: "/", label: "Index" },
+  { href: "/", label: "Home" },
+  { href: "/replacement-parts", label: "Repair & service" },
   { href: "/materials", label: "Materials" },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
@@ -67,7 +68,7 @@ export default function SiteFooter() {
           {/* Site index */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <span className="eyebrow">INDEX</span>
+              <span className="eyebrow">PAGES</span>
               <span className="h-px flex-1 bg-clay-500/20" />
             </div>
             <ul className="space-y-2.5">

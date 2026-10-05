@@ -212,7 +212,7 @@ function LoginContent() {
         {/* Left editorial plate */}
         <div className="hidden lg:flex flex-col justify-between border-r border-clay-500/12 p-12">
           <Link href="/" className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500 hover:text-clay-300 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back to index
+            <ArrowLeft className="h-4 w-4" /> Back to home
           </Link>
 
           <div>
@@ -253,7 +253,7 @@ function LoginContent() {
           </div>
 
           <div className="w-full max-w-md mx-auto">
-            <span className="eyebrow">{isLogin ? "AUTHENTICATE" : "NEW ACCOUNT"}</span>
+            <span className="eyebrow">{isLogin ? "SIGN IN" : "NEW ACCOUNT"}</span>
             <h2 className="mt-3 font-display text-4xl text-cream-100">
               {isLogin ? "Welcome back." : "Open an account."}
             </h2>

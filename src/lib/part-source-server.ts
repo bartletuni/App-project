@@ -1,13 +1,18 @@
 import {
   MAX_DESCRIPTION_CHARS,
   MAX_DIMENSIONS_CHARS,
+  MAX_EQUIPMENT_CHARS,
   MAX_MODEL_BYTES,
   MAX_PART_NAME_CHARS,
+  MAX_PART_NUMBER_CHARS,
   MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
   MIN_DESCRIPTION_CHARS,
+  MODEL_FILE_REQUIRED,
+  MODEL_FILE_TYPE_ERROR,
   SUBMISSION_DESCRIPTION,
   SubmissionType,
+  isModelFileName,
   isReferenceFileName,
   parseSubmissionType,
 } from "@/lib/part-source";
@@ -26,7 +31,9 @@ import { uploadToR2 } from "@/lib/r2";
  * come through here.
  *
  * Error strings are the ones the composer's route has always returned, and are
- * asserted by its tests; they are customer-facing copy, so they stay put.
+ * asserted by its tests; they are customer-facing copy, so they stay put. The
+ * two about which 3D formats are accepted live in part-source.ts beside the
+ * list they describe, and change only when that list does.
  */
 
 export interface ParsedModel {
@@ -44,12 +51,18 @@ export interface ParsedReference {
 export interface ParsedPartSource {
   submissionType: SubmissionType;
   isDescription: boolean;
-  /** Present on a MODEL submission, null on a DESCRIPTION one. */
+  /**
+   * Present on a MODEL submission that uploaded a file; null on a DESCRIPTION
+   * one, and on a reorder that reuses the file already on record.
+   */
   model: ParsedModel | null;
   partName: string | null;
   partDescription: string | null;
   dimensions: string | null;
   references: ParsedReference[];
+  /** Either lane; null when left blank. The caller folds them into the notes. */
+  equipment: string | null;
+  partNumber: string | null;
 }
 
 export type ParsePartSourceResult = { source: ParsedPartSource } | { error: string };
@@ -58,32 +71,67 @@ export type ParsePartSourceResult = { source: ParsedPartSource } | { error: stri
  * Validate and read the part fields. Nothing is uploaded anywhere until this
  * has returned a source — every check, including the ones that need the file's
  * leading bytes, has passed by then.
+ *
+ * `missingModelOk` is for a reorder, whose file is already on record: a MODEL
+ * submission with no upload comes back with `model: null` instead of an error,
+ * and the caller must then supply the file from the order being reordered — or
+ * refuse. It never loosens anything about a file that *is* uploaded.
  */
-export async function parsePartSourceForm(formData: FormData): Promise<ParsePartSourceResult> {
+export async function parsePartSourceForm(
+  formData: FormData,
+  options: { missingModelOk?: boolean } = {}
+): Promise<ParsePartSourceResult> {
   const submissionType = parseSubmissionType(formData.get("submissionType") as string | null);
   const isDescription = submissionType === SUBMISSION_DESCRIPTION;
 
   const partNameRaw = formData.get("partName");
   const partDescriptionRaw = formData.get("partDescription");
   const dimensionsRaw = formData.get("dimensions");
+  const equipmentRaw = formData.get("equipment");
+  const partNumberRaw = formData.get("partNumber");
 
   if (
     (partNameRaw !== null && typeof partNameRaw !== "string") ||
     (partDescriptionRaw !== null && typeof partDescriptionRaw !== "string") ||
-    (dimensionsRaw !== null && typeof dimensionsRaw !== "string")
+    (dimensionsRaw !== null && typeof dimensionsRaw !== "string") ||
+    (equipmentRaw !== null && typeof equipmentRaw !== "string") ||
+    (partNumberRaw !== null && typeof partNumberRaw !== "string")
   ) {
     return { error: "Invalid input types" };
+  }
+
+  // Optional on both lanes: what the part came off, and the OEM's number for it.
+  const equipment = ((equipmentRaw as string) || "").trim() || null;
+  const partNumber = ((partNumberRaw as string) || "").trim() || null;
+  if (equipment && equipment.length > MAX_EQUIPMENT_CHARS) {
+    return { error: `Equipment make and model must be ${MAX_EQUIPMENT_CHARS} characters or fewer` };
+  }
+  if (partNumber && partNumber.length > MAX_PART_NUMBER_CHARS) {
+    return { error: `Part number must be ${MAX_PART_NUMBER_CHARS} characters or fewer` };
   }
 
   if (!isDescription) {
     const file = formData.get("file") as File | null;
 
-    if (!file) return { error: "STL or ZIP file is required" };
+    if (!file && options.missingModelOk) {
+      return {
+        source: {
+          submissionType,
+          isDescription,
+          model: null,
+          partName: null,
+          partDescription: null,
+          dimensions: null,
+          references: [],
+          equipment,
+          partNumber,
+        },
+      };
+    }
+    if (!file) return { error: MODEL_FILE_REQUIRED };
     if (typeof file === "string" || !file.name) return { error: "Invalid file uploaded" };
     if (file.name.length > 255) return { error: "File name exceeds maximum allowed length" };
-    if (!file.name.toLowerCase().endsWith(".stl") && !file.name.toLowerCase().endsWith(".zip")) {
-      return { error: "Only .STL and .ZIP files are allowed" };
-    }
+    if (!isModelFileName(file.name)) return { error: MODEL_FILE_TYPE_ERROR };
     if (file.size > MAX_MODEL_BYTES) return { error: "File size exceeds the 20MB limit" };
 
     // The extension is only a claim; the leading bytes have to back it up.
@@ -100,6 +148,8 @@ export async function parsePartSourceForm(formData: FormData): Promise<ParsePart
         partDescription: null,
         dimensions: null,
         references: [],
+        equipment,
+        partNumber,
       },
     };
   }
@@ -156,6 +206,8 @@ export async function parsePartSourceForm(formData: FormData): Promise<ParsePart
       partDescription,
       dimensions,
       references,
+      equipment,
+      partNumber,
     },
   };
 }

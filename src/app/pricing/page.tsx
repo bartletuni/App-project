@@ -21,7 +21,7 @@ export const revalidate = 0;
 
 const title = "Pricing — 3D Printing & Scanning Rate Sheet";
 const description =
-  "Transparent, standardized rates for TakomoCo's high-precision 3D printing, 0.02mm 3D scanning, and reverse engineering — with 24-hour express turnaround available for urgent engineering deadlines.";
+  "Transparent, standardized rates for TakomoCo's high-precision 3D printing, 0.02mm 3D scanning, and reverse engineering — with a typical turnaround of about 72 hours.";
 
 export const metadata: Metadata = {
   title,

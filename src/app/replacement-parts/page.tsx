@@ -68,7 +68,7 @@ const sources = [
   {
     icon: FileBox,
     title: "A 3D file",
-    body: "Have an STL, or a ZIP with the model in it? Send it and we price and print from exactly that.",
+    body: "Have a 3D file — STL, STEP, or IGES — or a ZIP with the model in it? Send it and we price and print from exactly that.",
   },
   {
     icon: ScanLine,
@@ -96,7 +96,7 @@ const steps = [
   {
     n: "04",
     title: "It ships to you",
-    body: "Most jobs are made and in the post by USPS in about 72 hours. Nothing is built or invoiced until you approve the price.",
+    body: "Most jobs are made and in the post by USPS about 72 hours after payment. Nothing is built or invoiced until you approve the price.",
   },
 ];
 
@@ -125,8 +125,8 @@ const questions = [
     q: "How fast is it?",
     a: (
       <>
-        Most jobs are made and in the post in about 72 hours, with USPS transit time on top,
-        and the estimate comes within one business day.
+        Most jobs are made and in the post about 72 hours after payment, with USPS transit time
+        on top, and the estimate comes within one business day.
         The form takes dates at least three days out; if you need it sooner, call{" "}
         <a href={`tel:${BUSINESS.telephone}`}>{telephone}</a> and we will see what we can do.
       </>
@@ -189,7 +189,7 @@ export default function ReplacementPartsPage() {
               TakomoCo reproduces broken, obsolete, and hard-to-source parts for repair and
               service businesses — modelled from a photo, a file, or the part itself, printed in
               engineering-grade and carbon-fiber materials, and shipped anywhere in the United
-              States. Most jobs are back in about 72 hours.
+              States. Most jobs are made and in the post about 72 hours after payment.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <RequestEstimateButton />

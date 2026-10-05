@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { FileStack, Clock, Loader2, CheckCircle2, FileText, ArrowUp, X, Download } from "lucide-react";
+import { FileStack, Clock, Loader2, CheckCircle2, FileText, ArrowUp, X, Download, RotateCcw } from "lucide-react";
 
 import AppShell from "@/components/AppShell";
 import RequestForm from "@/components/RequestForm";
@@ -18,6 +18,7 @@ import { PrintSettingsSummary } from "@/components/PrintSettingsFields";
 import { parseStoredSettings } from "@/lib/print-settings";
 import { isDescriptionRequest, requestTitle } from "@/lib/part-source";
 import {
+  canReorder,
   isEstimate,
   isPricing,
   isQuote,
@@ -113,6 +114,15 @@ export default function DashboardPage() {
     } finally {
       setCancelingId(null);
     }
+  };
+
+  // "The same again": the composer refills itself from this order — see
+  // RequestForm, which reads the id from the URL — and the customer only has to
+  // set a quantity and a date. The file is not re-uploaded.
+  const handleReorder = (req: any) => {
+    setSelectedRequest(null);
+    router.push(`/dashboard?reorder=${encodeURIComponent(req.id)}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const isCancelable = (createdAt: string) => {
@@ -278,6 +288,17 @@ export default function DashboardPage() {
                       </button>
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <StatusChip status={req.status} />
+                        {canReorder(req) && (
+                          <button
+                            type="button"
+                            onClick={() => handleReorder(req)}
+                            aria-label={`Reorder ${requestTitle(req)}`}
+                            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-300 hover:text-clay-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
+                          >
+                            <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                            Reorder
+                          </button>
+                        )}
                         {isUntouched(req) && isCancelable(req.createdAt) && (
                           <button
                             onClick={() => handleCancel(req.id)}
@@ -444,6 +465,15 @@ export default function DashboardPage() {
                   <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-cream-600">
                     No model file — modelled by TakomoCo
                   </span>
+                )}
+                {canReorder(selectedRequest) && (
+                  <button
+                    type="button"
+                    onClick={() => handleReorder(selectedRequest)}
+                    className="inline-flex items-center gap-2 border border-clay-500/40 bg-clay-500/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-clay-100 hover:bg-clay-500/20 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Reorder this part
+                  </button>
                 )}
                 {isUntouched(selectedRequest) && isCancelable(selectedRequest.createdAt) && (
                   <button

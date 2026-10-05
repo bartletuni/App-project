@@ -1,14 +1,18 @@
 import {
+  MAX_EQUIPMENT_CHARS,
+  MAX_PART_NUMBER_CHARS,
   MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
   SUBMISSION_DESCRIPTION,
   SUBMISSION_MODEL,
   appendPartSource,
+  composeNotes,
   emptyPartSource,
   isPreviewableImage,
   parseSubmissionType,
   pricingIsForced,
   requestTitle,
+  splitNotes,
   validatePartSource,
 } from "@/lib/part-source";
 
@@ -25,8 +29,8 @@ describe("parseSubmissionType", () => {
 });
 
 describe("validatePartSource — model lane", () => {
-  it("requires a file", () => {
-    expect(validatePartSource(emptyPartSource())).toMatch(/STL or ZIP/);
+  it("requires a file, and names every format it takes", () => {
+    expect(validatePartSource(emptyPartSource())).toMatch(/STL, STEP, IGES, or ZIP/);
   });
 
   it("accepts an STL within the size limit", () => {
@@ -34,9 +38,46 @@ describe("validatePartSource — model lane", () => {
     expect(validatePartSource(state)).toBeNull();
   });
 
-  it("rejects a file that is not an STL or ZIP", () => {
-    const state = { ...emptyPartSource(), file: fakeFile("part.step") };
-    expect(validatePartSource(state)).toMatch(/Only .STL and .ZIP/);
+  it.each(["part.step", "part.STP", "part.iges", "part.igs", "part.zip"])(
+    "accepts %s",
+    (name) => {
+      expect(validatePartSource({ ...emptyPartSource(), file: fakeFile(name) })).toBeNull();
+    }
+  );
+
+  it.each(["part.exe", "part.obj", "part.3mf", "part.stl.exe", "part.stepx"])(
+    "rejects %s",
+    (name) => {
+      const state = { ...emptyPartSource(), file: fakeFile(name) };
+      expect(validatePartSource(state)).toMatch(/Only .STL, .STEP\/.STP, .IGES\/.IGS, and .ZIP/);
+    }
+  );
+
+  it("accepts the file on record from an earlier order in place of an upload", () => {
+    const state = {
+      ...emptyPartSource(),
+      carried: { fileId: "orig-key.stl", fileName: "bracket.stl" },
+    };
+    expect(validatePartSource(state)).toBeNull();
+  });
+
+  it("still holds a newly picked file to the rules, even with one on record", () => {
+    const state = {
+      ...emptyPartSource(),
+      carried: { fileId: "orig-key.stl", fileName: "bracket.stl" },
+      file: fakeFile("part.exe"),
+    };
+    expect(validatePartSource(state)).toMatch(/Only .STL/);
+  });
+
+  it("does not send the file on record — the server finds it from the order", () => {
+    const formData = new FormData();
+    appendPartSource(formData, {
+      ...emptyPartSource(),
+      carried: { fileId: "orig-key.stl", fileName: "bracket.stl" },
+    });
+    expect(formData.get("file")).toBeNull();
+    expect(formData.get("submissionType")).toBe("MODEL");
   });
 
   it("rejects a file over 20MB", () => {
@@ -131,5 +172,117 @@ describe("isPreviewableImage", () => {
     expect(isPreviewableImage("image/jpeg")).toBe(true);
     expect(isPreviewableImage("image/heic")).toBe(false);
     expect(isPreviewableImage("application/pdf")).toBe(false);
+  });
+});
+
+describe("equipment and part number", () => {
+  const withBoth = (over = {}) => ({
+    ...emptyPartSource(),
+    file: fakeFile("part.stl"),
+    equipment: "Bosch WTG86",
+    partNumber: "00 4.1.12",
+    ...over,
+  });
+
+  it("are optional on both lanes", () => {
+    expect(validatePartSource({ ...emptyPartSource(), file: fakeFile("part.stl") })).toBeNull();
+  });
+
+  it("are capped, on both lanes", () => {
+    expect(
+      validatePartSource(withBoth({ equipment: "x".repeat(MAX_EQUIPMENT_CHARS + 1) }))
+    ).toMatch(/Equipment make and model/);
+    expect(
+      validatePartSource(withBoth({ partNumber: "x".repeat(MAX_PART_NUMBER_CHARS + 1) }))
+    ).toMatch(/Part number/);
+
+    const described = {
+      ...emptyPartSource(),
+      mode: SUBMISSION_DESCRIPTION,
+      partName: "Dryer door catch",
+      description: "A small nylon catch that holds the dryer door shut.",
+      partNumber: "x".repeat(MAX_PART_NUMBER_CHARS + 1),
+    };
+    expect(validatePartSource(described)).toMatch(/Part number/);
+  });
+
+  it("are sent with either lane, trimmed", () => {
+    const model = new FormData();
+    appendPartSource(model, withBoth({ equipment: "  Bosch WTG86  " }));
+    expect(model.get("equipment")).toBe("Bosch WTG86");
+    expect(model.get("partNumber")).toBe("00 4.1.12");
+
+    const described = new FormData();
+    appendPartSource(described, withBoth({ mode: SUBMISSION_DESCRIPTION }));
+    expect(described.get("equipment")).toBe("Bosch WTG86");
+  });
+});
+
+describe("composeNotes / splitNotes", () => {
+  it("puts the labelled lines first, then the customer's own words", () => {
+    expect(
+      composeNotes({
+        company: "Rivera Appliance",
+        equipment: "Bosch WTG86",
+        partNumber: "00 4.1.12",
+        notes: "Black, if you have it.",
+      })
+    ).toBe(
+      "Company: Rivera Appliance\nEquipment: Bosch WTG86\nPart number: 00 4.1.12\nBlack, if you have it."
+    );
+  });
+
+  it("writes nothing for what was left blank", () => {
+    expect(composeNotes({ equipment: "  ", partNumber: null, notes: "" })).toBe("");
+    expect(composeNotes({ notes: "Black." })).toBe("Black.");
+  });
+
+  it("round-trips, so a refilled form does not write anything twice", () => {
+    const stored = composeNotes({
+      equipment: "Bosch WTG86",
+      partNumber: "00 4.1.12",
+      notes: "Black, if you have it.\nSecond line.",
+    });
+    expect(splitNotes(stored)).toEqual({
+      equipment: "Bosch WTG86",
+      partNumber: "00 4.1.12",
+      notes: "Black, if you have it.\nSecond line.",
+    });
+  });
+
+  it("only reads the lines it wrote, at the top", () => {
+    expect(splitNotes("Black.\nPart number: 12345")).toEqual({
+      equipment: "",
+      partNumber: "",
+      notes: "Black.\nPart number: 12345",
+    });
+    expect(splitNotes("Equipment: Mixer")).toEqual({ equipment: "Mixer", partNumber: "", notes: "" });
+    expect(splitNotes(null)).toEqual({ equipment: "", partNumber: "", notes: "" });
+  });
+
+  it("writes the reorder pointer first, and does not carry it into the next reorder", () => {
+    const stored = composeNotes({
+      reorderOf: "bracket.stl (Sep 3, 2026)",
+      equipment: "Bosch WTG86",
+      notes: "Black.",
+    });
+    expect(stored).toBe("Reorder of: bracket.stl (Sep 3, 2026)\nEquipment: Bosch WTG86\nBlack.");
+    expect(splitNotes(stored)).toEqual({ equipment: "Bosch WTG86", partNumber: "", notes: "Black." });
+  });
+
+  it("reads notes saved with Windows line endings", () => {
+    expect(splitNotes("Equipment: Mixer\r\nPart number: 12\r\nBlack.")).toEqual({
+      equipment: "Mixer",
+      partNumber: "12",
+      notes: "Black.",
+    });
+  });
+
+  it("drops a guest's company line, which is not the customer's to refill", () => {
+    expect(splitNotes("Company: Rivera Appliance\nEquipment: Mixer\nBlack.")).toEqual({
+      equipment: "Mixer",
+      partNumber: "",
+      notes: "Black.",
+    });
   });
 });

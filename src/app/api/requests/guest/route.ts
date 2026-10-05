@@ -14,7 +14,7 @@ import {
   issueGuestEmailToken,
 } from "@/lib/guest-email";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
-import { requestTitle } from "@/lib/part-source";
+import { composeNotes, requestTitle } from "@/lib/part-source";
 import { DEFAULT_ESTIMATE_STATUS, KIND_ESTIMATE } from "@/lib/request-status";
 import { describeFormTokenFailure, verifyFormToken } from "@/lib/form-token";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -32,7 +32,6 @@ import {
   GUEST_ESTIMATE_TOKEN_SCOPE,
   HONEYPOT_FIELD,
   MAX_COMPANY_CHARS,
-  MAX_NOTES_CHARS,
   TURNSTILE_FIELD,
   normalizeEmail,
   estimateReference,
@@ -317,13 +316,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // The console reads `notes`, so the company rides there rather than in a
-    // column of its own — a labelled first line, and never at the cost of the
-    // customer's own words.
-    const notes = [contact.company ? `Company: ${contact.company}` : "", customerNotes]
-      .filter(Boolean)
-      .join("\n")
-      .slice(0, MAX_NOTES_CHARS);
+    // The console reads `notes`, so the company, the equipment, and the part
+    // number ride there rather than in columns of their own — labelled first
+    // lines, ahead of the customer's own words, which are never cut to make
+    // room: they were capped above, and each labelled line has a cap of its own.
+    const notes = composeNotes({
+      company: contact.company,
+      equipment: source.equipment,
+      partNumber: source.partNumber,
+      notes: customerNotes,
+    });
 
     // --- 8. Who this belongs to ------------------------------------------
     // Nobody. The submitted address is never looked up against the accounts
@@ -403,7 +405,13 @@ export async function POST(req: NextRequest) {
           quantity,
           material: material || "Not specified — shop to recommend",
           dateNeeded,
-          notes: customerNotes || undefined,
+          // The company has its own row in the email; the rest ride in the notes.
+          notes:
+            composeNotes({
+              equipment: source.equipment,
+              partNumber: source.partNumber,
+              notes: customerNotes,
+            }) || undefined,
           pricingKind: KIND_ESTIMATE,
         }),
         label: "guest-estimate admin notification",

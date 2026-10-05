@@ -14,6 +14,7 @@ import {
   REQUEST_STATUSES,
   canConvert,
   canPromoteToQuote,
+  canReorder,
   convertability,
   isEstimate,
   isPricing,
@@ -254,5 +255,33 @@ describe("convertability — promoting an estimate to a quote", () => {
   it("refuses something that is already a quote or already a build", () => {
     expect(canPromoteToQuote({ kind: "QUOTE", status: "QUOTE SENT", ...QUALIFIED })).toBe(false);
     expect(canPromoteToQuote({ kind: "REQUEST", status: "PENDING", ...QUALIFIED })).toBe(false);
+  });
+});
+
+describe("canReorder", () => {
+  it("offers it on a finished build that has a part file on record", () => {
+    expect(canReorder({ status: "COMPLETED", fileId: "key.stl" })).toBe(true);
+    expect(canReorder({ status: "SHIPPED", fileId: "key.stl" })).toBe(true);
+  });
+
+  it("offers it on a finished build the shop modelled from a description", () => {
+    expect(canReorder({ status: "SHIPPED", fileId: null, partName: "Dryer door catch" })).toBe(true);
+  });
+
+  it("does not offer it before there is a part to repeat", () => {
+    for (const status of ["PENDING", "ACTIVE", "NEEDS REVIEW", "INVOICE SENT", "CANCELLED"]) {
+      expect(canReorder({ status, fileId: "key.stl" })).toBe(false);
+    }
+    expect(canReorder({ status: "ESTIMATE SENT", fileId: "key.stl" })).toBe(false);
+  });
+
+  it("does not offer it on a row with nothing to repeat", () => {
+    expect(canReorder({ status: "COMPLETED", fileId: null, partName: null })).toBe(false);
+    expect(canReorder(null)).toBe(false);
+    expect(canReorder(undefined)).toBe(false);
+  });
+
+  it("never offers it on a no-account estimate, which is on no customer's desk", () => {
+    expect(canReorder({ status: "COMPLETED", fileId: "key.stl", guestEmail: "a@b.com" })).toBe(false);
   });
 });

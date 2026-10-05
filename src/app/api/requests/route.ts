@@ -7,6 +7,8 @@ import { sendEmail } from "@/lib/email";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
+import { MODEL_FILE_REQUIRED, composeNotes } from "@/lib/part-source";
+import { confirmStoredFile, loadReorder, ReorderSource } from "@/lib/reorder";
 import {
   DEFAULT_REQUEST_STATUS,
   KIND_REQUEST,
@@ -41,6 +43,7 @@ export async function POST(req: NextRequest) {
     const printSettingsRaw = formData.get("printSettings") as string | null;
     const quoteRequestedRaw = formData.get("quoteRequested") as string | null;
     const isFreeSampleRaw = formData.get("isFreeSample") as string | null;
+    const reorderOfRaw = formData.get("reorderOf") as string | null;
 
     if (
       (quantityStr !== null && typeof quantityStr !== "string") ||
@@ -51,7 +54,8 @@ export async function POST(req: NextRequest) {
       (requestedUserId !== null && typeof requestedUserId !== "string") ||
       (printSettingsRaw !== null && typeof printSettingsRaw !== "string") ||
       (quoteRequestedRaw !== null && typeof quoteRequestedRaw !== "string") ||
-      (isFreeSampleRaw !== null && typeof isFreeSampleRaw !== "string")
+      (isFreeSampleRaw !== null && typeof isFreeSampleRaw !== "string") ||
+      (reorderOfRaw !== null && typeof reorderOfRaw !== "string")
     ) {
       return NextResponse.json({ error: "Invalid input types" }, { status: 400 });
     }
@@ -104,12 +108,25 @@ export async function POST(req: NextRequest) {
     // anything uploaded; nothing reaches R2 until every check has passed. The
     // public estimate form runs the same reader, so the two front doors cannot
     // drift apart on what they accept.
-    const parsedSource = await parsePartSourceForm(formData);
+    //
+    // A reorder names an earlier order whose file is already on record, so a
+    // model submission with no upload is allowed through the reader here and
+    // sorted out below, once we know which customer this is for.
+    const reorderOf = (reorderOfRaw || "").trim();
+    const parsedSource = await parsePartSourceForm(formData, { missingModelOk: Boolean(reorderOf) });
     if ("error" in parsedSource) {
       return NextResponse.json({ error: parsedSource.error }, { status: 400 });
     }
-    const { submissionType, isDescription: isDescriptionRequest, model, partName, partDescription, dimensions } =
-      parsedSource.source;
+    const {
+      submissionType,
+      isDescription: isDescriptionRequest,
+      model,
+      partName,
+      partDescription,
+      dimensions,
+      equipment,
+      partNumber,
+    } = parsedSource.source;
 
     // The composer's pricing checkbox. Absent or anything falsy means a normal
     // build request. A described part has nothing to price until we have drawn
@@ -167,6 +184,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ---- Reordering -------------------------------------------------------
+    // The order named must be this customer's own (see src/lib/reorder.ts), and
+    // a model submission with no upload can only be a reorder reusing the file
+    // from it. Everything that can refuse happens here, before anything is
+    // written, so a bad reorder leaves nothing behind.
+    let reorder: ReorderSource | null = null;
+    if (reorderOf) {
+      const loaded = await loadReorder(reorderOf, targetUserId);
+      if ("error" in loaded) {
+        return NextResponse.json({ error: loaded.error }, { status: loaded.status });
+      }
+      reorder = loaded.reorder;
+    }
+
+    let reusedFile: { fileId: string; fileName: string } | null = null;
+    if (!isDescriptionRequest && !model) {
+      if (!reorder?.fileId) {
+        return NextResponse.json({ error: MODEL_FILE_REQUIRED }, { status: 400 });
+      }
+      const stored = await confirmStoredFile(reorder.fileId);
+      if ("error" in stored) {
+        return NextResponse.json({ error: stored.error }, { status: stored.status });
+      }
+      reusedFile = { fileId: reorder.fileId, fileName: reorder.fileName || reorder.title };
+    }
+
+    // The labelled lines ride ahead of the customer's own notes — see
+    // composeNotes. The 2000-character cap above is on what they typed.
+    const storedNotes =
+      composeNotes({ reorderOf: reorder?.note, equipment, partNumber, notes }) || null;
+
     // A first-time customer gets exactly one free PLA 2.0 sample. The client
     // hides the option once it has been used; this is what actually enforces
     // it. "Already claimed" is checked per account, not "has ever ordered" —
@@ -206,7 +254,9 @@ export async function POST(req: NextRequest) {
     if ("error" in storedSource) {
       return NextResponse.json({ error: storedSource.error }, { status: 500 });
     }
-    const { fileId, references: storedReferences } = storedSource.stored;
+    const { references: storedReferences } = storedSource.stored;
+    // A reorder's file is the one already on record; anything else was just uploaded.
+    const fileId = reusedFile ? reusedFile.fileId : storedSource.stored.fileId;
 
     // Which pricing track this lands on, and therefore what we are allowed to
     // call it. A signed-in customer who uploaded the part file gets a QUOTE —
@@ -231,13 +281,13 @@ export async function POST(req: NextRequest) {
         phoneNumberId: phoneNumberRecord.id,
         submissionType,
         fileId,
-        fileName: model ? model.file.name : null,
+        fileName: model ? model.file.name : reusedFile ? reusedFile.fileName : null,
         partName,
         partDescription,
         dimensions,
         quantity: finalQuantity,
         material: finalMaterial,
-        notes,
+        notes: storedNotes,
         printSettings: customSettings ? JSON.stringify(customSettings) : null,
         quoteRequested,
         isFreeSample,
@@ -253,10 +303,11 @@ export async function POST(req: NextRequest) {
     // Send Email Notification. sendEmail reads Resend's reply and logs any
     // rejection; a failure here never blocks the request that was just created.
     try {
-      const title = (model ? model.file.name : partName) || "Untitled part";
+      const title =
+        (model ? model.file.name : reusedFile ? reusedFile.fileName : partName) || "Untitled part";
       // Sanitize to prevent Email Header (CRLF) Injection
       const safeTitle = title.replace(/[\r\n]/g, '');
-      const subjectPrefix = isFreeSample ? "[Free sample] " : "";
+      const subjectPrefix = isFreeSample ? "[Free sample] " : reorder ? "[Reorder] " : "";
       await sendEmail({
         to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
         subject: isDescriptionRequest
@@ -273,7 +324,7 @@ export async function POST(req: NextRequest) {
           quantity: finalQuantity,
           material: finalMaterial || "Not specified",
           dateNeeded: format(dateNeeded, "PPP"),
-          notes: notes || undefined,
+          notes: storedNotes || undefined,
           printSettings: summarizeSettings(customSettings),
           pricingKind,
           isFreeSample,

@@ -74,7 +74,7 @@ export const DEFAULT_PRICING: PricingContent = {
       "TakomoCo provides high-precision, low-volume 3D printing, 0.02mm precision 3D scanning, and rapid reverse engineering for tech, engineering, and hardware teams across the United States. We specialize in fast-turnaround production of functional prototypes, end-use replacement components, custom tooling, and high-performance carbon-fiber composite parts.",
     advantageLabel: "KEY ADVANTAGE",
     advantageBody:
-      "24-Hour Express Turnaround available for urgent engineering deadlines.",
+      "Most jobs are made and in the post in about 72 hours, and a person answers every estimate within one business day.",
     contactPhone: "(385) 695-4178",
     contactEmail: "info@takomoco.com",
     contactWeb: "takomoco.com",
@@ -111,6 +111,13 @@ export const DEFAULT_PRICING: PricingContent = {
           price: "20% off",
           note: "",
         },
+        {
+          label: "Typical FDM Tolerance",
+          detail:
+            "A typical figure for printed parts, not a guarantee. Any other tolerance is agreed in writing before work starts.",
+          price: "±0.2 mm",
+          note: "dimensional",
+        },
       ],
     },
     {
@@ -134,12 +141,6 @@ export const DEFAULT_PRICING: PricingContent = {
           detail: "Assemblies over 500mm.",
           price: "$250.00+",
           note: "custom estimate",
-        },
-        {
-          label: "Dimensional Inspection & Metrology Report",
-          detail: "Measured report against nominal geometry.",
-          price: "$50.00",
-          note: "per part",
         },
       ],
     },
@@ -166,16 +167,11 @@ export const DEFAULT_PRICING: PricingContent = {
       intro: "",
       items: [
         {
-          label: "Standard Turnaround",
-          detail: "Made, then shipped by USPS anywhere in the United States. Transit time is extra.",
-          price: "48–72 hours",
+          label: "Typical Turnaround",
+          detail:
+            "Made, then shipped by USPS anywhere in the United States. It runs from payment, and transit time is extra.",
+          price: "About 72 hours",
           note: "",
-        },
-        {
-          label: "24-Hour Express Turnaround",
-          detail: "Produced within 24 hours, then shipped by USPS.",
-          price: "+35%",
-          note: "express surcharge",
         },
       ],
     },

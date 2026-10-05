@@ -127,16 +127,31 @@ visitor meets them:
    the homepage's own copy.
 2. **The hero.** A bordered badge directly under the H1 — `72h · Typical turnaround` —
    replacing a chip that read "Fast · Fitted · Flawless" and promised nothing checkable.
-   The brand line keeps its place beside the number rather than being replaced by it: a
-   specific claim and a brand line do different jobs. The lede opens on the problem
-   ("Machine down, part discontinued, deadline this week?") and closes on the figure.
+   The brand line used to sit beside the number and has since come out of the hero
+   altogether: it is still in the footer and the materials ticker, where a brand line
+   belongs, but the one thing a visitor in a hurry should read next to the number is
+   something they can check. The lede opens on the problem ("Machine down, part
+   discontinued, deadline this week?") and closes on the figure.
 3. **The hero's buttons.** "Request an estimate" takes the primary weight and "Start a
    build" — which goes to sign-in — steps back to a secondary, because a visitor in a
    hurry should not meet a login wall first. Under them, a phone link for anyone who
    cannot wait even for a form.
-4. **The page itself,** where it always was: the spec sheet's "Lead time · 72 hours" row,
-   the 72h counter, and the closing call to action. This is what keeps the title honest
-   rather than a bare meta claim.
+4. **The page itself,** where it always was: the spec sheet's "Typical lead time · 72 hours
+   from payment" row, the 72h counter, and the closing call to action. This is what keeps
+   the title honest rather than a bare meta claim.
+
+**The clock starts at payment and stops at the post office.** Manufacturing begins once the
+invoice is paid in full (`/terms` §04), and a published turnaround is make-and-post time with
+USPS transit on top — so on-page copy says "about 72 hours after payment" or "made and in the
+post", never "back in 72 hours", which a reader takes to mean arrival. There is no express
+tier: a 24-hour option was on the pricing sheet and in its meta description until it came out,
+because it could not be promised on every job. Anything faster than the standing turnaround is
+a phone call (`/estimate` says so), not a price on the sheet.
+
+**The FDM tolerance is published, and published as typical.** The homepage spec sheet and the
+pricing sheet say ±0.2 mm; `/terms` §07 says that is a typical figure, not a guarantee, and
+that a tolerance binds the shop only once agreed in writing before work starts. If the figure
+changes, it changes in all three.
 
 **It is deliberately absent from `/estimate`.** A visitor who has reached the form is
 already sold and is there to send a part; that page makes the one timing promise it can
@@ -148,10 +163,18 @@ approved.
 ## Estimates Without an Account
 
 `/estimate` is the public estimate form. No sign-up, no password: what the part is, a name,
-an email, and a phone number. That is the whole required set — quantity, material, the
-date, notes, and company are folded behind one optional disclosure, because the shop
-can ask any of them on the callback and every extra required field is another reason to
-abandon the form standing next to a broken machine.
+an email, and a phone number. That is the whole required set. Company, and the equipment the
+part came off and its OEM part number, are visible but optional — for a repair or service
+business they are the facts that most speed an estimate. Quantity, material, the date, and notes
+stay folded behind one optional disclosure, because the shop can ask any of them on the callback
+and every extra required field is another reason to abandon the form standing next to a broken
+machine.
+
+The company, equipment, and part number are stored as labelled lines at the top of the
+request's `notes` (`composeNotes` in `src/lib/part-source.ts`) rather than in columns of their
+own: the console, its search box, the emails, and the report PDF already show notes, and it
+needs no migration. The equipment and part number fields live in the shared "What are we
+making?" block, so the signed-in composer and the admin add-request form take them too.
 
 The customer gets a reference (`E-4F2A9C`, derived from the row's id), a confirmation
 email, and an offer — never a gate — to open an account for future work.
@@ -310,12 +333,16 @@ code**: Prisma selects every column it knows about, so the new code cannot read 
 `PartRequest` table without `guestEmailConfirmedAt`. Re-running it fails with "table
 EmailSuppression already exists" and changes nothing.
 
-## Submitting a Part Without an STL or ZIP
+## Submitting a Part Without a 3D File
 
 The composer opens on **"What are we making?"** with two lanes:
 
-- **I have a 3D file** — the original path, unchanged. Upload an `.stl` or `.zip`
-  (20MB), get the 3D preview, submit.
+- **I have a 3D file** — the original path. Upload an `.stl`, a STEP or IGES
+  export (`.step`/`.stp`/`.iges`/`.igs`), or a `.zip` (20MB), and submit. Only an
+  STL gets the in-browser 3D preview; STEP, IGES, and ZIP show a glyph and are
+  opened by the shop. Each format is content-sniffed like the rest (see
+  `src/lib/file-signatures.ts`): a STEP must open with `ISO-10303-21;`, and an
+  IGES with the `S      1` start record in columns 73-80.
 - **No file yet** — for a customer who has a broken part but no model. They name
   the part, describe it, optionally give rough dimensions, and attach up to 5
   reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 10MB each). HEIC
@@ -640,6 +667,41 @@ ALTER TABLE "PartRequest" ADD COLUMN "isFreeSample" BOOLEAN NOT NULL DEFAULT fal
 
 Re-running it fails with `duplicate column name: isFreeSample` and changes
 nothing — that's the signal it's already applied, not damage.
+
+## Reordering a Part
+
+A finished build (`COMPLETED` or `SHIPPED`, see `canReorder` in `src/lib/request-status.ts`)
+has a **Reorder** button on the dashboard, in the ledger and in the review modal. It sends the
+customer to `/dashboard?reorder=<id>`, where the composer refills itself from that order —
+quantity, material, print settings, equipment, part number, notes, the pricing box — and leaves
+the date blank, since the old one is in the past. A banner says what it was filled from and
+offers "Start a new request instead".
+
+This is what `/file-retention` ("nothing to re-upload") and `/replacement-parts` ("the next one
+is a reprint rather than a fresh start") promise. A reorder is an ordinary new request through
+the ordinary route; only the file differs:
+
+- **The file is shared, not copied and not re-uploaded.** The form sends `reorderOf=<id>` and no
+  file, and `POST /api/requests` reuses the earlier row's `fileId`. Both rows belong to the same
+  customer, so `/api/download/[fileId]` authorises either the same way. Picking a new file in the
+  composer ("Use a different file") uploads that instead, as any request would.
+- **The order must be the customer's own.** `loadReorder` (`src/lib/reorder.ts`) puts the owner in
+  the query, and a missing order and someone else's answer identically (404), so the field cannot
+  be used to find out which ids exist. Everything that can refuse happens before anything is
+  written.
+- **The file is looked for first.** Deleting a file on request removes the object and leaves the
+  order behind, so the route does a `HEAD` on the bucket before pointing a new request at it
+  (`objectExistsInR2`). A deleted file is a 409 saying to upload it again; an outage is a 503, never
+  mistaken for a deletion.
+- **The new request says what it repeats.** The server writes `Reorder of: bracket.stl (Sep 3,
+  2026)` as the first line of the notes, and the admin email's subject is prefixed `[Reorder]`.
+- A described part (no file) can be reordered too; its description, size, equipment, and part
+  number come across, and photographs do not — attach new ones if the part has changed.
+- A reorder is never a free sample, whatever the original was.
+
+Because two rows can now share one stored file, **anything that deletes a file because a request
+went away has to check for the other row.** Nothing does today: only the guest "this wasn't me"
+flow deletes from the bucket, and guest rows can never be reordered.
 
 ## Submission Failures
 

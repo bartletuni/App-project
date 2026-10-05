@@ -177,7 +177,7 @@ export default function PricingView({ content }: { content: PricingContent }) {
                   href="/login"
                   className="group inline-flex shrink-0 items-center justify-center gap-2 border border-clay-500/30 px-7 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-300 hover:border-clay-400 hover:text-cream-100 transition-colors"
                 >
-                  Start a build
+                  Client sign in
                   <ArrowRight
                     className="h-4 w-4 transition-transform group-hover:translate-x-1"
                     aria-hidden="true"

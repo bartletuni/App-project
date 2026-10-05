@@ -14,12 +14,15 @@ const StlViewer = dynamic(() => import("@/components/StlViewer"), {
 import {
   MAX_DESCRIPTION_CHARS,
   MAX_DIMENSIONS_CHARS,
+  MAX_EQUIPMENT_CHARS,
   MAX_MODEL_BYTES,
   MAX_PART_NAME_CHARS,
+  MAX_PART_NUMBER_CHARS,
   MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
   MIN_DESCRIPTION_CHARS,
   MODEL_ACCEPT,
+  MODEL_FILE_TYPE_ERROR,
   PartSourceState,
   REFERENCE_ACCEPT,
   SUBMISSION_DESCRIPTION,
@@ -90,14 +93,15 @@ export default function PartSourceFields({
         return;
       }
       if (!isModelFileName(file.name)) {
-        raise("Only .STL and .ZIP files are accepted. No file? Switch to “No file yet”.");
+        raise(`${MODEL_FILE_TYPE_ERROR}. No file? Switch to “No file yet”.`);
         return;
       }
       if (file.size > MAX_MODEL_BYTES) {
         raise("File size exceeds the 20MB limit.");
         return;
       }
-      onChange({ ...value, file });
+      // A newly picked file replaces the one on record from an earlier order.
+      onChange({ ...value, file, carried: null });
     },
     [onChange, onLocalError, raise, value]
   );
@@ -149,7 +153,7 @@ export default function PartSourceFields({
             onSelect={() => setMode(SUBMISSION_MODEL)}
             icon={<UploadCloud className="h-4 w-4" aria-hidden="true" />}
             title="I have a 3D file"
-            blurb="Upload an .STL or .ZIP and we print it as drawn."
+            blurb="Upload an STL, STEP, IGES, or ZIP and we print it as drawn."
           />
           <ModeCard
             id={`${idPrefix}-mode-description`}
@@ -166,8 +170,10 @@ export default function PartSourceFields({
       {!describing ? (
         <div>
           <label htmlFor={`${idPrefix}-file`} className={labelClassName}>
-            STL / ZIP file <span className="text-clay-400">*</span>{" "}
-            <span className="text-cream-600 normal-case tracking-normal">(max 20MB)</span>
+            3D file <span className="text-clay-400">*</span>{" "}
+            <span className="text-cream-500 normal-case tracking-normal">
+              (STL, STEP, IGES, or ZIP — max 20MB)
+            </span>
           </label>
           <input
             id={`${idPrefix}-file`}
@@ -179,37 +185,67 @@ export default function PartSourceFields({
             }}
             className="sr-only peer"
           />
-          <label
-            htmlFor={`${idPrefix}-file`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDraggingModel(true);
-            }}
-            onDragLeave={() => setDraggingModel(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDraggingModel(false);
-              acceptModelFile(e.dataTransfer.files?.[0] || null);
-            }}
-            className={`${dropzoneBase} peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500 ${
-              draggingModel ? dropzoneActive : dropzoneIdle
-            }`}
-          >
-            <UploadCloud className="h-6 w-6 text-clay-400 shrink-0" aria-hidden="true" />
-            {value.file ? (
-              <span className="flex items-center gap-2 max-w-full">
-                <span className="truncate text-sm text-cream-200">{value.file.name}</span>
-                <span className="shrink-0 font-mono text-[10px] text-cream-600">
-                  {formatBytes(value.file.size)}
+          {value.carried && !value.file ? (
+            // A reorder: the file is already on record, so there is nothing to
+            // upload — the customer only has to say so if it has changed.
+            <div className="rounded-md border border-clay-500/30 bg-clay-500/5 p-4">
+              <div className="flex flex-col items-start gap-3">
+                <div className="min-w-0 max-w-full">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-clay-300">
+                    From your earlier order
+                  </span>
+                  <p className="mt-1 truncate text-sm text-cream-200">{value.carried.fileName}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-cream-500">
+                    Already on record with us, so there is nothing to upload again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...value, carried: null })}
+                  className="border border-clay-500/30 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-clay-200 transition-colors hover:bg-clay-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-md"
+                >
+                  Use a different file
+                </button>
+              </div>
+              <StlViewer
+                fileId={value.carried.fileId}
+                fileName={value.carried.fileName}
+                className="mt-3 h-64 w-full"
+              />
+            </div>
+          ) : (
+            <label
+              htmlFor={`${idPrefix}-file`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDraggingModel(true);
+              }}
+              onDragLeave={() => setDraggingModel(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDraggingModel(false);
+                acceptModelFile(e.dataTransfer.files?.[0] || null);
+              }}
+              className={`${dropzoneBase} peer-focus-visible:ring-2 peer-focus-visible:ring-clay-500 ${
+                draggingModel ? dropzoneActive : dropzoneIdle
+              }`}
+            >
+              <UploadCloud className="h-6 w-6 text-clay-400 shrink-0" aria-hidden="true" />
+              {value.file ? (
+                <span className="flex items-center gap-2 max-w-full">
+                  <span className="truncate text-sm text-cream-200">{value.file.name}</span>
+                  <span className="shrink-0 font-mono text-[10px] text-cream-600">
+                    {formatBytes(value.file.size)}
+                  </span>
                 </span>
-              </span>
-            ) : (
-              <span className="text-center text-sm text-cream-300">
-                Drag &amp; drop your file here, or{" "}
-                <span className="text-clay-300 underline underline-offset-2">browse</span>
-              </span>
-            )}
-          </label>
+              ) : (
+                <span className="text-center text-sm text-cream-300">
+                  Drag &amp; drop your file here, or{" "}
+                  <span className="text-clay-300 underline underline-offset-2">browse</span>
+                </span>
+              )}
+            </label>
+          )}
 
           {value.file && (
             <div className="mt-3">
@@ -256,7 +292,7 @@ export default function PartSourceFields({
               value={value.partName}
               onChange={(e) => onChange({ ...value, partName: e.target.value })}
               className={fieldClassName}
-              placeholder="e.g. Dryer door catch, Bosch WTG86"
+              placeholder="e.g. Dryer door catch"
               maxLength={MAX_PART_NAME_CHARS}
               // The rest of both forms uses native validation, so these do too:
               // the browser points at the offending field, which is what someone
@@ -363,6 +399,45 @@ export default function PartSourceFields({
           </div>
         </div>
       )}
+
+      {/* What a repair or service shop already knows about the original. Both
+          lanes, both optional: the machine and its part number are the two
+          facts that most speed an estimate, and the first thing a shop reads
+          off a parts diagram. Stored as labelled lines in the notes. */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor={`${idPrefix}-equipment`} className={labelClassName}>
+            Equipment make &amp; model{" "}
+            <span className="text-cream-500 normal-case tracking-normal">(optional)</span>
+          </label>
+          <input
+            id={`${idPrefix}-equipment`}
+            type="text"
+            value={value.equipment}
+            onChange={(e) => onChange({ ...value, equipment: e.target.value })}
+            className={fieldClassName}
+            placeholder="e.g. Bosch WTG86"
+            maxLength={MAX_EQUIPMENT_CHARS}
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label htmlFor={`${idPrefix}-part-number`} className={labelClassName}>
+            OEM part number{" "}
+            <span className="text-cream-500 normal-case tracking-normal">(optional)</span>
+          </label>
+          <input
+            id={`${idPrefix}-part-number`}
+            type="text"
+            value={value.partNumber}
+            onChange={(e) => onChange({ ...value, partNumber: e.target.value })}
+            className={fieldClassName}
+            placeholder="e.g. 00-123456"
+            maxLength={MAX_PART_NUMBER_CHARS}
+            autoComplete="off"
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
 // back.
 const title = "Request an Estimate — No Account Needed";
 const description =
-  "Get an estimate from TakomoCo within one business day. Upload an STL or just photograph the broken part and describe it — no sign-up, no password, and nothing built until you approve the price.";
+  "Get an estimate from TakomoCo within one business day. Upload a 3D file or just photograph the broken part and describe it — no sign-up, no password, and nothing built until you approve the price.";
 
 /**
  * The page itself is a client component, so its metadata lives here in the

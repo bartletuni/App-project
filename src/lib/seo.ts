@@ -30,8 +30,8 @@ export const SITE_NAME = "TakomoCo";
  * up for it: "Domestic", "3D Printing" and "Additive Manufacturing" all stay.
  *
  * The claim is the shop's standing lead time, already published on the
- * homepage spec sheet ("Lead time · 72 hours") and its counter, so the page
- * backs up its own title.
+ * homepage spec sheet ("Typical lead time · 72 hours from payment") and its
+ * counter, so the page backs up its own title.
  */
 export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturing";
 

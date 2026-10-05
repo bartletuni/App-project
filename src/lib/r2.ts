@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 
@@ -60,4 +66,27 @@ export async function deleteFromR2(objectKey: string): Promise<void> {
   }
 
   await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: objectKey }));
+}
+
+/**
+ * Whether an object is still in the bucket.
+ *
+ * A stored key is not proof the file is there: deleting a file on a customer's
+ * request removes the object and leaves the order record behind, so a reorder
+ * has to look before it points a new request at one. Answers false only for
+ * "not found". Anything else — bad credentials, an outage — throws, so a
+ * caller can never mistake a failure to look for a deletion.
+ */
+export async function objectExistsInR2(objectKey: string): Promise<boolean> {
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+    throw new Error("Missing Cloudflare R2 credentials in environment variables.");
+  }
+
+  try {
+    await s3Client.send(new HeadObjectCommand({ Bucket: bucketName, Key: objectKey }));
+    return true;
+  } catch (error: any) {
+    if (error?.name === "NotFound" || error?.$metadata?.httpStatusCode === 404) return false;
+    throw error;
+  }
 }

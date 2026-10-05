@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Box, RotateCcw } from "lucide-react";
+import { modelFormatName } from "@/lib/part-source";
 import {
   addStudioLights,
   createPartMaterial,
@@ -18,14 +19,15 @@ interface StlViewerProps {
   file?: File | null;
   /** Uploaded file id — loaded via the authenticated download proxy. */
   fileId?: string | null;
-  /** Original file name, used to detect non-STL (e.g. ZIP) uploads. */
+  /** Original file name, used to detect non-STL (STEP, IGES, ZIP) uploads. */
   fileName?: string | null;
   className?: string;
 }
 
 /**
  * Interactive 3D preview of an STL part: drag to orbit, scroll to zoom,
- * right-drag to pan. Falls back to a friendly notice for ZIP uploads.
+ * right-drag to pan. Falls back to a friendly notice for STEP, IGES, and ZIP
+ * uploads, which a browser cannot draw.
  */
 export default function StlViewer({ file, fileId, fileName, className = "" }: StlViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -153,7 +155,8 @@ export default function StlViewer({ file, fileId, fileName, className = "" }: St
         <p className="text-xs text-cream-500">
           3D preview is only available for .STL files.
           <br />
-          ZIP archives are reviewed manually by our team.
+          {modelFormatName(name) === "ZIP" ? "ZIP archives are" : "STEP and IGES files are"}{" "}
+          reviewed manually by our team.
         </p>
       </div>
     );
