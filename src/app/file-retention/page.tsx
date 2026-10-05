@@ -134,6 +134,13 @@ const sections: LegalSection[] = [
           a person looks at it first.
         </p>
         <p>
+          A larger file is sent from your browser straight to our file storage
+          and waits in a holding area until you submit the form. If you never
+          submit it — you close the tab, or change your mind — it is deleted
+          automatically, within about a day. It is never attached to a request,
+          and nobody but the shop can reach it, while it waits.
+        </p>
+        <p>
           The order record itself — dates, quantities, the invoice number, and
           the amount — is kept for our accounting and warranty obligations even
           after a file is deleted, as described in section 07 of the{" "}

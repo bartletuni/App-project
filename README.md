@@ -338,14 +338,14 @@ EmailSuppression already exists" and changes nothing.
 The composer opens on **"What are we making?"** with two lanes:
 
 - **I have a 3D file** — the original path. Upload an `.stl`, a STEP or IGES
-  export (`.step`/`.stp`/`.iges`/`.igs`), or a `.zip` (4MB), and submit. Only an
+  export (`.step`/`.stp`/`.iges`/`.igs`), or a `.zip` (4MB; 50MB with direct uploads on), and submit. Only an
   STL gets the in-browser 3D preview; STEP, IGES, and ZIP show a glyph and are
   opened by the shop. Each format is content-sniffed like the rest (see
   `src/lib/file-signatures.ts`): a STEP must open with `ISO-10303-21;`, and an
   IGES with the `S      1` start record in columns 73-80.
 - **No file yet** — for a customer who has a broken part but no model. They name
   the part, describe it, optionally give rough dimensions, and attach up to 5
-  reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 4MB in total). HEIC
+  reference photos or drawings (JPG, PNG, WEBP, GIF, HEIC, PDF; 4MB in total, or 10MB each and 50MB in total with direct uploads on). HEIC
   is accepted because it is what an iPhone hands over; it uploads fine but shows
   a glyph rather than an inline preview, since browsers will not draw it.
 
@@ -703,6 +703,63 @@ Because two rows can now share one stored file, **anything that deletes a file b
 went away has to check for the other row.** Nothing does today: only the guest "this wasn't me"
 flow deletes from the bucket, and guest rows can never be reordered.
 
+## Direct Uploads (large files)
+
+Vercel rejects a request body over about 4.5MB before any of our code runs, so by default
+the forms hold uploads to 4MB and send larger files to the shop by email. **Direct uploads**
+lift that: the browser sends the file straight to Cloudflare R2 on a signed URL, and the
+form post carries only a receipt for it. It is **off by default**.
+
+Turn it on only after the bucket accepts browser uploads (below):
+
+```bash
+NEXT_PUBLIC_DIRECT_UPLOADS=1   # build-time: set it in Vercel and REDEPLOY — it is baked into the bundle
+```
+
+The limits become 50MB for a model, 10MB per reference file, 50MB of references in total
+(`src/lib/part-source.ts`; the labels on the forms and the 413 message follow the flag).
+A customer whose files total under 3MB never sees any of this — they still post inline.
+
+### How it works
+
+1. The form asks `POST /api/uploads/presign` for a ticket per file (kind, name, size). The
+   route signs one exact `PUT` — this key, this content type, this many bytes — into the
+   `pending/` prefix, and returns an HMAC receipt. Guests present the estimate form token;
+   signed-in users their session. The route is rate-limited (fail-open, like the other
+   public endpoints) and 404s while the flag is off.
+2. The browser `PUT`s the file to R2 and shows progress on the submit button.
+3. The form post names the receipts. The server checks each is genuine, unexpired and issued
+   to *this* submitter, then **reads the object back**: it must exist, be exactly the
+   declared size, and begin with the bytes its extension promises. A file that fails is
+   deleted. Only then is it copied to its permanent key and the pending copy deleted, so a
+   receipt works once.
+4. An upload nobody submits is deleted after 24 hours by `sweepStalePending`, which runs from
+   the presign route. All of this is in the header comment of `src/lib/direct-upload.ts`.
+
+### What you must do in Cloudflare
+
+Allow the browser to `PUT` to the bucket — R2 → the bucket → Settings → CORS policy:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://takomoco.com", "https://www.takomoco.com"],
+    "AllowedMethods": ["PUT"],
+    "AllowedHeaders": ["content-type"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Add a Vercel preview origin while testing, and remove it afterwards. A lifecycle rule that
+deletes objects under `pending/` after 2 days is a sensible second line behind the sweep
+(the sweep looks at one page of keys per run, so a burst of abandoned uploads could outlast
+it); it is not required.
+
+Not verified against real R2: whether it rejects a `PUT` whose body differs from the signed
+`Content-Length`. The design does not depend on it — the readback in step 3 refuses any
+size other than the declared one — but test one upload on a preview deploy before enabling.
+
 ## Submission Failures
 
 Both request forms report every failed submission. The banner sits at the top of
@@ -720,8 +777,8 @@ to the status when there is no JSON to read at all:
   serverless function's request body at roughly 4.5MB, so the forms hold uploads
   to 4MB in total (`MAX_UPLOAD_BYTES` in `src/lib/part-source.ts`) and say where
   larger files go (email). This message is the safety net for anything that gets
-  past that check. Cloudflare R2 would take far larger files; the function in
-  front of it is the limit, and uploading straight to R2 is how it would be lifted.
+  past that check. With direct uploads switched on (next section) a large file does not
+  travel in the post at all, so the 4MB ceiling applies only to what is still sent inline.
 - **401 / 403** — expired session, or no permission.
 - **408 / 504** — the server took too long.
 - **5xx / 4xx with no JSON** — named by status, and clear that nothing was saved.

@@ -18,6 +18,7 @@ import {
   MAX_MODEL_BYTES,
   MAX_PART_NAME_CHARS,
   MAX_PART_NUMBER_CHARS,
+  MAX_REFERENCE_BYTES,
   MAX_REFERENCE_FILES,
   MAX_REFERENCE_TOTAL_BYTES,
   MIN_DESCRIPTION_CHARS,
@@ -25,7 +26,8 @@ import {
   MODEL_FILE_TYPE_ERROR,
   MODEL_TOO_LARGE,
   REFERENCES_TOO_LARGE,
-  UPLOAD_LIMIT_LABEL,
+  MODEL_LIMIT_LABEL,
+  REFERENCE_LIMIT_LABEL,
   PartSourceState,
   REFERENCE_ACCEPT,
   SUBMISSION_DESCRIPTION,
@@ -127,8 +129,8 @@ export default function PartSourceFields({
           continue;
         }
         if (next.some((f) => f.name === file.name && f.size === file.size)) continue;
-        // The host limits the whole request, so the photos are held to a total.
-        if (totalBytes(next) + file.size > MAX_REFERENCE_TOTAL_BYTES) {
+        // One photo has a limit, and so do all of them together.
+        if (file.size > MAX_REFERENCE_BYTES || totalBytes(next) + file.size > MAX_REFERENCE_TOTAL_BYTES) {
           raise(REFERENCES_TOO_LARGE);
           continue;
         }
@@ -177,7 +179,7 @@ export default function PartSourceFields({
           <label htmlFor={`${idPrefix}-file`} className={labelClassName}>
             3D file <span className="text-clay-400">*</span>{" "}
             <span className="text-cream-500 normal-case tracking-normal">
-              (STL, STEP, IGES, or ZIP — max {UPLOAD_LIMIT_LABEL}; larger by email)
+              (STL, STEP, IGES, or ZIP — max {MODEL_LIMIT_LABEL}; larger by email)
             </span>
           </label>
           <input
@@ -358,7 +360,7 @@ export default function PartSourceFields({
             <label htmlFor={`${idPrefix}-references`} className={labelClassName}>
               Reference photos or drawings{" "}
               <span className="text-cream-600 normal-case tracking-normal">
-                (optional — up to {MAX_REFERENCE_FILES}, {UPLOAD_LIMIT_LABEL} in total)
+                (optional — up to {MAX_REFERENCE_FILES}, {REFERENCE_LIMIT_LABEL})
               </span>
             </label>
             <input

@@ -99,8 +99,18 @@ function isIges(buffer: Buffer): boolean {
  * disagree. ZIP is checked by its local-file-header signature; STL may be ASCII
  * ("solid" …) or binary (an exact 84 + 50 × triangle-count byte length); STEP
  * and IGES are text formats with a fixed opening, checked above.
+ *
+ * Every check reads only the start of the file, except a binary STL's length
+ * check, which needs the whole file's size. A file uploaded straight to storage
+ * is never held in memory, so the caller passes the first few hundred bytes as
+ * `buffer` and the object's real size as `totalLength`; for a file already in
+ * memory the two are the same and `totalLength` can be left out.
  */
-export function modelMimeType(fileName: string, buffer: Buffer): string | null {
+export function modelMimeType(
+  fileName: string,
+  buffer: Buffer,
+  totalLength: number = buffer.length
+): string | null {
   const name = fileName.toLowerCase();
 
   if (name.endsWith(".zip")) {
@@ -114,7 +124,7 @@ export function modelMimeType(fileName: string, buffer: Buffer): string | null {
     let isBinaryStl = false;
     if (buffer.length >= 84) {
       const triangleCount = buffer.readUInt32LE(80);
-      isBinaryStl = buffer.length === 84 + triangleCount * 50;
+      isBinaryStl = totalLength === 84 + triangleCount * 50;
     }
     return isAsciiStl || isBinaryStl ? "application/sla" : null;
   }
@@ -127,5 +137,32 @@ export function modelMimeType(fileName: string, buffer: Buffer): string | null {
     return isIges(buffer) ? "model/iges" : null;
   }
 
+  return null;
+}
+
+/**
+ * What a file name promises, with no bytes involved. A direct upload has to
+ * say what it is before it exists — the storage URL is signed over its content
+ * type — so the label comes from the extension, and inspectUpload then checks
+ * the bytes agree with it. These return the same types the sniffers above do.
+ */
+export function expectedModelMime(fileName: string): string | null {
+  const name = fileName.toLowerCase();
+  if (name.endsWith(".zip")) return "application/zip";
+  if (name.endsWith(".stl")) return "application/sla";
+  if (name.endsWith(".step") || name.endsWith(".stp")) return "model/step";
+  if (name.endsWith(".iges") || name.endsWith(".igs")) return "model/iges";
+  return null;
+}
+
+export function expectedReferenceMime(fileName: string): string | null {
+  const name = fileName.toLowerCase();
+  if (name.endsWith(".png")) return "image/png";
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".webp")) return "image/webp";
+  if (name.endsWith(".gif")) return "image/gif";
+  if (name.endsWith(".heic")) return "image/heic";
+  if (name.endsWith(".heif")) return "image/heif";
+  if (name.endsWith(".pdf")) return "application/pdf";
   return null;
 }

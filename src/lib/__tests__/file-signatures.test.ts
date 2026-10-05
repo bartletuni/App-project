@@ -1,4 +1,9 @@
-import { modelMimeType, referenceMimeType } from "@/lib/file-signatures";
+import {
+  expectedModelMime,
+  expectedReferenceMime,
+  modelMimeType,
+  referenceMimeType,
+} from "@/lib/file-signatures";
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -113,5 +118,58 @@ describe("modelMimeType", () => {
       expect(modelMimeType("bracket.step", Buffer.from(iges))).toBeNull();
       expect(modelMimeType("bracket.stl", Buffer.from(iges))).toBeNull();
     });
+  });
+});
+
+describe("checking a file from its first bytes and its total size", () => {
+  /** A binary STL header declaring `triangles` triangles, and nothing after it. */
+  const binaryHead = (triangles: number) => {
+    const head = Buffer.alloc(84);
+    head.writeUInt32LE(triangles, 80);
+    return head;
+  };
+
+  it("accepts a binary STL when the total size matches its triangle count", () => {
+    const triangles = 200_000;
+    const total = 84 + triangles * 50;
+    expect(modelMimeType("part.stl", binaryHead(triangles), total)).toBe("application/sla");
+  });
+
+  it("refuses a binary STL whose total size does not match, even if the head looks right", () => {
+    expect(modelMimeType("part.stl", binaryHead(200_000), 84 + 199_999 * 50)).toBeNull();
+    expect(modelMimeType("part.stl", binaryHead(200_000), 5_000_000_000)).toBeNull();
+  });
+
+  it("needs nothing but the head for the other formats", () => {
+    expect(modelMimeType("p.zip", Buffer.from([0x50, 0x4b, 0x03, 0x04]), 40_000_000)).toBe("application/zip");
+    expect(modelMimeType("p.step", Buffer.from("ISO-10303-21;\nHEADER;"), 9_000_000)).toBe("model/step");
+    expect(referenceMimeType("p.png", Buffer.concat([PNG, Buffer.alloc(1012)]))).toBe("image/png");
+  });
+});
+
+describe("expectedModelMime / expectedReferenceMime", () => {
+  it("name the type an extension promises, case-insensitively", () => {
+    expect(expectedModelMime("a.STL")).toBe("application/sla");
+    expect(expectedModelMime("a.stp")).toBe("model/step");
+    expect(expectedModelMime("a.igs")).toBe("model/iges");
+    expect(expectedModelMime("a.zip")).toBe("application/zip");
+    expect(expectedReferenceMime("a.JPEG")).toBe("image/jpeg");
+    expect(expectedReferenceMime("a.heic")).toBe("image/heic");
+    expect(expectedReferenceMime("a.pdf")).toBe("application/pdf");
+  });
+
+  it("refuse an extension that is not that kind of file", () => {
+    expect(expectedModelMime("a.png")).toBeNull();
+    expect(expectedModelMime("a.exe")).toBeNull();
+    expect(expectedReferenceMime("a.stl")).toBeNull();
+    expect(expectedReferenceMime("a")).toBeNull();
+  });
+
+  it("agree with what the sniffers return for a genuine file", () => {
+    expect(modelMimeType("p.stl", Buffer.from("solid x"))).toBe(expectedModelMime("p.stl"));
+    expect(modelMimeType("p.zip", Buffer.from([0x50, 0x4b, 3, 4]))).toBe(expectedModelMime("p.zip"));
+    expect(referenceMimeType("p.png", PNG)).toBe(expectedReferenceMime("p.png"));
+    expect(referenceMimeType("p.jpg", JPEG)).toBe(expectedReferenceMime("p.jpg"));
+    expect(referenceMimeType("p.pdf", PDF)).toBe(expectedReferenceMime("p.pdf"));
   });
 });

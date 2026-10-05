@@ -278,7 +278,7 @@ export async function POST(req: NextRequest) {
     // --- 6. The part itself ----------------------------------------------
     // The same reader the signed-in composer uses, so a guest cannot upload
     // anything a customer could not.
-    const parsedSource = await parsePartSourceForm(formData);
+    const parsedSource = await parsePartSourceForm(formData, { uploadScope: "guest" });
     if ("error" in parsedSource) {
       return NextResponse.json({ error: parsedSource.error }, { status: 400 });
     }
@@ -355,7 +355,7 @@ export async function POST(req: NextRequest) {
         guestPhone: contact.phone,
         submissionType: source.submissionType,
         fileId: storedSource.stored.fileId,
-        fileName: source.model ? source.model.file.name : null,
+        fileName: source.model ? source.model.fileName : null,
         partName: source.partName,
         partDescription: source.partDescription,
         dimensions: source.dimensions,

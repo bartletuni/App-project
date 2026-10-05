@@ -25,7 +25,14 @@ import Reveal from "@/components/ui/Reveal";
 import PartSourceFields from "@/components/PartSourceFields";
 import { useFormAlert } from "@/components/ui/useFormAlert";
 import { describeSubmitException, readSubmitError } from "@/lib/submit-error";
-import { appendPartSource, emptyPartSource, PartSourceState, validatePartSource } from "@/lib/part-source";
+import {
+  appendPartSource,
+  emptyPartSource,
+  PartSourceState,
+  PreparedUploads,
+  validatePartSource,
+} from "@/lib/part-source";
+import { describeProgress, needsDirectUpload, prepareUploads } from "@/lib/direct-upload-client";
 import { COMPOSER_ESTIMATE_HREF } from "@/lib/estimate";
 import {
   FORM_TOKEN_FIELD,
@@ -94,6 +101,8 @@ function EstimateContent() {
 
   const [formToken, setFormToken] = useState("");
   const [loading, setLoading] = useState(false);
+  // "Uploading 43%" while a large file goes to storage; empty otherwise.
+  const [uploadStatus, setUploadStatus] = useState("");
   const [submitted, setSubmitted] = useState<{ reference: string; email: string } | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -165,8 +174,23 @@ function EstimateContent() {
 
     setLoading(true);
 
+    // A submission too big for the form post sends its files straight to
+    // storage first, and posts receipts for them instead.
+    let prepared: PreparedUploads | null = null;
+    if (needsDirectUpload(partSource)) {
+      try {
+        prepared = await prepareUploads(partSource, { formToken }, (p) => setUploadStatus(describeProgress(p)));
+      } catch (err: unknown) {
+        setError(describeSubmitException(err));
+        setLoading(false);
+        return;
+      } finally {
+        setUploadStatus("");
+      }
+    }
+
     const formData = new FormData();
-    appendPartSource(formData, partSource);
+    appendPartSource(formData, partSource, prepared);
     formData.append("name", contact.name);
     formData.append("email", contact.email);
     formData.append("phone", contact.phone);
@@ -478,7 +502,7 @@ function EstimateContent() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Sending…
+                  {uploadStatus || "Sending…"}
                 </>
               ) : (
                 <>

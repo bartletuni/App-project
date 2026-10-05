@@ -3,7 +3,7 @@ import {
   MAX_PART_NUMBER_CHARS,
   MAX_REFERENCE_FILES,
   MAX_REFERENCE_TOTAL_BYTES,
-  MAX_UPLOAD_BYTES,
+  MAX_INLINE_BYTES,
   SUBMISSION_DESCRIPTION,
   SUBMISSION_MODEL,
   appendPartSource,
@@ -82,19 +82,19 @@ describe("validatePartSource — model lane", () => {
   });
 
   it("rejects a file over the limit, and says where larger ones go", () => {
-    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_UPLOAD_BYTES + 1) };
+    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_INLINE_BYTES + 1) };
     expect(validatePartSource(state)).toMatch(/4MB/);
     expect(validatePartSource(state)).toMatch(/email it to info@takomoco\.com/);
   });
 
   it("accepts a file exactly at the limit", () => {
-    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_UPLOAD_BYTES) };
+    const state = { ...emptyPartSource(), file: fakeFile("part.stl", MAX_INLINE_BYTES) };
     expect(validatePartSource(state)).toBeNull();
   });
 
   it("holds the limit under what the host will take", () => {
     // Vercel rejects a request body over ~4.5MB; the form's own fields ride in it too.
-    expect(MAX_UPLOAD_BYTES).toBeLessThan(4.5 * 1000 * 1000);
+    expect(MAX_INLINE_BYTES).toBeLessThan(4.5 * 1000 * 1000);
   });
 });
 
@@ -302,5 +302,42 @@ describe("composeNotes / splitNotes", () => {
       partNumber: "",
       notes: "Black.",
     });
+  });
+});
+
+describe("appendPartSource with receipts for files sent straight to storage", () => {
+  it("sends the receipt instead of the model, and no bytes", () => {
+    const formData = new FormData();
+    appendPartSource(
+      formData,
+      { ...emptyPartSource(), file: fakeFile("part.stl", 20 * 1024 * 1024) },
+      { modelUpload: "receipt-1", referenceUploads: [] }
+    );
+    expect(formData.get("modelUpload")).toBe("receipt-1");
+    expect(formData.get("file")).toBeNull();
+  });
+
+  it("sends a receipt for every photo instead of the photos", () => {
+    const formData = new FormData();
+    appendPartSource(
+      formData,
+      {
+        ...emptyPartSource(),
+        mode: SUBMISSION_DESCRIPTION,
+        partName: "Dryer door catch",
+        description: "A small nylon catch that holds the dryer door shut.",
+        references: [fakeFile("a.jpg"), fakeFile("b.jpg")],
+      },
+      { modelUpload: null, referenceUploads: ["r1", "r2"] }
+    );
+    expect(formData.getAll("referenceUploads")).toEqual(["r1", "r2"]);
+    expect(formData.getAll("references")).toHaveLength(0);
+  });
+
+  it("still sends the file itself when nothing was uploaded ahead", () => {
+    const formData = new FormData();
+    appendPartSource(formData, { ...emptyPartSource(), file: fakeFile("part.stl") }, null);
+    expect(formData.get("file")).toBeInstanceOf(File);
+    expect(formData.get("modelUpload")).toBeNull();
   });
 });

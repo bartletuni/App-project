@@ -25,32 +25,50 @@ export const SUBMISSION_MODEL: SubmissionType = "MODEL";
 export const SUBMISSION_DESCRIPTION: SubmissionType = "DESCRIPTION";
 
 /**
- * How much one submission may carry, in total.
+ * How much a submission may carry, and by which road.
  *
- * The ceiling is the host's, not ours. The forms post through a serverless
+ * There are two roads, and the limits differ because the roads do.
+ *
+ * INLINE: the file rides in the form post. The forms post through a serverless
  * function, and Vercel rejects a request body over about 4.5MB before our code
- * runs — a bare 413 with no message. Cloudflare R2 would take far more; the
- * function in front of it is the limit. This used to advertise 20MB for a
- * model and 10MB per photo, which promised what the host would refuse, so it
- * is now the one figure that works, held under 4.5MB with room for the form's
- * own fields.
+ * runs — a bare 413 with no message. So an inline submission is held to 4MB in
+ * total (a model on its own, or a described part's photos added up), under the
+ * host's cap with room for the form's own fields.
  *
- * It is for everything in the submission together: a model on its own, or the
- * photos of a described part added up. Anything larger goes by email, which is
- * what every message here says. If uploads ever go straight to R2 instead,
- * this is the number to raise — and the copy that quotes it follows from the
- * constants below.
+ * DIRECT: the browser sends the file straight to Cloudflare R2 on a signed URL
+ * and the form post carries only a receipt for it (src/lib/direct-upload.ts).
+ * Nothing large passes through the function, so the host's cap does not apply
+ * and the limits are ours to choose. It needs the R2 bucket's CORS rule in
+ * place, so it is off until `NEXT_PUBLIC_DIRECT_UPLOADS=1` is set — and while
+ * it is off the forms advertise the inline limit, because they must not
+ * promise what the deployment cannot do. A small submission still goes inline
+ * either way; only one over DIRECT_UPLOAD_THRESHOLD_BYTES takes the direct road.
+ *
+ * Anything over the limit goes by email, which every message here says.
  */
-export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-export const MAX_MODEL_BYTES = MAX_UPLOAD_BYTES;
-export const MAX_REFERENCE_TOTAL_BYTES = MAX_UPLOAD_BYTES;
+export const DIRECT_UPLOADS = process.env.NEXT_PUBLIC_DIRECT_UPLOADS === "1";
+
+export const MAX_INLINE_BYTES = 4 * 1024 * 1024;
+export const DIRECT_UPLOAD_THRESHOLD_BYTES = 3 * 1024 * 1024;
+
+export const MAX_MODEL_BYTES = DIRECT_UPLOADS ? 50 * 1024 * 1024 : MAX_INLINE_BYTES;
+/** One photo or drawing. */
+export const MAX_REFERENCE_BYTES = DIRECT_UPLOADS ? 10 * 1024 * 1024 : MAX_INLINE_BYTES;
+/** All of a described part's photos together. */
+export const MAX_REFERENCE_TOTAL_BYTES = DIRECT_UPLOADS ? 50 * 1024 * 1024 : MAX_INLINE_BYTES;
 export const MAX_REFERENCE_FILES = 5;
 
-/** How the limit reads in a sentence. */
-export const UPLOAD_LIMIT_LABEL = "4MB";
+/** How the limits read in a sentence. */
+export const MODEL_LIMIT_LABEL = DIRECT_UPLOADS ? "50MB" : "4MB";
+export const REFERENCE_LIMIT_LABEL = DIRECT_UPLOADS ? "10MB each" : "4MB in total";
+export const INLINE_LIMIT_LABEL = "4MB";
 export const LARGE_FILE_ADVICE = `For anything larger, email it to ${BUSINESS.email}.`;
-export const MODEL_TOO_LARGE = `File size exceeds the ${UPLOAD_LIMIT_LABEL} limit. ${LARGE_FILE_ADVICE}`;
-export const REFERENCES_TOO_LARGE = `Photos and drawings can total ${UPLOAD_LIMIT_LABEL} per request. Send fewer or smaller ones. ${LARGE_FILE_ADVICE}`;
+export const MODEL_TOO_LARGE = `File size exceeds the ${MODEL_LIMIT_LABEL} limit. ${LARGE_FILE_ADVICE}`;
+export const REFERENCES_TOO_LARGE = DIRECT_UPLOADS
+  ? `Each photo or drawing can be up to 10MB, and a request takes up to ${MAX_REFERENCE_FILES}. ${LARGE_FILE_ADVICE}`
+  : `Photos and drawings can total 4MB per request. Send fewer or smaller ones. ${LARGE_FILE_ADVICE}`;
+/** A file too big to ride in the form post, from a client that did not send it directly. */
+export const INLINE_TOO_LARGE = `That file is too large to send this way. Refresh the page and try again, or email it to ${BUSINESS.email}.`;
 
 /** Photos off a phone, a scanned sketch, or a dimensioned PDF drawing. */
 export const REFERENCE_EXTENSIONS = [
@@ -325,6 +343,7 @@ export function validatePartSource(state: PartSourceState): string | null {
     if (!isReferenceFileName(reference.name)) {
       return `${reference.name} is not a supported reference file. Use JPG, PNG, WEBP, GIF, HEIC, or PDF.`;
     }
+    if (reference.size > MAX_REFERENCE_BYTES) return REFERENCES_TOO_LARGE;
   }
   if (totalBytes(state.references) > MAX_REFERENCE_TOTAL_BYTES) return REFERENCES_TOO_LARGE;
 
@@ -344,20 +363,44 @@ export function pricingIsForced(mode: SubmissionType): boolean {
   return mode === SUBMISSION_DESCRIPTION;
 }
 
-/** Write the source fields onto the multipart body both forms POST. */
-export function appendPartSource(formData: FormData, state: PartSourceState): void {
+/**
+ * Receipts for files already sent straight to storage (see
+ * src/lib/direct-upload.ts), standing in for the files themselves in the form
+ * post. Present only for a submission too big to ride in the post.
+ */
+export interface PreparedUploads {
+  modelUpload: string | null;
+  referenceUploads: string[];
+}
+
+/**
+ * Write the source fields onto the multipart body the forms POST. With
+ * `prepared`, a file that was sent to storage goes in as its receipt and the
+ * bytes stay out of the post — which is the point: the post is what the host
+ * caps.
+ */
+export function appendPartSource(
+  formData: FormData,
+  state: PartSourceState,
+  prepared?: PreparedUploads | null
+): void {
   formData.append("submissionType", state.mode);
   formData.append("equipment", state.equipment.trim());
   formData.append("partNumber", state.partNumber.trim());
 
   if (state.mode === SUBMISSION_MODEL) {
-    if (state.file) formData.append("file", state.file);
+    if (prepared?.modelUpload) formData.append("modelUpload", prepared.modelUpload);
+    else if (state.file) formData.append("file", state.file);
     return;
   }
 
   formData.append("partName", state.partName.trim());
   formData.append("partDescription", state.description.trim());
   formData.append("dimensions", state.dimensions.trim());
+  if (prepared && prepared.referenceUploads.length > 0) {
+    for (const receipt of prepared.referenceUploads) formData.append("referenceUploads", receipt);
+    return;
+  }
   for (const reference of state.references) {
     formData.append("references", reference);
   }

@@ -113,7 +113,15 @@ export async function POST(req: NextRequest) {
     // model submission with no upload is allowed through the reader here and
     // sorted out below, once we know which customer this is for.
     const reorderOf = (reorderOfRaw || "").trim();
-    const parsedSource = await parsePartSourceForm(formData, { missingModelOk: Boolean(reorderOf) });
+    //
+    // A file may also have been sent straight to storage and arrive here as a
+    // receipt, which is only good to the account that was issued it: the
+    // session's own, even when an admin is filing the request for a customer.
+    const sessionUserId = (session.user as any).id as string | undefined;
+    const parsedSource = await parsePartSourceForm(formData, {
+      missingModelOk: Boolean(reorderOf),
+      uploadScope: sessionUserId ? `user:${sessionUserId}` : undefined,
+    });
     if ("error" in parsedSource) {
       return NextResponse.json({ error: parsedSource.error }, { status: 400 });
     }
@@ -281,7 +289,7 @@ export async function POST(req: NextRequest) {
         phoneNumberId: phoneNumberRecord.id,
         submissionType,
         fileId,
-        fileName: model ? model.file.name : reusedFile ? reusedFile.fileName : null,
+        fileName: model ? model.fileName : reusedFile ? reusedFile.fileName : null,
         partName,
         partDescription,
         dimensions,
@@ -304,7 +312,7 @@ export async function POST(req: NextRequest) {
     // rejection; a failure here never blocks the request that was just created.
     try {
       const title =
-        (model ? model.file.name : reusedFile ? reusedFile.fileName : partName) || "Untitled part";
+        (model ? model.fileName : reusedFile ? reusedFile.fileName : partName) || "Untitled part";
       // Sanitize to prevent Email Header (CRLF) Injection
       const safeTitle = title.replace(/[\r\n]/g, '');
       const subjectPrefix = isFreeSample ? "[Free sample] " : reorder ? "[Reorder] " : "";

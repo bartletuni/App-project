@@ -234,7 +234,9 @@ const sections: LegalSection[] = [
         <ul>
           <li>
             <strong>Cloudflare R2</strong> — stores the model files and
-            reference images you upload.
+            reference images you upload. Larger files go from your browser
+            straight to it, on a short-lived signed link, rather than through
+            our own server.
           </li>
           <li>
             <strong>Resend</strong> — delivers transactional email such as
@@ -323,7 +325,8 @@ const sections: LegalSection[] = [
           <li>
             <strong>Uploaded model files</strong> — kept while the order is
             live and afterwards so a part can be reprinted or a revision
-            priced. Ask us and we will delete a file sooner. The{" "}
+            priced. A file you upload but never submit is deleted within about
+            a day. Ask us and we will delete a file sooner. The{" "}
             <Link href="/file-retention">File Retention Policy</Link> sets this
             out in full, including how to have a specific file deleted.
           </li>
@@ -428,7 +431,8 @@ const sections: LegalSection[] = [
           stored only as bcrypt hashes. Uploaded files are held in private
           storage and reached through short-lived signed links rather than
           public URLs, and every upload is checked against its real file
-          signature before it is stored. Order and account records are reachable
+          signature before it is attached to a request — a file that fails the
+          check is deleted. Order and account records are reachable
           only by you and by shop staff who need them to do the work.
         </p>
         <p>

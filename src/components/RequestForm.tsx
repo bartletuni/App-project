@@ -14,8 +14,10 @@ import { DEFAULT_CUSTOM_SETTINGS, parseStoredSettings, validateCustomSettings } 
 import { ESTIMATE_PARAM, isPricingRequested } from "@/lib/estimate";
 import { KIND_QUOTE, kindLabel, pricingKindFor } from "@/lib/request-status";
 import { FREE_SAMPLE_MATERIAL } from "@/lib/free-sample";
+import { describeProgress, needsDirectUpload, prepareUploads } from "@/lib/direct-upload-client";
 import {
   PartSourceState,
+  PreparedUploads,
   SUBMISSION_DESCRIPTION,
   SUBMISSION_MODEL,
   appendPartSource,
@@ -74,6 +76,8 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const [reorder, setReorder] = useState<ReorderBanner | null>(null);
   const [reorderLoading, setReorderLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  // "Uploading 43%" while a large file goes to storage; empty otherwise.
+  const [uploadStatus, setUploadStatus] = useState("");
   // The banner sits at the top of the panel, well above the submit button, so
   // it scrolls itself into view rather than failing somewhere off-screen.
   const errorAlert = useFormAlert<HTMLDivElement>();
@@ -271,8 +275,23 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
       printSettingsJson = JSON.stringify(result.settings);
     }
 
+    // A submission too big for the form post sends its files straight to
+    // storage first, and posts receipts for them instead.
+    let prepared: PreparedUploads | null = null;
+    if (needsDirectUpload(partSource)) {
+      try {
+        prepared = await prepareUploads(partSource, {}, (p) => setUploadStatus(describeProgress(p)));
+      } catch (err: unknown) {
+        setError(describeSubmitException(err));
+        setLoading(false);
+        return;
+      } finally {
+        setUploadStatus("");
+      }
+    }
+
     const formData = new FormData();
-    appendPartSource(formData, partSource);
+    appendPartSource(formData, partSource, prepared);
     formData.append("quantity", freeSample ? "1" : quantity);
     formData.append("material", freeSample ? FREE_SAMPLE_MATERIAL : material);
     formData.append("notes", notes);
@@ -604,7 +623,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
           {loading ? (
             <>
               <span className="h-4 w-4 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" />
-              Submitting…
+              {uploadStatus || "Submitting…"}
             </>
           ) : freeSample ? (
             <>
