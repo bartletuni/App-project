@@ -1,3 +1,5 @@
+import { MODEL_LIMIT_LABEL } from "@/lib/part-source";
+
 /** A single priced line — "Setup Fee per Build … $25.00 / build". */
 export interface PricingItemData {
   label: string;
@@ -182,7 +184,7 @@ export const DEFAULT_PRICING: PricingContent = {
         {
           label: "Web Upload",
           detail:
-            "Submit CAD files (.STEP, .STL, .IGES) up to 4MB directly at takomoco.com. Larger files by email.",
+            `Submit CAD files (.STEP, .STL, .IGES) up to ${MODEL_LIMIT_LABEL} directly at takomoco.com. Larger files by email.`,
           price: "",
           note: "",
         },
