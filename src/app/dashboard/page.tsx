@@ -481,7 +481,14 @@ export default function DashboardPage() {
                     disabled={cancelingId === selectedRequest.id}
                     className="inline-flex items-center gap-2 border border-red-500/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-red-300 hover:bg-red-500/15 disabled:opacity-60 disabled:cursor-not-allowed transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                   >
-                    {cancelingId === selectedRequest.id ? "Canceling…" : "Cancel request"}
+                    {cancelingId === selectedRequest.id ? (
+                      <>
+                        <span className="h-2.5 w-2.5 rounded-full border border-red-300/40 border-t-red-300 animate-spin" aria-hidden="true" />
+                        Canceling
+                      </>
+                    ) : (
+                      "Cancel request"
+                    )}
                   </button>
                 )}
               </div>
