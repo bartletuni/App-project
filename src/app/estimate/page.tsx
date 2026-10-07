@@ -497,6 +497,7 @@ function EstimateContent() {
             <button
               type="submit"
               disabled={loading}
+              aria-busy={loading}
               className="group w-full inline-flex items-center justify-center gap-2 rounded-md bg-clay-700 px-4 py-4 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 shadow-glow transition-colors hover:bg-clay-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
             >
               {loading ? (

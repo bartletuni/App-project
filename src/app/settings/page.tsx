@@ -209,7 +209,7 @@ export default function SettingsPage() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-cream-600 sm:max-w-[55%]">
                     Email is used for login and notifications — it cannot be changed.
                   </p>
-                  <button type="submit" disabled={profileLoading} className={btn}>
+                  <button type="submit" disabled={profileLoading} aria-busy={profileLoading} className={btn}>
                     {profileLoading ? (
                       <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" /> Saving…</>
                     ) : "Save name"}
@@ -281,7 +281,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end pt-1">
-                  <button type="submit" disabled={addressLoading || !addressesLoaded} className={btn}>
+                  <button type="submit" disabled={addressLoading || !addressesLoaded} aria-busy={addressLoading} className={btn}>
                     {addressLoading ? (
                       <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" aria-hidden="true" /> Saving…</>
                     ) : "Save addresses"}
@@ -340,7 +340,7 @@ export default function SettingsPage() {
                 ))}
 
                 <div className="flex justify-end pt-1">
-                  <button type="submit" disabled={loading} className={btn}>
+                  <button type="submit" disabled={loading} aria-busy={loading} className={btn}>
                     {loading ? (
                       <><span className="h-3.5 w-3.5 rounded-full border-2 border-cream-200/40 border-t-cream-100 animate-spin" /> Updating…</>
                     ) : "Update password"}

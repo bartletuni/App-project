@@ -286,6 +286,7 @@ export default function AdminMaterialsPage() {
                 <button
                   type="submit"
                   disabled={isSaving}
+                  aria-busy={isSaving}
                   className="bg-clay-700 hover:bg-clay-800 text-white px-6 py-2 rounded-lg font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSaving ? (
