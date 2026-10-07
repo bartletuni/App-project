@@ -28,3 +28,6 @@
 ## 2026-10-03 - Accessible form submission state
 **Learning:** Submit buttons in loading states and submit blocker messages must not hide crucial context from screen readers.
 **Action:** Applied aria-busy to loading buttons and utilized role=status for submit blockers.
+## 2024-10-07 - Accessible form submission state
+**Learning:** Submit buttons in loading states and submit blocker messages must not hide crucial context from screen readers.
+**Action:** Applied aria-busy to loading buttons.

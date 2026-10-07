@@ -449,6 +449,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading || (!isLogin && !(termsAccepted && retentionAccepted))}
+                aria-busy={loading}
                 className="group w-full inline-flex items-center justify-center gap-2 bg-clay-700 px-4 py-3.5 font-mono text-xs uppercase tracking-[0.2em] text-cream-100 hover:bg-clay-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors active:scale-[0.99] shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
               >
                 {loading ? (
