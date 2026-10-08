@@ -26,14 +26,19 @@ export const SITE_NAME = "TakomoCo";
  * The homepage title, after the brand name — and the only page title Google
  * shows for a search of the shop itself. The turnaround leads it because that
  * is what someone with a broken part searches for, and it sits early enough to
- * survive the ~60-character truncation in a result listing. Nothing was given
- * up for it: "Domestic", "3D Printing" and "Additive Manufacturing" all stay.
+ * survive the ~60-character truncation in a result listing.
+ *
+ * "in Utah" closes it because the title is the strongest single signal a page
+ * sends for a search with a place in it, and "additive manufacturing in Utah"
+ * is exactly such a search; until it was added, no title on the site named the
+ * state at all. It took the place of "Domestic", which it says more precisely;
+ * "domestic" still opens the meta description below and the homepage lede.
  *
  * The claim is the shop's standing lead time, already published on the
  * homepage spec sheet ("Typical lead time · 72 hours from payment") and its
  * counter, so the page backs up its own title.
  */
-export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturing";
+export const SITE_TAGLINE = "72-Hour Additive Manufacturing & 3D Printing in Utah";
 
 /**
  * Used as the default meta description and the Organization description.

@@ -151,9 +151,11 @@ export default function LandingPage() {
 
               {/* The headline and lede are the page's largest paint, so they
                   are in the server HTML fully visible rather than waiting on
-                  hydration to fade in — see `priority` on Reveal. */}
+                  hydration to fade in — see `priority` on Reveal. The first
+                  line is the search a Utah buyer types, word for word; the
+                  title in src/lib/seo.ts carries the same phrase. */}
               <h1 className="font-display font-semibold tracking-tight text-cream-100 text-[2.7rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-                <span className="block">Domestic 3D printing —</span>
+                <span className="block">Utah additive manufacturing&nbsp;—</span>
                 <span className="block">forging digital geometry</span>
                 <span className="block italic text-clay-300">into physical parts.</span>
               </h1>
