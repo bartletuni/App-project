@@ -48,11 +48,17 @@ export function organizationSchema(): Record<string, unknown> {
     ],
     address: {
       "@type": "PostalAddress",
+      addressLocality: BUSINESS.locality,
       addressRegion: BUSINESS.region,
       addressCountry: BUSINESS.country,
     },
-    // Based in Utah (the address above), shipping anywhere in the country.
-    areaServed: { "@type": "Country", name: BUSINESS.areaServed },
+    // Local first, then the rest of the country it ships to: the order the
+    // shop markets itself in, and each one is true.
+    areaServed: [
+      { "@type": "City", name: BUSINESS.locality },
+      { "@type": "State", name: BUSINESS.regionName },
+      { "@type": "Country", name: BUSINESS.areaServed },
+    ],
     naics: BUSINESS.naics,
     openingHoursSpecification: [
       {

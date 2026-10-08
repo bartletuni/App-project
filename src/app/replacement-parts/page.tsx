@@ -112,7 +112,7 @@ const questions = [
     q: "We're not in Utah. Can you still help?",
     a: (
       <>
-        Yes. The shop is in Utah and ships by USPS anywhere in the United States. Everything else —
+        Yes. The shop is in Salt Lake City, Utah and ships by USPS anywhere in the United States. Everything else —
         the estimate, the questions, your approval — happens by email and phone, Monday to
         Friday, 9am to 5pm Mountain Time.
       </>
