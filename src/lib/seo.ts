@@ -23,40 +23,51 @@ export const SITE_URL = (
 export const SITE_NAME = "TakomoCo";
 
 /**
- * The homepage title, after the brand name — and the only page title Google
- * shows for a search of the shop itself. The turnaround leads it because that
- * is what someone with a broken part searches for, and it sits early enough to
- * survive the ~60-character truncation in a result listing. Nothing was given
- * up for it: "Domestic", "3D Printing" and "Additive Manufacturing" all stay.
+ * The homepage title. The shop's search and marketing focus is local — Salt
+ * Lake City first, then Utah — even though it ships anywhere in the country,
+ * so the title is the local search, as people type it, with the brand after
+ * it (`${SITE_TAGLINE} | ${SITE_NAME}`, the same order as every other page's
+ * title). A brand nobody searches for yet does not earn the first words.
  *
- * The claim is the shop's standing lead time, already published on the
- * homepage spec sheet ("Typical lead time · 72 hours from payment") and its
- * counter, so the page backs up its own title.
+ * The 72-hour turnaround used to lead this title. Naming the city and both
+ * services fills the ~60 characters Google shows, so the turnaround moved to
+ * the description below, which is the snippet directly under the title, and
+ * it still leads the homepage itself. "Utah" is left to the headline ("Utah
+ * additive manufacturing") and the description; Google reads Salt Lake City as
+ * Utah anyway.
  */
-export const SITE_TAGLINE = "72-Hour Domestic 3D Printing & Additive Manufacturing";
+export const SITE_TAGLINE = "Salt Lake City 3D Printing & Additive Manufacturing";
 
 /**
  * Used as the default meta description and the Organization description.
  * Kept near 160 characters so Google shows it without truncating, with the
- * terms that matter most placed first — which now includes the turnaround,
- * since the snippet under the title is what earns the click from someone
- * whose machine is already down. "Rapid prototyping" was the one phrase
- * traded out to make room; it still leads the homepage's own copy.
+ * terms that matter most placed first: the city and state, then the
+ * turnaround, which is what earns the click from someone whose machine is
+ * already down.
  *
- * "Shipped nationwide" is in it because the shop serves the whole country
- * from Utah, and a searcher outside Utah who reads only "in Utah" assumes a
- * local shop and scrolls past.
+ * "Shipped nationwide" stays because the shop still serves the whole country,
+ * and a searcher outside Utah who reads only "Salt Lake City" assumes a local
+ * shop and scrolls past.
  */
 export const SITE_DESCRIPTION =
-  "Domestic additive manufacturing from Utah, shipped nationwide on a 72-hour turnaround — FDM 3D printing, 0.02mm scanning, and carbon-fiber reverse engineering.";
+  "3D printing and additive manufacturing in Salt Lake City, Utah — 72-hour turnaround, shipped nationwide. FDM printing, 3D scanning, and carbon-fiber parts.";
 
 export const BUSINESS = {
   telephone: "+1-385-695-4178",
   email: "info@takomoco.com",
-  /** Region only — the shop does not publish a street address. */
+  /**
+   * City and state only — the shop does not publish a street address. These
+   * must read exactly as the Google Business Profile does: Google matches a
+   * business across the web by name, phone, and place, and a mismatch splits
+   * it into two weaker listings.
+   */
+  locality: "Salt Lake City",
   region: "UT",
+  regionName: "Utah",
   country: "US",
-  /** Where parts go: the shop is in Utah and ships anywhere in the country. */
+  /** The place as the site prints it, in the footer and on /contact. */
+  locationLabel: "Salt Lake City, Utah",
+  /** Where parts go: the shop is in Salt Lake City and ships anywhere in the country. */
   areaServed: "United States",
   /**
    * Shop hours, in Utah local time. Schema.org has no time-zone field for
@@ -88,5 +99,5 @@ export const OG_IMAGE = {
   url: "/opengraph-image",
   width: 1200,
   height: 630,
-  alt: "TakomoCo — replacement parts and 3D printing on a 72-hour turnaround, made in Utah and shipped nationwide",
+  alt: "TakomoCo — replacement parts and 3D printing on a 72-hour turnaround, made in Salt Lake City, Utah and shipped nationwide",
 };

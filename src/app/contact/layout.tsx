@@ -5,7 +5,7 @@ import { OG_IMAGE, SITE_NAME } from "@/lib/seo";
 
 const title = "Contact — Talk to the Shop";
 const description =
-  "Get in touch with TakomoCo about a custom additive manufacturing order. Call 385-695-4178 or email info@takomoco.com — we respond to inquiries within 24 business hours.";
+  "Contact TakomoCo in Salt Lake City, Utah about a 3D printing or additive manufacturing order. Call 385-695-4178 or email info@takomoco.com.";
 
 /**
  * The page itself is a client component, so its metadata lives here in the

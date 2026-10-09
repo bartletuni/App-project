@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, Clock, Send } from "lucide-react";
+import { Mail, Phone, Clock, MapPin, Send } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/ui/Reveal";
@@ -13,6 +13,8 @@ const coordinates = [
   { icon: Mail, k: "EMAIL", v: "info@takomoco.com" },
   { icon: Phone, k: "VOICE", v: "385-695-4178" },
   { icon: Clock, k: "HOURS", v: BUSINESS.openingHours.label },
+  // City and state, never a street: the shop does not publish one.
+  { icon: MapPin, k: "LOCATION", v: `${BUSINESS.locationLabel} · ships nationwide` },
 ];
 
 export default function ContactPage() {

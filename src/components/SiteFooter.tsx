@@ -58,7 +58,7 @@ export default function SiteFooter() {
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-cream-500">
-              A domestic additive manufacturing studio in Utah — high-precision
+              A domestic additive manufacturing studio in Salt Lake City, Utah — high-precision
               3D printing, scanning, and reverse engineering for engineering and
               reproduction work.
             </p>
@@ -146,7 +146,7 @@ export default function SiteFooter() {
                 </a>
               </li>
               <li className="text-cream-500">{BUSINESS.openingHours.label}</li>
-              <li className="text-cream-500">Utah, USA · ships nationwide</li>
+              <li className="text-cream-500">{BUSINESS.locationLabel} · ships nationwide</li>
             </ul>
           </div>
         </div>

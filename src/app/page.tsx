@@ -143,7 +143,7 @@ export default function LandingPage() {
             <div className="lg:col-span-12">
               <Reveal direction="up">
                 <div className="flex items-center gap-3 mb-7">
-                  <span className="eyebrow">EST. UTAH</span>
+                  <span className="eyebrow">SALT LAKE CITY, UT</span>
                   <span className="h-px w-10 bg-clay-500/40" />
                   <span className="eyebrow">ADDITIVE MANUFACTURING</span>
                 </div>
@@ -151,9 +151,11 @@ export default function LandingPage() {
 
               {/* The headline and lede are the page's largest paint, so they
                   are in the server HTML fully visible rather than waiting on
-                  hydration to fade in — see `priority` on Reveal. */}
+                  hydration to fade in — see `priority` on Reveal. The first
+                  line is the search a Utah buyer types, word for word; the
+                  title in src/lib/seo.ts takes the city's. */}
               <h1 className="font-display font-semibold tracking-tight text-cream-100 text-[2.7rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-                <span className="block">Domestic 3D printing —</span>
+                <span className="block">Utah additive manufacturing&nbsp;—</span>
                 <span className="block">forging digital geometry</span>
                 <span className="block italic text-clay-300">into physical parts.</span>
               </h1>
@@ -181,8 +183,8 @@ export default function LandingPage() {
                   drifts through this paragraph, and it is the pitch. */}
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-300">
                 Machine down, part discontinued, deadline this week? A US-based
-                additive manufacturing and rapid prototyping studio in Utah,
-                shipping nationwide — high-precision 3D printing and scanning
+                additive manufacturing and rapid prototyping studio in Salt
+                Lake City, Utah, shipping nationwide — high-precision 3D printing and scanning
                 for engineering and reproduction work, made domestically and,
                 for most jobs, in the post about 72 hours after payment.
               </p>

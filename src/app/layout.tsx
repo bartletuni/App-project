@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     // `default` is what the homepage gets; every other route sets its own
-    // title and is wrapped by the template.
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    // title and is wrapped by the template. Both put the brand last.
+    default: `${SITE_TAGLINE} | ${SITE_NAME}`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -43,6 +43,8 @@ export const metadata: Metadata = {
     "US-based additive manufacturing",
     "American made 3D printed parts",
     "Utah 3D printing",
+    "Salt Lake City 3D printing",
+    "additive manufacturing Utah",
     "carbon fiber 3D printing",
     "3D scanning",
     "reverse engineering",
@@ -61,13 +63,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "en_US",
     url: "/",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_TAGLINE} | ${SITE_NAME}`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_TAGLINE} | ${SITE_NAME}`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE.url],
   },
