@@ -10,6 +10,10 @@ Read the header comment of any module you are about to change. They are written
 to be read and they carry the reasoning; a change that contradicts one is
 usually a change that needs discussing rather than making.
 
+This file is maintained by the agents who read it. If your change makes any
+part of it wrong, or teaches you something the next agent will need, updating
+it is part of the change — see §8.
+
 ---
 
 ## 1. What this application is
@@ -56,6 +60,10 @@ Known pre-existing noise, not yours to fix unless you are in that file anyway:
 If you changed anything a person looks at, serve the production build and look
 at it: `npx next build && NEXTAUTH_SECRET=dev NEXTAUTH_URL=http://localhost:3000 npx next start`.
 Chromium and Playwright are available for driving it.
+
+Then two questions no tool asks for you: do the legal documents still describe
+what the application does (§4), and does this file still describe the code
+(§8)? If either answer is no, fix it in the same PR.
 
 ---
 
@@ -162,6 +170,11 @@ Two habits that keep this honest:
 A change that is purely internal — a refactor, a performance fix, a test —
 needs none of this. Say so in the PR rather than leaving the reader guessing.
 
+If the change creates a *new* link between the code and the legal documents —
+a new kind of data, a new third party, a new promise — add it to the questions
+above or to the coupling map in §3, so the next agent is asked about it too
+(§8).
+
 ---
 
 ## 5. Conventions and decisions already made
@@ -225,3 +238,53 @@ convention instead of a thing that gets reintroduced in six months.
   why it needed to. The existing history is the standard to match.
 - A merged PR is finished. Follow-up work starts from a fresh branch off the
   default, never on top of already-merged history.
+
+---
+
+## 8. Keep this file current
+
+This file is only useful while it is true. An agent that reads a stale
+coupling map will skip the update the map forgot to mention, and nothing will
+fail. So treat `AGENTS.md` as part of the code: **when your change makes it
+wrong or incomplete, update it in the same PR.**
+
+Update it when your change:
+
+- **Couples two things that were not coupled before.** A new constant that
+  copy elsewhere repeats, a new surface that shows a status, a new place a
+  carrier or a file type is named → a row in §3, naming the files that move
+  together and what guards them (or "nothing").
+- **Touches what the legal documents describe.** Data collected, its purposes,
+  how long it is kept, who it is shared with, cookies or browser storage, what
+  is promised about a part, a price, a file, or sign-up → the legal pages
+  themselves (§4), *and* this file wherever it names the section or rule that
+  changed. A new kind of change that should send the next agent to a policy is
+  a new question in §4.
+- **Moves, renames, or deletes something this file names** — a path, a
+  constant, a test, a section number in a legal page. Grep this file for the
+  old name.
+- **Settles a decision** that someone could plausibly undo by accident → §5,
+  with the reason.
+- **Changes how the work is checked or shipped** — a new script, a new
+  required check, new pre-existing noise, a new migration step → §2, §3
+  "Database", or §7.
+- **Uncovers something you could not see by reading one file,** and that cost
+  you time or nearly caused a bug. If the next agent reviewing this code
+  should know it, write it here.
+
+How to write an entry:
+
+- **Put it where it will be read** — in the section it belongs to, not
+  appended as a loose note at the end.
+- **Say why, and say what guards it.** "Guarded by: nothing" is useful
+  information; it tells a reviewer what to check by hand.
+- **Prefer pointers to copies.** Name the file, constant, or test; do not
+  paste its contents, which will drift.
+- **Remove what is no longer true** rather than adding a correction beside it.
+- **Don't duplicate the `.jules/` logs.** A dated security, performance, or
+  design learning still goes there (§6); add a line here only when it changes
+  what an agent must do across the codebase.
+
+When reviewing a change, ask the same question of it: does `AGENTS.md` still
+describe the code after this lands? If not, the PR is not finished. Say in the
+PR description that you updated it, or that you checked and it needed nothing.
