@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, shopInbox } from "@/lib/email";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
 import { FILE_RETENTION_CONSENT_REQUIRED, TERMS_CONSENT_REQUIRED } from "@/lib/legal";
 
@@ -114,17 +114,12 @@ export async function POST(req: NextRequest) {
       };
 
       // 1. Send notification to Admin
-      const adminEmail = process.env.ADMIN_EMAIL;
-      if (adminEmail) {
-        await sendEmail({
-          to: adminEmail,
-          subject: `New User Registered: ${safeUserName}`,
-          html: NewUserAdminNotificationEmailHTML(details),
-          label: "new-user admin notification",
-        });
-      } else {
-        console.warn("[email] ADMIN_EMAIL is not set; skipping new-user admin notification");
-      }
+      await sendEmail({
+        to: shopInbox(),
+        subject: `New User Registered: ${safeUserName}`,
+        html: NewUserAdminNotificationEmailHTML(details),
+        label: "new-user admin notification",
+      });
 
       // 2. Send welcome email to the user
       await sendEmail({

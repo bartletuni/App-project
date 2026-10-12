@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
   }, [status, router, session, currentPage]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this user? This will also delete all of their requests and phone numbers. This cannot be undone.")) return;
+    if (!confirm("Are you sure you want to delete this user? This will also delete all of their requests, phone numbers, and uploaded files. This cannot be undone.")) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
