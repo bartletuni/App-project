@@ -77,7 +77,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // (customerStatusMessage) and it actually changed. Best-effort like every
     // send here: a mail failure is logged and never undoes the status change.
     if (partRequest.status !== status) {
-      await notifyCustomer({ ...partRequest, status });
+      await notifyCustomer({ ...partRequest, status, kind });
     }
 
     return NextResponse.json(updatedRequest);
@@ -95,6 +95,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 async function notifyCustomer(request: {
   id: string;
   status: string;
+  kind: string;
   fileName: string | null;
   partName: string | null;
   invoiceNumber: string | null;
@@ -134,6 +135,7 @@ async function notifyCustomer(request: {
         trackingNumber: request.status === "SHIPPED" ? request.trackingNumber : null,
         shippingCarrier: request.shippingCarrier,
         shippingService: request.shippingService,
+        kind: request.kind,
       }),
       label: `status notice (${request.status}) for ${request.id}`,
     });

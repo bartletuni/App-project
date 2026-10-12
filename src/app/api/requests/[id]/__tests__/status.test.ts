@@ -96,6 +96,20 @@ describe("PATCH /api/requests/[id]/status — customer email", () => {
     expect(mockSend.mock.calls[0][0].html).toContain("INV-0042");
   });
 
+  it("labels an estimate as an estimate, not a build", async () => {
+    (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(
+      row({ kind: "ESTIMATE", status: "ESTIMATE IN REVIEW", fileId: null, fileName: null, partName: "Hinge" })
+    );
+
+    await PATCH(patch("ESTIMATE SENT"), params);
+
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    const sent = mockSend.mock.calls[0][0];
+    expect(sent.subject).toBe("Status update: ESTIMATE SENT — Hinge");
+    expect(sent.html).toContain("Estimate ⁄ Update");
+    expect(sent.html).toContain("not a guaranteed price");
+  });
+
   it("says nothing when the status did not change", async () => {
     (prisma.partRequest.findUnique as jest.Mock).mockResolvedValue(row({ status: "SHIPPED" }));
 

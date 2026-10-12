@@ -686,11 +686,21 @@ export const StatusUpdateEmailHTML = (data: {
   /** Stored carrier key; absent reads as USPS, the primary carrier. */
   shippingCarrier?: string | null;
   shippingService?: string | null;
+  /**
+   * Which track the row is on, so an estimate or a quote is not labelled a
+   * build. Absent reads as a build, the track this email was written for.
+   */
+  kind?: string | null;
 }) =>
   shell({
     audience: "customer",
     preheader: `${data.fileName} — ${data.status}. ${data.message}`,
-    eyebrow: "Build ⁄ Status update",
+    eyebrow:
+      data.kind === "ESTIMATE"
+        ? "Estimate ⁄ Update"
+        : data.kind === "QUOTE"
+          ? "Quote ⁄ Update"
+          : "Build ⁄ Status update",
     title: `Status update: ${data.status}`,
     content: `
       <div style="padding:0 0 16px;">${statusChip(data.status)}</div>

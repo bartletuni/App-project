@@ -235,3 +235,16 @@ describe("the console emails flag what the shop must act on", () => {
     expect(html).toContain("attached 1 reference file.");
   });
 });
+
+describe("status update eyebrow", () => {
+  const email = (kind?: string) =>
+    StatusUpdateEmailHTML({ customerName: "c", fileName: "f.stl", status: "CANCELLED", message: "m", kind });
+
+  it("names the track the row is on, so an estimate is never called a build", () => {
+    expect(email("ESTIMATE")).toContain("Estimate ⁄ Update");
+    expect(email("QUOTE")).toContain("Quote ⁄ Update");
+    expect(email("REQUEST")).toContain("Build ⁄ Status update");
+    expect(email()).toContain("Build ⁄ Status update");
+    expect(email("ESTIMATE")).not.toContain("Build ⁄");
+  });
+});
