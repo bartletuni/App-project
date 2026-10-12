@@ -36,8 +36,15 @@ BING_SITE_VERIFICATION="ABC123..."           # Bing Webmaster Tools (msvalidate.
 
 Transactional email is sent through [Resend](https://resend.com). Two emails go out when a
 user registers: a notification to `ADMIN_EMAIL` and a welcome email to the new user. A third
-goes to `ADMIN_EMAIL` when a part request is submitted. Templates live in
-`src/lib/email-templates.ts`.
+goes to `ADMIN_EMAIL` when a part request is submitted. When an admin sets a request's
+status, the customer is emailed for the statuses listed in `customerStatusMessage`
+(`src/lib/request-status.ts`): a price is ready, the part is being made, invoiced, finished,
+shipped, or cancelled. Save the invoice or tracking number *before* setting "INVOICE SENT" or
+"SHIPPED" so the email carries it. No-account estimates are never sent these. Templates live
+in `src/lib/email-templates.ts`.
+
+Resend's free plan caps sending at roughly 100 emails a day across all of the above; past
+that, sends pause until the next day.
 
 Sends are best-effort — a failure is logged to the server console and never blocks
 registration or request creation, so check the logs if an expected email does not arrive.

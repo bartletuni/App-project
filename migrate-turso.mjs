@@ -4,8 +4,9 @@
  *
  *   node migrate-turso.mjs [path-to-.sql]
  *
- * Defaults to the newest migration — the one that adds email confirmation to
- * the no-account estimate form. Pass a path to apply an older one.
+ * Defaults to the newest migration — the one that records the shipping carrier
+ * and service. Pass a path to apply an older one. Update DEFAULT_SQL when a
+ * newer migration is added.
  *
  * This used to shell out to `npx prisma db push`, which cannot work: the Prisma
  * CLI validates the datasource URL against the schema's provider, and
@@ -17,7 +18,7 @@ import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { spawn } from "node:child_process";
 
-const DEFAULT_SQL = "prisma/migrations/2026-add-guest-email-confirmation.sql";
+const DEFAULT_SQL = "prisma/migrations/2026-add-shipping-carrier.sql";
 const file = process.argv[2] || DEFAULT_SQL;
 
 const rl = readline.createInterface({ input, output });

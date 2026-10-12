@@ -246,7 +246,7 @@ function AdminDashboardContent() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to completely delete this request? This cannot be undone.")) return;
+    if (!confirm("Are you sure you want to completely delete this request and its uploaded files? This cannot be undone.")) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/requests/${id}`, { method: "DELETE" });

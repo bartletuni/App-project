@@ -412,3 +412,43 @@ const HINTS: Record<string, string> = {
 export function statusHint(status: string | null | undefined): string {
   return HINTS[(status || "").toUpperCase()] || "";
 }
+
+/**
+ * What the customer is told, by email, when an admin moves their row to a
+ * status. Only the moments a customer would want to hear about are here; a
+ * status absent from this map changes silently. Left out on purpose: the
+ * starting statuses (the customer just submitted), the "in review" steps (shop
+ * work in progress), and accepted/declined (the customer's own answer).
+ *
+ * Never sent for a no-account estimate: the address on one of those is only
+ * what somebody typed, and the estimate form's one email is the only mail it
+ * gets (see src/lib/guest-email.ts). Customer-facing, so it says "estimate"
+ * and "quote" the way the rest of the site does.
+ */
+const CUSTOMER_MESSAGES: Record<string, string> = {
+  "ESTIMATE SENT":
+    "your estimate is ready on your desk. An estimate is an indication of cost, not a guaranteed price.",
+  "ESTIMATE EXPIRED":
+    "your estimate has expired. If you still need the part, send it to us again and we will take another look.",
+  "QUOTE SENT":
+    "your quote is ready on your desk. Unless it says otherwise, it is good for 30 days.",
+  "QUOTE EXPIRED":
+    "your quote has expired. If you still need the part, send it to us again and we will price it afresh.",
+  ACTIVE: "your part is now being made.",
+  "NEEDS REVIEW":
+    "we have a question about your part before we can carry on, and will be in touch shortly.",
+  "INVOICE SENT":
+    "your invoice has been issued through Square and will arrive from them in a separate email. Manufacturing starts once it is paid in full.",
+  COMPLETED: "your part is finished and being packed for shipping.",
+  SHIPPED: "your part is on its way.",
+  CANCELLED:
+    "this request has been cancelled. If you weren't expecting that, call or email us and we will sort it out.",
+};
+
+/** The statuses a customer is emailed about. */
+export const CUSTOMER_EMAILED_STATUSES = Object.keys(CUSTOMER_MESSAGES);
+
+/** The customer's email line for a status, or null when it is not emailed. */
+export function customerStatusMessage(status: string | null | undefined): string | null {
+  return CUSTOMER_MESSAGES[(status || "").toUpperCase()] ?? null;
+}

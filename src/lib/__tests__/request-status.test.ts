@@ -2,6 +2,7 @@ import {
   ALL_STATUSES,
   CANCELLED_STATUS,
   CONVERTED_STATUS,
+  CUSTOMER_EMAILED_STATUSES,
   DEFAULT_ESTIMATE_STATUS,
   DEFAULT_QUOTE_STATUS,
   DEFAULT_REQUEST_STATUS,
@@ -16,6 +17,7 @@ import {
   canPromoteToQuote,
   canReorder,
   convertability,
+  customerStatusMessage,
   isEstimate,
   isPricing,
   isQuote,
@@ -283,5 +285,44 @@ describe("canReorder", () => {
 
   it("never offers it on a no-account estimate, which is on no customer's desk", () => {
     expect(canReorder({ status: "COMPLETED", fileId: "key.stl", guestEmail: "a@b.com" })).toBe(false);
+  });
+});
+
+describe("customerStatusMessage", () => {
+  it("only names real statuses", () => {
+    for (const status of CUSTOMER_EMAILED_STATUSES) expect(ALL_STATUSES).toContain(status);
+  });
+
+  it("stays quiet where the customer has nothing new to hear", () => {
+    for (const status of [
+      DEFAULT_ESTIMATE_STATUS,
+      DEFAULT_QUOTE_STATUS,
+      DEFAULT_REQUEST_STATUS,
+      "ESTIMATE IN REVIEW",
+      PROMOTED_QUOTE_STATUS,
+      "ESTIMATE ACCEPTED",
+      "QUOTE ACCEPTED",
+      "ESTIMATE DECLINED",
+      "QUOTE DECLINED",
+    ]) {
+      expect(customerStatusMessage(status)).toBeNull();
+    }
+  });
+
+  it("tells the customer when a price is ready, and calls an estimate an estimate", () => {
+    expect(customerStatusMessage("ESTIMATE SENT")).toMatch(/not a guaranteed price/);
+    expect(customerStatusMessage("QUOTE SENT")).toMatch(/30 days/);
+  });
+
+  it("covers every build milestone after the queue", () => {
+    for (const status of ["ACTIVE", "INVOICE SENT", "COMPLETED", "SHIPPED", CANCELLED_STATUS]) {
+      expect(customerStatusMessage(status)).toEqual(expect.any(String));
+    }
+  });
+
+  it("is case-insensitive and safe on nothing", () => {
+    expect(customerStatusMessage("shipped")).toBe(customerStatusMessage("SHIPPED"));
+    expect(customerStatusMessage(null)).toBeNull();
+    expect(customerStatusMessage(undefined)).toBeNull();
   });
 });

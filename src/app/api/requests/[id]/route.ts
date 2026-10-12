@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteStoredFiles, storedFilesForRequest } from "@/lib/file-deletion";
 
 // See the note in api/download/[fileId]: the libSQL client reaches Turso over
 // HTTP with fetch(), which Next caches unless the route opts out.
@@ -67,16 +68,30 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         const { id } = params;
 
         const request = await prisma.partRequest.findUnique({
-            where: { id }
+            where: { id },
+            include: { attachments: { select: { fileId: true } } },
         });
 
         if (!request) {
             return NextResponse.json({ error: "Request not found" }, { status: 404 });
         }
 
-        await prisma.partRequest.delete({
-            where: { id }
-        });
+        // Files before the row, so a storage failure leaves the row naming them
+        // and a second press finishes the job (see src/lib/file-deletion.ts).
+        try {
+            await deleteStoredFiles(await storedFilesForRequest(request));
+        } catch (error) {
+            console.error(`Could not delete the stored files of request ${id}:`, error);
+            return NextResponse.json(
+                { error: "Couldn't remove the request's files from storage. Nothing was deleted — try again in a minute." },
+                { status: 503 }
+            );
+        }
+
+        await prisma.$transaction([
+            prisma.requestAttachment.deleteMany({ where: { requestId: id } }),
+            prisma.partRequest.delete({ where: { id } }),
+        ]);
 
         return NextResponse.json({ success: true });
 

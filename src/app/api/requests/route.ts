@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { addDays, format } from "date-fns";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, shopInbox } from "@/lib/email";
 import { NewRequestEmailHTML } from "@/lib/email-templates";
 import { validateCustomSettings, summarizeSettings, CustomPrintSettings } from "@/lib/print-settings";
 import { parsePartSourceForm, storePartSourceFiles } from "@/lib/part-source-server";
@@ -317,7 +317,7 @@ export async function POST(req: NextRequest) {
       const safeTitle = title.replace(/[\r\n]/g, '');
       const subjectPrefix = isFreeSample ? "[Free sample] " : reorder ? "[Reorder] " : "";
       await sendEmail({
-        to: process.env.ADMIN_EMAIL || (session.user as any).email, // Send to admin or fall back to user
+        to: shopInbox(),
         subject: isDescriptionRequest
           ? `${subjectPrefix}New Request (no model): ${safeTitle}`
           : `${subjectPrefix}New Request: ${safeTitle}`,
