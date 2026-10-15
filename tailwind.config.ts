@@ -84,7 +84,10 @@ const config: Config = {
         },
         marquee: {
           "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
+          // -100%, not -50%: each of the marquee's two copies runs this
+          // animation on its own, so the percentage is of one copy's width.
+          // At -50% the loop restarted halfway through a copy and visibly jumped.
+          "100%": { transform: "translateX(-100%)" },
         },
         "gradient-x": {
           "0%, 100%": { backgroundPosition: "0% 50%" },
