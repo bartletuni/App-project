@@ -12,6 +12,12 @@ interface MarqueeProps {
 /**
  * Infinite horizontal marquee. Renders its children twice so the
  * loop is seamless, with soft edge fades via CSS mask.
+ *
+ * Each copy slides left by exactly its own width (the `marquee` keyframe in
+ * tailwind.config.ts), so when the animation restarts the second copy is
+ * standing where the first began. The trailing `pr-12` matches the `gap-12`
+ * so the join between copies is spaced like every other gap. One copy must be
+ * at least as wide as the container, or a blank stretch shows at the end.
  */
 export default function Marquee({
   children,
