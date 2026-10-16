@@ -187,9 +187,9 @@ export default function AdminMaterialsPage() {
           </div>
           <button
             onClick={() => setIsAdding(true)}
-            className="shrink-0 inline-flex items-center gap-2 bg-clay-700 hover:bg-clay-800 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow"
+            className="shrink-0 inline-flex items-center gap-2 bg-clay-700 hover:bg-clay-800 text-cream-100 px-4 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             Add Material
           </button>
         </div>
@@ -309,7 +309,7 @@ export default function AdminMaterialsPage() {
                     setNewMaterialDesc("");
                     setNewMaterialImage(null);
                   }}
-                  className="bg-espresso-600 hover:bg-espresso-500 text-cream-400 px-6 py-2 rounded-lg font-bold transition-colors"
+                  className="bg-espresso-600 hover:bg-espresso-500 text-cream-400 px-6 py-2 rounded-lg font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                 >
                   Cancel
                 </button>
@@ -444,9 +444,9 @@ export default function AdminMaterialsPage() {
                               setEditingHdt("");
                               setEditingImpactResistance("");
                             }}
-                            className="text-cream-400 bg-espresso-600 hover:bg-espresso-500 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold"
+                            className="text-cream-400 bg-espresso-600 hover:bg-espresso-500 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500"
                           >
-                            <X className="w-4 h-4" /> Cancel
+                            <X className="w-4 h-4" aria-hidden="true" /> Cancel
                           </button>
                         </div>
                       </div>
