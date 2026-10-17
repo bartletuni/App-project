@@ -100,7 +100,7 @@ function AdminAddRequestContent() {
   // Fetch phone numbers when user changes
   useEffect(() => {
       if (selectedUserId) {
-          fetch(`/api/admin/users/${selectedUserId}/phone-numbers`)
+          fetch(`/api/admin/users/${selectedUserId}/phone-numbers?limit=50`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -200,7 +200,7 @@ function AdminAddRequestContent() {
       setPrintSettings({ mode: "AUTO", custom: { ...DEFAULT_CUSTOM_SETTINGS } });
 
       // refresh phones list
-      fetch(`/api/admin/users/${selectedUserId}/phone-numbers`)
+      fetch(`/api/admin/users/${selectedUserId}/phone-numbers?limit=50`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {

@@ -17,9 +17,19 @@ export async function GET(req: NextRequest) {
         }
 
         const userId = (session.user as any).id;
+        const limitParam = req.nextUrl.searchParams.get("limit");
+
+        let limit = 50; // Default limit
+        if (limitParam) {
+            const parsedLimit = parseInt(limitParam, 10);
+            if (!isNaN(parsedLimit) && parsedLimit > 0) {
+                limit = Math.min(parsedLimit, 100);
+            }
+        }
 
         const phoneNumbers = await prisma.phoneNumber.findMany({
             where: { userId },
+            take: limit,
             orderBy: { createdAt: 'desc' }
         });
 
