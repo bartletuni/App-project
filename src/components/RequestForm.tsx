@@ -87,7 +87,7 @@ function RequestFormContent({ onFormSubmit }: { onFormSubmit: () => void }) {
   const minDate = format(addDays(new Date(), 3), "yyyy-MM-dd");
 
   useEffect(() => {
-    fetch("/api/user/phone-numbers")
+    fetch("/api/user/phone-numbers?limit=50")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
