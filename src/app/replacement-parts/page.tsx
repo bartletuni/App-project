@@ -98,7 +98,7 @@ const steps = [
   {
     n: "03",
     title: "We print and check it",
-    body: "Engineering-grade and fiber-reinforced materials, and every part checked against the model before it ships.",
+    body: "Engineering-grade and fiber-reinforced materials, and a random sample of each batch verified against the model before it ships.",
   },
   {
     n: "04",

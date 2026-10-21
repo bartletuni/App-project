@@ -53,7 +53,7 @@ const process = [
   { n: "01", title: "Scan & Capture", body: "Digitize legacy or reference parts with high-fidelity scanning." },
   { n: "02", title: "Design & Engineer", body: "CAD refinement, tolerancing, and material selection for the job." },
   { n: "03", title: "Print & Validate", body: "Production on engineering printers with dimensional verification." },
-  { n: "04", title: "Deliver", body: "Inspected, finished components shipped by USPS direct to your door, anywhere in the United States." },
+  { n: "04", title: "Deliver", body: "Finished components, sampled and verified per batch, shipped by USPS direct to your door, anywhere in the United States." },
 ];
 
 // The tolerance is the figure a buyer asks for first. It is a typical value,
@@ -108,7 +108,7 @@ const differentiators: {
   { title: "Material mastery", body: "Specialized in abrasive, composite, and carbon-fiber-reinforced filaments most shops avoid." },
   { title: "End-to-end workflow", body: "From scanning a broken legacy part to delivering a reinforced replacement — one shop." },
   { title: "Agile response", body: "Small-scale focus means rapid pivots, personal attention, and direct engineering support." },
-  { title: "Dimensional verification", body: "Every part checked against the model before it ships — no surprises on arrival." },
+  { title: "Dimensional verification", body: "Dimensional verification is performed on a random sample drawn from each production batch and measured against the source model, so conformance is assessed statistically and consistently." },
 ];
 
 // The materials come from the same list as the spec sheet, so the two cannot
@@ -521,8 +521,8 @@ export default function LandingPage() {
             Every TakomoCo part is produced under strict internal quality
             control standards — controlled material handling and drying,
             calibrated and regularly maintained equipment, documented print
-            parameters, and in-process checks with a final inspection before
-            anything leaves the shop.
+            parameters, and in-process checks with a final inspection of a
+            random sample from each batch before it leaves the shop.
           </p>
         </div>
       </section>
