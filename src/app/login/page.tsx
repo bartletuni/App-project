@@ -212,7 +212,7 @@ function LoginContent() {
         {/* Left editorial plate */}
         <div className="hidden lg:flex flex-col justify-between border-r border-clay-500/12 p-12">
           <Link href="/" className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500 hover:text-clay-300 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back to home
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to home
           </Link>
 
           <div>
@@ -248,7 +248,7 @@ function LoginContent() {
         <div className="flex flex-col justify-center px-5 sm:px-10 py-12">
           <div className="lg:hidden mb-8">
             <Link href="/" className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream-500 hover:text-clay-300">
-              <ArrowLeft className="h-4 w-4" /> Index
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Index
             </Link>
           </div>
 
@@ -285,7 +285,7 @@ function LoginContent() {
                 <div className="relative">
                   <input id="password" type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className={`${field} pr-12`} placeholder="••••••••" autoComplete={isLogin ? "current-password" : "new-password"} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream-500 hover:text-clay-300 p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500" aria-label={showPassword ? "Hide password" : "Show password"}>
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                   </button>
                 </div>
               </div>
