@@ -13,6 +13,10 @@ jest.mock("@/lib/prisma", () => ({
     phoneNumber: {
       create: jest.fn(),
     },
+    rateLimit: {
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
+    },
   },
 }));
 
@@ -22,6 +26,13 @@ jest.mock("resend", () => ({
       send: jest.fn(),
     },
   })),
+}));
+
+jest.mock("@/lib/rate-limit", () => ({
+  ...jest.requireActual("@/lib/rate-limit"),
+  consumeRateLimits: jest.fn().mockResolvedValue({ ok: true }),
+  clientIp: jest.fn().mockReturnValue("127.0.0.1"),
+  hashIdentifier: jest.fn().mockReturnValue("hashedip"),
 }));
 
 describe("POST /api/auth/register", () => {
@@ -144,4 +155,28 @@ describe("POST /api/auth/register", () => {
       expect(data).not.toHaveProperty("retentionPolicyAccepted");
     });
   });
+
+  describe("rate limiting", () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it("should return 429 if the rate limit is exceeded", async () => {
+      const { consumeRateLimits } = require("@/lib/rate-limit");
+      consumeRateLimits.mockResolvedValueOnce({
+        ok: false,
+        rule: { message: "Too many registration attempts. Please try again later." },
+        retryAfterSeconds: 60,
+      });
+
+      const req = createRequest(validBody);
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(429);
+      expect(res.headers.get("Retry-After")).toBe("60");
+      expect(json.error).toBe("Too many registration attempts. Please try again later.");
+    });
+  });
+
 });

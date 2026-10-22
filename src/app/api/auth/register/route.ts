@@ -4,9 +4,43 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail, shopInbox } from "@/lib/email";
 import { NewUserAdminNotificationEmailHTML, WelcomeUserEmailHTML } from "@/lib/email-templates";
 import { FILE_RETENTION_CONSENT_REQUIRED, TERMS_CONSENT_REQUIRED } from "@/lib/legal";
+import { DAY_MS, HOUR_MS, clientIp, consumeRateLimits, hashIdentifier } from "@/lib/rate-limit";
+
+const REGISTRATION_LIMITS = { perIpHour: 5, perIpDay: 20 };
+const TOO_MANY = "Too many registration attempts. Please try again later.";
 
 export async function POST(req: NextRequest) {
   try {
+    const ipHash = hashIdentifier(clientIp(req.headers));
+    const rate = await consumeRateLimits([
+      {
+        scope: "register:ip-hour",
+        subject: ipHash,
+        limit: REGISTRATION_LIMITS.perIpHour,
+        windowMs: HOUR_MS,
+        message: TOO_MANY,
+      },
+      {
+        scope: "register:ip-day",
+        subject: ipHash,
+        limit: REGISTRATION_LIMITS.perIpDay,
+        windowMs: DAY_MS,
+        message: TOO_MANY,
+      },
+    ]);
+
+    if (!rate.ok) {
+      return NextResponse.json(
+        { error: rate.rule?.message || TOO_MANY },
+        {
+          status: 429,
+          headers: rate.retryAfterSeconds
+            ? { "Retry-After": String(rate.retryAfterSeconds) }
+            : undefined,
+        }
+      );
+    }
+
     const body = await req.json();
     const {
       name,
