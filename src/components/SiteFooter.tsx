@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import RequestEstimateButton from "@/components/RequestEstimateButton";
 import LegalLinks from "@/components/LegalLinks";
@@ -35,6 +38,9 @@ const services: { label: string; href?: string }[] = [
 
 export default function SiteFooter() {
   const year = new Date().getFullYear();
+  const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <footer className="border-t border-clay-500/15 bg-espresso-900/50">
@@ -76,6 +82,7 @@ export default function SiteFooter() {
                 <li key={s.href}>
                   <Link
                     href={s.href}
+                    aria-current={isActive(s.href) ? "page" : undefined}
                     className="text-sm text-cream-400 hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                   >
                     {s.label}
@@ -110,6 +117,7 @@ export default function SiteFooter() {
                   {s.href ? (
                     <Link
                       href={s.href}
+                      aria-current={isActive(s.href) ? "page" : undefined}
                       className="hover:text-cream-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-500 rounded-sm"
                     >
                       {s.label}
